@@ -14,6 +14,7 @@ const COLOR_CABLE = {
   ac: { pos: '#8d6e63', neg: '#1976d2' },
   senal: { pos: '#9e9e9e', neg: '#9e9e9e' },
   agua: { pos: '#29b6f6', neg: null },
+  gas: { pos: '#ff9800', neg: null },
 };
 
 const m = (v) => v / 1000;
@@ -25,8 +26,11 @@ export const VISTAS = {
   foto: { nombre: 'Como la foto', pos: [3.3, 3.4, -0.6], target: [-0.86, 0.3, 1.35] },
   trasera: { nombre: 'Desde la puerta trasera', pos: [-0.86, 1.3, -2.7], target: [-0.86, 0.55, 1.6] },
   arriba: { nombre: 'Desde arriba', pos: [-0.86, 4.6, 1.25], target: [-0.86, 0, 1.2] },
-  cabecera: { nombre: 'Mueble trasero', pos: [-0.5, 1.25, 0.9], target: [-0.6, 0.45, 2.3] },
-  electrico: { nombre: 'Zona eléctrica (ver interior)', pos: [-0.4, 1.6, 1.0], target: [-0.4, 0.3, 2.2] },
+  cabecera: { nombre: 'Mueble trasero (completo)', pos: [-0.86, 1.1, -0.35], target: [-0.86, 0.5, 2.2] },
+  agua: { nombre: 'Agua: fregadero y bidones', pos: [-0.45, 1.2, 0.6], target: [-0.45, 0.45, 2.2] },
+  cocina: { nombre: 'Cocina: anafe, gas y heladera', pos: [-1.15, 1.2, 0.6], target: [-1.15, 0.45, 2.2] },
+  electrico: { nombre: 'Zona eléctrica (ver interior)', pos: [-1.5, 1.2, 0.6], target: [-1.55, 0.4, 2.2] },
+  techo: { nombre: 'Techo: tiras LED y extractor', pos: [-0.86, 0.5, 0.1], target: [-0.86, 1.25, 1.6] },
   asientos: { nombre: 'Batería del auto (bajo el asiento)', pos: [-0.5, 1.5, 3.7], target: [-1.35, 0.2, 2.75] },
 };
 
@@ -117,7 +121,7 @@ function Tramo({ a, b, r, color, emisivo }) {
 function Cable({ cable, seccion, elegido, onClick, onOver, onOut }) {
   const col = COLOR_CABLE[cable.tipo];
   // El grosor dibujado sale de la sección calculada (no es a escala real)
-  const r = cable.tipo === 'agua' ? 6 : 1.5 + Math.sqrt(seccion || 1.5) * 0.75;
+  const r = cable.tipo === 'agua' || cable.tipo === 'gas' ? 6 : 1.5 + Math.sqrt(seccion || 1.5) * 0.75;
   const juegos = [{ pts: cable.puntos, color: col.pos }];
   if (col.neg) juegos.push({ pts: cable.puntos.map((p) => [p[0] + 14, p[1], p[2] + 14]), color: col.neg });
   return (
@@ -224,7 +228,7 @@ function Escena(props) {
           const q = { ...desplazar(p, p.grupo) };
           if (p.ext) q.x += (data.layout.cama?.extension || 0) * camaAbierta; // las bandejas salen al pasillo
           const elegida = seleccion === p.id;
-          const color = elegida ? '#ff7043' : p.tipo === 'liston' ? '#c49a5e' : COLORES[p.grupo];
+          const color = elegida ? '#ff7043' : p.tipo === 'liston' ? '#c49a5e' : p.color || COLORES[p.grupo];
           const comun = {
             x: q.x,
             y: q.y,
@@ -237,9 +241,11 @@ function Escena(props) {
             bordes: elegida ? '#bf360c' : '#6b4f2a',
             onClick: (e) => {
               e.stopPropagation();
-              setSeleccion(p.id);
+              // Las puertas de la heladera, del gas y de lo eléctrico abren la ficha del equipo
+              if (p.abre) setElemento(p.abre);
+              else setSeleccion(p.id);
             },
-            onOver: sobre(`${p.id} - ${p.nombre}`),
+            onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? ' (clic para ver el equipo y el video)' : ''}`),
             onOut: () => setHover(''),
           };
           return p.radio ? <PlacaRedonda key={p.id} {...comun} radio={p.radio} /> : <Caja key={p.id} {...comun} />;
@@ -301,6 +307,8 @@ function Escena(props) {
             />
           );
         })}
+
+      {mostrarElectrico && (elec3d.decosElec || []).map((d) => <Caja key={d.nombre} {...d} bordes={null} />)}
 
       {mostrarElectrico &&
         explosion < 0.02 &&

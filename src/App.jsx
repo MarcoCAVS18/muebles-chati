@@ -153,11 +153,11 @@ export default function App() {
               ))}
               <label>
                 <input type="checkbox" checked={mostrarEquipos} onChange={(e) => setMostrarEquipos(e.target.checked)} />
-                Agua y cocina
+                Agua, cocina y gas
               </label>
               <label>
                 <input type="checkbox" checked={mostrarElectrico} onChange={(e) => setMostrarElectrico(e.target.checked)} />
-                Eléctrico
+                Eléctrico y mangueras
               </label>
               <label>
                 <input type="checkbox" checked={mostrarAsientos} onChange={(e) => setMostrarAsientos(e.target.checked)} />

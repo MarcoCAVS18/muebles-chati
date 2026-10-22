@@ -95,7 +95,7 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
     filas.push({ categoria: 'Fijaciones', item: f.nombre, cantidad: f.cantidad, nota: f.nota });
   }
   for (const e of data.equipos) {
-    filas.push({ categoria: 'Equipos', item: e.nombre, cantidad: 1, nota: 'Ya comprado' });
+    filas.push({ categoria: 'Equipos', item: e.nombre, cantidad: 1, nota: e.estado || 'Ya comprado' });
   }
   if (elec3d) {
     for (const e of elec3d.equipos) {
@@ -117,8 +117,15 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
       filas.push({ categoria: 'Cables y protecciones', item, cantidad, nota: 'Uno por línea; la caja de fusibles reparte las de 12 V' });
     }
     filas.push({ categoria: 'Cables y protecciones', item: 'Terminales de ojal y termocontraíbles', cantidad: 1, nota: 'Un surtido para todos los calibres' });
-    filas.push({ categoria: 'Cables y protecciones', item: 'Pasacables de goma 20 mm', cantidad: 10, nota: 'Estantes, divisores, frente, fondo y mamparo' });
+    filas.push({ categoria: 'Cables y protecciones', item: 'Pasacables de goma 20 mm', cantidad: 14, nota: 'Estantes, divisores, tablero, fondo y mamparo' });
     filas.push({ categoria: 'Cables y protecciones', item: 'Manguera de grado alimenticio, abrazaderas y T', cantidad: 1, nota: 'Bidones, bomba y canilla' });
+  }
+  // Sistema de gas (el anafe y la garrafa figuran en Equipos)
+  if (data.equipos.some((e) => e.id === 'garrafa')) {
+    filas.push({ categoria: 'Gas', item: 'Manguera flexible de gas certificada con abrazaderas', cantidad: 1, nota: 'Del regulador a la llave de corte, con bucle para el cajón' });
+    filas.push({ categoria: 'Gas', item: 'Caño o flexible de acero para el tramo fijo al anafe', cantidad: 1, nota: 'Tramo corto de la llave de corte a la entrada del anafe' });
+    filas.push({ categoria: 'Gas', item: 'Sellador de roscas apto para gas', cantidad: 1, nota: '' });
+    filas.push({ categoria: 'Gas', item: 'Spray detector de fugas (o agua con jabón)', cantidad: 1, nota: 'Para probar todas las uniones' });
   }
   return filas;
 }

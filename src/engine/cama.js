@@ -1,7 +1,8 @@
 // Cama extensible de 90 a 120 cm: plataforma de placas de plywood con esquinas redondeadas,
 // pegada a la pared izquierda y a la cabecera (mueble trasero). Debajo de cada placa hay una
 // bandeja que se tira hacia el pasillo sobre correderas de carga y agranda la cama.
-// Abajo hay dos cajones grandes y al pie la caja con arco.
+// Abajo hay dos cajones grandes y al pie la caja con arco. Frente al mueble trasero queda un hueco
+// libre bajo la cama (cama.huecoMueble) para sacar el cajón de bidones y abrir las puertas bajas.
 import { cajon } from './cajon.js';
 
 export function cama(ctx, G) {
@@ -55,9 +56,11 @@ export function cama(ctx, G) {
   const zPanel = zCentro - t / 2;
   P('Panel central de apoyo (guía)', x0, 0, zPanel, L, yB, t);
 
-  // Guía de la cabecera, del lado del mueble trasero
-  const zG2 = zCab - 45;
-  P('Guía de la cabecera (lado del mueble)', x1 - 560, 0, zG2, 560, yB, t);
+  // Guía de la cabecera: cierra el hueco libre que queda bajo la cama frente al mueble trasero.
+  // En ese hueco salen el cajón de bidones y las puertas bajas del mueble.
+  const hueco = ca.huecoMueble ?? 430;
+  const zG2 = zCab - hueco;
+  P('Guía de la cabecera (al fondo del hueco libre)', x1 - 560, 0, zG2, 560, yB, t);
 
   // Zonas de las bandejas y de los cajones: entre guías, con la luz de las correderas
   const zonaCab = { z0: zPanel + t + c, z1: zG2 - c };
@@ -100,14 +103,15 @@ export function cama(ctx, G) {
   const arcoFin = van.archInicio + van.archLargo;
   const xLarguero = xb0 - 35;
   LST('Larguero de apoyo (cabecera)', xLarguero, yB - 30, zPanel + t, 30, 30, zG2 - zPanel - t);
+  LST('Larguero sobre el hueco libre', xLarguero, yB - 30, zG2 + t, 30, 30, zCab - 30 - zG2 - t);
   LST('Larguero de apoyo (pie)', xLarguero, yB - 30, zInt, 30, 30, zPanel - zInt);
   LST('Listón de pared (pie)', x0, yB - 30, zInt + 5, 30, 30, zPanel - zInt - 10);
   LST('Listón de pared (cabecera, antes del arco)', x0, yB - 30, zPanel + t + 5, 30, 30, arcoIni - 10 - zPanel - t - 5);
   LST('Listón de pared (cabecera, después del arco)', x0, yB - 30, arcoFin + 10, 30, 30, zCab - 30 - arcoFin - 10);
 
-  // Uniones al frente del mueble trasero (dos tramos, esquivando las puertas)
-  LST('Listón de unión a la cabecera - izquierdo', x0, yB - 30, zCab - 30, 95, 30, 30);
-  LST('Listón de unión a la cabecera - derecho', 615, yB - 30, zCab - 30, x1 - 615, 30, 30);
+  // Unión al frente del mueble trasero: va en el travesaño que queda entre los frentes bajos
+  // (que terminan antes del listón) y los altos (que empiezan sobre la cama)
+  LST('Listón de unión a la cabecera', x0, yB - 30, zCab - 30, x1 - x0, 30, 30);
 
   // Uniones
   ctx.unir(G, 'cola_tornillo', 2 * L, 'Placas con panel central, largueros y listones');
@@ -118,14 +122,14 @@ export function cama(ctx, G) {
     herraje: 'Tornillo avellanado 4x40 mm (placas de la cama)',
     cantidad: 24,
   });
-  ctx.unir(G, 'directo', 0, 'Listones de unión al frente del mueble trasero', {
+  ctx.unir(G, 'directo', 0, 'Listón de unión al frente del mueble trasero', {
     herraje: 'Tornillo aglomerado 4x50 mm (cama al mueble trasero)',
-    cantidad: 8,
+    cantidad: 10,
   });
   ctx.unir(G, 'piso', 2 * L, 'Frente del pie, panel central y guías al piso de la van');
   ctx.unir(G, 'pared', ca.largo, 'Caja del pie y listones contra la pared izquierda');
   ctx.anclaje(G, 'Piso de la van', 'Escuadras L en el frente del pie, el panel central y las guías', 6, 'Sellar los agujeros');
-  ctx.anclaje(G, 'Mueble trasero', 'Listones de unión atornillados al frente del mueble', 2, 'Evitar las puertas F1 y F2b');
+  ctx.anclaje(G, 'Mueble trasero', 'Listón de unión atornillado al travesaño del frente del mueble', 2, 'Entre los frentes bajos y los altos');
   ctx.anclaje(G, 'Pared izquierda', 'Escuadras L en la caja del pie', 2, 'Remache o autoperforante');
 
   // Herrajes

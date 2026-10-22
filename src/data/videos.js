@@ -1,4 +1,4 @@
-// Videos recomendados de YouTube para cada elemento eléctrico y de agua.
+// Videos recomendados de YouTube para cada elemento eléctrico, de agua y de gas.
 // Los links salieron de búsquedas reales. Si alguno deja de estar disponible, se puede
 // cambiar el id acá; el botón "Buscar más en YouTube" siempre funciona.
 
@@ -71,11 +71,31 @@ const FREGADERO = [
   v('pkG8GwzoKOo', 'Grifo de fregadero para tu furgoneta'),
   v('ofjBmCfNpUQ', '#8 Camperización: fontanería con grifo, bomba de agua, depósitos y llenado'),
 ];
-const EXTRACTOR = [
-  v('kPnr6TFzUtk', '#7 Camperización: caja de fusibles, focos, cargadores, extractor e inversor'),
-  v('jPQdmTQoRGk', 'Ventilación camper (para cualquier modelo de coche)'),
-  v('XEUX5qOWzcc', 'How to Install a Van Roof Vent Fan', 'en'),
-  v('sEBNhqPwm-c', 'Install a 12v Roof Vent Fan', 'en'),
+const CLARABOYA = [
+  v('LdhrxeuVnH4', 'Instalación de claraboya en furgoneta camper (Dometic)'),
+  v('NXihOY8SP7Q', 'Instalación de claraboya paso a paso en furgoneta camper (Fiamma)'),
+  v('Y4kcG6cLIJA', 'Claraboya sin goteras en camper'),
+  v('SdEQ95KtEAA', 'Aislar y sellar una claraboya de techo de autocaravana o camper'),
+];
+const GAS = [
+  v('vOHac9Sj5rY', 'Instalación de gas en tu furgoneta'),
+  v('aEN3KcUlQ34', 'Instalación de gas en furgoneta camper'),
+  v('uq1QHgZLP08', 'Instalación de gas para tu furgoneta camper'),
+  v('1K-qneaKoUI', 'Instalación de gas en furgoneta camper: consejos (Iveco Daily)'),
+];
+const ANAFE = [
+  v('5RSvxdMau9o', 'Instalar un anafe de 2 hornallas de acero inoxidable para gas natural o envasado'),
+  v('aEN3KcUlQ34', 'Instalación de gas en furgoneta camper'),
+  v('uq1QHgZLP08', 'Instalación de gas para tu furgoneta camper'),
+];
+const REGULADOR = [
+  v('XDEl68nehhQ', 'Instalación segura de regulador de gas paso a paso'),
+  v('_1ZeVAhQU4U', 'Instalación de regulador de gas'),
+  v('JGiirLZ_7Qc', 'Cómo instalar un regulador para gas propano'),
+];
+const DETECTOR_GAS = [
+  v('Q9WPB712SCg', 'Detector de gases para autocaravanas'),
+  v('vOHac9Sj5rY', 'Instalación de gas en tu furgoneta'),
 ];
 
 // Clave de video por id de elemento (equipos, cables y mangueras)
@@ -92,13 +112,20 @@ export const VIDEOS = {
   enchufe2: ENCHUFES,
   ledA: LED,
   ledB: LED,
-  extractor: EXTRACTOR,
+  ledC: LED,
+  extractor: CLARABOYA,
   nevera: NEVERA,
   bomba: BOMBA,
   canilla: FREGADERO,
   fregadero: FREGADERO,
   bidon1: BOMBA,
   bidon2: BOMBA,
+  anafe: ANAFE,
+  garrafa: GAS,
+  regulador: REGULADOR,
+  valvulaGas: GAS,
+  detectorGas: DETECTOR_GAS,
+  gas: GAS,
   cableado: CABLEADO,
 };
 

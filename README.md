@@ -1,8 +1,9 @@
 # La Chata - diseño de muebles
 
 Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy y su sistema eléctrico,
-con la distribución de la foto de referencia: mueble trasero cruzado detrás de los asientos (fregadero,
-heladera, bidones, batería e inversor), cama extensible de 90 a 120 cm (placas de plywood con esquinas redondeadas, bandejas sobre correderas, caja con arco y cajones), y mueble
+con la distribución de la foto de referencia: mueble trasero cruzado de pared a pared detrás de los asientos
+(de izquierda a derecha: agua con fregadero y bidones, guardado, cocina con anafe, gas y heladera, y la sección
+eléctrica con batería e inversor), cama extensible de 90 a 120 cm (placas de plywood con esquinas redondeadas, bandejas sobre correderas, caja con arco y cajones), y mueble
 derecho con cajones, alacena y mesa plegable.
 
 ## Uso
@@ -27,7 +28,10 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   salen del recorrido dibujado en 3D.
 - Sistema eléctrico en 3D: batería del auto bajo el asiento del acompañante, fusible ANL, cable largo bajo los
   asientos, DC-DC, batería de 150 Ah, caja de fusibles, inversor, panel de 5 interruptores, 2 enchufes con USB-C,
-  2 tiras LED de 2 m en el techo, extractor, bomba y mangueras de agua.
+  3 tiras LED en el techo (2 de 2 m y una al centro detrás del extractor), bomba y mangueras de agua y de gas. El extractor
+  del techo (310 x 310 mm con el marco) se abre a mano: está en el 3D pero sin conexión eléctrica.
+- Sistema de gas en 3D: garrafa chica recargable en un cajón bajo el anafe, regulador, manguera, llave de corte y
+  detector de gas, con la ventilación al exterior por el piso.
 - Al hacer clic en cualquier equipo, cable o manguera (en el 3D o en la pestaña Eléctrica) se abre un panel con qué
   es, dónde va, cómo se conecta y un video de YouTube recomendado.
 - Lista de compras agrupada.
@@ -46,7 +50,15 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Largo y entrada del pasarruedas (estimados).
 - Medidas de la batería de 150 Ah, inversor, DC-DC, caja de fusibles, batería del auto, fregadero y bidones (estimadas).
 - Potencia del inversor (se supuso 1000 W) y consumo de las tiras LED (9,6 W por metro).
-- Qué hace cada uno de los 5 interruptores (supuesto: luces 1, luces 2, bomba, extractor y mando del inversor).
+- Qué hace cada uno de los 5 interruptores (supuesto: luces 1, luces 2, luces 3, bomba y mando del inversor).
+- Mueble trasero de pared a pared (1720 mm) y de 450 mm de profundidad. Si tapa la puerta corrediza, achicar el ancho en la
+  barra lateral. Secciones (x): agua 15-575, guardado 590-910, cocina 925-1380 y eléctrico 1395-1705.
+- Bajo la cama, frente al mueble trasero, queda un hueco libre de 430 mm para sacar el cajón de bidones (llega al piso) y abrir
+  las puertas bajas. Por eso la cama quedó en 1800 mm de largo (antes 1850).
+- Medidas estimadas de la cocina: anafe 420 x 300 mm, garrafa de 230 mm de diámetro y 330 mm de alto, heladera 420 x 300 x 340 mm,
+  fregadero 340 de ancho x 400 de fondo, bidones de 20 L de 215 x 400 x 290 mm.
+- Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El cajón de la garrafa necesita una rejilla de
+  ventilación hacia el exterior por el piso, detector de gas y detector de monóxido de carbono.
 - Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
 - Cama extensible: al abrir, la bandeja queda 16 mm más baja que la placa fija (la cubre el colchón o un relleno de 15 mm).
   La zona del pie (caja con arco) no se extiende: ahí la cama sigue en 90 cm. Con la cama abierta quedan 110 mm de pasillo.

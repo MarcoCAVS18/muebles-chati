@@ -5,7 +5,8 @@ import { planificar, pesoEstimado, listaDeCompras } from '../src/engine/cortes.j
 import { resumenFijaciones } from '../src/engine/fijaciones.js';
 import { calcularElectrica } from '../src/engine/electrica.js';
 import { electrico3d } from '../src/engine/electrico3d.js';
-import { videosDe } from '../src/data/videos.js';
+import { videosDe, VIDEOS } from '../src/data/videos.js';
+import { ELEMENTOS } from '../src/data/elementos.js';
 
 const data = construir(CONFIG_INICIAL);
 const plan = planificar(data.partes, CONFIG_INICIAL);
@@ -80,4 +81,61 @@ const xMax = Math.max(...bandejas.map((p) => p.x + p.sx + CONFIG_INICIAL.cama.ex
 exigir(xMax - CONFIG_INICIAL.cama.x0 >= 1200 - 1, 'la cama extendida no llega a 120 cm');
 exigir(data.partes.filter((p) => p.radio).length >= 4, 'faltan placas con esquinas redondeadas');
 exigir(data.decos.every((d) => d.id), 'decos sin id');
+
+// ---- Diseño nuevo: mueble trasero de 450 mm, cocina con gas, heladera visible, eléctrico a la derecha ----
+const cfgI = CONFIG_INICIAL;
+const tra = data.partes.filter((p) => p.grupo === 'Mueble trasero');
+exigir(cfgI.trasero.profundidad === 450, 'el mueble trasero debería tener 450 mm de profundidad');
+exigir(cfgI.trasero.ancho === cfgI.van.ancho, 'el mueble trasero debería ir de pared a pared');
+exigir(tra.every((p) => p.z + p.sz <= cfgI.van.largo + 0.5), 'el mueble trasero se sale del mamparo');
+
+// Cada equipo y cada cable tiene un video propio (sin caer en el video genérico) y una ficha
+const ids = [...data.equipos, ...e3.equipos].map((e) => e.id);
+for (const id of ids) {
+  exigir(VIDEOS[id], `el equipo ${id} no tiene lista de videos propia`);
+  exigir(ELEMENTOS[id], `el equipo ${id} no tiene ficha en elementos.js`);
+}
+for (const c of [...e3.cables, ...e3.mangueras]) exigir(VIDEOS[c.video], `el cable ${c.id} usa un video que no existe: ${c.video}`);
+
+// Los equipos no se pisan entre sí ni atraviesan la estructura del mueble (salvo los que encastran en la tapa)
+const solapan = (a, b, tol = 0.5) =>
+  a.x + a.sx > b.x + tol && b.x + b.sx > a.x + tol && a.y + a.sy > b.y + tol && b.y + b.sy > a.y + tol && a.z + a.sz > b.z + tol && b.z + b.sz > a.z + tol;
+const interiores = [...data.equipos, ...e3.equipos.filter((e) => e.en === 'Mueble trasero')];
+for (let i = 0; i < interiores.length; i++) {
+  for (let j = i + 1; j < interiores.length; j++) {
+    exigir(!solapan(interiores[i], interiores[j]), `los equipos ${interiores[i].id} y ${interiores[j].id} se pisan`);
+  }
+}
+const ENCASTRADOS = ['fregadero', 'anafe', 'canilla', 'detectorGas'];
+for (const e of interiores) {
+  if (ENCASTRADOS.includes(e.id)) continue;
+  for (const p of tra) exigir(!solapan(e, p), `el equipo ${e.id} atraviesa la pieza ${p.id} (${p.nombre})`);
+}
+// Lo eléctrico queda en la sección derecha, a más de 400 mm del fregadero
+const freg = data.equipos.find((e) => e.id === 'fregadero');
+for (const id of ['bateria', 'inversor', 'dcdc', 'fusibles', 'fusiblePrincipal']) {
+  const e = e3.equipos.find((q) => q.id === id);
+  exigir(e && e.x - (freg.x + freg.sx) > 400, `${id} debería quedar lejos del fregadero`);
+}
+// Heladera visible: la puerta tiene color propio y abre la ficha del equipo
+exigir(tra.some((p) => p.abre === 'nevera' && p.color), 'la puerta de la heladera debería tener color y abrir la heladera');
+exigir(tra.some((p) => p.abre === 'garrafa'), 'falta el frente del cajón del gas');
+// El cajón de bidones llega hasta el piso, queda bajo la cama y los frentes altos sobre ella
+const frBid = tra.find((p) => p.nombre === 'Frente cajón de bidones');
+exigir(frBid && frBid.y < 30 && frBid.y + frBid.sy <= cfgI.cama.plataforma - cfgI.materiales.estructura.t - 30, 'el frente de bidones debería llegar al piso y quedar bajo la cama');
+exigir(tra.find((p) => p.nombre === 'Frente cajón bajo el fregadero').y > cfgI.cama.plataforma, 'el cajón bajo el fregadero debería quedar sobre la cama');
+// Tres tiras LED y extractor sin conexión
+exigir(['ledA', 'ledB', 'ledC'].every((id) => e3.equipos.some((e) => e.id === id)), 'faltan las tres tiras LED');
+exigir(e3.largoC > 500, 'la tercera tira LED quedó muy corta');
+exigir(!e3.cables.some((c) => c.desde === 'extractor' || c.hasta === 'extractor'), 'el extractor no debería tener cable');
+const ex = e3.equipos.find((e) => e.id === 'extractor');
+exigir(ex && ex.sx === 310 && ex.sz === 310, 'el extractor debería medir 310 x 310 mm con el marco');
+exigir(ELECTRICA_INICIAL.switches.length === 5 && !ELECTRICA_INICIAL.switches.includes('Extractor'), 'el panel debería tener 5 interruptores sin el extractor');
+exigir(!CARGAS_INICIALES.some((c) => c.id === 'extractor'), 'el extractor no debería tener consumo');
+// Gas
+for (const id of ['anafe', 'garrafa', 'regulador', 'valvulaGas', 'detectorGas']) exigir(data.equipos.some((e) => e.id === id), `falta el equipo de gas ${id}`);
+exigir(e3.mangueras.filter((m) => m.tipo === 'gas').length === 2, 'faltan las mangueras de gas');
+// La bomba de agua sigue conectada
+exigir(e3.cables.some((c) => c.hasta === 'bomba') && CARGAS_INICIALES.some((c) => c.id === 'bomba'), 'la bomba de 12 V debería estar conectada');
+
 process.exit(fallos ? 1 : 0);

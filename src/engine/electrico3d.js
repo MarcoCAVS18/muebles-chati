@@ -4,73 +4,80 @@
 // Camino de la energía:
 //   batería del auto (bajo el asiento del acompañante) -> fusible ANL -> cable largo bajo los asientos
 //   -> mamparo -> DC-DC -> batería de 150 Ah -> fusible principal -> inversor -> enchufes
-//   batería -> caja de fusibles -> heladera, panel de 5 interruptores -> luces, bomba, extractor, mando
+//   batería -> caja de fusibles -> heladera y panel de 5 interruptores -> 3 tiras LED, bomba y mando del inversor
+//
+// Todo lo eléctrico del mueble está en la sección derecha (D), lejos del fregadero. El extractor del
+// techo no tiene conexión: se deja en el 3D para ubicar las luces.
+
+import { disposicionTrasero } from './disposicion.js';
 
 export const GRUPO_ELEC = 'Eléctrico';
 
 export function electrico3d(cfg) {
-  const { van, trasero: tr, equipos: eq, vehiculo: ve, led } = cfg;
-  const t = cfg.materiales.estructura.t;
-  const zf = van.largo - tr.profundidad; // frente del mueble trasero
-  const zb = van.largo; // mamparo
-  const yb = tr.zocalo + t + 5; // piso de la zona eléctrica, sobre la base
+  const { van, trasero: tr, equipos: eq, vehiculo: ve, led, extractor: ex } = cfg;
+  const L = disposicionTrasero(cfg);
+  const { zF, zB: zb, zFondo, sec, D, A, C } = L;
   const EN = 'Mueble trasero';
 
   const caja = (id, nombre, x, y, z, sx, sy, sz, extra) => ({ id, nombre, grupo: GRUPO_ELEC, x, y, z, sx, sy, sz, ...extra });
 
-  // --- Equipos dentro de la sección izquierda (zona baja, detrás de la cama) ---
-  const bat = eq.bateria;
-  const bateria = caja('bateria', 'Batería de litio 150 Ah', 25, yb, zf + 30, bat.x, bat.y, bat.z, {
+  // --- Equipos dentro de la sección D (eléctrica) ---
+  const bateria = caja('bateria', 'Batería de litio 150 Ah (parada)', D.xBateria, D.yBateria, D.zBateria, D.bsx, D.bsy, D.bsz, {
     en: EN,
     color: '#1565c0',
-    nota: 'Sección izquierda, zona baja',
+    nota: 'Sección eléctrica, abajo, parada, detrás de la puerta de la batería',
+  });
+  const TP = [D.xBateria + 70, D.yTopeBateria]; // borne positivo (x, y); z se define en cada cable
+
+  const inv = eq.inversor;
+  const inversor = caja('inversor', 'Inversor 12 V a 230 V', D.xBateria, D.yEquipos, zF + 110, inv.x, inv.y, inv.z, {
+    en: EN,
+    color: '#455a64',
+    nota: 'Ya comprado. Sobre el estante de los equipos',
+  });
+  const dc = eq.dcdc;
+  const dcdc = caja('dcdc', 'Cargador DC-DC', D.xBateria + 165, D.yEquipos, zFondo - 31 - dc.z, dc.x, dc.y, dc.z, {
+    en: EN,
+    color: '#00897b',
+    nota: 'Carga la batería de 150 Ah desde la del auto. Pegado al mamparo',
   });
   const fus = eq.fusibles;
-  const fusibles = caja('fusibles', 'Caja de fusibles', 520, yb, zf + 30, fus.x, fus.y, fus.z, {
+  const fusibles = caja('fusibles', 'Caja de fusibles', D.xBateria + 170, D.yEquipos, zF + 40, fus.z, fus.y, fus.x, {
     en: EN,
     color: '#ef6c00',
     nota: 'Reparte la energía de 12 V',
   });
   const anl = eq.anl;
-  const fusiblePrincipal = caja('fusiblePrincipal', 'Fusible principal del inversor', 520, yb, zf + 140, anl.x, anl.y, anl.z, {
+  const fusiblePrincipal = caja('fusiblePrincipal', 'Fusible principal del inversor', sec.D.x1 - anl.x - 5, 480, zF + 40, anl.x, anl.y, anl.z, {
     en: EN,
     color: '#ffb300',
-    nota: 'Entre la batería y el inversor',
-  });
-  const inv = eq.inversor;
-  const inversor = caja('inversor', 'Inversor 12 V a 230 V', 25, yb, zf + 220, inv.z, inv.y, inv.x, {
-    en: EN,
-    color: '#455a64',
-    nota: 'Ya comprado',
-  });
-  const dc = eq.dcdc;
-  const dcdc = caja('dcdc', 'Cargador DC-DC', 340, yb, zf + 240, dc.z, dc.y, dc.x, {
-    en: EN,
-    color: '#00897b',
-    nota: 'Carga la batería de 150 Ah desde la del auto',
+    nota: 'Al lado de la batería, entre la batería y el inversor',
   });
 
-  // --- Fuera de la sección: panel de interruptores y enchufes en el frente ---
+  // --- Frente de la sección eléctrica: panel de interruptores y enchufes ---
   const ps = eq.panelSwitches;
   const ench = eq.enchufe;
-  const zPanel = zf - ps.z;
-  const panelSwitches = caja('panelSwitches', 'Panel de 5 interruptores', 630, 700, zPanel, ps.x, ps.y, ps.z, {
+  const xTablero = sec.D.x0 + 25;
+  const panelSwitches = caja('panelSwitches', 'Panel de 5 interruptores', xTablero, 760, zF - ps.z, ps.x, ps.y, ps.z, {
     color: '#263238',
-    nota: 'En el frente del mueble, a la altura de la cabecera',
+    nota: 'En el tablero del frente de la sección eléctrica',
   });
-  const enchufe1 = caja('enchufe1', 'Enchufe 230 V con USB-C (1)', 626, 610, zf - ench.z, ench.x, ench.y, ench.z, {
+  const enchufe1 = caja('enchufe1', 'Enchufe 230 V con USB-C (1)', xTablero, 675, zF - ench.z, ench.x, ench.y, ench.z, {
     color: '#eceff1',
-    nota: 'En el frente, sobre la cama',
+    nota: 'En el tablero del frente de la sección eléctrica',
   });
-  const enchufe2 = caja('enchufe2', 'Enchufe 230 V con USB-C (2)', 702, 610, zf - ench.z, ench.x, ench.y, ench.z, {
+  const enchufe2 = caja('enchufe2', 'Enchufe 230 V con USB-C (2)', xTablero + ench.x + 12, 675, zF - ench.z, ench.x, ench.y, ench.z, {
     color: '#eceff1',
-    nota: 'En el frente, sobre la cama',
+    nota: 'En el tablero del frente de la sección eléctrica',
   });
 
-  // --- Techo: tiras LED y extractor ---
+  // --- Techo: tres tiras LED y el extractor (sin conexión) ---
   const yTecho = van.alto;
   const zLed0 = 250;
   const largoLed = led.largoM * 1000;
+  const zExtAtras = ex.z - ex.marco / 2; // borde del extractor hacia la puerta trasera
+  const zFinC = zExtAtras - 60; // la tercera tira sigue hacia la puerta trasera desde el extractor
+  const largoC = Math.max(zFinC - zLed0, 0);
   const ledA = caja('ledA', `Tira LED ${led.largoM} m (1)`, led.x1 - 10, yTecho - 8, zLed0, 20, 8, largoLed, {
     color: '#fff59d',
     emisivo: true,
@@ -81,9 +88,14 @@ export function electrico3d(cfg) {
     emisivo: true,
     nota: 'Techo, lado derecho',
   });
-  const extractor = caja('extractor', 'Extractor de techo', 760, yTecho - 15, 1650, 250, 15, 250, {
-    color: '#90a4ae',
-    nota: 'Techo, sobre la zona de la mesa',
+  const ledC = caja('ledC', `Tira LED ${(largoC / 1000).toFixed(1).replace('.', ',')} m (3)`, led.xC - 10, yTecho - 8, zLed0, 20, 8, largoC, {
+    color: '#fff59d',
+    emisivo: true,
+    nota: 'Techo, al centro, desde el extractor hacia la puerta trasera',
+  });
+  const extractor = caja('extractor', 'Extractor de techo (sin conexión)', ex.x - ex.marco / 2, yTecho - 25, ex.z - ex.marco / 2, ex.marco, 25, ex.marco, {
+    color: '#cfd8dc',
+    nota: `Se abre a mano, sin ventilador. Hueco ${ex.hueco} mm, con el marco ${ex.marco} mm`,
   });
 
   // --- Batería del auto bajo el asiento del acompañante ---
@@ -97,15 +109,22 @@ export function electrico3d(cfg) {
     nota: 'A menos de 30 cm del borne positivo de la batería del auto',
   });
 
-  const equipos = [bateria, fusibles, fusiblePrincipal, inversor, dcdc, panelSwitches, enchufe1, enchufe2, ledA, ledB, extractor, bateriaAuto, anlCaja];
+  const equipos = [
+    bateria, fusibles, fusiblePrincipal, inversor, dcdc, panelSwitches, enchufe1, enchufe2,
+    ledA, ledB, ledC, extractor, bateriaAuto, anlCaja,
+  ];
 
-  // --- Cables (puntos en mm). tipo: dc | ac | senal | agua ---
+  // --- Cables (puntos en mm). tipo: dc | ac | senal | agua | gas ---
   const zA = ve.bateriaZ - 10; // cota z del fusible ANL
   const xTerm = bateriaAuto.x + 20; // borne positivo de la batería del auto
-  const xCab = 360; // por donde entra el cable largo al mueble
+  const xCab = dcdc.x + dcdc.sx / 2 + 20; // por donde entra el cable largo al mueble
+  const yCab = dcdc.y + dcdc.sy / 2;
   const zUnder = 2600; // recorrido bajo los asientos
-  const T = [430, bateria.y + bateria.sy]; // borne positivo de la batería de 150 Ah (x, y)
-  const yTop = bateria.y + bateria.sy;
+  const yTop = D.yTopeBateria;
+  const yAlto = D.yEquipos + inv.y + 22; // nivel de los cables por encima del inversor
+  const zTab = zF - 13; // plano de la canaleta pegada al tablero
+  const yCan = yTecho - 12; // cota de los cables en el techo
+  const zFinA = zLed0 + largoLed;
 
   const cables = [
     {
@@ -138,12 +157,11 @@ export function electrico3d(cfg) {
         [anlCaja.x - 20, 30, zUnder],
         [xCab, 30, zUnder],
         [xCab, 30, zb + 8],
-        [xCab, yb + 10, zb + 8],
-        [xCab, yb + 10, zb - 30],
-        [xCab + 20, yb + 10, zb - 30],
-        [xCab + 20, yb + 30, dcdc.z + dcdc.sz + 2],
+        [xCab, yCab, zb + 8],
+        [xCab, yCab, zb - 30],
+        [xCab, yCab, dcdc.z + dcdc.sz + 2],
       ],
-      nota: 'Va por el piso bajo los asientos, pasa el mamparo por un pasacables y entra por el fondo del mueble.',
+      nota: 'Va por el piso bajo el asiento del acompañante, sube por el mamparo, lo pasa por un pasacables y entra directo al DC-DC.',
     },
     {
       id: 'c_dcdc_bat',
@@ -154,13 +172,13 @@ export function electrico3d(cfg) {
       video: 'dcdc',
       corriente: 'dcdc',
       puntos: [
-        [500, dcdc.y + dcdc.sy, zf + 280],
-        [500, yTop + 12, zf + 280],
-        [T[0], yTop + 12, zf + 280],
-        [T[0], yTop + 12, zf + 66],
-        [T[0], yTop + 2, zf + 66],
+        [dcdc.x + 25, dcdc.y + dcdc.sy + 1, dcdc.z + 15],
+        [dcdc.x + 25, yAlto, dcdc.z + 15],
+        [TP[0], yAlto, dcdc.z + 15],
+        [TP[0], yAlto, zF + 90],
+        [TP[0], yTop + 1, zF + 90],
       ],
-      nota: 'Salida del DC-DC al borne de la batería. Usar el mismo calibre que la entrada.',
+      nota: 'Salida del DC-DC al borne de la batería, por arriba del inversor y por un pasacables del estante. Usar el mismo calibre que la entrada.',
     },
     {
       id: 'c_bat_fusp',
@@ -171,11 +189,11 @@ export function electrico3d(cfg) {
       video: 'fusiblePrincipal',
       corriente: 'inversor',
       puntos: [
-        [T[0], yTop, zf + 40],
-        [T[0], yTop + 16, zf + 40],
-        [550, yTop + 16, zf + 40],
-        [550, yTop + 16, zf + 160],
-        [550, fusiblePrincipal.y + fusiblePrincipal.sy, zf + 160],
+        [TP[0], yTop + 1, zF + 84],
+        [TP[0], yTop + 5, zF + 84],
+        [fusiblePrincipal.x + 30, yTop + 5, zF + 84],
+        [fusiblePrincipal.x + 30, yTop + 5, fusiblePrincipal.z + 20],
+        [fusiblePrincipal.x + 30, fusiblePrincipal.y + fusiblePrincipal.sy + 1, fusiblePrincipal.z + 20],
       ],
       nota: 'Fusible lo más cerca posible del borne positivo.',
     },
@@ -188,12 +206,14 @@ export function electrico3d(cfg) {
       video: 'inversor',
       corriente: 'inversor',
       puntos: [
-        [530, yb + 20, zf + 180],
-        [530, yb + 20, zf + 212],
-        [60, yb + 20, zf + 212],
-        [60, yb + 25, inversor.z],
+        [fusiblePrincipal.x - 1, 500, fusiblePrincipal.z + 20],
+        [fusiblePrincipal.x - 30, 500, fusiblePrincipal.z + 20],
+        [fusiblePrincipal.x - 30, 500, zF + 25],
+        [fusiblePrincipal.x - 30, 575, zF + 25],
+        [inversor.x + 90, 575, zF + 25],
+        [inversor.x + 90, 575, inversor.z - 2],
       ],
-      nota: 'Cable corto y grueso. El inversor es el consumo más fuerte del sistema.',
+      nota: 'Cable corto y grueso, por el frente del estante. El inversor es el consumo más fuerte del sistema.',
     },
     {
       id: 'c_bat_caja',
@@ -204,10 +224,10 @@ export function electrico3d(cfg) {
       video: 'fusibles',
       corriente: 'carga12',
       puntos: [
-        [T[0], yTop, zf + 90],
-        [T[0], yTop + 24, zf + 90],
-        [560, yTop + 24, zf + 90],
-        [560, fusibles.y + fusibles.sy, zf + 90],
+        [TP[0], yTop + 1, zF + 96],
+        [TP[0], yTop + 5, zF + 96],
+        [fusibles.x + 50, yTop + 5, zF + 96],
+        [fusibles.x + 50, fusibles.y - 1, zF + 96],
       ],
       nota: 'Alimenta todo lo de 12 V que no pasa por el inversor.',
     },
@@ -220,11 +240,15 @@ export function electrico3d(cfg) {
       video: 'nevera',
       corriente: 'nevera',
       puntos: [
-        [612, fusibles.y + fusibles.sy, zf + 85],
-        [612, 420, zf + 85],
-        [600, 420, zf + 85],
+        [fusibles.x + 20, fusibles.y + fusibles.sy + 1, zF + 150],
+        [fusibles.x + 20, yAlto, zF + 150],
+        [sec.C.x1 - 8, yAlto, zF + 150],
+        [sec.C.x1 - 8, yAlto, zFondo - 21],
+        [sec.C.x1 - 8, 250, zFondo - 21],
+        [sec.C.x1 - 40, 250, zFondo - 21],
+        [sec.C.x1 - 40, 250, L.zIn + 5 + eq.nevera.z + 2],
       ],
-      nota: 'Directo a la caja de fusibles, sin pasar por interruptor.',
+      nota: 'Pasa el divisor por un agujero con pasacables, baja por el fondo de la cocina y entra por atrás de la heladera. Sin interruptor.',
     },
     {
       id: 'c_caja_panel',
@@ -235,10 +259,10 @@ export function electrico3d(cfg) {
       video: 'panelSwitches',
       corriente: 'switches',
       puntos: [
-        [612, fusibles.y + fusibles.sy, zf + 50],
-        [612, panelSwitches.y + 5, zf + 50],
-        [640, panelSwitches.y + 5, zf + 50],
-        [640, panelSwitches.y + 5, zf],
+        [fusibles.x + 50, fusibles.y + fusibles.sy + 1, zF + 60],
+        [fusibles.x + 50, panelSwitches.y + 10, zF + 60],
+        [panelSwitches.x + 80, panelSwitches.y + 10, zF + 60],
+        [panelSwitches.x + 80, panelSwitches.y + 10, zF],
       ],
       nota: 'Un solo cable de entrada al panel; de ahí salen los 5 interruptores.',
     },
@@ -251,13 +275,13 @@ export function electrico3d(cfg) {
       video: 'ledA',
       corriente: 'ledA',
       puntos: [
-        [700, panelSwitches.y + panelSwitches.sy, zf - 13],
-        [700, yTecho - 12, zf - 13],
-        [700, yTecho - 12, zLed0 + largoLed],
-        [led.x1, yTecho - 12, zLed0 + largoLed],
-        [led.x1, yTecho - 8, zLed0 + largoLed],
+        [panelSwitches.x + 10, panelSwitches.y + panelSwitches.sy + 1, zTab],
+        [panelSwitches.x + 10, yCan, zTab],
+        [panelSwitches.x + 10, yCan, zFinA],
+        [led.x1, yCan, zFinA],
+        [led.x1, yTecho - 8, zFinA],
       ],
-      nota: 'Sube por una canaleta pegada al frente del mueble y sigue por el techo.',
+      nota: 'Sube por una canaleta pegada al tablero y sigue por el techo hasta el extremo de la tira.',
     },
     {
       id: 'c_panel_ledB',
@@ -268,29 +292,31 @@ export function electrico3d(cfg) {
       video: 'ledB',
       corriente: 'ledB',
       puntos: [
-        [715, panelSwitches.y + panelSwitches.sy, zf - 13],
-        [715, yTecho - 12, zf - 13],
-        [715, yTecho - 12, zLed0 + largoLed + 12],
-        [led.x2, yTecho - 12, zLed0 + largoLed + 12],
-        [led.x2, yTecho - 8, zLed0 + largoLed],
+        [panelSwitches.x + 30, panelSwitches.y + panelSwitches.sy + 1, zTab],
+        [panelSwitches.x + 30, yCan, zTab],
+        [panelSwitches.x + 30, yCan, zFinA + 12],
+        [led.x2, yCan, zFinA + 12],
+        [led.x2, yTecho - 8, zFinA],
       ],
-      nota: 'Comparte la canaleta con el cable de la otra tira.',
+      nota: 'Comparte la canaleta con los otros cables de luz.',
     },
     {
-      id: 'c_panel_extractor',
-      nombre: 'Panel al extractor de techo',
+      id: 'c_panel_ledC',
+      nombre: 'Panel a tira LED 3 (centro)',
       tipo: 'dc',
       desde: 'panelSwitches',
-      hasta: 'extractor',
-      video: 'extractor',
-      corriente: 'extractor',
+      hasta: 'ledC',
+      video: 'ledC',
+      corriente: 'ledC',
       puntos: [
-        [730, panelSwitches.y + panelSwitches.sy, zf - 13],
-        [730, yTecho - 20, zf - 13],
-        [730, yTecho - 20, extractor.z + extractor.sz / 2],
-        [extractor.x + extractor.sx / 2, yTecho - 15, extractor.z + extractor.sz / 2],
+        [panelSwitches.x + 50, panelSwitches.y + panelSwitches.sy + 1, zTab],
+        [panelSwitches.x + 50, yCan, zTab],
+        [ex.x + ex.marco / 2 + 85, yCan, zTab],
+        [ex.x + ex.marco / 2 + 85, yCan, zLed0 + largoC],
+        [led.xC, yCan, zLed0 + largoC],
+        [led.xC, yTecho - 8, zLed0 + largoC],
       ],
-      nota: 'Pasar el cable por el costado del techo, nunca por el medio.',
+      nota: 'Rodea el extractor por el costado y llega a la tira por el lado del extractor. El extractor no lleva cable.',
     },
     {
       id: 'c_panel_bomba',
@@ -301,13 +327,14 @@ export function electrico3d(cfg) {
       video: 'bomba',
       corriente: 'bomba',
       puntos: [
-        [745, panelSwitches.y + 5, zf],
-        [745, panelSwitches.y + 5, zf + 30],
-        [770, panelSwitches.y + 5, zf + 30],
-        [770, 560, zf + 30],
-        [770, 560, zf + 55],
+        [panelSwitches.x + 100, panelSwitches.y + 30, zF],
+        [panelSwitches.x + 100, panelSwitches.y + 30, zFondo - 10],
+        [400, panelSwitches.y + 30, zFondo - 10],
+        [400, 520, zFondo - 10],
+        [320, 520, zFondo - 10],
+        [320, 520, zF + 345 + 70 + 2],
       ],
-      nota: 'Entra a la sección central por detrás del frente y baja hasta la bomba.',
+      nota: 'Va por atrás del tablero y por la parte alta del fondo del mueble, detrás del anafe y del fregadero, hasta la bomba. Lejos del gas: separarlo con una canaleta.',
     },
     {
       id: 'c_panel_mando',
@@ -318,11 +345,10 @@ export function electrico3d(cfg) {
       video: 'inversor',
       corriente: 'senal',
       puntos: [
-        [655, panelSwitches.y + 40, zf],
-        [655, panelSwitches.y + 40, zb - 18],
-        [655, yb + 50, zb - 18],
-        [60, yb + 50, zb - 18],
-        [60, yb + 50, inversor.z + inversor.sz + 1],
+        [panelSwitches.x + 50, panelSwitches.y + 10, zF],
+        [panelSwitches.x + 50, panelSwitches.y + 10, zF + 45],
+        [panelSwitches.x + 50, inversor.y + 50, zF + 45],
+        [panelSwitches.x + 50, inversor.y + 50, inversor.z - 2],
       ],
       nota: 'Cable de señal de 2 hilos: el interruptor 5 enciende o apaga el inversor sin tocarlo.',
     },
@@ -335,11 +361,10 @@ export function electrico3d(cfg) {
       video: 'enchufe1',
       corriente: 'ac',
       puntos: [
-        [300, yb + 60, inversor.z],
-        [300, yb + 60, zf + 208],
-        [650, yb + 60, zf + 208],
-        [650, 640, zf + 208],
-        [650, 640, zf],
+        [enchufe1.x + 10, inversor.y + 40, inversor.z - 2],
+        [enchufe1.x + 10, inversor.y + 40, zF + 55],
+        [enchufe1.x + 10, enchufe1.y + 25, zF + 55],
+        [enchufe1.x + 10, enchufe1.y + 25, zF + 2],
       ],
       nota: 'Cable de 3 hilos (fase, neutro y tierra). Siempre con disyuntor aguas abajo del inversor.',
     },
@@ -352,16 +377,22 @@ export function electrico3d(cfg) {
       video: 'enchufe2',
       corriente: 'ac',
       puntos: [
-        [650, 640, zf + 30],
-        [736, 640, zf + 30],
-        [736, 640, zf],
+        [enchufe1.x + 50, enchufe1.y + 50, zF + 2],
+        [enchufe1.x + 50, enchufe1.y + 50, zF + 30],
+        [enchufe2.x + 40, enchufe2.y + 50, zF + 30],
+        [enchufe2.x + 40, enchufe2.y + 50, zF + 2],
       ],
       nota: 'Misma línea de 230 V.',
     },
   ];
 
-  // --- Mangueras de agua ---
-  const bid2 = { x: 830, y: 460, z: zf + 287 };
+  // --- Mangueras de agua y de gas ---
+  const bid = eq.bidon;
+  const bidon2x = A.xCajon + L.t + 2 + (bid.x + 10);
+  const cuello = [bidon2x + bid.x / 2, A.yPisoBidones + bid.y, zF + 35 + bid.z - 40]; // boca del segundo bidón
+  const reg = eq.regulador;
+  const yRegulador = C.yCajonGas + L.tb + eq.garrafa.y; // base del regulador, sobre la garrafa
+  const zRegulador = L.zIn + 15 + 10 + 80 + reg.z / 2; // centro del regulador en z
   const mangueras = [
     {
       id: 'm_bidon_bomba',
@@ -371,11 +402,12 @@ export function electrico3d(cfg) {
       hasta: 'bomba',
       video: 'bomba',
       puntos: [
-        [bid2.x, bid2.y, bid2.z],
-        [bid2.x, 540, bid2.z],
-        [bid2.x, 540, zf + 127],
+        [cuello[0], cuello[1], cuello[2]],
+        [cuello[0], 520, cuello[2]],
+        [cuello[0], 520, zF + 380],
+        [372, 520, zF + 380],
       ],
-      nota: 'Manguera de grado alimenticio. Unir los dos bidones en paralelo con una T.',
+      nota: 'Manguera de grado alimenticio. Sube por un agujero del estante. Unir los dos bidones en paralelo con una T.',
     },
     {
       id: 'm_bomba_canilla',
@@ -385,13 +417,44 @@ export function electrico3d(cfg) {
       hasta: 'canilla',
       video: 'canilla',
       puntos: [
-        [805, 577, zf + 90],
-        [805, 760, zf + 90],
-        [565, 760, zf + 90],
-        [565, 760, zb - 30],
-        [565, tr.alto - 15, zb - 30],
+        [340, 561, zF + 380],
+        [340, 600, zF + 380],
+        [400, 600, zF + 380],
+        [400, 830, zF + 380],
+        [450, 830, zF + 380],
+        [450, 851, zF + 420],
       ],
-      nota: 'Sube por la sección central, cruza el divisor por un agujero y llega a la canilla.',
+      nota: 'Sube por al lado del fregadero y atraviesa la tapa por un agujero junto a la canilla.',
+    },
+    {
+      id: 'm_gas_regulador',
+      nombre: 'Manguera de gas del regulador a la llave de corte',
+      tipo: 'gas',
+      desde: 'regulador',
+      hasta: 'valvulaGas',
+      video: 'gas',
+      puntos: [
+        [C.xCentro, yRegulador + reg.y + 1, zRegulador],
+        [C.xCentro, 775, zRegulador],
+        [sec.C.x1 - 80, 775, zRegulador],
+        [sec.C.x1 - 80, 775, zF + 400],
+      ],
+      nota: 'Manguera flexible certificada para gas con abrazaderas, con bucle suficiente para que el cajón se abra sin tirar.',
+    },
+    {
+      id: 'm_gas_anafe',
+      nombre: 'Caño de gas de la llave de corte al anafe',
+      tipo: 'gas',
+      desde: 'valvulaGas',
+      hasta: 'anafe',
+      video: 'gas',
+      puntos: [
+        [sec.C.x1 - 80, 781, zF + 400],
+        [sec.C.x1 - 80, 790, zF + 400],
+        [sec.C.x1 - 80, 790, zF + 340],
+        [sec.C.x1 - 80, 797, zF + 340],
+      ],
+      nota: 'Tramo corto y fijo hasta la entrada del anafe. Probar todas las uniones con agua jabonosa.',
     },
   ];
 
@@ -407,8 +470,21 @@ export function electrico3d(cfg) {
     { nombre: 'Asiento del conductor - respaldo', x: 150, y: 450, z: zb + 20, sx: 560, sy: 620, sz: 130, color: '#37474f', opacidad: 0.35 },
   ];
   const decos = [
-    { nombre: 'Pasacables en el mamparo', x: xCab - 14, y: yb + 2, z: zb - 4, sx: 40, sy: 30, sz: 18, color: '#212121' },
+    { nombre: 'Pasacables en el mamparo', x: xCab - 20, y: yCab - 15, z: zb - 4, sx: 40, sy: 30, sz: 18, color: '#212121' },
+  ];
+  // Detalles del techo que se ven junto con el eléctrico
+  const decosElec = [
+    {
+      nombre: 'Hueco del extractor',
+      x: ex.x - ex.hueco / 2,
+      y: yTecho - 26,
+      z: ex.z - ex.hueco / 2,
+      sx: ex.hueco,
+      sy: 1.2,
+      sz: ex.hueco,
+      color: '#37474f',
+    },
   ];
 
-  return { equipos, cables, mangueras, escenario, decos };
+  return { equipos, cables, mangueras, escenario, decos, decosElec, largoC };
 }
