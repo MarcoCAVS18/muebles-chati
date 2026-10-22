@@ -1,0 +1,380 @@
+import React from 'react';
+import { pasosDeCorte } from '../engine/packer.js';
+
+const n0 = (v) => Math.round(v);
+
+export function descargar(nombre, texto, tipo = 'text/csv;charset=utf-8') {
+  const blob = new Blob(['﻿' + texto], { type: tipo });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nombre;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+const csv = (filas) =>
+  filas.map((f) => f.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
+
+// ---------- Despiece ----------
+export function Despiece({ data, cfg, seleccion, setSeleccion }) {
+  const exportar = () => {
+    const filas = [['Id', 'Mueble', 'Pieza', 'Material', 'Largo', 'Ancho', 'Espesor']];
+    for (const p of data.partes) {
+      const d = [p.sx, p.sy, p.sz].sort((a, b) => b - a);
+      const mat = p.tipo === 'liston' ? cfg.listones[p.mat].nombre : cfg.materiales[p.mat].nombre;
+      filas.push([p.id, p.grupo, p.nombre, mat, n0(d[0]), n0(d[1]), n0(d[2])]);
+    }
+    descargar('despiece.csv', csv(filas));
+  };
+  return (
+    <div>
+      <div className="barra">
+        <span>{data.partes.length} piezas</span>
+        <button onClick={exportar}>Exportar CSV</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Pieza</th>
+            <th>Material</th>
+            <th>Largo x Ancho x Esp.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.partes.map((p) => {
+            const d = [p.sx, p.sy, p.sz].sort((a, b) => b - a);
+            const mat = p.tipo === 'liston' ? cfg.listones[p.mat].nombre : cfg.materiales[p.mat].nombre;
+            return (
+              <tr key={p.id} className={seleccion === p.id ? 'sel' : ''} onClick={() => setSeleccion(p.id)}>
+                <td>{p.id}</td>
+                <td>{p.nombre}</td>
+                <td>{mat}</td>
+                <td>
+                  {n0(d[0])} x {n0(d[1])} x {n0(d[2])}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ---------- Plano de placas ----------
+function Hoja({ hoja, mat, recorte, onSel, seleccion }) {
+  const esc = 0.22;
+  const W = mat.hojaL;
+  const H = mat.hojaA;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ background: '#f6efe2', border: '1px solid #9c8359' }}>
+      <rect x={recorte} y={recorte} width={W - 2 * recorte} height={H - 2 * recorte} fill="none" stroke="#c9b48a" strokeDasharray="12 8" />
+      {hoja.tiras.map((t) =>
+        t.items.map((it) => (
+          <g key={it.id} onClick={() => onSel(it.id)} style={{ cursor: 'pointer' }}>
+            <rect
+              x={recorte + it.x}
+              y={recorte + t.y}
+              width={it.w}
+              height={it.h}
+              fill={seleccion === it.id ? '#ffab91' : '#e3c690'}
+              stroke="#6b4f2a"
+              strokeWidth="3"
+            />
+            <text x={recorte + it.x + 10} y={recorte + t.y + 46} fontSize={Math.max(26, 90 * esc)} fill="#3b2a12">
+              {it.id}
+            </text>
+            <text x={recorte + it.x + 10} y={recorte + t.y + 90} fontSize={Math.max(24, 80 * esc)} fill="#5a4325">
+              {n0(it.w)} x {n0(it.h)}
+            </text>
+          </g>
+        ))
+      )}
+    </svg>
+  );
+}
+
+export function Placas({ plan, cfg, seleccion, setSeleccion }) {
+  return (
+    <div>
+      {Object.entries(plan.planPlacas).map(([mat, res]) => (
+        <section key={mat}>
+          <h3>
+            {cfg.materiales[mat].nombre}: {res.hojas.length} hojas ({Math.round(res.aprovechamientoTotal * 100)} % de aprovechamiento)
+          </h3>
+          {res.sinColocar.length > 0 && (
+            <p className="aviso">No entran en la hoja: {res.sinColocar.map((i) => i.id).join(', ')}</p>
+          )}
+          {res.hojas.map((h) => (
+            <div key={h.numero} className="hoja">
+              <h4>
+                Hoja {h.numero} ({Math.round(h.aprovechamiento * 100)} % usado)
+              </h4>
+              <Hoja hoja={h} mat={cfg.materiales[mat]} recorte={res.recorte} onSel={setSeleccion} seleccion={seleccion} />
+              <details>
+                <summary>Cómo cortar esta hoja</summary>
+                <pre>{pasosDeCorte(h, cfg.corte).join('\n')}</pre>
+              </details>
+            </div>
+          ))}
+        </section>
+      ))}
+      {Object.entries(plan.planListones).map(([mat, res]) => (
+        <section key={mat}>
+          <h3>
+            {cfg.listones[mat].nombre}: {res.barras.length} barras de {cfg.listones[mat].largo} mm
+          </h3>
+          {res.barras.map((b, i) => (
+            <p key={i} className="barra-liston">
+              Barra {i + 1}: {b.items.map((it) => `${it.id} (${n0(it.largo)})`).join(' + ')} - sobran {n0(cfg.listones[mat].largo - b.usado)} mm
+            </p>
+          ))}
+        </section>
+      ))}
+      <p className="nota">
+        Los cortes son de tipo guillotina: primero se cortan tiras a lo ancho de la hoja y después cada tira.
+        Sirve para sierra circular con guía. Las piezas se ordenan con la veta a lo largo de la hoja.
+      </p>
+    </div>
+  );
+}
+
+// ---------- Herrajes y fijaciones ----------
+export function Herrajes({ data, fijaciones }) {
+  const porGrupo = {};
+  for (const h of data.herrajes) {
+    const g = (porGrupo[h.grupo] = porGrupo[h.grupo] || new Map());
+    const prev = g.get(h.nombre) || { cantidad: 0, notas: new Set() };
+    prev.cantidad += h.cantidad;
+    if (h.nota) prev.notas.add(h.nota);
+    g.set(h.nombre, prev);
+  }
+  return (
+    <div>
+      <h3>Dónde van enganchados</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Mueble</th>
+            <th>Punto</th>
+            <th>Cómo</th>
+            <th>Cant.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.anclajes.map((a, i) => (
+            <tr key={i}>
+              <td>{a.grupo}</td>
+              <td>{a.punto}</td>
+              <td>
+                {a.metodo}
+                {a.nota && <div className="nota">{a.nota}</div>}
+              </td>
+              <td>{a.cantidad}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h3>Herrajes por mueble</h3>
+      {Object.entries(porGrupo).map(([g, mapa]) => (
+        <div key={g}>
+          <h4>{g}</h4>
+          <table>
+            <tbody>
+              {[...mapa.entries()].map(([nombre, v]) => (
+                <tr key={nombre}>
+                  <td>{nombre}</td>
+                  <td>{v.cantidad}</td>
+                  <td className="nota">{[...v.notas].join('; ')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+
+      <h3>Tornillos, escuadras y cola (con 10 % de margen)</h3>
+      <table>
+        <tbody>
+          {fijaciones.totales.map((f) => (
+            <tr key={f.nombre}>
+              <td>{f.nombre}</td>
+              <td>{f.cantidad}</td>
+              <td className="nota">{f.nota}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ---------- Eléctrica ----------
+export function Electrica({ res, cargas, setCargas, elec, setElec }) {
+  const cambiarCarga = (id, campo, valor) =>
+    setCargas(cargas.map((c) => (c.id === id ? { ...c, [campo]: valor } : c)));
+  const num = (v) => (Number.isNaN(parseFloat(v)) ? 0 : parseFloat(v));
+  return (
+    <div>
+      <p className="nota">
+        Sistema: batería del auto, fusible ANL, cargador DC-DC 40 A, batería trasera de 100 Ah, caja de fusibles. Sin panel solar.
+        Los consumos son estimados: reemplazalos por los de cada producto.
+      </p>
+      <div className="resumen">
+        <div>
+          <b>{n0(res.whDia)} Wh/día</b>
+          <span>{res.ahDia.toFixed(1)} Ah/día</span>
+        </div>
+        <div>
+          <b>{res.autonomiaDias === Infinity ? '-' : res.autonomiaDias.toFixed(1)} días</b>
+          <span>autonomía sin manejar</span>
+        </div>
+        <div>
+          <b>{res.horasConduccion.toFixed(1)} h</b>
+          <span>de manejo para recargar</span>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Consumo</th>
+            <th>W</th>
+            <th>Horas</th>
+            <th>Ciclo</th>
+            <th>Wh/día</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cargas.map((c) => {
+            const fila = res.filas.find((f) => f.id === c.id);
+            return (
+              <tr key={c.id}>
+                <td>{c.nombre}</td>
+                <td>
+                  <input className="mini" type="number" value={c.w} onChange={(e) => cambiarCarga(c.id, 'w', num(e.target.value))} />
+                </td>
+                <td>
+                  <input className="mini" type="number" step="0.05" value={c.horas} onChange={(e) => cambiarCarga(c.id, 'horas', num(e.target.value))} />
+                </td>
+                <td>
+                  <input className="mini" type="number" step="0.05" value={c.ciclo} onChange={(e) => cambiarCarga(c.id, 'ciclo', num(e.target.value))} />
+                </td>
+                <td>{fila ? n0(fila.wh) : '-'}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      <fieldset>
+        <legend>Parámetros</legend>
+        <label className="campo">
+          <span>Batería (Ah)</span>
+          <input type="number" value={elec.bateriaAh} onChange={(e) => setElec({ ...elec, bateriaAh: num(e.target.value) })} />
+        </label>
+        <label className="campo">
+          <span>Corriente real de carga (A)</span>
+          <input type="number" value={elec.cargadorRealA} onChange={(e) => setElec({ ...elec, cargadorRealA: num(e.target.value) })} />
+        </label>
+        <label className="campo">
+          <span>Caída máxima (%)</span>
+          <input type="number" step="0.5" value={elec.caidaMaxPct} onChange={(e) => setElec({ ...elec, caidaMaxPct: num(e.target.value) })} />
+        </label>
+        <label className="campo">
+          <span>Incluir inversor 230 V</span>
+          <input type="checkbox" checked={elec.inversor} onChange={(e) => setElec({ ...elec, inversor: e.target.checked })} />
+        </label>
+      </fieldset>
+
+      <h3>Cables y fusibles principales</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Tramo</th>
+            <th>Largo</th>
+            <th>A</th>
+            <th>Cable</th>
+            <th>Fusible</th>
+            <th>Caída</th>
+          </tr>
+        </thead>
+        <tbody>
+          {res.tramos.map((t) => (
+            <tr key={t.id}>
+              <td>{t.nombre}</td>
+              <td>{t.largoM} m</td>
+              <td>{t.amperes.toFixed(0)}</td>
+              <td>{t.seccion} mm2</td>
+              <td>{t.fusible} A</td>
+              <td>{t.caidaPct.toFixed(1)} %</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h3>Ramales desde la caja de fusibles ({elec.ramalLargoM} m)</h3>
+      <table>
+        <tbody>
+          {res.ramales.map((r) => (
+            <tr key={r.nombre}>
+              <td>{r.nombre}</td>
+              <td>{r.amperes.toFixed(1)} A</td>
+              <td>{r.seccion} mm2</td>
+              <td>fusible {r.fusible} A</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {res.avisos.map((a, i) => (
+        <p key={i} className="aviso">
+          {a}
+        </p>
+      ))}
+      <p className="nota">
+        Las secciones salen de la caída de tensión y de una corriente admisible conservadora. Confirmar con la ficha del cable
+        comprado antes de instalar. Todo conectado al sistema del auto: usar fusible en cada derivación y proteger los pasos por chapa.
+      </p>
+    </div>
+  );
+}
+
+// ---------- Compras ----------
+export function Compras({ filas }) {
+  const exportar = () => {
+    const f = [['Categoría', 'Ítem', 'Cantidad', 'Nota']];
+    for (const r of filas) f.push([r.categoria, r.item, r.cantidad, r.nota]);
+    descargar('compras.csv', csv(f));
+  };
+  const cats = [...new Set(filas.map((f) => f.categoria))];
+  return (
+    <div>
+      <div className="barra">
+        <span>Lista para llevar a Derome y al resto de tiendas</span>
+        <button onClick={exportar}>Exportar CSV</button>
+      </div>
+      {cats.map((c) => (
+        <div key={c}>
+          <h3>{c}</h3>
+          <table>
+            <tbody>
+              {filas
+                .filter((f) => f.categoria === c)
+                .map((f, i) => (
+                  <tr key={i}>
+                    <td>{f.item}</td>
+                    <td>{f.cantidad}</td>
+                    <td className="nota">{f.nota}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  );
+}

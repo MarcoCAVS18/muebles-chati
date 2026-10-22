@@ -1,0 +1,11 @@
+rules_version = '2';
+
+// Sin login: solo queda abierto el documento del proyecto. Cualquiera que tenga la URL
+// de la app podría leerlo y modificarlo. Si querés cerrarlo, agregar Firebase Auth.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /proyectos/la-chata {
+      allow read, write: if true;
+    }
+  }
+}
