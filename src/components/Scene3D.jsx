@@ -27,9 +27,9 @@ export const VISTAS = {
   trasera: { nombre: 'Desde la puerta trasera', pos: [-0.86, 1.3, -2.7], target: [-0.86, 0.55, 1.6] },
   arriba: { nombre: 'Desde arriba', pos: [-0.86, 4.6, 1.25], target: [-0.86, 0, 1.2] },
   cabecera: { nombre: 'Mueble trasero (completo)', pos: [-0.86, 1.1, -0.35], target: [-0.86, 0.5, 2.2] },
-  agua: { nombre: 'Agua: fregadero y bidones', pos: [-0.45, 1.2, 0.6], target: [-0.45, 0.45, 2.2] },
-  cocina: { nombre: 'Cocina: anafe, gas y heladera', pos: [-1.15, 1.2, 0.6], target: [-1.15, 0.45, 2.2] },
-  electrico: { nombre: 'Zona eléctrica (ver interior)', pos: [-1.5, 1.2, 0.6], target: [-1.55, 0.4, 2.2] },
+  agua: { nombre: 'Agua: fregadero y bidones', pos: [-1.4, 1.2, 0.6], target: [-1.4, 0.45, 2.2] },
+  cocina: { nombre: 'Cocina: anafe, gas y heladera', pos: [-0.86, 1.2, 0.6], target: [-0.86, 0.45, 2.2] },
+  electrico: { nombre: 'Zona eléctrica (ver interior)', pos: [-0.35, 1.2, 0.6], target: [-0.35, 0.4, 2.2] },
   techo: { nombre: 'Techo: tiras LED y extractor', pos: [-0.86, 0.5, 0.1], target: [-0.86, 1.25, 1.6] },
   asientos: { nombre: 'Batería del auto (bajo el asiento)', pos: [-0.5, 1.5, 3.7], target: [-1.35, 0.2, 2.75] },
 };

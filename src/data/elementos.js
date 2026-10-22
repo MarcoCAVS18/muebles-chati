@@ -16,19 +16,19 @@ export const ELEMENTOS = {
   },
   dcdc: {
     descripcion: 'Cargador DC-DC. Toma energía de la batería del auto con el motor en marcha y carga la batería de 150 Ah con el perfil correcto para litio.',
-    ubicacion: 'Sección eléctrica del mueble trasero (la de la derecha), sobre el estante de los equipos, pegado al mamparo.',
+    ubicacion: 'Sección eléctrica del mueble trasero (la de la izquierda), sobre el estante de los equipos, pegado al mamparo y al lado de la cocina.',
     consejos: ['Tiene que ser apto para alternador inteligente (el Jumpy lo es).', 'Ponerlo cerca de la batería de 150 Ah para que el cable de salida sea corto.', 'Dejar aire alrededor: se calienta cuando carga fuerte.'],
     busqueda: 'instalar cargador DC-DC camper alternador inteligente',
   },
   bateria: {
     descripcion: 'Batería de litio (LiFePO4) de 150 Ah. Alimenta la heladera, las luces, la bomba y el inversor.',
-    ubicacion: 'Sección eléctrica (derecha) del mueble trasero, abajo, parada, detrás de la puerta de la batería. Queda lejos del fregadero y del gas.',
-    consejos: ['Fijarla con un marco o correas: no puede moverse al frenar.', 'Confirmar que el BMS entrega la corriente que pide el inversor.', 'El fusible principal va lo más cerca posible del borne positivo.'],
+    ubicacion: 'Sección eléctrica (izquierda) del mueble trasero, abajo y acostada, detrás de la puerta de la batería. Queda lejos del fregadero y del gas.',
+    consejos: ['Fijarla con un marco o correas: no puede moverse al frenar. Los bornes quedan arriba, con 6 cm libres hasta el estante.', 'Confirmar que el BMS entrega la corriente que pide el inversor.', 'El fusible principal va lo más cerca posible del borne positivo.'],
     busqueda: 'instalar batería de litio 12v camper furgoneta',
   },
   fusiblePrincipal: {
     descripcion: 'Fusible principal del inversor. Protege el cable más grueso de la instalación.',
-    ubicacion: 'Al lado de la batería, entre el borne positivo y el inversor, dentro de la sección eléctrica.',
+    ubicacion: 'Sobre el estante, justo arriba del borne positivo de la batería y pegado al inversor, dentro de la sección eléctrica.',
     consejos: ['Elegir el fusible por la tabla de cables de la pestaña Eléctrica.', 'Usar un portafusible de calidad (tipo MEGA o ANL).'],
     busqueda: 'fusible principal inversor camper instalación',
   },
@@ -46,7 +46,7 @@ export const ELEMENTOS = {
   },
   panelSwitches: {
     descripcion: 'Panel con 5 interruptores. Cada uno enciende o apaga una parte de la instalación.',
-    ubicacion: 'En el tablero del frente de la sección eléctrica (arriba a la derecha del mueble trasero).',
+    ubicacion: 'En el tablero del frente de la sección eléctrica (arriba a la izquierda del mueble trasero).',
     consejos: ['Cada interruptor lleva su fusible en la caja de fusibles.', 'Rotular cada interruptor.'],
     busqueda: 'instalar panel de interruptores 12v camper',
   },
@@ -106,8 +106,8 @@ export const ELEMENTOS = {
     busqueda: 'instalar nevera compresor 12v furgoneta camper',
   },
   fregadero: {
-    descripcion: 'Fregadero encastrado en la tapa 1, del lado izquierdo del mueble, lejos de lo eléctrico. Mide 400 mm de fondo.',
-    ubicacion: 'Sección del agua (izquierda) del mueble trasero, arriba. Abajo tiene el cajón y, más abajo, el cajón de los bidones.',
+    descripcion: 'Fregadero encastrado en la tapa 3, del lado derecho del mueble, lejos de lo eléctrico. Mide 400 mm de fondo.',
+    ubicacion: 'Sección del agua (derecha) del mueble trasero, arriba. Abajo tiene el cajón y, más abajo, el cajón de los bidones.',
     consejos: [
       'Calar la tapa con la plantilla del fregadero.',
       'Sellar el borde con silicona.',
@@ -118,7 +118,7 @@ export const ELEMENTOS = {
   },
   canilla: {
     descripcion: 'Canilla del fregadero, alimentada por la bomba de agua.',
-    ubicacion: 'Sobre la tapa 1, al lado del fregadero.',
+    ubicacion: 'Sobre la tapa 3, al lado del fregadero.',
     consejos: ['Manguera de grado alimenticio con abrazaderas.'],
     busqueda: 'instalar grifo fregadero camper',
   },
@@ -130,6 +130,7 @@ export const ELEMENTOS = {
       'Fijarla sobre goma para que no vibre.',
       'Filtro de agua antes de la bomba.',
       'Se alcanza sacando el cajón de abajo del fregadero.',
+      'El cable de 12 V llega desde el panel (lado izquierdo) por el fondo del mueble: dentro de una funda y lejos del caño de gas.',
     ],
     busqueda: 'instalar bomba de agua 12v camper',
   },
@@ -191,7 +192,7 @@ export const ELEMENTOS = {
   },
   detectorGas: {
     descripcion: 'Detector de gas GLP con alarma. El gas es más pesado que el aire y se junta cerca del piso.',
-    ubicacion: 'En el frente del mueble, cerca del piso, al lado de la puerta de la heladera.',
+    ubicacion: 'En el montante entre el eléctrico y la cocina, cerca del piso, al lado de la puerta de la heladera.',
     consejos: [
       'Instalarlo a unos 30 cm del piso y lejos del anafe y de las rejillas de ventilación.',
       'Sumar un detector de monóxido de carbono a la altura de la cama.',

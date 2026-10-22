@@ -1,14 +1,14 @@
 // Disposición interna del mueble trasero. La usan el mueble (trasero.js) y el eléctrico 3D
 // (electrico3d.js) para que los equipos y los cables salgan de las mismas medidas.
 //
-// Secciones de izquierda a derecha (x = 0 es la pared izquierda):
-//   A  agua:      fregadero arriba, cajón abajo del fregadero y cajón hasta el piso con 2 bidones de 20 L
-//   B  guardado:  puertas, arriba y abajo de la cama
-//   C  cocina:    anafe arriba, cajón de la garrafa y heladera abajo
-//   D  eléctrico: batería, inversor, DC-DC y fusibles, con el panel y los enchufes en el frente
+// Secciones de izquierda a derecha, vistas desde la puerta trasera hacia los asientos
+// (x = 0 es la pared izquierda):
+//   E  eléctrico: batería acostada, inversor, DC-DC y fusibles abajo; panel y enchufes en el frente
+//   K  cocina:    anafe arriba, cajón de la garrafa y heladera al piso
+//   W  agua:      fregadero arriba, cajón bajo el fregadero y cajón de bidones al piso
 //
-// La cama (plataforma a 500 mm) pasa frente a las secciones A y B. Lo que está bajo la cama sale
-// hacia un hueco libre; lo que está sobre la cama queda a la vista.
+// La cama (plataforma a 500 mm) pasa frente al mueble. Lo que está bajo la cama sale hacia un hueco
+// libre; lo que está sobre la cama queda a la vista.
 
 export function disposicionTrasero(cfg) {
   const { van, trasero: tr, equipos: eq, cama: ca } = cfg;
@@ -23,7 +23,6 @@ export function disposicionTrasero(cfg) {
   const yBase = tr.zocalo; // cara inferior de la base
   const yPiso = yBase + t; // cara superior de la base
   const yTapa = tr.alto - t; // cara inferior de la tapa
-  const dA = tr.divisorAgua;
   const d1 = tr.divisor1;
   const d2 = tr.divisor2;
 
@@ -34,65 +33,69 @@ export function disposicionTrasero(cfg) {
   const yInicioAlto = yCamaSup + 20; // los frentes altos empiezan sobre la cama
 
   const sec = {
-    A: { x0: t, x1: dA },
-    B: { x0: dA + t, x1: d1 },
-    C: { x0: d1 + t, x1: d2 },
-    D: { x0: d2 + t, x1: x1 - t },
+    E: { x0: t, x1: d1 },
+    K: { x0: d1 + t, x1: d2 },
+    W: { x0: d2 + t, x1: x1 - t },
   };
   // Hueco de cada frente (los montantes son los bordes de la sección)
   const hueco = {
-    A: { x0: sec.A.x0 + 15, x1: sec.A.x1 - 15 },
-    B: { x0: sec.B.x0 + 15, x1: sec.B.x1 - 15 },
-    C: { x0: sec.C.x0 + 15, x1: sec.C.x1 - 18 },
-    D: { x0: sec.D.x0 + 15, x1: sec.D.x1 - 15 },
+    E: { x0: sec.E.x0 + 15, x1: sec.E.x1 - 15 },
+    K: { x0: sec.K.x0 + 15, x1: sec.K.x1 - 15 },
+    W: { x0: sec.W.x0 + 15, x1: sec.W.x1 - 15 },
   };
 
   const bid = eq.bidon;
   const fri = eq.nevera;
   const bat = eq.bateria;
 
-  // --- Sección A: agua ---
-  const A = {
+  // --- Sección E: eléctrico ---
+  // Batería acostada (largo sobre x) al frente y abajo. El estante de los equipos queda 62 mm sobre
+  // ella para llegar a los bornes. Todo lo de adentro termina por debajo del plano de la cama.
+  const E = {
+    xBateria: sec.E.x0 + 15,
+    yBateria: yPiso + 3,
+    zBateria: zIn + 15,
+    bsx: bat.x, // largo de la batería (x)
+    bsy: bat.y, // alto de la batería (y)
+    bsz: bat.z, // ancho de la batería (z)
+  };
+  E.yTopeBateria = E.yBateria + E.bsy;
+  E.yEstante = E.yTopeBateria + 62; // estante de los equipos
+  E.yEquipos = E.yEstante + t + 2; // cara inferior de los equipos sobre el estante
+  E.hueco = hueco.E;
+
+  // --- Sección K: cocina ---
+  const K = {
+    yHeladera: yPiso + 3,
+    xHeladera: sec.K.x0 + (sec.K.x1 - sec.K.x0 - fri.x) / 2,
+  };
+  K.yEstante = K.yHeladera + fri.y + 7; // estante bajo el cajón del gas
+  K.yCajonGas = K.yEstante + t + 2;
+  K.altoCajonGas = 150;
+  K.fondoCajonGas = 340;
+  K.anchoCajon = hueco.K.x1 - hueco.K.x0 - 26;
+  K.xCajon = hueco.K.x0 + 13;
+  K.xCentro = (sec.K.x0 + sec.K.x1) / 2;
+  K.yAnafe = tr.alto - eq.anafe.y; // cara inferior del anafe
+
+  // --- Sección W: agua ---
+  const W = {
     yCajonBidones: yPiso + 1,
     altoCajonBidones: 260,
     fondoCajonBidones: 340,
-    anchoCajon: hueco.A.x1 - hueco.A.x0 - 26,
-    xCajon: hueco.A.x0 + 13,
+    anchoCajon: hueco.W.x1 - hueco.W.x0 - 26,
+    xCajon: hueco.W.x0 + 13,
   };
-  A.yPisoBidones = A.yCajonBidones + t; // el piso del cajón de bidones es de 15 mm
-  A.yEstante = A.yPisoBidones + bid.y + 12; // estante sobre los bidones
-  A.yCajonFregadero = 525;
-  A.altoCajonFregadero = 120;
-  A.fondoCajonFregadero = 260;
+  W.yPisoBidones = W.yCajonBidones + t; // el piso del cajón de bidones es de 15 mm
+  W.yEstante = W.yPisoBidones + bid.y + 12; // estante sobre los bidones
+  W.yCajonFregadero = 525;
+  W.altoCajonFregadero = 120;
+  W.fondoCajonFregadero = 260;
+  // El fregadero y la canilla se acomodan desde el borde izquierdo de la sección de agua
+  W.xFregadero = sec.W.x0 + 25;
+  W.xCanilla = W.xFregadero + eq.fregadero.x + 30;
+  W.xBomba = sec.W.x0 + 250;
+  W.bomba = { x: W.xBomba, y: W.yEstante + t + 2, z: zF + 345, sx: 120, sy: 80, sz: 70 }; // sobre el estante, atrás del cajón bajo el fregadero
 
-  // --- Sección C: cocina ---
-  const C = {
-    yHeladera: yPiso + 3,
-    xHeladera: sec.C.x0 + (sec.C.x1 - sec.C.x0 - fri.x) / 2,
-  };
-  C.yEstante = C.yHeladera + fri.y + 7; // estante bajo el cajón del gas
-  C.yCajonGas = C.yEstante + t + 2;
-  C.altoCajonGas = 150;
-  C.fondoCajonGas = 340;
-  C.anchoCajon = hueco.C.x1 - hueco.C.x0 - 26;
-  C.xCajon = hueco.C.x0 + 13;
-  C.xCentro = (sec.C.x0 + sec.C.x1) / 2;
-  C.yAnafe = tr.alto - eq.anafe.y; // cara inferior del anafe
-
-  // --- Sección D: eléctrico ---
-  // Batería parada (largo vertical) al frente; el estante de los equipos sobre ella
-  const D = {
-    xBateria: sec.D.x0 + 15,
-    yBateria: yPiso + 3,
-    zBateria: zIn + 15,
-    bsx: bat.z, // ancho de la batería parada (x)
-    bsy: bat.x, // alto de la batería parada (y)
-    bsz: bat.y, // fondo de la batería parada (z)
-  };
-  D.yTopeBateria = D.yBateria + D.bsy;
-  D.yEstante = D.yTopeBateria + 10; // estante de los equipos
-  D.yEquipos = D.yEstante + t + 2; // cara inferior de los equipos sobre el estante
-  D.yBordeTablero = D.yEquipos + 112; // sobre este nivel va el tablero del panel y los enchufes
-
-  return { t, tb, zF, zB, zIn, zFondo, x1, yBase, yPiso, yTapa, dA, d1, d2, yCamaSup, yCamaInf, yTopeBajo, yInicioAlto, sec, hueco, A, C, D };
+  return { t, tb, zF, zB, zIn, zFondo, x1, yBase, yPiso, yTapa, d1, d2, yCamaSup, yCamaInf, yTopeBajo, yInicioAlto, sec, hueco, E, K, W };
 }

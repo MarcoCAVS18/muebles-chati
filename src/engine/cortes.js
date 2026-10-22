@@ -117,7 +117,7 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
       filas.push({ categoria: 'Cables y protecciones', item, cantidad, nota: 'Uno por línea; la caja de fusibles reparte las de 12 V' });
     }
     filas.push({ categoria: 'Cables y protecciones', item: 'Terminales de ojal y termocontraíbles', cantidad: 1, nota: 'Un surtido para todos los calibres' });
-    filas.push({ categoria: 'Cables y protecciones', item: 'Pasacables de goma 20 mm', cantidad: 14, nota: 'Estantes, divisores, tablero, fondo y mamparo' });
+    filas.push({ categoria: 'Cables y protecciones', item: 'Pasacables de goma 20 mm', cantidad: 13, nota: 'Estantes, divisores, tablero, fondo y mamparo' });
     filas.push({ categoria: 'Cables y protecciones', item: 'Manguera de grado alimenticio, abrazaderas y T', cantidad: 1, nota: 'Bidones, bomba y canilla' });
   }
   // Sistema de gas (el anafe y la garrafa figuran en Equipos)

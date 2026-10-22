@@ -82,7 +82,7 @@ exigir(xMax - CONFIG_INICIAL.cama.x0 >= 1200 - 1, 'la cama extendida no llega a 
 exigir(data.partes.filter((p) => p.radio).length >= 4, 'faltan placas con esquinas redondeadas');
 exigir(data.decos.every((d) => d.id), 'decos sin id');
 
-// ---- Diseño nuevo: mueble trasero de 450 mm, cocina con gas, heladera visible, eléctrico a la derecha ----
+// ---- Diseño: mueble trasero de 450 mm, eléctrico a la izquierda, cocina con gas al centro, agua a la derecha ----
 const cfgI = CONFIG_INICIAL;
 const tra = data.partes.filter((p) => p.grupo === 'Mueble trasero');
 exigir(cfgI.trasero.profundidad === 450, 'el mueble trasero debería tener 450 mm de profundidad');
@@ -111,11 +111,28 @@ for (const e of interiores) {
   if (ENCASTRADOS.includes(e.id)) continue;
   for (const p of tra) exigir(!solapan(e, p), `el equipo ${e.id} atraviesa la pieza ${p.id} (${p.nombre})`);
 }
-// Lo eléctrico queda en la sección derecha, a más de 400 mm del fregadero
-const freg = data.equipos.find((e) => e.id === 'fregadero');
+// Orden del mueble trasero, visto desde la puerta trasera: eléctrico a la izquierda, cocina al centro y agua a la derecha
+const eqE = (id) => e3.equipos.find((q) => q.id === id) || data.equipos.find((q) => q.id === id);
+const centroX = (id) => eqE(id).x + eqE(id).sx / 2;
+const xDiv1 = cfgI.trasero.divisor1;
+const xDiv2 = cfgI.trasero.divisor2;
 for (const id of ['bateria', 'inversor', 'dcdc', 'fusibles', 'fusiblePrincipal']) {
-  const e = e3.equipos.find((q) => q.id === id);
-  exigir(e && e.x - (freg.x + freg.sx) > 400, `${id} debería quedar lejos del fregadero`);
+  const e = eqE(id);
+  exigir(e && e.x + e.sx <= xDiv1, `${id} debería estar en la sección eléctrica (izquierda)`);
+  exigir(e && freg_dist(e) > 400, `${id} debería quedar lejos del fregadero`);
+}
+for (const id of ['nevera', 'garrafa', 'regulador', 'anafe']) {
+  exigir(centroX(id) > xDiv1 && centroX(id) < xDiv2, `${id} debería estar en la sección de la cocina (centro)`);
+}
+for (const id of ['fregadero', 'bidon1', 'bidon2', 'bomba', 'canilla']) {
+  exigir(eqE(id).x >= xDiv2, `${id} debería estar en la sección del agua (derecha)`);
+}
+const bat = eqE('bateria');
+exigir(bat.sx > bat.sy && bat.sx > bat.sz, 'la batería debería ir acostada (el largo sobre x)');
+exigir(bat.y + bat.sy < cfgI.cama.plataforma - 20, 'la batería debería quedar bajo el plano de la cama');
+function freg_dist(e) {
+  const f = data.equipos.find((q) => q.id === 'fregadero');
+  return f.x - (e.x + e.sx);
 }
 // Heladera visible: la puerta tiene color propio y abre la ficha del equipo
 exigir(tra.some((p) => p.abre === 'nevera' && p.color), 'la puerta de la heladera debería tener color y abrir la heladera');

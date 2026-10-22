@@ -2,8 +2,8 @@
 
 Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy y su sistema eléctrico,
 con la distribución de la foto de referencia: mueble trasero cruzado de pared a pared detrás de los asientos
-(de izquierda a derecha: agua con fregadero y bidones, guardado, cocina con anafe, gas y heladera, y la sección
-eléctrica con batería e inversor), cama extensible de 90 a 120 cm (placas de plywood con esquinas redondeadas, bandejas sobre correderas, caja con arco y cajones), y mueble
+(de izquierda a derecha: eléctrico con la batería acostada, inversor, DC-DC, fusibles, panel y enchufes; cocina con
+anafe, gas y heladera al piso, al centro; y agua con fregadero y bidones al piso, a la derecha), cama extensible de 90 a 120 cm (placas de plywood con esquinas redondeadas, bandejas sobre correderas, caja con arco y cajones), y mueble
 derecho con cajones, alacena y mesa plegable.
 
 ## Uso
@@ -52,9 +52,11 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Potencia del inversor (se supuso 1000 W) y consumo de las tiras LED (9,6 W por metro).
 - Qué hace cada uno de los 5 interruptores (supuesto: luces 1, luces 2, luces 3, bomba y mando del inversor).
 - Mueble trasero de pared a pared (1720 mm) y de 450 mm de profundidad. Si tapa la puerta corrediza, achicar el ancho en la
-  barra lateral. Secciones (x): agua 15-575, guardado 590-910, cocina 925-1380 y eléctrico 1395-1705.
+  barra lateral. Secciones (x): eléctrico 15-617, cocina 632-1087 y agua 1102-1705.
 - Bajo la cama, frente al mueble trasero, queda un hueco libre de 430 mm para sacar el cajón de bidones (llega al piso) y abrir
-  las puertas bajas. Por eso la cama quedó en 1800 mm de largo (antes 1850).
+  las puertas bajas. Todo lo eléctrico queda debajo del plano de la cama; el panel y los enchufes van en el tablero de arriba. Por eso la cama quedó en 1800 mm de largo (antes 1850).
+- El cajón del gas (y el frente de la cocina) cruza el plano de la cama: con la cama cerrada (hasta x = 910) la placa de la
+  cabecera pasa por delante de la cocina. Falta resolver cómo se saca la garrafa.
 - Medidas estimadas de la cocina: anafe 420 x 300 mm, garrafa de 230 mm de diámetro y 330 mm de alto, heladera 420 x 300 x 340 mm,
   fregadero 340 de ancho x 400 de fondo, bidones de 20 L de 215 x 400 x 290 mm.
 - Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El cajón de la garrafa necesita una rejilla de

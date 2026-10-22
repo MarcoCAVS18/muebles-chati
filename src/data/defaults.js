@@ -36,16 +36,16 @@ export const CONFIG_INICIAL = {
   corte: { kerf: 3, recorte: 5, rotar: false },
 
   // Mueble cruzado detrás de los asientos, de pared a pared. Secciones de izquierda a derecha:
-  // agua (fregadero y bidones), guardado, cocina (anafe, gas y heladera) y eléctrico.
+  // eléctrico (batería acostada, inversor, DC-DC, fusibles, panel y enchufes), cocina (anafe, gas y
+  // heladera al piso) y agua (fregadero y bidones al piso).
   // Las posiciones x son la cara izquierda de cada divisor (el divisor tiene el espesor de la placa).
   trasero: {
     ancho: 1720,
     profundidad: 450, // el fregadero mide 400 mm de fondo
     alto: 850,
     zocalo: 20,
-    divisorAgua: 575, // fin de la columna de agua (fregadero y bidones)
-    divisor1: 910, // fin de la zona de la cama (el borde de la cama cerrada está en x = 910)
-    divisor2: 1380, // fin de la cocina
+    divisor1: 617, // fin de la sección eléctrica
+    divisor2: 1087, // fin de la cocina (queda centrada en el mueble)
   },
 
   // Cama extensible de 90 a 120 cm: placas de plywood con esquinas redondeadas y bandejas que se tiran al pasillo
@@ -85,7 +85,7 @@ export const CONFIG_INICIAL = {
 
   // Dimensiones de equipos en el orden de los ejes de la van (ESTIMADAS, confirmar con cada ficha)
   equipos: {
-    bateria: { x: 483, y: 240, z: 170 }, // batería 150 Ah (largo, alto, ancho); va parada
+    bateria: { x: 483, y: 240, z: 170 }, // batería 150 Ah (largo, alto, ancho); va acostada, con el largo sobre x
     fusibles: { x: 140, y: 50, z: 100 },
     inversor: { x: 150, y: 75, z: 300 },
     dcdc: { x: 110, y: 70, z: 200 },
