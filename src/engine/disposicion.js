@@ -98,6 +98,10 @@ export function disposicionTrasero(cfg) {
   K.fondoCajonGas = 340;
   K.anchoCajon = hueco.K.x1 - hueco.K.x0 - 26;
   K.xCajon = hueco.K.x0 + 13;
+  // Al sacar la garrafa el cajón se tira entero hasta que la garrafa queda fuera del mueble. El frente alto
+  // (hasta el anafe) viaja con él y barre este volumen: la cama tiene que dejarle lugar.
+  K.recorridoGas = Math.floor(K.fondoCajonGas / 50) * 50; // largo de las correderas
+  K.barridoGas = { x0: hueco.K.x0 + 2, x1: hueco.K.x1 - 2, z0: zF - K.recorridoGas - 20, z1: zF, y0: K.yCajonGas, y1: 785 };
   K.xCentro = (sec.K.x0 + sec.K.x1) / 2;
   K.yAnafe = tr.alto - eq.anafe.y; // cara inferior del anafe
 

@@ -65,8 +65,9 @@ function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f2a', on
   );
 }
 
-// Placa con las cuatro esquinas redondeadas en planta (x, z) y espesor en y
-function PlacaRedonda({ x, y, z, sx, sy, sz, radio, color, opacidad = 1, bordes, onClick, onOver, onOut }) {
+// Placa con las cuatro esquinas redondeadas en planta (x, z) y espesor en y. Puede llevar un recorte
+// rectangular en la esquina delantera derecha (x alto, z alto): recDx es dónde empieza en x y recDz cuánto entra en z (mm).
+function PlacaRedonda({ x, y, z, sx, sy, sz, radio, recDx, recDz, color, opacidad = 1, bordes, onClick, onOver, onOut }) {
   const geometria = useMemo(() => {
     const r = Math.min(m(radio), m(sx) / 2, m(sz) / 2);
     const w = m(sx);
@@ -75,15 +76,25 @@ function PlacaRedonda({ x, y, z, sx, sy, sz, radio, color, opacidad = 1, bordes,
     const forma = new THREE.Shape();
     forma.moveTo(r, 0);
     forma.lineTo(w - r, 0);
-    forma.absarc(w - r, -r, r, Math.PI * 1.5, Math.PI * 2, false);
-    forma.lineTo(w, -h + r);
-    forma.absarc(w - r, -h + r, r, 0, Math.PI * 0.5, false);
+    forma.absarc(w - r, -r, r, Math.PI / 2, 0, true);
+    if (recDx != null) {
+      const nx = m(recDx);
+      const vf = -(h - m(recDz)); // borde delantero de la parte que queda a la derecha
+      forma.lineTo(w, vf + r);
+      forma.absarc(w - r, vf + r, r, 0, -Math.PI / 2, true);
+      forma.lineTo(nx, vf);
+      forma.lineTo(nx, -h + r);
+      forma.absarc(nx - r, -h + r, r, 0, -Math.PI / 2, true);
+    } else {
+      forma.lineTo(w, -h + r);
+      forma.absarc(w - r, -h + r, r, 0, -Math.PI / 2, true);
+    }
     forma.lineTo(r, -h);
-    forma.absarc(r, -h + r, r, Math.PI * 0.5, Math.PI, false);
+    forma.absarc(r, -h + r, r, -Math.PI / 2, -Math.PI, true);
     forma.lineTo(0, -r);
-    forma.absarc(r, -r, r, Math.PI, Math.PI * 1.5, false);
+    forma.absarc(r, -r, r, Math.PI, Math.PI / 2, true);
     return new THREE.ExtrudeGeometry(forma, { depth: m(sy), bevelEnabled: false, curveSegments: 10 });
-  }, [sx, sy, sz, radio]);
+  }, [sx, sy, sz, radio, recDx, recDz]);
   return (
     <mesh geometry={geometria} position={[m(x), m(y), m(z)]} rotation={[-Math.PI / 2, 0, 0]} onClick={onClick} onPointerOver={onOver} onPointerOut={onOut}>
       <meshStandardMaterial
@@ -248,7 +259,7 @@ function Escena(props) {
             onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? ' (clic para ver el equipo y el video)' : ''}`),
             onOut: () => setHover(''),
           };
-          return p.radio ? <PlacaRedonda key={p.id} {...comun} radio={p.radio} /> : <Caja key={p.id} {...comun} />;
+          return p.radio ? <PlacaRedonda key={p.id} {...comun} radio={p.radio} recDx={p.recorte ? p.recorte.x0 - p.x : undefined} recDz={p.recorte ? p.z + p.sz - p.recorte.z0 : undefined} /> : <Caja key={p.id} {...comun} />;
         })}
 
       {data.decos

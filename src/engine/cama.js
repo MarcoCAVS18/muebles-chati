@@ -4,6 +4,7 @@
 // Abajo hay dos cajones grandes y al pie la caja con arco. Frente al mueble trasero queda un hueco
 // libre bajo la cama (cama.huecoMueble) para sacar el cajón de bidones y abrir las puertas bajas.
 import { cajon } from './cajon.js';
+import { disposicionTrasero } from './disposicion.js';
 
 export function cama(ctx, G) {
   const { cfg, t } = ctx;
@@ -33,8 +34,18 @@ export function cama(ctx, G) {
   const LST = (nombre, x, y, z, sx, sy, sz, extra = {}) =>
     ctx.parte({ grupo: G, nombre, tipo: 'liston', mat: 'l30x30', x, y, z, sx, sy, sz, ...extra });
 
+  // Recorte de la placa de la cabecera para el cajón del gas: al sacar la garrafa el cajón se tira entero
+  // sobre el escalón que queda frente a la cocina y su frente alto pasa por encima del plano de la cama.
+  // Es un rectángulo en la esquina del lado de la cocina (el colchón lleva el mismo recorte).
+  const bar = disposicionTrasero(cfg).K.barridoGas;
+  const recorte = bar.x0 < x1 && bar.z0 < zCab ? { x0: Math.max(x0 + 100, bar.x0), x1, z0: bar.z0, z1: zCab } : null;
+  ctx.layout.cama.recorte = recorte;
+
   // Placas de la plataforma (esquinas redondeadas, se cortan con fresadora o caladora)
-  P(`Placa de la cabecera (esquinas R${R})`, x0, yB, zCentro + hol, L, t, zCab - zCentro - hol, { radio: R });
+  const nombreCab = recorte
+    ? `Placa de la cabecera (esquinas R${R}, recorte de ${Math.round(recorte.x1 - recorte.x0)} x ${Math.round(recorte.z1 - recorte.z0)} mm para el cajón del gas)`
+    : `Placa de la cabecera (esquinas R${R})`;
+  P(nombreCab, x0, yB, zCentro + hol, L, t, zCab - zCentro - hol, { radio: R, ...(recorte ? { recorte } : {}) });
   P(`Placa del pie (esquinas R${R})`, x0, yB, zPie, L, t, zCentro - hol - zPie, { radio: R });
 
   // Caja del pie con la abertura en arco (visto desde la puerta trasera)

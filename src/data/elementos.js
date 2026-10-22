@@ -163,9 +163,12 @@ export const ELEMENTOS = {
   },
   garrafa: {
     descripcion:
-      'Garrafa chica recargable, parada dentro del cajón de la cocina, justo debajo del anafe. Se carga afuera y se vuelve a colocar.',
+      'Garrafa chica recargable, parada dentro del cajón de la cocina, justo debajo del anafe. Se saca una vez por semana, se carga afuera y se vuelve a colocar.',
     ubicacion: 'Cajón de la cocina (sección del medio, entre el anafe y la heladera).',
     consejos: [
+      'Para sacarla: cerrar la llave de corte y la válvula de la garrafa, tirar el cajón entero (30 cm, hasta que la garrafa quede fuera del mueble), desenroscar el regulador y levantarla. El regulador y la manguera quedan en el cajón.',
+      'Para que el cajón salga entero, la placa de la cabecera de la cama y el colchón llevan un recorte en la esquina del lado de la cocina (26 x 15 cm). Sin ese recorte el frente alto del cajón choca con la cama a los 17 cm.',
+      'La manguera tiene que ser lo bastante larga para acompañar al cajón en todo su recorrido, con un bucle holgado.',
       'Siempre parada y con correa. Nunca acostada.',
       'El cajón del gas tiene que ser un compartimento aparte del resto del mueble, con una rejilla de ventilación de unos 100 cm2 hacia el exterior por el piso: el gas pesa más que el aire y tiene que poder salir sin entrar a la van.',
       'Cerrar la válvula de la garrafa al manejar, al dormir y al irse.',

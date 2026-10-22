@@ -65,8 +65,12 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Mueble derecho: se apoya sobre el pasarruedas derecho. Bajo 43 cm solo queda libre la franja del frente (cerrada con un
   frente ciego) y los dos cajones se acomodan arriba, a partir de los 45 cm.
 - El frente de la cocina y del agua está en z = 1910, 170 mm detrás del frente de la L (z = 1740), donde termina la placa de la
-  cabecera. El cajón del gas cruza el plano de la cama: sale 17 cm libres y después toca la placa para x menor a 910.
-  Falta resolver cómo se saca la garrafa. La sección de agua tapa parte de la puerta lateral derecha (z 1340 a 2320).
+  cabecera. La garrafa se carga una vez por semana: el cajón del gas (correderas de 300 mm, frente alto) se tira entero y la
+  garrafa queda fuera del mueble para levantarla, con el regulador y la manguera quedando en el cajón. Para que el frente alto
+  no choque con la cama, la placa de la cabecera lleva un recorte de 261 x 150 mm en la esquina del lado de la cocina (el
+  colchón lleva el mismo recorte). `npm run check` verifica que el cajón no choque al sacarlo.
+  La sección de agua tapa parte de la puerta lateral derecha (z 1340 a 2320).
+- Gas: la rejilla de ventilación al piso hoy cae bajo la heladera, no bajo la garrafa. Falta definir cómo ventila el cajón del gas.
 - Medidas estimadas de la cocina: anafe 420 x 300 mm, garrafa de 230 mm de diámetro y 330 mm de alto, heladera 420 x 300 x 340 mm,
   fregadero 340 de ancho x 400 de fondo, bidones de 20 L de 215 x 400 x 290 mm.
 - Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El cajón de la garrafa necesita una rejilla de

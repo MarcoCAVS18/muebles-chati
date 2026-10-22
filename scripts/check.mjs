@@ -7,6 +7,7 @@ import { calcularElectrica } from '../src/engine/electrica.js';
 import { electrico3d } from '../src/engine/electrico3d.js';
 import { videosDe, VIDEOS } from '../src/data/videos.js';
 import { ELEMENTOS } from '../src/data/elementos.js';
+import { disposicionTrasero } from '../src/engine/disposicion.js';
 
 const data = construir(CONFIG_INICIAL);
 const plan = planificar(data.partes, CONFIG_INICIAL);
@@ -142,6 +143,20 @@ exigir(bat.y + bat.sy < cfgI.cama.plataforma - 20, 'la batería debería quedar 
 function freg_dist(e) {
   const f = data.equipos.find((q) => q.id === 'fregadero');
   return f.x - (e.x + e.sx);
+}
+// Garrafa: el cajón del gas se tira entero (frente alto incluido) y no puede chocar con la cama.
+// La placa de la cabecera tiene que tener un recorte que cubra todo lo que el cajón barre sobre ella.
+const bar = disposicionTrasero(cfgI).K.barridoGas;
+const GAS_RECORRIDO_MIN = 300; // la garrafa de 230 mm tiene que salir del frente del mueble
+exigir(bar.z1 - bar.z0 >= GAS_RECORRIDO_MIN, 'el cajón del gas debería poder salir al menos 300 mm');
+for (const p of data.partes.filter((q) => q.grupo === 'Cama' && q.sx > 0)) {
+  const ix0 = Math.max(bar.x0, p.x), ix1 = Math.min(bar.x1, p.x + p.sx);
+  const iz0 = Math.max(bar.z0, p.z), iz1 = Math.min(bar.z1, p.z + p.sz);
+  const iy = Math.min(bar.y1, p.y + p.sy) - Math.max(bar.y0, p.y);
+  if (ix1 - ix0 > 0.5 && iz1 - iz0 > 0.5 && iy > 0.5) {
+    const r = p.recorte;
+    exigir(r && ix0 >= r.x0 - 0.5 && ix1 <= r.x1 + 0.5 && iz0 >= r.z0 - 0.5 && iz1 <= r.z1 + 0.5, `el cajón del gas, al sacarlo, choca con la pieza de la cama ${p.id} (${p.nombre})`);
+  }
 }
 // Heladera visible: la puerta tiene color propio y abre la ficha del equipo
 exigir(tra.some((p) => p.abre === 'nevera' && p.color), 'la puerta de la heladera debería tener color y abrir la heladera');
