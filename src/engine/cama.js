@@ -11,7 +11,11 @@ export function cama(ctx, G) {
 
   const x0 = ca.x0;
   const x1 = ca.x0 + ca.ancho; // borde del pasillo con la cama cerrada (90 cm)
-  const zCab = van.largo - tr.profundidad; // frente del mueble trasero
+  const zCab = van.largo - (tr.profundidadL ?? tr.profundidad); // frente de la sección izquierda del mueble trasero (la L)
+  const arcoIni = van.archInicio;
+  const arcoFin = van.archInicio + van.archLargo;
+  const xArco = van.archIntrusion + 5; // las guías que cruzan el pasarruedas arrancan después de él
+  const sobreArco = (z0, z1) => z1 > arcoIni && z0 < arcoFin;
   const zPie = zCab - ca.largo; // extremo trasero de la cama
   const yT = ca.plataforma; // cara superior de la plataforma
   const yB = yT - t; // cara inferior de la plataforma
@@ -46,7 +50,7 @@ export function cama(ctx, G) {
   P('Frente del pie - sobre la abertura (calar arco)', aX0, aCy, zPie, aX1 - aX0, yB - aCy, t);
   ctx.deco({ grupo: G, nombre: 'Arco de la abertura', forma: 'arco', cx: (aX0 + aX1) / 2, cy: aCy, z: zPie - 0.6, radio: radioArco, sz: 0.8 });
   ctx.herraje(G, `Plantilla de arco R${radioArco} mm`, 1, 'Marcar el arco en la pieza sobre la abertura y calar con caladora');
-  const zInt = zPie + 385; // fondo de la caja
+  const zInt = Math.min(zPie + 385, arcoIni - 10); // fondo de la caja (termina antes del pasarruedas)
   P('Lateral izquierdo de la caja del pie', x0, 0, zPie + t, t, yB, zInt - zPie - t);
   P('Lateral derecho de la caja del pie', x1 - t, 0, zPie + t, t, yB, zInt - zPie - 2 * t);
   // Panel interior: además de cerrar la caja, es la guía de la bandeja y del cajón del pie
@@ -54,7 +58,8 @@ export function cama(ctx, G) {
 
   // Panel central: divide las placas y es guía de la bandeja y del cajón de los dos lados
   const zPanel = zCentro - t / 2;
-  P('Panel central de apoyo (guía)', x0, 0, zPanel, L, yB, t);
+  const xPanel = sobreArco(zPanel, zPanel + t) ? xArco : x0;
+  P('Panel central de apoyo (guía)', xPanel, 0, zPanel, x1 - xPanel, yB, t);
 
   // Guía de la cabecera: cierra el hueco libre que queda bajo la cama frente al mueble trasero.
   // En ese hueco salen el cajón de bidones y las puertas bajas del mueble.
@@ -99,19 +104,21 @@ export function cama(ctx, G) {
   cajonConFrente('Cajón del pie', zonaPie, ca.cajonPie.fondo, ca.cajonPie.alto);
 
   // Apoyos de las placas fijas: largueros y listones de pared (esquivan el pasarruedas)
-  const arcoIni = van.archInicio;
-  const arcoFin = van.archInicio + van.archLargo;
   const xLarguero = xb0 - 35;
   LST('Larguero de apoyo (cabecera)', xLarguero, yB - 30, zPanel + t, 30, 30, zG2 - zPanel - t);
   LST('Larguero sobre el hueco libre', xLarguero, yB - 30, zG2 + t, 30, 30, zCab - 30 - zG2 - t);
   LST('Larguero de apoyo (pie)', xLarguero, yB - 30, zInt, 30, 30, zPanel - zInt);
-  LST('Listón de pared (pie)', x0, yB - 30, zInt + 5, 30, 30, zPanel - zInt - 10);
-  LST('Listón de pared (cabecera, antes del arco)', x0, yB - 30, zPanel + t + 5, 30, 30, arcoIni - 10 - zPanel - t - 5);
-  LST('Listón de pared (cabecera, después del arco)', x0, yB - 30, arcoFin + 10, 30, 30, zCab - 30 - arcoFin - 10);
+  // Sobre el pasarruedas la placa apoya directamente en él (con fieltro): ahí no hay listón de pared
+  const lw = (nombre, z0, z1) => {
+    if (z1 - z0 > 100) LST(nombre, x0, yB - 30, z0, 30, 30, z1 - z0);
+  };
+  lw('Listón de pared (pie)', zInt + 5, Math.min(zPanel - 5, arcoIni - 10));
+  lw('Listón de pared (cabecera, después del arco)', arcoFin + 10, zCab - 30);
 
   // Unión al frente del mueble trasero: va en el travesaño que queda entre los frentes bajos
   // (que terminan antes del listón) y los altos (que empiezan sobre la cama)
-  LST('Listón de unión a la cabecera', x0, yB - 30, zCab - 30, x1 - x0, 30, 30);
+  const xUnion = Math.min(x1, tr.divisor1); // solo hasta donde llega la sección izquierda del mueble
+  LST('Listón de unión a la cabecera', x0, yB - 30, zCab - 30, xUnion - x0, 30, 30);
 
   // Uniones
   ctx.unir(G, 'cola_tornillo', 2 * L, 'Placas con panel central, largueros y listones');
@@ -137,7 +144,7 @@ export function cama(ctx, G) {
   ctx.herraje(G, 'Retén o traba para bandejas', 2, 'Para que no salgan solas al frenar');
   ctx.herraje(G, 'Tirador embutido o agarradera ovalada', 4, 'Dos frentes de cajón y dos bandejas');
   ctx.herraje(G, 'Fresadora con fresa de radio o plantilla y lijadora', 1, `Para las esquinas R${R} de las placas y las bandejas`);
-  ctx.herraje(G, 'Fieltro o goma antivibración 20 mm', 1, 'Entre la placa y el pasarruedas, 1 m');
+  ctx.herraje(G, 'Fieltro o goma antivibración 5 mm', 2, `Entre las placas y los pasarruedas (${(van.archLargo / 1000).toFixed(1)} m cada uno)`);
 
   // Control de que las bandejas entren en la van al abrir
   if (x1 + ca.extension > van.ancho) ctx.aviso('La cama extendida no entra: la extensión supera el ancho de la van.');

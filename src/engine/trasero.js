@@ -1,6 +1,7 @@
 // Mueble cruzado detrás de los asientos, de pared a pared, con frentes planos y puertas a ras.
 // Origen: x = 0 es la pared izquierda, el fondo apoya contra el mamparo (z = largo).
-// Las secciones (ver disposicion.js), de izquierda a derecha: E eléctrico, K cocina y W agua.
+// Las secciones (ver disposicion.js), de izquierda a derecha: E eléctrico (la L, más profunda),
+// K cocina y W agua.
 import { cajon } from './cajon.js';
 import { frenteZ } from './frentes.js';
 import { disposicionTrasero } from './disposicion.js';
@@ -9,55 +10,68 @@ export function trasero(ctx, G) {
   const { cfg, t, tb } = ctx;
   const { trasero: tr, equipos: eq } = cfg;
   const L = disposicionTrasero(cfg);
-  const { zF, zB, zIn, x1, yBase, yPiso, yTapa, d1, d2, sec, hueco, E, K, W, yTopeBajo, yInicioAlto } = L;
+  const { zF, zFL, zB, zIn, zFondo, x1, yBase, yPiso, yTapa, d1, d2, sec, hueco, E, K, W } = L;
   const prof = tr.profundidad;
-  const largoInt = prof - t - tb; // profundidad entre el frente y el fondo
+  const profL = zB - zFL;
+  const largoInt = prof - t - tb; // profundidad interior de la cocina y el agua
+  const largoIntE = profL - t - tb; // profundidad interior de la sección eléctrica
 
   ctx.layout.trasero = L;
 
   const P = (nombre, x, y, z, sx, sy, sz, mat = 'estructura') => ctx.parte({ grupo: G, nombre, mat, x, y, z, sx, sy, sz });
 
   // Costados, fondo, base y zócalo
-  P('Costado izquierdo', 0, 0, zF, t, tr.alto - t, prof - tb);
+  P('Costado izquierdo', 0, 0, zFL, t, tr.alto - t, profL - tb);
   P('Costado derecho', x1 - t, 0, zF, t, tr.alto - t, prof - tb);
   P('Fondo (contra el mamparo)', t, yBase, zB - tb, x1 - 2 * t, tr.alto - t - yBase, tb, 'fondo');
-  P('Base', t, yBase, zIn, x1 - 2 * t, t, largoInt);
-  P('Zócalo frontal', t, 0, zF, x1 - 2 * t, yBase, t);
+  P('Base (eléctrico)', t, yBase, L.E.zIn, d1 + t - t, t, largoIntE);
+  P('Base (cocina y agua)', d1 + t, yBase, zIn, x1 - t - (d1 + t), t, largoInt);
+  P('Zócalo frontal (eléctrico)', t, 0, zFL, d1 + t - t, yBase, t);
+  P('Zócalo frontal (cocina y agua)', d1 + t, 0, zF, x1 - t - (d1 + t), yBase, t);
 
-  // Divisores entre secciones
+  // Divisores entre secciones: el primero sigue la L y queda a la vista como escalón
   const altoDiv = yTapa - yPiso;
-  P('Divisor eléctrico y cocina', d1, yPiso, zIn, t, altoDiv, largoInt);
+  P('Divisor eléctrico y cocina (escalón de la L)', d1, yPiso, E.zIn, t, altoDiv, largoIntE);
   P('Divisor cocina y agua', d2, yPiso, zIn, t, altoDiv, largoInt);
 
   // Estantes
-  P('Estante de los equipos eléctricos', sec.E.x0, E.yEstante, zIn, sec.E.x1 - sec.E.x0, t, largoInt);
+  P('Estante de los cajones de cocina (cierra el eléctrico)', sec.E.x0, E.yEstante, E.zIn, sec.E.x1 - sec.E.x0, t, largoIntE);
   P('Estante bajo el gas (sobre la heladera)', sec.K.x0, K.yEstante, zIn, sec.K.x1 - sec.K.x0, t, largoInt);
   P('Estante sobre los bidones', sec.W.x0, W.yEstante, zIn, sec.W.x1 - sec.W.x0, t, largoInt);
 
   // Tapas: una por sección, atornilladas desde arriba
-  P('Tapa 1 (eléctrico)', 0, yTapa, zF, d1 + t, t, prof);
+  P('Tapa 1 (eléctrico)', 0, yTapa, zFL, d1 + t, t, profL);
   P('Tapa 2 (cocina)', d1 + t, yTapa, zF, d2 - d1, t, prof);
   P('Tapa 3 (fregadero)', d2 + t, yTapa, zF, x1 - d2 - t, t, prof);
 
-  // Frentes planos con puertas a ras. Los frentes bajos terminan antes del plano de la cama y los
-  // altos empiezan sobre ella: el travesaño del medio es donde se atornilla la cama.
-  const f = { grupo: G, zf: zF, ya: yBase, yb: yTapa };
+  // Frentes planos con puertas a ras. En la sección eléctrica los frentes bajos terminan antes del plano
+  // de la cama y el tablero cubre desde ahí: el travesaño del medio es donde se atornilla la cama.
+  const yTopeE = L.yTopeBajo;
   frenteZ(ctx, {
-    ...f,
+    grupo: G,
+    zf: zFL,
+    ya: yBase,
+    yb: yTapa,
     xa: sec.E.x0,
     xb: d1,
     hx0: hueco.E.x0,
     hx1: hueco.E.x1,
     marco: 'Frente eléctrico',
-    tope: 'Tablero del panel y los enchufes',
+    tope: 'Frente de los cajones de cocina - travesaño superior',
     huecos: [
-      { nombre: 'Puerta de la batería', y0: yBase, y1: E.yEstante - 3, color: '#ffe082', abre: 'bateria' },
-      { nombre: 'Puerta de los equipos eléctricos', y0: E.yEquipos - 2, y1: yTopeBajo, color: '#ffe082', abre: 'inversor' },
+      { nombre: 'Puerta de la batería y los equipos', y0: yBase, y1: yTopeE, color: '#ffe082', abre: 'bateria', marcoBajo: 'Frente eléctrico - travesaño' },
+      ...E.cajones.map((c, i) => ({
+        nombre: `Frente ${c.nombre.toLowerCase()}`,
+        y0: c.y0,
+        y1: c.y1,
+        marcoBajo: i === 0 ? 'Tablero del panel y los enchufes' : 'Frente eléctrico - travesaño',
+      })),
     ],
   });
+  const f = { grupo: G, zf: zF, ya: yBase, yb: yTapa };
   frenteZ(ctx, {
     ...f,
-    xa: d1,
+    xa: d1 + t,
     xb: d2,
     hx0: hueco.K.x0,
     hx1: hueco.K.x1,
@@ -75,12 +89,25 @@ export function trasero(ctx, G) {
     hx1: hueco.W.x1,
     marco: 'Frente agua',
     huecos: [
-      { nombre: 'Frente cajón de bidones', y0: yBase, y1: yTopeBajo, color: '#b3e5fc', abre: 'bidon1' },
-      { nombre: 'Frente cajón bajo el fregadero', y0: yInicioAlto, y1: 760 },
+      { nombre: 'Frente cajón de bidones', y0: yBase, y1: W.yEstante - 3, color: '#b3e5fc', abre: 'bidon1' },
+      { nombre: 'Frente cajón bajo el fregadero', y0: W.yCajonFregadero, y1: 760 },
     ],
   });
 
   // Cajones (se tiran hacia la cama o el pasillo)
+  for (const c of E.cajones) {
+    cajon(ctx, {
+      grupo: G,
+      nombre: c.nombre,
+      x: hueco.E.x0 + 13,
+      y: c.y0 + 5,
+      z: E.zIn + 15,
+      ancho: hueco.E.x1 - hueco.E.x0 - 26,
+      alto: c.y1 - c.y0 - 25,
+      fondo: 560,
+      dir: 'z-',
+    });
+  }
   cajon(ctx, {
     grupo: G,
     nombre: 'Cajón de bidones',
@@ -118,15 +145,15 @@ export function trasero(ctx, G) {
   });
 
   // Uniones
-  ctx.unir(G, 'cola_tornillo', 2 * (tr.alto + prof), 'Costados con base, fondo y tapas');
-  ctx.unir(G, 'cola_tornillo', 2 * (2 * largoInt + 2 * (tr.alto - yBase)), 'Divisores con base, tapa, fondo y frente');
+  ctx.unir(G, 'cola_tornillo', tr.alto + prof + tr.alto + profL, 'Costados con base, fondo y tapas');
+  ctx.unir(G, 'cola_tornillo', 2 * (largoInt + largoIntE) + 4 * (tr.alto - yBase), 'Divisores con base, tapa, fondo y frente');
   ctx.unir(G, 'cola_tornillo', 2 * (x1 - 2 * t) + 6 * (tr.alto - yBase), 'Marcos de los frentes con costados, base y tapas');
   ctx.unir(G, 'cola_tornillo', 2 * (x1 - 2 * t), 'Estantes con divisores y costados');
   ctx.unir(G, 'cola_tornillo', 2 * x1, 'Tapas con costados y divisores (atornilladas desde arriba)');
 
   // Fijación a la van
   ctx.unir(G, 'piso', x1 - 2 * t, 'Zócalo y base al piso de la van');
-  ctx.unir(G, 'pared', tr.alto + prof, 'Costado izquierdo a la pared izquierda');
+  ctx.unir(G, 'pared', tr.alto + profL, 'Costado izquierdo a la pared izquierda');
   ctx.unir(G, 'pared', tr.alto + prof, 'Costado derecho a la pared derecha');
   ctx.unir(G, 'pared', x1, 'Fondo al mamparo de los asientos (escuadras en la parte alta)');
   ctx.anclaje(G, 'Piso de la van', 'Escuadras L a la base y tornillos al listón del piso, con butilo', 8, 'Sellar los agujeros');
@@ -135,15 +162,16 @@ export function trasero(ctx, G) {
   ctx.anclaje(G, 'Mamparo', 'Escuadras L al fondo, arriba y abajo', 6, 'Dejar el pasacables del eléctrico sin tapar');
 
   // Herrajes
-  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 6, 'Tres puertas, dos bisagras cada una: heladera, batería y equipos eléctricos');
-  ctx.herraje(G, 'Tirador embutido', 6, 'Dos cajones del agua, heladera, cajón del gas y dos puertas eléctricas');
-  ctx.herraje(G, 'Imán o cierre push para puertas', 3);
+  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 5, 'Puerta de la heladera (2) y puerta de la batería y los equipos, que es ancha (3)');
+  ctx.herraje(G, 'Tirador embutido', 7, 'Dos cajones del agua, heladera, cajón del gas, puerta eléctrica y dos cajones de cocina');
+  ctx.herraje(G, 'Imán o cierre push para puertas', 2);
   ctx.herraje(G, 'Soporte regulable de estante', 12, 'Estantes del eléctrico, la cocina y el agua');
   ctx.herraje(G, 'Sifón y desagüe para fregadero', 1, 'Con la salida hacia un bidón de aguas grises o al piso');
   ctx.herraje(G, 'Rejilla de ventilación 100 cm2 para el gas', 1, 'Al exterior por el piso, bajo el cajón de la garrafa: el gas pesa más que el aire');
   ctx.herraje(G, 'Detector de monóxido de carbono', 1, 'Con la cocina a gas en un espacio cerrado es obligatorio en la práctica');
   ctx.herraje(G, 'Extintor de polvo ABC de 1 kg', 1, 'Cerca de la puerta, lejos de la cocina');
   ctx.herraje(G, 'Rejilla de ventilación de la heladera', 2, 'Una abajo y una arriba, para el aire del compresor');
+  ctx.herraje(G, 'Rejilla de ventilación para el inversor y el DC-DC', 2, 'En la puerta de la batería y los equipos: se calientan con carga');
 
   // ---- Equipos que no son eléctricos ----
   const E_ = (e) => ctx.equipo({ grupo: G, ...e });

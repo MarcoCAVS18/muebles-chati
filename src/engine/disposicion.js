@@ -3,19 +3,23 @@
 //
 // Secciones de izquierda a derecha, vistas desde la puerta trasera hacia los asientos
 // (x = 0 es la pared izquierda):
-//   E  eléctrico: batería acostada, inversor, DC-DC y fusibles abajo; panel y enchufes en el frente
-//   K  cocina:    anafe arriba, cajón de la garrafa y heladera al piso
-//   W  agua:      fregadero arriba, cajón bajo el fregadero y cajón de bidones al piso
+//   E  eléctrico (la L, 670 mm de fondo): al piso la batería acostada, el inversor, el DC-DC y los
+//      fusibles, bajo el plano de la cama; sobre la cama, el tablero con interruptores y enchufes
+//      y dos cajones para cosas de cocina
+//   K  cocina (500 mm): anafe arriba, cajón de la garrafa y heladera al piso
+//   W  agua (500 mm): fregadero arriba, cajón bajo el fregadero y cajón de bidones al piso
 //
-// La cama (plataforma a 500 mm) pasa frente al mueble. Lo que está bajo la cama sale hacia un hueco
-// libre; lo que está sobre la cama queda a la vista.
+// La cama (plataforma a 440 mm) termina contra el frente de la sección E. Lo que está bajo la cama sale
+// hacia un hueco libre; lo que está sobre la cama queda a la vista.
 
 export function disposicionTrasero(cfg) {
   const { van, trasero: tr, equipos: eq, cama: ca } = cfg;
   const t = cfg.materiales.estructura.t;
   const tb = cfg.materiales.fondo.t;
 
-  const zF = van.largo - tr.profundidad; // frente del mueble (hacia la cama)
+  const profL = tr.profundidadL ?? tr.profundidad;
+  const zF = van.largo - tr.profundidad; // frente de la cocina y del agua
+  const zFL = van.largo - profL; // frente de la sección eléctrica (la L)
   const zB = van.largo; // mamparo
   const zIn = zF + t; // primera cara interior, detrás del frente
   const zFondo = zB - tb; // cara interior del fondo
@@ -30,7 +34,7 @@ export function disposicionTrasero(cfg) {
   const yCamaSup = ca.plataforma;
   const yCamaInf = ca.plataforma - t;
   const yTopeBajo = yCamaInf - 35; // los frentes bajos terminan antes del listón de unión de la cama
-  const yInicioAlto = yCamaSup + 20; // los frentes altos empiezan sobre la cama
+  const yInicioAlto = yCamaSup + 20; // los frentes altos empiezan sobre ella
 
   const sec = {
     E: { x0: t, x1: d1 },
@@ -47,28 +51,47 @@ export function disposicionTrasero(cfg) {
   const bid = eq.bidon;
   const fri = eq.nevera;
   const bat = eq.bateria;
+  const inv = eq.inversor;
+  const dc = eq.dcdc;
+  const fus = eq.fusibles;
+  const anl = eq.anl;
 
   // --- Sección E: eléctrico ---
-  // Batería acostada (largo sobre x) al frente y abajo. El estante de los equipos queda 62 mm sobre
-  // ella para llegar a los bornes. Todo lo de adentro termina por debajo del plano de la cama.
+  // Todo al piso. Fila del frente (se alcanza por la puerta): fusibles, DC-DC e inversor.
+  // Fila del fondo: la batería acostada (largo sobre x) y el fusible principal a su lado.
+  const zInE = zFL + t; // primera cara interior de la sección E
+  const yE = yPiso + 3; // altura de lo que va apoyado en el piso
   const E = {
-    xBateria: sec.E.x0 + 15,
-    yBateria: yPiso + 3,
-    zBateria: zIn + 15,
-    bsx: bat.x, // largo de la batería (x)
-    bsy: bat.y, // alto de la batería (y)
-    bsz: bat.z, // ancho de la batería (z)
+    zF: zFL,
+    zIn: zInE,
+    yPiso: yE,
+    yEstante: yTopeBajo + 2, // estante que cierra el compartimento eléctrico y es el piso de los cajones
+    // Tablero con interruptores y enchufes, sobre la cama
+    yTablero: yCamaSup + 40,
+    // Cajones de cocina (sobre el tablero)
+    cajones: [
+      { nombre: 'Cajón de cocina 1', y0: 570, y1: 690 },
+      { nombre: 'Cajón de cocina 2', y0: 720, y1: 805 },
+    ],
   };
-  E.yTopeBateria = E.yBateria + E.bsy;
-  E.yEstante = E.yTopeBateria + 62; // estante de los equipos
-  E.yEquipos = E.yEstante + t + 2; // cara inferior de los equipos sobre el estante
-  E.hueco = hueco.E;
+  // Inversor y DC-DC contra el borde derecho; los fusibles a su izquierda
+  E.inversor = { x: sec.E.x1 - 15 - inv.x, y: yE, z: zInE + 15, sx: inv.x, sy: inv.y, sz: inv.z };
+  E.dcdc = { x: E.inversor.x - 10 - dc.x, y: yE, z: zInE + 15, sx: dc.x, sy: dc.y, sz: dc.z };
+  E.fusibles = { x: E.dcdc.x - 10 - fus.z, y: yE, z: zInE + 15, sx: fus.z, sy: fus.y, sz: fus.x };
+  // Batería acostada contra el fondo, con 70 mm de pasada para los cables
+  E.bateria = { x: sec.E.x0 + 15, y: yE, z: zFondo - 70 - bat.z, sx: bat.x, sy: bat.y, sz: bat.z };
+  E.yTopeBateria = yE + bat.y;
+  // El fusible principal va a la derecha de la batería, pegado al borne positivo
+  E.anl = { x: E.bateria.x + bat.x + 12, y: yE, z: E.bateria.z + 20, sx: anl.x, sy: anl.y, sz: anl.z };
+  // Borne positivo en el extremo derecho de la batería, en la cara de arriba
+  E.borne = { x: E.bateria.x + bat.x - 55, y: E.yTopeBateria, z: E.bateria.z + 40 };
 
   // --- Sección K: cocina ---
   const K = {
     yHeladera: yPiso + 3,
     xHeladera: sec.K.x0 + (sec.K.x1 - sec.K.x0 - fri.x) / 2,
   };
+  K.zNeveraFondo = zIn + 5 + fri.z; // cara trasera de la heladera
   K.yEstante = K.yHeladera + fri.y + 7; // estante bajo el cajón del gas
   K.yCajonGas = K.yEstante + t + 2;
   K.altoCajonGas = 150;
@@ -88,7 +111,7 @@ export function disposicionTrasero(cfg) {
   };
   W.yPisoBidones = W.yCajonBidones + t; // el piso del cajón de bidones es de 15 mm
   W.yEstante = W.yPisoBidones + bid.y + 12; // estante sobre los bidones
-  W.yCajonFregadero = 525;
+  W.yCajonFregadero = 510;
   W.altoCajonFregadero = 120;
   W.fondoCajonFregadero = 260;
   // El fregadero y la canilla se acomodan desde el borde izquierdo de la sección de agua
@@ -97,5 +120,5 @@ export function disposicionTrasero(cfg) {
   W.xBomba = sec.W.x0 + 250;
   W.bomba = { x: W.xBomba, y: W.yEstante + t + 2, z: zF + 345, sx: 120, sy: 80, sz: 70 }; // sobre el estante, atrás del cajón bajo el fregadero
 
-  return { t, tb, zF, zB, zIn, zFondo, x1, yBase, yPiso, yTapa, d1, d2, yCamaSup, yCamaInf, yTopeBajo, yInicioAlto, sec, hueco, E, K, W };
+  return { t, tb, zF, zFL, zB, zIn, zFondo, x1, yBase, yPiso, yTapa, d1, d2, yCamaSup, yCamaInf, yTopeBajo, yInicioAlto, sec, hueco, E, K, W };
 }

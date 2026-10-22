@@ -2,8 +2,10 @@
 
 Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy y su sistema eléctrico,
 con la distribución de la foto de referencia: mueble trasero cruzado de pared a pared detrás de los asientos
-(de izquierda a derecha: eléctrico con la batería acostada, inversor, DC-DC, fusibles, panel y enchufes; cocina con
-anafe, gas y heladera al piso, al centro; y agua con fregadero y bidones al piso, a la derecha), cama extensible de 90 a 120 cm (placas de plywood con esquinas redondeadas, bandejas sobre correderas, caja con arco y cajones), y mueble
+(de izquierda a derecha: eléctrico al piso con la batería acostada, inversor, DC-DC y fusibles, y sobre la cama el
+panel y los enchufes con dos cajones de cocina arriba; cocina con anafe, gas y heladera al piso, al centro; y agua con
+fregadero y bidones al piso, a la derecha), cama extensible de 90 a 120 cm de 170 cm de largo (placas de plywood con
+esquinas redondeadas, bandejas sobre correderas, caja con arco y cajones), y mueble
 derecho con cajones, alacena y mesa plegable.
 
 ## Uso
@@ -47,16 +49,24 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 
 ## Supuestos a confirmar con medidas reales
 
-- Largo y entrada del pasarruedas (estimados).
+- Medidas tomadas en la van (de atrás hacia adelante): hasta el pasarruedas 33 cm libres, pasarruedas 80 cm de largo x 42,5 cm de
+  alto x 18,5 cm de profundidad, vigas sin aislar de 22 cm, puerta lateral de 98 cm (queda 9 cm antes de la mampara) y
+  84 cm desde lo alto del pasarruedas hasta el techo construible. La mampara entre los asientos ya no está: tenía una curva con
+  10 cm libres abajo que se usan para pasar el cable largo.
 - Medidas de la batería de 150 Ah, inversor, DC-DC, caja de fusibles, batería del auto, fregadero y bidones (estimadas).
 - Potencia del inversor (se supuso 1000 W) y consumo de las tiras LED (9,6 W por metro).
 - Qué hace cada uno de los 5 interruptores (supuesto: luces 1, luces 2, luces 3, bomba y mando del inversor).
-- Mueble trasero de pared a pared (1720 mm) y de 450 mm de profundidad. Si tapa la puerta corrediza, achicar el ancho en la
-  barra lateral. Secciones (x): eléctrico 15-617, cocina 632-1087 y agua 1102-1705.
-- Bajo la cama, frente al mueble trasero, queda un hueco libre de 430 mm para sacar el cajón de bidones (llega al piso) y abrir
-  las puertas bajas. Todo lo eléctrico queda debajo del plano de la cama; el panel y los enchufes van en el tablero de arriba. Por eso la cama quedó en 1800 mm de largo (antes 1850).
-- El cajón del gas (y el frente de la cocina) cruza el plano de la cama: con la cama cerrada (hasta x = 910) la placa de la
-  cabecera pasa por delante de la cocina. Falta resolver cómo se saca la garrafa.
+- Mueble trasero de pared a pared (1720 mm) y de 500 mm de profundidad, con una L de 670 mm solo en la sección eléctrica
+  (a la izquierda), que llega hasta el pie de la cama de 170 cm. Si tapa la puerta corrediza, achicar el ancho en la barra
+  lateral. Secciones (x): eléctrico 15-617, cocina 632-1087 y agua 1102-1705.
+- La cama queda a 44 cm, apenas sobre el pasarruedas, y apoya sobre él. Bajo la cama, frente a la L, queda un hueco libre de
+  430 mm para abrir la puerta de la batería. Todo lo eléctrico queda al piso, debajo del plano de la cama; el panel y los
+  enchufes van sobre la cama, en el tablero de arriba, y los cajones de cocina de la L van sobre el tablero.
+- Mueble derecho: se apoya sobre el pasarruedas derecho. Bajo 43 cm solo queda libre la franja del frente (cerrada con un
+  frente ciego) y los dos cajones se acomodan arriba, a partir de los 45 cm.
+- El frente de la cocina y del agua está en z = 1910, 170 mm detrás del frente de la L (z = 1740), donde termina la placa de la
+  cabecera. El cajón del gas cruza el plano de la cama: sale 17 cm libres y después toca la placa para x menor a 910.
+  Falta resolver cómo se saca la garrafa. La sección de agua tapa parte de la puerta lateral derecha (z 1340 a 2320).
 - Medidas estimadas de la cocina: anafe 420 x 300 mm, garrafa de 230 mm de diámetro y 330 mm de alto, heladera 420 x 300 x 340 mm,
   fregadero 340 de ancho x 400 de fondo, bidones de 20 L de 215 x 400 x 290 mm.
 - Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El cajón de la garrafa necesita una rejilla de

@@ -47,7 +47,7 @@ export function frenteX(ctx, { grupo, xf, za, zb, ya, yb, hz0, hz1, huecos, marc
   par(`${marco} - montante`, hz1, zb, ya, yb);
   let y = ya;
   for (const h of [...huecos].sort((a, b) => a.y0 - b.y0)) {
-    par(`${marco} - travesaño`, hz0, hz1, y, h.y0);
+    par(h.marcoBajo || `${marco} - travesaño`, hz0, hz1, y, h.y0);
     ctx.parte({
       grupo,
       nombre: h.nombre,

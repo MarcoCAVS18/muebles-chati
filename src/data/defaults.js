@@ -5,8 +5,12 @@
 //   z = largo (0 = puerta trasera, aumenta hacia los asientos; el mamparo está en z = largo)
 //
 // La distribución sigue la foto de referencia:
-//   - Mueble trasero cruzado de pared a pared, pegado al mamparo de los asientos (cabecera de la cama)
-//       agua (fregadero, cajón, cajón de bidones) | guardado | cocina (anafe, gas, heladera) | eléctrico
+//   - Mueble trasero cruzado de pared a pared, pegado a la zona de los asientos (cabecera de la cama).
+//     Vista desde la puerta trasera, de izquierda a derecha:
+//       izquierda: electricidad al piso (batería acostada, inversor, DC-DC, fusibles) y arriba interruptores,
+//                  enchufes y cajones de cocina; esta sección es la L: llega a 670 mm de profundidad
+//       centro:    anafe, cajón de la garrafa de gas y heladera al piso
+//       derecha:   grifo y fregadero, con los dos bidones de agua al piso
 //   - Cama extensible (90 a 120 cm) de plywood con esquinas redondeadas, con caja con arco al pie
 //   - Mueble derecho con cajones, puerta bajo la mesa plegable y alacena alta
 
@@ -15,12 +19,17 @@ export const CONFIG_INICIAL = {
   van: {
     ancho: 1720,
     largo: 2410,
-    alto: 1270,
+    alto: 1265, // 425 mm del pasarruedas más 840 mm hasta el techo construible
     margenTrasero: 170, // zona del cierre del baúl
-    archInicio: 1290, // distancia hasta las ruedas
-    archLargo: 450, // ESTIMADO
-    archIntrusion: 210, // ESTIMADO
-    archAlto: 470,
+    // Pasarruedas (medido): 800 mm de largo, 425 de alto y 185 de profundidad. De atrás hacia adelante:
+    // 330 mm libres, pasarruedas, 220 mm de vigas sin aislar, puerta lateral de 980 mm y los asientos.
+    archInicio: 320,
+    archLargo: 800,
+    archIntrusion: 185,
+    archAlto: 425,
+    // Puerta lateral derecha (corrediza): 980 mm de largo, empieza a 90 mm del mamparo
+    puertaLateral: { desdeMamparo: 90, largo: 980, vigas: 220 },
+    espacioMampara: 100, // la curva de la mampara (ya retirada) deja 100 mm libres abajo para pasar cables
   },
 
   materiales: {
@@ -36,12 +45,12 @@ export const CONFIG_INICIAL = {
   corte: { kerf: 3, recorte: 5, rotar: false },
 
   // Mueble cruzado detrás de los asientos, de pared a pared. Secciones de izquierda a derecha:
-  // eléctrico (batería acostada, inversor, DC-DC, fusibles, panel y enchufes), cocina (anafe, gas y
-  // heladera al piso) y agua (fregadero y bidones al piso).
-  // Las posiciones x son la cara izquierda de cada divisor (el divisor tiene el espesor de la placa).
+  // eléctrica (la L, más profunda), cocina y agua. Las posiciones x son la cara izquierda de cada
+  // divisor (el divisor tiene el espesor de la placa).
   trasero: {
     ancho: 1720,
-    profundidad: 450, // el fregadero mide 400 mm de fondo
+    profundidad: 500, // cocina y agua (el fregadero mide 400 mm de fondo)
+    profundidadL: 670, // sección izquierda: llega hasta la cabecera de la cama
     alto: 850,
     zocalo: 20,
     divisor1: 617, // fin de la sección eléctrica
@@ -55,8 +64,8 @@ export const CONFIG_INICIAL = {
     extension: 300, // se agranda hasta 1200
     bandejaAncho: 500, // 200 mm quedan debajo de la placa fija al abrir
     radio: 50, // radio de las esquinas
-    largo: 1800, // el mueble trasero ahora tiene 450 mm de profundidad
-    plataforma: 500, // altura de la cara superior (pasa por encima del pasarruedas)
+    largo: 1700, // confirmado
+    plataforma: 440, // altura de la cara superior: la placa (15 mm) apoya justo sobre el pasarruedas (425)
     largoCabecera: 940, // largo de la placa de la cabecera (la otra placa va al pie)
     huecoMueble: 430, // espacio libre bajo la cama, frente al mueble trasero (bidones y puertas bajas)
     cajonCabecera: { fondo: 560, alto: 200 },

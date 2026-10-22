@@ -82,10 +82,19 @@ exigir(xMax - CONFIG_INICIAL.cama.x0 >= 1200 - 1, 'la cama extendida no llega a 
 exigir(data.partes.filter((p) => p.radio).length >= 4, 'faltan placas con esquinas redondeadas');
 exigir(data.decos.every((d) => d.id), 'decos sin id');
 
-// ---- Diseño: mueble trasero de 450 mm, eléctrico a la izquierda, cocina con gas al centro, agua a la derecha ----
+// ---- Diseño: mueble trasero de 500 mm con una L de 670 mm a la izquierda (eléctrico), cocina con gas al centro, agua a la derecha ----
 const cfgI = CONFIG_INICIAL;
 const tra = data.partes.filter((p) => p.grupo === 'Mueble trasero');
-exigir(cfgI.trasero.profundidad === 450, 'el mueble trasero debería tener 450 mm de profundidad');
+exigir(cfgI.trasero.profundidad === 500, 'el mueble trasero debería tener 500 mm de profundidad');
+exigir(cfgI.trasero.profundidadL === 670, 'la sección eléctrica (la L) debería tener 670 mm de profundidad');
+// Medidas tomadas en la van: puerta lateral de 98 cm, vigas de 22 cm, pasarruedas de 80 x 42,5 x 18,5 cm
+const vn = cfgI.van;
+exigir(vn.puertaLateral.largo === 980 && vn.puertaLateral.vigas === 220, 'la puerta lateral debería medir 980 mm y las vigas 220 mm');
+exigir(vn.archLargo === 800 && vn.archAlto === 425 && vn.archIntrusion === 185, 'el pasarruedas debería medir 800 x 425 x 185 mm');
+exigir(vn.archInicio + vn.archLargo + vn.puertaLateral.vigas + vn.puertaLateral.largo + vn.puertaLateral.desdeMamparo === vn.largo, 'el pasarruedas, las vigas y la puerta no suman el largo útil de la van');
+exigir(cfgI.cama.largo === 1700, 'la cama debería medir 170 cm de largo');
+exigir(cfgI.cama.plataforma >= 430 && cfgI.cama.plataforma <= 440, 'la cama debería quedar apenas sobre el pasarruedas (43 a 44 cm)');
+exigir(Math.abs(vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL) >= 0 && vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL < vn.archInicio, 'la cama más la L deberían terminar antes del pasarruedas');
 exigir(cfgI.trasero.ancho === cfgI.van.ancho, 'el mueble trasero debería ir de pared a pared');
 exigir(tra.every((p) => p.z + p.sz <= cfgI.van.largo + 0.5), 'el mueble trasero se sale del mamparo');
 
@@ -139,8 +148,19 @@ exigir(tra.some((p) => p.abre === 'nevera' && p.color), 'la puerta de la helader
 exigir(tra.some((p) => p.abre === 'garrafa'), 'falta el frente del cajón del gas');
 // El cajón de bidones llega hasta el piso, queda bajo la cama y los frentes altos sobre ella
 const frBid = tra.find((p) => p.nombre === 'Frente cajón de bidones');
-exigir(frBid && frBid.y < 30 && frBid.y + frBid.sy <= cfgI.cama.plataforma - cfgI.materiales.estructura.t - 30, 'el frente de bidones debería llegar al piso y quedar bajo la cama');
-exigir(tra.find((p) => p.nombre === 'Frente cajón bajo el fregadero').y > cfgI.cama.plataforma, 'el cajón bajo el fregadero debería quedar sobre la cama');
+exigir(frBid && frBid.y < 30, 'el frente de bidones debería llegar al piso');
+// Sección eléctrica: todo al piso y bajo el plano de la cama; el tablero con interruptores y enchufes, sobre la cama
+for (const id of ['bateria', 'inversor', 'dcdc', 'fusibles', 'fusiblePrincipal']) {
+  const e = eqE(id);
+  exigir(e.y < 60 && e.y + e.sy < cfgI.cama.plataforma - 20, `${id} debería ir al piso y bajo el plano de la cama`);
+}
+for (const id of ['panelSwitches', 'enchufe1', 'enchufe2']) {
+  const e = eqE(id);
+  exigir(e.y >= cfgI.cama.plataforma && e.x + e.sx <= xDiv1, `${id} debería estar en el tablero, sobre la cama y en la sección eléctrica`);
+}
+// La cama termina contra el frente de la L, y el cajón de cocina de la L queda sobre la cama
+exigir(Math.abs(data.layout.cama.zCab - (vn.largo - cfgI.trasero.profundidadL)) < 0.5, 'la cama debería terminar contra el frente de la L del mueble trasero');
+exigir(tra.find((p) => p.nombre === 'Frente cajón de cocina 1').y > cfgI.cama.plataforma, 'los cajones de cocina de la L deberían quedar sobre la cama');
 // Tres tiras LED y extractor sin conexión
 exigir(['ledA', 'ledB', 'ledC'].every((id) => e3.equipos.some((e) => e.id === id)), 'faltan las tres tiras LED');
 exigir(e3.largoC > 500, 'la tercera tira LED quedó muy corta');
