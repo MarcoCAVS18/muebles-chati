@@ -27,7 +27,9 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Dónde se fija cada mueble (piso, pared, entre muebles) y cuántos tornillos y escuadras.
 - Herrajes: correderas, bisagras, pistones, bisagras de piano, tiradores.
 - Eléctrica: consumo diario, autonomía, horas de manejo para recargar, cables y fusibles. Los largos de cable
-  salen del recorrido dibujado en 3D.
+  salen del recorrido dibujado en 3D. Las corrientes se calculan a 12 V, la entrada del DC-DC se calcula aparte de su
+  salida, la heladera y la bomba llevan fusible con margen de arranque, la línea de 230 V lleva disyuntor y diferencial, y la
+  caída de tensión se suma a lo largo de cada camino (batería a bomba, a heladera, a luces...) y no tramo por tramo.
 - Sistema eléctrico en 3D: batería del auto bajo el asiento del acompañante, fusible ANL, cable largo bajo los
   asientos, DC-DC, batería de 150 Ah, caja de fusibles, inversor, panel de 5 interruptores, 2 enchufes con USB-C,
   3 tiras LED en el techo (2 de 2 m y una al centro detrás del extractor), bomba y mangueras de agua y de gas. El extractor

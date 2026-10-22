@@ -33,6 +33,7 @@ console.log('Peso estimado (kg):', pesoEstimado(data.partes, CONFIG_INICIAL).toF
 console.log('Fijaciones:', fij.totales.map((f) => `${f.nombre}: ${f.cantidad}`));
 console.log('Eléctrica: Wh/dia', ele.whDia.toFixed(0), 'Ah/dia', ele.ahDia.toFixed(1), 'autonomía d', ele.autonomiaDias.toFixed(1), 'h conducción', ele.horasConduccion.toFixed(1));
 console.log('Tramos:', ele.tramos.map((t) => `${t.nombre}: ${t.largoM.toFixed(2)} m, ${t.amperes.toFixed(1)} A, ${t.seccion} mm2, fusible ${t.fusible} A, caída ${t.caidaPct.toFixed(2)} %`));
+console.log('Caminos:', ele.caminos.map((c) => `${c.nombre}: ${c.largoM.toFixed(2)} m, ${c.caidaPct.toFixed(2)} %`));
 console.log('Cable a comprar:', ele.cableCompras.map((c) => `${c.item}: ${c.metros} m`));
 console.log('Filas de compras:', compras.length);
 
@@ -184,6 +185,20 @@ const ex = e3.equipos.find((e) => e.id === 'extractor');
 exigir(ex && ex.sx === 310 && ex.sz === 310, 'el extractor debería medir 310 x 310 mm con el marco');
 exigir(ELECTRICA_INICIAL.switches.length === 5 && !ELECTRICA_INICIAL.switches.includes('Extractor'), 'el panel debería tener 5 interruptores sin el extractor');
 exigir(!CARGAS_INICIALES.some((c) => c.id === 'extractor'), 'el extractor no debería tener consumo');
+// ---- Revisión eléctrica: protecciones y caídas de tensión ----
+const AMP = { 0.75: 8, 1: 10, 1.5: 15, 2.5: 20, 4: 30, 6: 40, 10: 60, 16: 80, 25: 100, 35: 125, 50: 150, 70: 190, 95: 230 };
+for (const t of ele.tramos.filter((q) => q.tipo !== 'senal')) {
+  exigir(AMP[t.seccion] >= t.fusible, `el cable de ${t.nombre} (${t.seccion} mm2) no aguanta su protección de ${t.fusible} A`);
+}
+for (const c of ele.caminos) exigir(c.ok, `el camino "${c.nombre}" pasa la caída máxima (${c.caidaPct.toFixed(2)} %)`);
+const tramoDe = (id) => ele.tramos.find((q) => q.id === id);
+exigir(tramoDe('c_caja_nevera').fusible >= 2 * tramoDe('c_caja_nevera').amperes, 'el fusible de la heladera debería tolerar el arranque del compresor');
+exigir(tramoDe('c_panel_bomba').fusible >= 2 * tramoDe('c_panel_bomba').amperes, 'el fusible de la bomba debería tolerar el arranque del motor');
+exigir(tramoDe('c_largo').amperes > ELECTRICA_INICIAL.cargadorNominalA, 'la entrada del DC-DC debería calcularse con una corriente mayor que la de salida');
+exigir(tramoDe('c_inv_ench1').fusible === 6, 'la línea de 230 V debería llevar un disyuntor de 6 A');
+exigir(ele.filas.some((f) => f.id === 'inversorEspera'), 'falta el consumo propio del inversor');
+exigir(compras.some((r) => /Interruptor diferencial/.test(r.item)), 'falta el diferencial de 230 V en la lista de compras');
+exigir(!compras.some((r) => /Fusible 7\.5 A/.test(r.item) && /230/.test(r.nota)), 'la línea de 230 V no debería llevar fusible sino disyuntor');
 // Gas
 for (const id of ['anafe', 'garrafa', 'regulador', 'valvulaGas', 'detectorGas']) exigir(data.equipos.some((e) => e.id === id), `falta el equipo de gas ${id}`);
 exigir(e3.mangueras.filter((m) => m.tipo === 'gas').length === 2, 'faltan las mangueras de gas');

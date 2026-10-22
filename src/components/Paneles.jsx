@@ -271,6 +271,12 @@ export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, el
         </tbody>
       </table>
 
+      {res.filas.filter((f) => f.calculada).map((f) => (
+        <p key={f.id} className="nota">
+          {f.nombre}: {f.w} W x {f.horas} h = {n0(f.wh)} Wh por día (ESTIMADO, ya está sumado en el total).
+        </p>
+      ))}
+
       <fieldset>
         <legend>Parámetros</legend>
         <label className="campo">
@@ -328,6 +334,28 @@ export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, el
               <td>{t.seccion} mm2</td>
               <td>{t.fusible} A</td>
               <td>{t.caidaPct.toFixed(1)} %</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h3>Caída de tensión acumulada por camino</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Camino</th>
+            <th>Largo</th>
+            <th>Caída</th>
+          </tr>
+        </thead>
+        <tbody>
+          {res.caminos.map((c) => (
+            <tr key={c.nombre} className={c.ok ? '' : 'aviso'}>
+              <td>{c.nombre}</td>
+              <td>{c.largoM.toFixed(2)} m</td>
+              <td>
+                {c.caidaPct.toFixed(1)} % (máx. {elec.caidaMaxPct} %)
+              </td>
             </tr>
           ))}
         </tbody>

@@ -142,7 +142,7 @@ export function electrico3d(cfg) {
       desde: 'bateriaAuto',
       hasta: 'anl',
       video: 'anl',
-      corriente: 'dcdc',
+      corriente: 'dcdcEntrada',
       puntos: [
         [xTerm, bateriaAuto.y + ba.y + 2, zA + 10],
         [anlCaja.x + 30, bateriaAuto.y + ba.y + 2, zA + 10],
@@ -157,7 +157,7 @@ export function electrico3d(cfg) {
       desde: 'anl',
       hasta: 'dcdc',
       video: 'cableado',
-      corriente: 'dcdc',
+      corriente: 'dcdcEntrada',
       puntos: [
         [anlCaja.x, 220, zA + 10],
         [anlCaja.x - 20, 220, zA + 10],

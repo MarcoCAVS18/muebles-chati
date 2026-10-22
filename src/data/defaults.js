@@ -136,6 +136,12 @@ export const ELECTRICA_INICIAL = {
   profundidadDescarga: 0.9, // LiFePO4
   cargadorNominalA: 40,
   cargadorRealA: 30, // lo que entrega el alternador inteligente (ESTIMADO)
+  cargadorVCarga: 14.4, // tensión de carga del DC-DC (perfil litio); sirve para calcular la corriente de entrada
+  cargadorVEntrada: 13, // tensión de la batería del auto con el motor en marcha, ya con la caída del cable
+  cargadorEfic: 0.95, // rendimiento del DC-DC (ESTIMADO)
+  tensionDiseno: 12, // las corrientes de los cables y fusibles se calculan a esta tensión
+  inversorEsperaW: 20, // consumo propio del inversor encendido sin carga (ESTIMADO, ver su ficha)
+  inversorEsperaH: 4, // horas por día con el inversor encendido
   inversor: true, // ya comprado
   inversorW: 1000, // ESTIMADO: poné la potencia real del inversor comprado
   eficienciaInversor: 0.85,

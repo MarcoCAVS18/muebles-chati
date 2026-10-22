@@ -108,14 +108,29 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
     }
     // Fusibles por cable que lleva protección propia
     const fus = new Map();
+    const disy = new Map();
     for (const t of resElec.tramos) {
       if (t.tipo === 'senal') continue;
+      if (t.tipo === 'ac') {
+        // De 230 V: un disyuntor por línea (las dos tomas comparten el del inversor), no un fusible
+        disy.set(t.fusible, 1);
+        continue;
+      }
       const k = `Fusible ${t.fusible} A`;
       fus.set(k, (fus.get(k) || 0) + 1);
     }
     for (const [item, cantidad] of fus) {
       filas.push({ categoria: 'Cables y protecciones', item, cantidad, nota: 'Uno por línea; la caja de fusibles reparte las de 12 V' });
     }
+    for (const [amp] of disy) {
+      filas.push({ categoria: 'Cables y protecciones', item: `Disyuntor ${amp} A curva B (230 V)`, cantidad: 1, nota: 'A la salida del inversor, antes de las tomas' });
+    }
+    if (disy.size) {
+      filas.push({ categoria: 'Cables y protecciones', item: 'Interruptor diferencial 30 mA (2 polos)', cantidad: 1, nota: 'A la salida del inversor. El técnico confirma el puenteo neutro-tierra' });
+    }
+    filas.push({ categoria: 'Cables y protecciones', item: 'Corta-baterías general', cantidad: 1, nota: 'Falta en el diseño: confirmar con el técnico dónde va' });
+    filas.push({ categoria: 'Cables y protecciones', item: 'Shunt o monitor de batería', cantidad: 1, nota: 'Falta en el diseño: confirmar con el técnico' });
+    filas.push({ categoria: 'Cables y protecciones', item: 'Barras de distribución positiva y negativa', cantidad: 2, nota: 'Falta en el diseño: reparten los cables del borne de la batería' });
     filas.push({ categoria: 'Cables y protecciones', item: 'Terminales de ojal y termocontraíbles', cantidad: 1, nota: 'Un surtido para todos los calibres' });
     filas.push({ categoria: 'Cables y protecciones', item: 'Pasacables de goma 20 mm', cantidad: 13, nota: 'Estantes, divisores, tablero, fondo y mamparo' });
     filas.push({ categoria: 'Cables y protecciones', item: 'Manguera de grado alimenticio, abrazaderas y T', cantidad: 1, nota: 'Bidones, bomba y canilla' });
