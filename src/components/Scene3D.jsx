@@ -1,31 +1,129 @@
-import React, { useMemo } from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Edges } from '@react-three/drei';
 
 const COLORES = {
-  'Mueble izquierdo': '#dcbc8c',
+  'Mueble trasero': '#dcbc8c',
   Cama: '#e8d2a6',
   'Mueble derecho': '#cfae7c',
 };
 
+const COLOR_CABLE = {
+  dc: { pos: '#d32f2f', neg: '#212121' },
+  ac: { pos: '#8d6e63', neg: '#1976d2' },
+  senal: { pos: '#9e9e9e', neg: '#9e9e9e' },
+  agua: { pos: '#29b6f6', neg: null },
+};
+
 const m = (v) => v / 1000;
 
-function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f2a', onClick, onOver, onOut, wire }) {
+// El modelo usa x = 0 en la pared izquierda mirando hacia los asientos (eje que no es el de three.js).
+// Se espeja el eje x al dibujar para que izquierda y derecha se vean como en la van real.
+// Por eso en las vistas la coordenada x del mundo es el negativo de la x de la van.
+export const VISTAS = {
+  foto: { nombre: 'Como la foto', pos: [3.3, 3.4, -0.6], target: [-0.86, 0.3, 1.35] },
+  trasera: { nombre: 'Desde la puerta trasera', pos: [-0.86, 1.3, -2.7], target: [-0.86, 0.55, 1.6] },
+  arriba: { nombre: 'Desde arriba', pos: [-0.86, 4.6, 1.25], target: [-0.86, 0, 1.2] },
+  cabecera: { nombre: 'Mueble trasero', pos: [-0.5, 1.25, 0.9], target: [-0.6, 0.45, 2.3] },
+  electrico: { nombre: 'Zona eléctrica (ver interior)', pos: [-0.4, 1.6, 1.0], target: [-0.4, 0.3, 2.2] },
+  asientos: { nombre: 'Batería del auto (bajo el asiento)', pos: [-0.5, 1.5, 3.7], target: [-1.35, 0.2, 2.75] },
+};
+
+function Camara({ vista, controles }) {
+  const { camera } = useThree();
+  useEffect(() => {
+    const v = VISTAS[vista.clave] || VISTAS.foto;
+    camera.position.set(...v.pos);
+    if (controles.current) {
+      controles.current.target.set(...v.target);
+      controles.current.update();
+    }
+  }, [vista, camera, controles]);
+  return null;
+}
+
+function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f2a', onClick, onOver, onOut, emisivo, resaltar }) {
   return (
-    <mesh
-      position={[m(x + sx / 2), m(y + sy / 2), m(z + sz / 2)]}
-      onClick={onClick}
-      onPointerOver={onOver}
-      onPointerOut={onOut}
-    >
+    <mesh position={[m(x + sx / 2), m(y + sy / 2), m(z + sz / 2)]} onClick={onClick} onPointerOver={onOver} onPointerOut={onOut}>
       <boxGeometry args={[m(sx), m(sy), m(sz)]} />
-      <meshStandardMaterial color={color} transparent={opacidad < 1} opacity={opacidad} wireframe={wire} />
+      <meshStandardMaterial
+        key={opacidad < 1 ? 'transparente' : 'opaco'}
+        color={color}
+        transparent={opacidad < 1}
+        opacity={opacidad}
+        depthWrite={opacidad >= 1}
+        emissive={resaltar ? '#ff7043' : emisivo ? color : '#000000'}
+        emissiveIntensity={resaltar ? 0.6 : emisivo ? 0.9 : 0}
+      />
       {bordes && <Edges color={bordes} />}
     </mesh>
   );
 }
 
-function Escena({ data, van, visibles, explosion, mostrarEquipos, mostrarArcos, seleccion, setSeleccion, setHover }) {
+// Un tramo recto de cable: cilindro entre dos puntos
+function Tramo({ a, b, r, color, emisivo }) {
+  const { pos, quat, largo } = useMemo(() => {
+    const va = new THREE.Vector3(m(a[0]), m(a[1]), m(a[2]));
+    const vb = new THREE.Vector3(m(b[0]), m(b[1]), m(b[2]));
+    const dir = vb.clone().sub(va);
+    const largo = dir.length();
+    const quat = new THREE.Quaternion();
+    if (largo > 1e-6) quat.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+    return { pos: va.clone().add(vb).multiplyScalar(0.5), quat, largo };
+  }, [a, b]);
+  if (largo < 1e-6) return null;
+  return (
+    <mesh position={pos} quaternion={quat}>
+      <cylinderGeometry args={[m(r), m(r), largo, 10]} />
+      <meshStandardMaterial color={color} emissive={emisivo ? color : '#000000'} emissiveIntensity={emisivo ? 0.5 : 0} />
+    </mesh>
+  );
+}
+
+function Cable({ cable, seccion, elegido, onClick, onOver, onOut }) {
+  const col = COLOR_CABLE[cable.tipo];
+  // El grosor dibujado sale de la sección calculada (no es a escala real)
+  const r = cable.tipo === 'agua' ? 6 : 1.5 + Math.sqrt(seccion || 1.5) * 0.75;
+  const juegos = [{ pts: cable.puntos, color: col.pos }];
+  if (col.neg) juegos.push({ pts: cable.puntos.map((p) => [p[0] + 14, p[1], p[2] + 14]), color: col.neg });
+  return (
+    <group onClick={onClick} onPointerOver={onOver} onPointerOut={onOut}>
+      {juegos.map((j, k) =>
+        j.pts.slice(1).map((p, i) => (
+          <React.Fragment key={`${k}-${i}`}>
+            <Tramo a={j.pts[i]} b={p} r={r} color={elegido ? '#ff7043' : j.color} emisivo={elegido} />
+            <mesh position={[m(p[0]), m(p[1]), m(p[2])]}>
+              <sphereGeometry args={[m(r), 10, 8]} />
+              <meshStandardMaterial color={elegido ? '#ff7043' : j.color} />
+            </mesh>
+          </React.Fragment>
+        ))
+      )}
+    </group>
+  );
+}
+
+function Deco({ d }) {
+  if (d.forma === 'arco') {
+    // Medio cilindro oscuro: marca la abertura en arco del frente de la caja del pie
+    return (
+      <mesh position={[m(d.cx), m(d.cy), m(d.z + d.sz / 2)]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[m(d.radio), m(d.radio), m(d.sz), 32, 1, false, Math.PI / 2, Math.PI]} />
+        <meshStandardMaterial color="#2b2118" />
+      </mesh>
+    );
+  }
+  return <Caja x={d.x} y={d.y} z={d.z} sx={d.sx} sy={d.sy} sz={d.sz} color={d.color} bordes={null} />;
+}
+
+function Escena(props) {
+  const {
+    data, elec3d, tramos, van, visibles, explosion, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
+    seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar,
+  } = props;
+  const controles = useRef();
+
   // Centro de cada grupo para separar las piezas al "explotar" la vista
   const centros = useMemo(() => {
     const acc = {};
@@ -42,18 +140,30 @@ function Escena({ data, van, visibles, explosion, mostrarEquipos, mostrarArcos, 
     return acc;
   }, [data]);
 
-  const desplazar = (p) => {
-    if (!explosion) return p;
-    const c = centros[p.grupo];
-    const px = p.x + p.sx / 2;
-    const py = p.y + p.sy / 2;
-    const pz = p.z + p.sz / 2;
+  const desplazar = (p, grupo) => {
+    const c = centros[grupo];
+    if (!explosion || !c) return p;
     return {
       ...p,
-      x: p.x + (px - c.x) * explosion,
-      y: p.y + (py - c.y) * explosion,
-      z: p.z + (pz - c.z) * explosion,
+      x: p.x + (p.x + p.sx / 2 - c.x) * explosion,
+      y: p.y + (p.y + p.sy / 2 - c.y) * explosion,
+      z: p.z + (p.z + p.sz / 2 - c.z) * explosion,
     };
+  };
+
+  const seccionDe = useMemo(() => {
+    const mapa = {};
+    for (const t of tramos) mapa[t.id] = t.seccion;
+    return mapa;
+  }, [tramos]);
+
+  const sobre = (texto) => (ev) => {
+    ev.stopPropagation();
+    setHover(texto);
+  };
+  const clic = (id) => (ev) => {
+    ev.stopPropagation();
+    setElemento(id);
   };
 
   return (
@@ -62,19 +172,23 @@ function Escena({ data, van, visibles, explosion, mostrarEquipos, mostrarArcos, 
       <directionalLight position={[3, 5, -2]} intensity={0.9} />
       <directionalLight position={[-3, 3, 4]} intensity={0.4} />
 
+      <group scale={[-1, 1, 1]}>
       {/* Piso y contorno interior de la van */}
       <Caja x={0} y={-12} z={0} sx={van.ancho} sy={12} sz={van.largo} color="#8d6e4a" bordes="#4b3a24" />
       <Caja x={0} y={0} z={0} sx={van.ancho} sy={van.alto} sz={van.largo} color="#9aa5b1" opacidad={0.04} bordes="#7a8794" />
 
-      {mostrarArcos &&
-        data.arcos.map((a) => (
-          <Caja key={a.nombre} {...a} color="#555b63" opacidad={0.75} bordes="#2b2f33" />
+      {mostrarArcos && data.arcos.map((a) => <Caja key={a.nombre} {...a} color="#555b63" opacidad={0.75} bordes="#2b2f33" />)}
+
+      {mostrarAsientos &&
+        elec3d.escenario.map((e) => (
+          <Caja key={e.nombre} {...e} bordes="#263238" onOver={sobre(e.nombre)} onOut={() => setHover('')} />
         ))}
+      {mostrarAsientos && elec3d.decos.map((d) => <Caja key={d.nombre} {...d} bordes={null} />)}
 
       {data.partes
         .filter((p) => visibles[p.grupo])
         .map((p) => {
-          const q = desplazar(p);
+          const q = desplazar(p, p.grupo);
           const elegida = seleccion === p.id;
           const color = elegida ? '#ff7043' : p.tipo === 'liston' ? '#c49a5e' : COLORES[p.grupo];
           return (
@@ -87,28 +201,33 @@ function Escena({ data, van, visibles, explosion, mostrarEquipos, mostrarArcos, 
               sy={p.sy}
               sz={p.sz}
               color={color}
+              opacidad={transparentar ? 0.12 : 1}
               bordes={elegida ? '#bf360c' : '#6b4f2a'}
               onClick={(e) => {
                 e.stopPropagation();
                 setSeleccion(p.id);
               }}
-              onOver={(e) => {
-                e.stopPropagation();
-                setHover(`${p.id} - ${p.nombre}`);
-              }}
+              onOver={sobre(`${p.id} - ${p.nombre}`)}
               onOut={() => setHover('')}
             />
           );
         })}
 
+      {data.decos
+        .filter((d) => visibles[d.grupo])
+        .map((d) => (
+          <Deco key={d.id} d={d.forma ? d : desplazar(d, d.grupo)} />
+        ))}
+
+      {/* Equipos de agua y cocina */}
       {mostrarEquipos &&
         data.equipos
           .filter((e) => visibles[e.grupo])
           .map((e) => {
-            const q = desplazar(e);
+            const q = desplazar(e, e.grupo);
             return (
               <Caja
-                key={e.nombre}
+                key={e.id}
                 x={q.x}
                 y={q.y}
                 z={q.z}
@@ -116,18 +235,59 @@ function Escena({ data, van, visibles, explosion, mostrarEquipos, mostrarArcos, 
                 sy={e.sy}
                 sz={e.sz}
                 color={e.color}
-                opacidad={0.85}
+                opacidad={1}
                 bordes="#222"
-                onOver={(ev) => {
-                  ev.stopPropagation();
-                  setHover(`${e.nombre}: ${e.nota || ''}`);
-                }}
+                resaltar={elemento === e.id}
+                onClick={clic(e.id)}
+                onOver={sobre(`${e.nombre}: ${e.nota || ''} (clic para ver el video)`)}
                 onOut={() => setHover('')}
               />
             );
           })}
 
-      <OrbitControls target={[m(van.ancho / 2), 0.45, m(van.largo / 2)]} makeDefault />
+      {/* Sistema eléctrico */}
+      {mostrarElectrico &&
+        elec3d.equipos.map((e) => {
+          const q = desplazar(e, e.en || e.grupo);
+          return (
+            <Caja
+              key={e.id}
+              x={q.x}
+              y={q.y}
+              z={q.z}
+              sx={e.sx}
+              sy={e.sy}
+              sz={e.sz}
+              color={e.color}
+              emisivo={e.emisivo}
+              opacidad={1}
+              bordes="#111"
+              resaltar={elemento === e.id}
+              onClick={clic(e.id)}
+              onOver={sobre(`${e.nombre}: ${e.nota || ''} (clic para ver el video)`)}
+              onOut={() => setHover('')}
+            />
+          );
+        })}
+
+      {mostrarElectrico &&
+        explosion < 0.02 &&
+        [...elec3d.cables, ...elec3d.mangueras].map((c) => (
+          <Cable
+            key={c.id}
+            cable={c}
+            seccion={seccionDe[c.id]}
+            elegido={elemento === c.id}
+            onClick={clic(c.id)}
+            onOver={sobre(`${c.nombre} (clic para ver el video)`)}
+            onOut={() => setHover('')}
+          />
+        ))}
+
+      </group>
+
+      <OrbitControls ref={controles} makeDefault />
+      <Camara vista={vista} controles={controles} />
     </>
   );
 }
@@ -136,8 +296,11 @@ export default function Scene3D(props) {
   const { van } = props;
   return (
     <Canvas
-      camera={{ position: [m(van.ancho) + 1.6, 2.2, -2.6], fov: 45, near: 0.05, far: 50 }}
-      onPointerMissed={() => props.setSeleccion('')}
+      camera={{ position: VISTAS.foto.pos, fov: 45, near: 0.05, far: 60 }}
+      onPointerMissed={() => {
+        props.setSeleccion('');
+        props.setElemento('');
+      }}
     >
       <color attach="background" args={['#eef1f4']} />
       <Escena {...props} />

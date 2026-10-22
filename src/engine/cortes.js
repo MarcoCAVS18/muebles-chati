@@ -61,7 +61,7 @@ export function pesoEstimado(partes, cfg) {
   return kg;
 }
 
-export function listaDeCompras(data, plan, cfg) {
+export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
   const filas = [];
   for (const [mat, res] of Object.entries(plan.planPlacas)) {
     const m = cfg.materiales[mat];
@@ -96,6 +96,29 @@ export function listaDeCompras(data, plan, cfg) {
   }
   for (const e of data.equipos) {
     filas.push({ categoria: 'Equipos', item: e.nombre, cantidad: 1, nota: 'Ya comprado' });
+  }
+  if (elec3d) {
+    for (const e of elec3d.equipos) {
+      filas.push({ categoria: 'Equipos', item: e.nombre, cantidad: 1, nota: 'Ya comprado' });
+    }
+  }
+  if (resElec) {
+    for (const c of resElec.cableCompras) {
+      filas.push({ categoria: 'Cables y protecciones', item: c.item, cantidad: `${c.metros} m`, nota: 'Largo medido en el 3D, con 15 % de sobrante' });
+    }
+    // Fusibles por cable que lleva protección propia
+    const fus = new Map();
+    for (const t of resElec.tramos) {
+      if (t.tipo === 'senal') continue;
+      const k = `Fusible ${t.fusible} A`;
+      fus.set(k, (fus.get(k) || 0) + 1);
+    }
+    for (const [item, cantidad] of fus) {
+      filas.push({ categoria: 'Cables y protecciones', item, cantidad, nota: 'Uno por línea; la caja de fusibles reparte las de 12 V' });
+    }
+    filas.push({ categoria: 'Cables y protecciones', item: 'Terminales de ojal y termocontraíbles', cantidad: 1, nota: 'Un surtido para todos los calibres' });
+    filas.push({ categoria: 'Cables y protecciones', item: 'Pasacables de goma 20 mm', cantidad: 10, nota: 'Estantes, divisores, frente, fondo y mamparo' });
+    filas.push({ categoria: 'Cables y protecciones', item: 'Manguera de grado alimenticio, abrazaderas y T', cantidad: 1, nota: 'Bidones, bomba y canilla' });
   }
   return filas;
 }

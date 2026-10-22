@@ -213,15 +213,16 @@ export function Herrajes({ data, fijaciones }) {
 }
 
 // ---------- Eléctrica ----------
-export function Electrica({ res, cargas, setCargas, elec, setElec }) {
+export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, elemento, setElemento }) {
   const cambiarCarga = (id, campo, valor) =>
     setCargas(cargas.map((c) => (c.id === id ? { ...c, [campo]: valor } : c)));
   const num = (v) => (Number.isNaN(parseFloat(v)) ? 0 : parseFloat(v));
   return (
     <div>
       <p className="nota">
-        Sistema: batería del auto, fusible ANL, cargador DC-DC 40 A, batería trasera de 100 Ah, caja de fusibles. Sin panel solar.
-        Los consumos son estimados: reemplazalos por los de cada producto.
+        Sistema: batería del auto, fusible ANL, cable largo bajo los asientos, DC-DC, batería de 150 Ah, caja de fusibles,
+        inversor, panel de 5 interruptores, 2 enchufes con USB-C y 2 tiras LED. Sin panel solar. Tocá cualquier elemento o cable
+        (acá o en el 3D) para ver cómo se instala en un video. Los consumos son estimados.
       </p>
       <div className="resumen">
         <div>
@@ -277,6 +278,10 @@ export function Electrica({ res, cargas, setCargas, elec, setElec }) {
           <input type="number" value={elec.bateriaAh} onChange={(e) => setElec({ ...elec, bateriaAh: num(e.target.value) })} />
         </label>
         <label className="campo">
+          <span>Potencia del inversor (W)</span>
+          <input type="number" value={elec.inversorW} onChange={(e) => setElec({ ...elec, inversorW: num(e.target.value) })} />
+        </label>
+        <label className="campo">
           <span>Corriente real de carga (A)</span>
           <input type="number" value={elec.cargadorRealA} onChange={(e) => setElec({ ...elec, cargadorRealA: num(e.target.value) })} />
         </label>
@@ -290,7 +295,19 @@ export function Electrica({ res, cargas, setCargas, elec, setElec }) {
         </label>
       </fieldset>
 
-      <h3>Cables y fusibles principales</h3>
+      <h3>Elementos (tocá uno para ver el video)</h3>
+      <table>
+        <tbody>
+          {elementos.map((e) => (
+            <tr key={e.id} className={`fila-click ${elemento === e.id ? 'sel' : ''}`} onClick={() => setElemento(e.id)}>
+              <td>{e.nombre}</td>
+              <td className="nota">{e.nota}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h3>Cables y fusibles (largo medido en el 3D)</h3>
       <table>
         <thead>
           <tr>
@@ -304,10 +321,10 @@ export function Electrica({ res, cargas, setCargas, elec, setElec }) {
         </thead>
         <tbody>
           {res.tramos.map((t) => (
-            <tr key={t.id}>
+            <tr key={t.id} className={`fila-click ${elemento === t.id ? 'sel' : ''}`} onClick={() => setElemento(t.id)}>
               <td>{t.nombre}</td>
-              <td>{t.largoM} m</td>
-              <td>{t.amperes.toFixed(0)}</td>
+              <td>{t.largoM.toFixed(2)} m</td>
+              <td>{t.amperes.toFixed(1)}</td>
               <td>{t.seccion} mm2</td>
               <td>{t.fusible} A</td>
               <td>{t.caidaPct.toFixed(1)} %</td>
@@ -316,15 +333,13 @@ export function Electrica({ res, cargas, setCargas, elec, setElec }) {
         </tbody>
       </table>
 
-      <h3>Ramales desde la caja de fusibles ({elec.ramalLargoM} m)</h3>
+      <h3>Cable a comprar</h3>
       <table>
         <tbody>
-          {res.ramales.map((r) => (
-            <tr key={r.nombre}>
-              <td>{r.nombre}</td>
-              <td>{r.amperes.toFixed(1)} A</td>
-              <td>{r.seccion} mm2</td>
-              <td>fusible {r.fusible} A</td>
+          {res.cableCompras.map((c) => (
+            <tr key={c.item}>
+              <td>{c.item}</td>
+              <td>{c.metros} m</td>
             </tr>
           ))}
         </tbody>

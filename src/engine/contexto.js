@@ -1,13 +1,15 @@
 // Contexto de construcción: junta piezas, uniones, herrajes, equipos y anclajes.
 
 const PREFIJOS = {
-  'Mueble izquierdo': 'IZQ',
+  'Mueble trasero': 'TRA',
   Cama: 'CAM',
   'Mueble derecho': 'DER',
 };
 
 export function crearContexto(cfg) {
   const partes = [];
+  const decos = []; // detalles visuales (ranuras, aberturas): no se cortan ni pesan
+  const layout = {}; // posiciones clave que usan el eléctrico y los equipos
   const uniones = [];
   const herrajes = [];
   const equipos = [];
@@ -23,6 +25,10 @@ export function crearContexto(cfg) {
     const id = `${pref}-${String(contadores[pref]).padStart(2, '0')}`;
     partes.push({ tipo: 'placa', mat: 'estructura', ...p, id });
     return id;
+  }
+
+  function deco(d) {
+    decos.push({ color: '#2b2118', ...d, id: `DEC-${String(decos.length + 1).padStart(3, '0')}` });
   }
 
   // tipo: cola_tornillo | cajon | piso | pared | directo
@@ -51,12 +57,15 @@ export function crearContexto(cfg) {
     t,
     tb,
     partes,
+    decos,
+    layout,
     uniones,
     herrajes,
     equipos,
     anclajes,
     avisos,
     parte,
+    deco,
     unir,
     herraje,
     equipo,

@@ -10,7 +10,9 @@ const AMPACIDAD = { 0.75: 8, 1: 10, 1.5: 15, 2.5: 20, 4: 30, 6: 40, 10: 60, 16: 
 
 const siguiente = (lista, valor) => lista.find((v) => v >= valor) ?? lista[lista.length - 1];
 
-export function calcularElectrica(cargas, e) {
+const largoPolilinea = (pts) => pts.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1], p[2] - pts[i][2]), 0);
+
+export function calcularElectrica(cargas, e, cables = []) {
   const inversor = e.inversor;
   const filas = cargas
     .filter((c) => inversor || c.tipo !== '230V')
@@ -28,46 +30,101 @@ export function calcularElectrica(cargas, e) {
   const horasConduccion = ahDia / e.cargadorRealA;
   const corrienteMax = filas.reduce((s, f) => s + f.amperes, 0);
 
-  const calcCable = (largoM, amperes) => {
-    const caidaV = (e.caidaMaxPct / 100) * 12;
+  // Corriente continua de cada carga de 12 V (potencia / tensión)
+  const ampDe = (id) => {
+    const c = cargas.find((x) => x.id === id);
+    return c ? c.w / e.bateriaV : 0;
+  };
+  const ampInversor = e.inversorW / (e.bateriaV * e.eficienciaInversor);
+  const suma12 = cargas.filter((c) => c.tipo === '12V').reduce((s, c) => s + c.w / e.bateriaV, 0);
+  const resolver = {
+    dcdc: e.cargadorNominalA,
+    inversor: ampInversor,
+    carga12: suma12,
+    nevera: ampDe('nevera'),
+    ledA: ampDe('luces') / 2,
+    ledB: ampDe('luces') / 2,
+    bomba: ampDe('bomba'),
+    extractor: ampDe('extractor'),
+    switches: ampDe('luces') + ampDe('bomba') + ampDe('extractor'),
+    ac: e.inversorW / 230,
+    senal: 0.5,
+  };
+
+  // voltaje: tensión del circuito; minimo: sección mínima por robustez mecánica
+  const calcCable = (largoM, amperes, voltaje = 12, minimoMm2 = 1.5) => {
+    const caidaV = (e.caidaMaxPct / 100) * voltaje;
     const minimo = (2 * largoM * amperes * RHO_COBRE) / caidaV;
     const fusible = siguiente(FUSIBLES, amperes * 1.25);
     // El cable tiene que soportar el fusible que lo protege y también cumplir la caída máxima
     const porCorriente = SECCIONES.find((s) => AMPACIDAD[s] >= fusible) ?? SECCIONES[SECCIONES.length - 1];
-    const seccion = Math.max(siguiente(SECCIONES, minimo), porCorriente);
+    const porCaida = siguiente(SECCIONES, minimo);
+    const seccion = Math.max(porCaida, porCorriente, minimoMm2);
     const caidaReal = (2 * largoM * amperes * RHO_COBRE) / seccion;
+    let limitadoPor = 'caída de tensión';
+    if (seccion === porCorriente && porCorriente >= porCaida) limitadoPor = 'corriente';
+    if (seccion === minimoMm2 && minimoMm2 > porCorriente && minimoMm2 > porCaida) limitadoPor = 'sección mínima';
     return {
       seccionMinima: minimo,
       seccion,
-      limitadoPor: seccion === porCorriente && porCorriente > siguiente(SECCIONES, minimo) ? 'corriente' : 'caída de tensión',
+      limitadoPor,
       caidaReal,
-      caidaPct: (caidaReal / 12) * 100,
+      caidaPct: (caidaReal / voltaje) * 100,
       fusible,
     };
   };
 
-  const tramos = e.tramos.map((t) => {
-    const amperes = t.amperes === 'auto' ? Math.max(corrienteMax, 1) : t.amperes;
-    return { ...t, amperes, ...calcCable(t.largoM, amperes) };
+  // Cada cable del 3D usa su largo real (más 15 % de sobrante para terminales y curvas)
+  const tramos = cables.map((c) => {
+    const largoM = (largoPolilinea(c.puntos) / 1000) * (e.margenCable ?? 1.15);
+    const amperes = resolver[c.corriente] ?? 1;
+    const ac = c.tipo === 'ac';
+    const senal = c.tipo === 'senal';
+    return {
+      ...c,
+      largoM,
+      amperes,
+      ...calcCable(largoM, amperes, ac ? 230 : 12, senal ? 0.75 : 1.5),
+    };
   });
 
   const ramales = filas.map((f) => ({
     nombre: f.nombre,
     amperes: f.amperes,
-    ...calcCable(e.ramalLargoM, f.amperes),
+    ...calcCable(3, f.amperes),
   }));
+
+  // Cable a comprar, por sección (los de CC llevan positivo y negativo)
+  const mapa = new Map();
+  const sumar = (clave, item, metros) => {
+    const prev = mapa.get(clave) || { item, metros: 0 };
+    prev.metros += metros;
+    mapa.set(clave, prev);
+  };
+  for (const t of tramos) {
+    const m = t.largoM;
+    if (t.tipo === 'dc') {
+      sumar(`dc-${t.seccion}`, `Cable de cobre flexible ${t.seccion} mm2 (rojo y negro)`, m * 2);
+    } else if (t.tipo === 'ac') {
+      sumar(`ac-${t.seccion}`, `Cable 3 x ${t.seccion} mm2 para 230 V`, m);
+    } else if (t.tipo === 'senal') {
+      sumar(`se-${t.seccion}`, `Cable de señal 2 x ${t.seccion} mm2`, m);
+    }
+  }
+  const cableCompras = [...mapa.values()]
+    .map((c) => ({ ...c, metros: Math.ceil(c.metros * 10) / 10 }))
+    .sort((a, b) => a.item.localeCompare(b.item));
 
   const avisos = [];
   if (autonomiaDias < 1.5) avisos.push('La autonomía sin manejar es menor a 1,5 días. Revisar consumos o sumar batería.');
-  if (inversor) {
+  if (inversor && ampInversor > 100) {
     avisos.push(
-      'Hay cargas de 230 V: hace falta un inversor. No figura entre los productos comprados que tengo anotados.'
+      `El inversor a plena carga pide unos ${Math.round(ampInversor)} A de la batería. Confirmar que el BMS de la batería de ${e.bateriaAh} Ah entrega esa corriente de forma continua.`
     );
   }
   if (e.cargadorRealA > e.cargadorNominalA) avisos.push('La corriente real de carga supera la nominal del DC-DC.');
-  avisos.push(
-    'El DC-DC debe ser compatible con alternador inteligente (el Jumpy lo es). El fusible ANL va a menos de 30 cm del borne de la batería del auto.'
-  );
+  avisos.push('El DC-DC debe ser compatible con alternador inteligente (el Jumpy lo es). El fusible ANL va a menos de 30 cm del borne de la batería del auto.');
+  avisos.push('Los largos de cable salen del recorrido dibujado en 3D, con 15 % de sobrante. Medir en la van antes de cortar.');
 
   return {
     filas,
@@ -78,8 +135,10 @@ export function calcularElectrica(cargas, e) {
     autonomiaDias,
     horasConduccion,
     corrienteMax,
+    ampInversor,
     tramos,
     ramales,
+    cableCompras,
     avisos,
   };
 }

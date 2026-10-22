@@ -1,7 +1,9 @@
 # La Chata - diseño de muebles
 
-Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy: mueble izquierdo,
-cama con cajones y mueble derecho (pileta, alacena y mesa plegable).
+Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy y su sistema eléctrico,
+con la distribución de la foto de referencia: mueble trasero cruzado detrás de los asientos (fregadero,
+heladera, bidones, batería e inversor), cama de plataforma ranurada con caja con arco y cajones, y mueble
+derecho con cajones, alacena y mesa plegable.
 
 ## Uso
 
@@ -21,25 +23,36 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Plano de cortes por hoja, con los pasos de corte para sierra circular.
 - Dónde se fija cada mueble (piso, pared, entre muebles) y cuántos tornillos y escuadras.
 - Herrajes: correderas, bisagras, pistones, bisagras de piano, tiradores.
-- Eléctrica: consumo diario, autonomía, horas de manejo para recargar, cables y fusibles.
+- Eléctrica: consumo diario, autonomía, horas de manejo para recargar, cables y fusibles. Los largos de cable
+  salen del recorrido dibujado en 3D.
+- Sistema eléctrico en 3D: batería del auto bajo el asiento del acompañante, fusible ANL, cable largo bajo los
+  asientos, DC-DC, batería de 150 Ah, caja de fusibles, inversor, panel de 5 interruptores, 2 enchufes con USB-C,
+  2 tiras LED de 2 m en el techo, extractor, bomba y mangueras de agua.
+- Al hacer clic en cualquier equipo, cable o manguera (en el 3D o en la pestaña Eléctrica) se abre un panel con qué
+  es, dónde va, cómo se conecta y un video de YouTube recomendado.
 - Lista de compras agrupada.
 - Avisos si una pieza choca con otro mueble, con el pasarruedas o se sale de la van.
 
 ## Dónde cambiar cosas
 
 - `src/data/defaults.js`: medidas de la van, materiales, equipos y consumos iniciales.
-- `src/engine/mueble.js`: mueble bajo y alacena.
-- `src/engine/cama.js`: cama, cajones y mesa.
-- `src/engine/electrica.js`: cálculo de cables y batería.
+- `src/engine/trasero.js`, `cama.js`, `derecho.js`: los tres muebles. `frentes.js` arma los frentes con puertas a ras.
+- `src/engine/electrico3d.js`: posición de cada equipo eléctrico y recorrido 3D de cada cable.
+- `src/engine/electrica.js`: cálculo de cables, fusibles y batería.
+- `src/data/videos.js`: videos de YouTube de cada elemento. `src/data/elementos.js`: textos del panel.
 
 ## Supuestos a confirmar con medidas reales
 
 - Largo y entrada del pasarruedas (estimados).
-- Medidas de batería, DC-DC, caja de fusibles, pileta y tanque (estimadas).
+- Medidas de la batería de 150 Ah, inversor, DC-DC, caja de fusibles, batería del auto, fregadero y bidones (estimadas).
+- Potencia del inversor (se supuso 1000 W) y consumo de las tiras LED (9,6 W por metro).
+- Qué hace cada uno de los 5 interruptores (supuesto: luces 1, luces 2, bomba, extractor y mando del inversor).
+- Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
 - Consumos de cada aparato.
 - Tamaño de hoja que vende Derome (se usó 2440 x 1220).
-- La disposición de cada mueble sigue la foto de referencia. Si en la van el mueble de la pileta
-  va del otro lado, hay que cambiar los lados en `src/engine/construir.js`.
+- Ejes del modelo: x = 0 en la pared izquierda mirando desde la puerta trasera hacia los asientos, z = 0 en la
+  puerta trasera. El 3D se dibuja espejado en x para que izquierda y derecha se vean como en la van real.
+- El tablero de la foto no se puede medir: las medidas de cada frente y de las ranuras salen de la imagen.
 
 ## Firebase (base de datos y hosting)
 

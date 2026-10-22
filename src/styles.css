@@ -321,3 +321,123 @@ pre {
     height: 60vh;
   }
 }
+
+/* Panel de video y datos de un elemento eléctrico */
+.panel-elemento {
+  position: absolute;
+  top: 88px;
+  right: 10px;
+  width: 340px;
+  max-height: calc(100% - 98px);
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 10px 14px 12px;
+  font-size: 13px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+  z-index: 5;
+}
+
+.panel-elemento header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.panel-elemento h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.panel-elemento h4 {
+  margin: 12px 0 6px;
+  font-size: 13px;
+}
+
+.panel-elemento p,
+.panel-elemento ul,
+.panel-elemento ol {
+  margin: 6px 0;
+}
+
+.panel-elemento ul,
+.panel-elemento ol {
+  padding-left: 18px;
+}
+
+.panel-elemento .datos td {
+  padding: 2px 6px 2px 0;
+}
+
+.panel-elemento .reproductor {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.panel-elemento iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.panel-elemento .ver-video {
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--borde);
+  background: #fff3e0;
+  cursor: pointer;
+}
+
+.panel-elemento .videos {
+  list-style: none;
+  padding: 0;
+}
+
+.panel-elemento .videos button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 4px 2px;
+  cursor: pointer;
+  color: #1a56a0;
+  font-size: 12.5px;
+}
+
+.panel-elemento .videos button.activo {
+  font-weight: 700;
+}
+
+.panel-elemento .enlaces {
+  font-size: 12.5px;
+}
+
+.fila-click {
+  cursor: pointer;
+}
+
+.fila-click:hover,
+.fila-click.sel {
+  background: #fff3e0;
+}
+
+@media (max-width: 900px) {
+  .panel-elemento {
+    width: calc(100% - 20px);
+  }
+}
+
+.panel-elemento .ver-video {
+  color: #3b2a14;
+  font-weight: 600;
+}

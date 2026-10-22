@@ -1,7 +1,8 @@
 // Arma los tres muebles a partir de la configuración y valida interferencias.
 import { crearContexto } from './contexto.js';
-import { mueble, alacena } from './mueble.js';
-import { cama, mesa } from './cama.js';
+import { trasero } from './trasero.js';
+import { cama } from './cama.js';
+import { derecho } from './derecho.js';
 
 const solapa = (a, b) => {
   const tol = 0.5;
@@ -15,74 +16,16 @@ const solapa = (a, b) => {
   );
 };
 
+export const GRUPOS = ['Mueble trasero', 'Cama', 'Mueble derecho'];
+
 export function construir(cfg) {
   const ctx = crearContexto(cfg);
-  const { van, izquierdo: iz, derecho: de, cama: ca, mesa: me } = cfg;
-  const GI = 'Mueble izquierdo';
-  const GC = 'Cama';
-  const GD = 'Mueble derecho';
+  const { van } = cfg;
+  const [GT, GC, GD] = GRUPOS;
 
-  mueble(ctx, {
-    grupo: GI,
-    lado: 'izq',
-    x0: 0,
-    z0: van.margenTrasero,
-    profundidad: iz.profundidad,
-    largo: iz.largo,
-    alto: iz.alto,
-    zocalo: iz.zocalo,
-    bahias: [
-      { tipo: 'nevera', largo: iz.nevera.largo },
-      { tipo: 'cajones', largo: iz.cajones.largo, n: iz.cajones.n },
-      { tipo: 'electrico' },
-    ],
-  });
-
-  const bz0 = van.largo - ca.largo;
-  cama(ctx, {
-    grupo: GC,
-    bx0: iz.profundidad + ca.holguraMueble,
-    bz0,
-    ancho: ca.ancho,
-    largo: ca.largo,
-    base: ca.base,
-    marco: ca.marco,
-    separacion: ca.separacion,
-    largoCajon: ca.largoCajon,
-    altoCajon: ca.altoCajon,
-  });
-
-  const xDer = van.ancho - de.profundidad;
-  mueble(ctx, {
-    grupo: GD,
-    lado: 'der',
-    x0: xDer,
-    z0: van.margenTrasero,
-    profundidad: de.profundidad,
-    largo: de.largo,
-    alto: de.alto,
-    zocalo: de.zocalo,
-    bahias: [{ tipo: 'pileta' }],
-  });
-  const yAlacena = de.alto + de.alacena.separacion;
-  alacena(ctx, {
-    grupo: GD,
-    lado: 'der',
-    x0: van.ancho - de.alacena.profundidad,
-    z0: van.margenTrasero,
-    profundidad: de.alacena.profundidad,
-    largo: de.largo,
-    y0: yAlacena,
-    alto: van.alto - 20 - yAlacena,
-  });
-  mesa(ctx, {
-    grupo: GD,
-    x0: xDer,
-    z0: van.margenTrasero + 20,
-    ancho: me.ancho,
-    largo: me.largo,
-    altura: me.altura,
-  });
+  trasero(ctx, GT);
+  cama(ctx, GC);
+  derecho(ctx, GD);
 
   // Pasarruedas como obstáculos
   const arcos = [
@@ -130,12 +73,14 @@ export function construir(cfg) {
 
   return {
     partes,
+    decos: ctx.decos,
+    layout: ctx.layout,
     uniones: ctx.uniones,
     herrajes: ctx.herrajes,
     equipos: ctx.equipos,
     anclajes: ctx.anclajes,
     arcos,
     avisos,
-    grupos: [GI, GC, GD],
+    grupos: GRUPOS,
   };
 }
