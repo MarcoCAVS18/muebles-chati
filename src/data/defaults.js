@@ -6,7 +6,7 @@
 //
 // La distribución sigue la foto de referencia:
 //   - Mueble trasero cruzado, pegado al mamparo de los asientos (cabecera de la cama)
-//   - Cama de plataforma ranurada pegada a la pared izquierda, con caja con arco al pie
+//   - Cama extensible (90 a 120 cm) de plywood con esquinas redondeadas, con caja con arco al pie
 //   - Mueble derecho con cajones, puerta bajo la mesa plegable y alacena alta
 
 export const CONFIG_INICIAL = {
@@ -44,15 +44,18 @@ export const CONFIG_INICIAL = {
     divisor2: 980, // límite de la sección central (bidones, inversor, DC-DC)
   },
 
-  // Cama de plataforma ranurada, pegada a la pared izquierda y al mueble trasero
+  // Cama extensible de 90 a 120 cm: placas de plywood con esquinas redondeadas y bandejas que se tiran al pasillo
   cama: {
     x0: 10,
-    ancho: 800,
+    ancho: 900, // cama cerrada
+    extension: 300, // se agranda hasta 1200
+    bandejaAncho: 500, // 200 mm quedan debajo de la placa fija al abrir
+    radio: 50, // radio de las esquinas
     largo: 1850,
     plataforma: 500, // altura de la cara superior (pasa por encima del pasarruedas)
     largoCabecera: 990, // largo de la placa de la cabecera (la otra placa va al pie)
-    cajonA: { z: 1100, ancho: 600, fondo: 450, alto: 200 },
-    cajonB: { ancho: 420, fondo: 600, alto: 200 },
+    cajonCabecera: { fondo: 560, alto: 200 },
+    cajonPie: { fondo: 600, alto: 200 },
   },
 
   // Mueble derecho: módulo de cajones (atrás), módulo con puerta bajo la mesa y alacena
@@ -66,7 +69,7 @@ export const CONFIG_INICIAL = {
     alacena: { profundidad: 300, base: 870, alto: 380 },
   },
 
-  mesa: { ancho: 500 },
+  mesa: { ancho: 400 }, // con la cama de 90 cm cerrada quedan 410 mm de pasillo
 
   // Datos del vehículo (ESTIMADOS)
   vehiculo: {

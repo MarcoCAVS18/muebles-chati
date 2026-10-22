@@ -50,6 +50,17 @@ export function construir(cfg) {
       avisos.push(`${p.id} (${p.nombre}) se sale del interior de la van.`);
     }
   }
+  // Con la cama extendida las bandejas salen hacia el pasillo: controlar que no choquen
+  for (const p of partes) {
+    if (!p.ext) continue;
+    const abierta = { ...p, x: p.x + cfg.cama.extension };
+    for (const o of partes) {
+      if (o.grupo !== p.grupo && solapa(abierta, o)) {
+        avisos.push(`Con la cama extendida, ${p.id} (${p.nombre}) choca con ${o.id} (${o.nombre}).`);
+      }
+    }
+    if (abierta.x + abierta.sx > van.ancho + 0.5) avisos.push(`Con la cama extendida, ${p.id} (${p.nombre}) se sale de la van.`);
+  }
   // Interferencias entre muebles y con pasarruedas
   const visto = new Set();
   for (let i = 0; i < partes.length; i++) {

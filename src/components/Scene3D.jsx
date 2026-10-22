@@ -61,6 +61,39 @@ function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f2a', on
   );
 }
 
+// Placa con las cuatro esquinas redondeadas en planta (x, z) y espesor en y
+function PlacaRedonda({ x, y, z, sx, sy, sz, radio, color, opacidad = 1, bordes, onClick, onOver, onOut }) {
+  const geometria = useMemo(() => {
+    const r = Math.min(m(radio), m(sx) / 2, m(sz) / 2);
+    const w = m(sx);
+    const h = m(sz);
+    // La forma se dibuja en (u, v) y al rotar el eje x -90 grados v queda como -z
+    const forma = new THREE.Shape();
+    forma.moveTo(r, 0);
+    forma.lineTo(w - r, 0);
+    forma.absarc(w - r, -r, r, Math.PI * 1.5, Math.PI * 2, false);
+    forma.lineTo(w, -h + r);
+    forma.absarc(w - r, -h + r, r, 0, Math.PI * 0.5, false);
+    forma.lineTo(r, -h);
+    forma.absarc(r, -h + r, r, Math.PI * 0.5, Math.PI, false);
+    forma.lineTo(0, -r);
+    forma.absarc(r, -r, r, Math.PI, Math.PI * 1.5, false);
+    return new THREE.ExtrudeGeometry(forma, { depth: m(sy), bevelEnabled: false, curveSegments: 10 });
+  }, [sx, sy, sz, radio]);
+  return (
+    <mesh geometry={geometria} position={[m(x), m(y), m(z)]} rotation={[-Math.PI / 2, 0, 0]} onClick={onClick} onPointerOver={onOver} onPointerOut={onOut}>
+      <meshStandardMaterial
+        key={opacidad < 1 ? 'transparente' : 'opaco'}
+        color={color}
+        transparent={opacidad < 1}
+        opacity={opacidad}
+        depthWrite={opacidad >= 1}
+      />
+      {bordes && <Edges color={bordes} threshold={20} />}
+    </mesh>
+  );
+}
+
 // Un tramo recto de cable: cilindro entre dos puntos
 function Tramo({ a, b, r, color, emisivo }) {
   const { pos, quat, largo } = useMemo(() => {
@@ -120,7 +153,7 @@ function Deco({ d }) {
 function Escena(props) {
   const {
     data, elec3d, tramos, van, visibles, explosion, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
-    seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar,
+    seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar, camaAbierta,
   } = props;
   const controles = useRef();
 
@@ -188,29 +221,28 @@ function Escena(props) {
       {data.partes
         .filter((p) => visibles[p.grupo])
         .map((p) => {
-          const q = desplazar(p, p.grupo);
+          const q = { ...desplazar(p, p.grupo) };
+          if (p.ext) q.x += (data.layout.cama?.extension || 0) * camaAbierta; // las bandejas salen al pasillo
           const elegida = seleccion === p.id;
           const color = elegida ? '#ff7043' : p.tipo === 'liston' ? '#c49a5e' : COLORES[p.grupo];
-          return (
-            <Caja
-              key={p.id}
-              x={q.x}
-              y={q.y}
-              z={q.z}
-              sx={p.sx}
-              sy={p.sy}
-              sz={p.sz}
-              color={color}
-              opacidad={transparentar ? 0.12 : 1}
-              bordes={elegida ? '#bf360c' : '#6b4f2a'}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSeleccion(p.id);
-              }}
-              onOver={sobre(`${p.id} - ${p.nombre}`)}
-              onOut={() => setHover('')}
-            />
-          );
+          const comun = {
+            x: q.x,
+            y: q.y,
+            z: q.z,
+            sx: p.sx,
+            sy: p.sy,
+            sz: p.sz,
+            color,
+            opacidad: transparentar ? 0.12 : 1,
+            bordes: elegida ? '#bf360c' : '#6b4f2a',
+            onClick: (e) => {
+              e.stopPropagation();
+              setSeleccion(p.id);
+            },
+            onOver: sobre(`${p.id} - ${p.nombre}`),
+            onOut: () => setHover(''),
+          };
+          return p.radio ? <PlacaRedonda key={p.id} {...comun} radio={p.radio} /> : <Caja key={p.id} {...comun} />;
         })}
 
       {data.decos

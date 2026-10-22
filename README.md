@@ -2,7 +2,7 @@
 
 Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy y su sistema eléctrico,
 con la distribución de la foto de referencia: mueble trasero cruzado detrás de los asientos (fregadero,
-heladera, bidones, batería e inversor), cama de plataforma ranurada con caja con arco y cajones, y mueble
+heladera, bidones, batería e inversor), cama extensible de 90 a 120 cm (placas de plywood con esquinas redondeadas, bandejas sobre correderas, caja con arco y cajones), y mueble
 derecho con cajones, alacena y mesa plegable.
 
 ## Uso
@@ -48,6 +48,10 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Potencia del inversor (se supuso 1000 W) y consumo de las tiras LED (9,6 W por metro).
 - Qué hace cada uno de los 5 interruptores (supuesto: luces 1, luces 2, bomba, extractor y mando del inversor).
 - Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
+- Cama extensible: al abrir, la bandeja queda 16 mm más baja que la placa fija (la cubre el colchón o un relleno de 15 mm).
+  La zona del pie (caja con arco) no se extiende: ahí la cama sigue en 90 cm. Con la cama abierta quedan 110 mm de pasillo.
+- Correderas de las bandejas: de carga, 500 mm, extensión total, 100 kg el par. Confirmar con la ficha de las que compres.
+- Mesa plegable reducida a 400 mm de ancho para que no pase sobre la cama de 90 cm.
 - Consumos de cada aparato.
 - Tamaño de hoja que vende Derome (se usó 2440 x 1220).
 - Ejes del modelo: x = 0 en la pared izquierda mirando desde la puerta trasera hacia los asientos, z = 0 en la

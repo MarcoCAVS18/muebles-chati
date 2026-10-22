@@ -81,14 +81,15 @@ export const SECCIONES_CFG = [
     ],
   },
   {
-    titulo: 'Cama',
+    titulo: 'Cama extensible',
     campos: [
-      { ruta: 'cama.ancho', etiqueta: 'Ancho' },
+      { ruta: 'cama.ancho', etiqueta: 'Ancho cerrada' },
+      { ruta: 'cama.extension', etiqueta: 'Cuánto se agranda' },
+      { ruta: 'cama.bandejaAncho', etiqueta: 'Ancho de cada bandeja' },
+      { ruta: 'cama.radio', etiqueta: 'Radio de esquinas' },
       { ruta: 'cama.largo', etiqueta: 'Largo (mínimo 1700)' },
       { ruta: 'cama.plataforma', etiqueta: 'Altura de la plataforma' },
       { ruta: 'cama.largoCabecera', etiqueta: 'Largo placa cabecera' },
-      { ruta: 'cama.cajonA.ancho', etiqueta: 'Cajón A: ancho' },
-      { ruta: 'cama.cajonB.ancho', etiqueta: 'Cajón B: ancho' },
     ],
   },
   {

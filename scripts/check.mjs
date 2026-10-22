@@ -73,5 +73,11 @@ for (const c of [...e3.cables, ...e3.mangueras]) {
   }
 }
 exigir(data.avisos.length === 0, 'hay avisos de geometría');
+// La cama extendida: las bandejas tienen que existir y moverse hasta 1200 mm de ancho
+const bandejas = data.partes.filter((p) => p.ext && p.radio);
+exigir(bandejas.length === 2, 'faltan las dos bandejas extensibles');
+const xMax = Math.max(...bandejas.map((p) => p.x + p.sx + CONFIG_INICIAL.cama.extension));
+exigir(xMax - CONFIG_INICIAL.cama.x0 >= 1200 - 1, 'la cama extendida no llega a 120 cm');
+exigir(data.partes.filter((p) => p.radio).length >= 4, 'faltan placas con esquinas redondeadas');
 exigir(data.decos.every((d) => d.id), 'decos sin id');
 process.exit(fallos ? 1 : 0);

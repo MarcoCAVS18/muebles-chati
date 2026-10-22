@@ -41,6 +41,7 @@ export default function App() {
   const [mostrarElectrico, setMostrarElectrico] = useState(true);
   const [mostrarAsientos, setMostrarAsientos] = useState(true);
   const [transparentar, setTransparentar] = useState(false);
+  const [camaAbierta, setCamaAbierta] = useState(0);
   const [elemento, setElemento] = useState('');
   const [vista, setVista] = useState({ clave: 'foto', n: 0 });
   const [visibles, setVisibles] = useState({
@@ -136,6 +137,7 @@ export default function App() {
             setHover={setHover}
             vista={vista}
             transparentar={transparentar}
+            camaAbierta={camaAbierta}
           />
           <div className="hud">
             <div className="controles">
@@ -178,6 +180,10 @@ export default function App() {
                     </option>
                   ))}
                 </select>
+              </label>
+              <label>
+                Cama: {Math.round((cfg.cama.ancho + cfg.cama.extension * camaAbierta) / 10)} cm
+                <input type="range" min="0" max="1" step="0.05" value={camaAbierta} onChange={(e) => setCamaAbierta(parseFloat(e.target.value))} />
               </label>
               <label>
                 Vista explotada
