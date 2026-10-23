@@ -85,17 +85,17 @@ exigir(xMax - CONFIG_INICIAL.cama.x0 >= 1200 - 1, 'la cama extendida no llega a 
 exigir(data.partes.filter((p) => p.radio).length >= 4, 'faltan placas con esquinas redondeadas');
 exigir(data.decos.every((d) => d.id), 'decos sin id');
 
-// ---- Diseño: mueble trasero de 500 mm con una L de 670 mm a la izquierda (eléctrico), cocina con gas al centro, agua a la derecha ----
+// ---- Diseño: mueble trasero de 500 mm con una L de 570 mm a la izquierda (eléctrico), cocina con gas al centro, agua a la derecha ----
 const cfgI = CONFIG_INICIAL;
 const tra = data.partes.filter((p) => p.grupo === 'Mueble trasero');
 exigir(cfgI.trasero.profundidad === 500, 'el mueble trasero debería tener 500 mm de profundidad');
-exigir(cfgI.trasero.profundidadL === 670, 'la sección eléctrica (la L) debería tener 670 mm de profundidad');
+exigir(cfgI.trasero.profundidadL === 570, 'la sección eléctrica (la L) debería tener 570 mm de profundidad');
 // Medidas tomadas en la van: puerta lateral de 98 cm, vigas de 22 cm, pasarruedas de 80 x 42,5 x 18,5 cm
 const vn = cfgI.van;
 exigir(vn.puertaLateral.largo === 980 && vn.puertaLateral.vigas === 220, 'la puerta lateral debería medir 980 mm y las vigas 220 mm');
 exigir(vn.archLargo === 800 && vn.archAlto === 425 && vn.archIntrusion === 185, 'el pasarruedas debería medir 800 x 425 x 185 mm');
 exigir(vn.archInicio + vn.archLargo + vn.puertaLateral.vigas + vn.puertaLateral.largo + vn.puertaLateral.desdeMamparo === vn.largo, 'el pasarruedas, las vigas y la puerta no suman el largo útil de la van');
-exigir(cfgI.cama.largo === 1700, 'la cama debería medir 170 cm de largo');
+exigir(cfgI.cama.largo === 1800, 'la cama debería medir 180 cm de largo');
 exigir(cfgI.cama.plataforma >= 430 && cfgI.cama.plataforma <= 440, 'la cama debería quedar apenas sobre el pasarruedas (43 a 44 cm)');
 exigir(Math.abs(vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL) >= 0 && vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL < vn.archInicio, 'la cama más la L deberían terminar antes del pasarruedas');
 exigir(cfgI.trasero.ancho === cfgI.van.ancho, 'el mueble trasero debería ir de pared a pared');
@@ -264,7 +264,7 @@ const conContorno = data.partes.filter((p) => contorno(p));
 exigir(conContorno.length === 5, `deberían tener contorno propio 5 piezas (2 placas, 2 bandejas y el frente con arco), hay ${conContorno.length}`);
 const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
 exigir(contorno(cab).esquinas === 5 && contorno(cab).recorte, 'la placa de la cabecera debería tener 5 esquinas redondeadas y un recorte');
-exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /261 x 150/.test(l.texto)), 'la descripción de la cabecera debería decir el recorte de 261 x 150');
+exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /261 x 250/.test(l.texto)), 'la descripción de la cabecera debería decir el recorte de 261 x 250');
 const frenteArco = data.partes.find((p) => /calar arco/.test(p.nombre));
 exigir(frenteArco && contorno(frenteArco).arco && contorno(frenteArco).arco.r === 170, 'el frente con arco debería llevar el arco de R170');
 for (const p of data.partes) {

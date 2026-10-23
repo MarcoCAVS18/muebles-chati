@@ -67,8 +67,13 @@ export default function App() {
           // Un guardado de un diseño anterior no sirve para el diseño nuevo
           if (d.version === VERSION) {
             if (d.cfg) {
-              // Un guardado con el reparto anterior de las placas (940 mm de cabecera) pasa al nuevo (1100 y 600 mm)
-              if (d.cfg.cama && d.cfg.cama.largoCabecera === 940) d.cfg.cama.largoCabecera = CONFIG_INICIAL.cama.largoCabecera;
+              // Un guardado con la cama de 170 cm y la L de 670 mm pasa a la cama de 180 cm (placas de 1200 y 600 mm) y la L de 570 mm
+              const { cama: cm, trasero: tr } = d.cfg;
+              if (cm && tr && cm.largo === 1700 && tr.profundidadL === 670) {
+                cm.largo = CONFIG_INICIAL.cama.largo;
+                cm.largoCabecera = CONFIG_INICIAL.cama.largoCabecera;
+                tr.profundidadL = CONFIG_INICIAL.trasero.profundidadL;
+              }
               setCfg(mezclar(CONFIG_INICIAL, d.cfg));
             }
             if (Array.isArray(d.cargas)) setCargas(d.cargas);

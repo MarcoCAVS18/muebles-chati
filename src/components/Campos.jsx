@@ -91,7 +91,7 @@ export const SECCIONES_CFG = [
       { ruta: 'cama.extension', etiqueta: 'Cuánto se agranda' },
       { ruta: 'cama.bandejaAncho', etiqueta: 'Ancho de cada bandeja' },
       { ruta: 'cama.radio', etiqueta: 'Radio de esquinas' },
-      { ruta: 'cama.largo', etiqueta: 'Largo (mínimo 1700)' },
+      { ruta: 'cama.largo', etiqueta: 'Largo (180 cm: la L del mueble trasero llega hasta él)' },
       { ruta: 'cama.huecoMueble', etiqueta: 'Hueco libre bajo la cama frente al mueble' },
       { ruta: 'cama.plataforma', etiqueta: 'Altura de la plataforma' },
       { ruta: 'cama.largoCabecera', etiqueta: 'Largo placa cabecera' },

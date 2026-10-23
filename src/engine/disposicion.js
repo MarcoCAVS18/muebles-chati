@@ -3,13 +3,13 @@
 //
 // Secciones de izquierda a derecha, vistas desde la puerta trasera hacia los asientos
 // (x = 0 es la pared izquierda):
-//   E  eléctrico (la L, 670 mm de fondo): al piso la batería acostada, el inversor, el DC-DC y los
+//   E  eléctrico (la L, 570 mm de fondo): al piso la batería acostada, el inversor, el DC-DC y los
 //      fusibles, bajo el plano de la cama; sobre la cama, el tablero con interruptores y enchufes
 //      y dos cajones para cosas de cocina
 //   K  cocina (500 mm): anafe arriba, cajón de la garrafa y heladera al piso
 //   W  agua (500 mm): fregadero arriba, cajón bajo el fregadero y cajón de bidones al piso
 //
-// La cama (plataforma a 440 mm) termina contra el frente de la sección E. Lo que está bajo la cama sale
+// La cama (plataforma a 440 mm, 1800 mm de largo) termina contra el frente de la sección E. Lo que está bajo la cama sale
 // hacia un hueco libre; lo que está sobre la cama queda a la vista.
 
 export function disposicionTrasero(cfg) {
@@ -74,8 +74,14 @@ export function disposicionTrasero(cfg) {
       { nombre: 'Cajón de cocina 2', y0: 720, y1: 805 },
     ],
   };
-  // Inversor y DC-DC contra el borde derecho; los fusibles a su izquierda
-  E.inversor = { x: sec.E.x1 - 15 - inv.x, y: yE, z: zInE + 15, sx: inv.x, sy: inv.y, sz: inv.z };
+  // Inversor y DC-DC contra el borde derecho; los fusibles a su izquierda.
+  // Si la L es profunda el inversor va de largo sobre z (como los demás equipos). Si es angosta (570 mm), el inversor,
+  // el paso del cable largo y la batería no entran uno detrás de otro: el inversor va atravesado, con el largo sobre x.
+  const fondoE = zFondo - zInE;
+  E.inversorAtravesado = 15 + inv.z + 70 + bat.z + 60 > fondoE;
+  const ivSx = E.inversorAtravesado ? inv.z : inv.x;
+  const ivSz = E.inversorAtravesado ? inv.x : inv.z;
+  E.inversor = { x: sec.E.x1 - 15 - ivSx, y: yE, z: zInE + 15, sx: ivSx, sy: inv.y, sz: ivSz };
   E.dcdc = { x: E.inversor.x - 10 - dc.x, y: yE, z: zInE + 15, sx: dc.x, sy: dc.y, sz: dc.z };
   E.fusibles = { x: E.dcdc.x - 10 - fus.z, y: yE, z: zInE + 15, sx: fus.z, sy: fus.y, sz: fus.x };
   // Batería acostada contra el fondo, con 70 mm de pasada para los cables

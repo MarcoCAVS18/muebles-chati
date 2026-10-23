@@ -128,6 +128,7 @@ export function electrico3d(cfg) {
   const xEnt = sec.E.x1 - 17; // por donde entra el cable largo al mueble, entre el ANL y el divisor
   const yEnt = 60; // altura de la entrada: pasa por el hueco de 100 mm bajo la curva del mamparo
   const zUnder = 2600; // recorrido bajo los asientos
+  const zRutaLargo = Math.max(iv.z + iv.sz, dcdc.z + dcdc.sz) + 42; // el cable largo pasa por detrás de los equipos del frente
   const yCan = yTecho - 12; // cota de los cables en el techo
   const zFinA = zLed0 + largoLed;
   const xCeil = xViga + 90; // por el techo el cable de la lámpara corre cerca de la pared izquierda, antes de bajar por la viga
@@ -171,8 +172,8 @@ export function electrico3d(cfg) {
         [xEnt, yEnt, zb + 8],
         [xEnt, yEnt, zFondo - 6],
         [xEnt, 95, zFondo - 6],
-        [xEnt, 95, iv.z + iv.sz + 42],
-        [dcdc.x + dcdc.sx / 2, 95, iv.z + iv.sz + 42],
+        [xEnt, 95, zRutaLargo],
+        [dcdc.x + dcdc.sx / 2, 95, zRutaLargo],
         [dcdc.x + dcdc.sx / 2, 95, dcdc.z + dcdc.sz + 2],
       ],
       nota: 'Va por el piso bajo los asientos, cruza de lado a lado, entra al mueble por el hueco de 10 cm bajo la curva del mamparo (con pasacables en el fondo) y sigue pegado al piso, detrás del inversor, hasta la parte de atrás del DC-DC.',

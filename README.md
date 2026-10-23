@@ -4,7 +4,7 @@ Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy y su 
 con la distribución de la foto de referencia: mueble trasero cruzado de pared a pared detrás de los asientos
 (de izquierda a derecha: eléctrico al piso con la batería acostada, inversor, DC-DC y fusibles, y sobre la cama el
 panel y los enchufes con dos cajones de cocina arriba; cocina con anafe, gas y heladera al piso, al centro; y agua con
-fregadero y bidones al piso, a la derecha), cama extensible de 90 a 120 cm de 170 cm de largo (placas de plywood con
+fregadero y bidones al piso, a la derecha), cama extensible de 90 a 120 cm de 180 cm de largo (placas de plywood con
 esquinas redondeadas, bandejas sobre correderas, caja con arco y cajones), y mueble
 derecho con cajones, alacena y mesa plegable.
 
@@ -75,18 +75,18 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   autonomía baja a 1,7 días; se edita en la pestaña Eléctrica.
 - Lámpara flexible (MRYC de 12 V con interruptor táctil y USB 5 V 2 A): 13 W estimados (3 W de luz y 10 W de USB) durante 0,5 h por día,
   base a 68 cm del piso (z 1230, centro de la viga de 22 cm). Se asumió la viga izquierda igual a la derecha.
-- Mueble trasero de pared a pared (1720 mm) y de 500 mm de profundidad, con una L de 670 mm solo en la sección eléctrica
-  (a la izquierda), que llega hasta el pie de la cama de 170 cm. Si tapa la puerta corrediza, achicar el ancho en la barra
+- Mueble trasero de pared a pared (1720 mm) y de 500 mm de profundidad, con una L de 570 mm solo en la sección eléctrica
+  (a la izquierda), que llega hasta el pie de la cama de 180 cm. Si tapa la puerta corrediza, achicar el ancho en la barra
   lateral. Secciones (x): eléctrico 15-617, cocina 632-1087 y agua 1102-1705.
 - La cama queda a 44 cm, apenas sobre el pasarruedas, y apoya sobre él. Bajo la cama, frente a la L, queda un hueco libre de
   430 mm para abrir la puerta de la batería. Todo lo eléctrico queda al piso, debajo del plano de la cama; el panel y los
   enchufes van sobre la cama, en el tablero de arriba, y los cajones de cocina de la L van sobre el tablero.
 - Mueble derecho: se apoya sobre el pasarruedas derecho. Bajo 43 cm solo queda libre la franja del frente (cerrada con un
   frente ciego) y los dos cajones se acomodan arriba, a partir de los 45 cm.
-- El frente de la cocina y del agua está en z = 1910, 170 mm detrás del frente de la L (z = 1740), donde termina la placa de la
+- El frente de la cocina y del agua está en z = 1910, 70 mm detrás del frente de la L (z = 1840), donde termina la placa de la
   cabecera. La garrafa se carga una vez por semana: el cajón del gas (correderas de 300 mm, frente alto) se tira entero y la
   garrafa queda fuera del mueble para levantarla, con el regulador y la manguera quedando en el cajón. Para que el frente alto
-  no choque con la cama, la placa de la cabecera lleva un recorte de 261 x 150 mm en la esquina del lado de la cocina (el
+  no choque con la cama, la placa de la cabecera lleva un recorte de 261 x 250 mm en la esquina del lado de la cocina (el
   colchón lleva el mismo recorte). `npm run check` verifica que el cajón no choque al sacarlo.
   La sección de agua tapa parte de la puerta lateral derecha (z 1340 a 2320).
 - Gas: la rejilla de ventilación al piso hoy cae bajo la heladera, no bajo la garrafa. Falta definir cómo ventila el cajón del gas.
@@ -95,9 +95,12 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El cajón de la garrafa necesita una rejilla de
   ventilación hacia el exterior por el piso, detector de gas y detector de monóxido de carbono.
 - Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
-- Placas de la cama: cabecera de 1100 mm y pie de 600 mm de largo (900 mm de ancho, 3 mm de luz entre las dos), las dos con su
-  bandeja extensible. La del pie mide unos 311 mm de largo porque los primeros 255 mm son la caja con arco. Se cambia en
-  "Largo placa cabecera" (un guardado con el valor anterior de 940 mm pasa solo a 1100).
+- Placas de la cama: cabecera de 1200 mm y pie de 600 mm de largo (900 mm de ancho, 3 mm de luz entre las dos), las dos con su
+  bandeja extensible. La de la cabecera mide 736,5 mm y la del pie unos 311 mm, porque los primeros 255 mm del pie son la caja con
+  arco. Se cambia en "Largo placa cabecera". Un guardado con la cama de 170 cm y la L de 670 mm pasa solo a 180 cm y 570 mm.
+- Con la L de 570 mm (10 cm menos que antes) el inversor va atravesado, con el largo sobre el ancho del mueble, para que entren
+  uno detrás de otro los equipos del frente, el paso del cable largo y la batería. Los dos cajones de cocina de la L usan
+  correderas de 500 mm. Si se vuelve a una L de 670 mm el inversor vuelve a ir de largo sobre z.
 - Cama extensible: al abrir, la bandeja queda 16 mm más baja que la placa fija (la cubre el colchón o un relleno de 15 mm).
   La zona del pie (caja con arco) no se extiende: ahí la cama sigue en 90 cm. Con la cama abierta quedan 110 mm de pasillo.
 - Correderas de las bandejas: de carga, 500 mm, extensión total, 100 kg el par. Confirmar con la ficha de las que compres.

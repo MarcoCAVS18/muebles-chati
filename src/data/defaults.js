@@ -8,7 +8,7 @@
 //   - Mueble trasero cruzado de pared a pared, pegado a la zona de los asientos (cabecera de la cama).
 //     Vista desde la puerta trasera, de izquierda a derecha:
 //       izquierda: electricidad al piso (batería acostada, inversor, DC-DC, fusibles) y arriba interruptores,
-//                  enchufes y cajones de cocina; esta sección es la L: llega a 670 mm de profundidad
+//                  enchufes y cajones de cocina; esta sección es la L: llega a 570 mm de profundidad
 //       centro:    anafe, cajón de la garrafa de gas y heladera al piso
 //       derecha:   grifo y fregadero, con los dos bidones de agua al piso
 //   - Cama extensible (90 a 120 cm) de plywood con esquinas redondeadas, con caja con arco al pie
@@ -50,7 +50,7 @@ export const CONFIG_INICIAL = {
   trasero: {
     ancho: 1720,
     profundidad: 500, // cocina y agua (el fregadero mide 400 mm de fondo)
-    profundidadL: 670, // sección izquierda: llega hasta la cabecera de la cama
+    profundidadL: 570, // sección izquierda: llega hasta la cabecera de la cama
     alto: 850,
     zocalo: 20,
     divisor1: 617, // fin de la sección eléctrica
@@ -64,9 +64,9 @@ export const CONFIG_INICIAL = {
     extension: 300, // se agranda hasta 1200
     bandejaAncho: 500, // 200 mm quedan debajo de la placa fija al abrir
     radio: 50, // radio de las esquinas
-    largo: 1700, // confirmado
+    largo: 1800, // largo de la cama (antes 1700): la L del mueble trasero se achicó 100 mm para dejarle lugar
     plataforma: 440, // altura de la cara superior: la placa (15 mm) apoya justo sobre el pasarruedas (425)
-    largoCabecera: 1100, // largo de la placa de la cabecera (la otra placa, de 600 mm, va al pie)
+    largoCabecera: 1200, // largo de la placa de la cabecera (la otra placa, de 600 mm, va al pie)
     huecoMueble: 430, // espacio libre bajo la cama, frente al mueble trasero (bidones y puertas bajas)
     cajonCabecera: { fondo: 560, alto: 200 },
     cajonPie: { fondo: 600, alto: 200 },

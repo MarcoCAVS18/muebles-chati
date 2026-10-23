@@ -104,7 +104,7 @@ export function trasero(ctx, G) {
       z: E.zIn + 15,
       ancho: hueco.E.x1 - hueco.E.x0 - 26,
       alto: c.y1 - c.y0 - 25,
-      fondo: 560,
+      fondo: Math.min(560, Math.floor((zFondo - (E.zIn + 15) - 15) / 50) * 50), // correderas de 500 mm cuando la L mide 570 mm
       dir: 'z-',
     });
   }
