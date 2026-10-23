@@ -1,5 +1,6 @@
 import React from 'react';
 import { pasosDeCorte } from '../engine/packer.js';
+import { useDobleToque, TACTIL } from '../util/pantalla.js';
 
 const n0 = (v) => Math.round(v);
 
@@ -18,6 +19,7 @@ const csv = (filas) =>
 
 // ---------- Despiece ----------
 export function Despiece({ data, cfg, seleccion, setSeleccion, enfocar }) {
+  const esDoble = useDobleToque();
   const exportar = () => {
     const filas = [['Id', 'Mueble', 'Pieza', 'Material', 'Largo', 'Ancho', 'Espesor']];
     for (const p of data.partes) {
@@ -30,10 +32,10 @@ export function Despiece({ data, cfg, seleccion, setSeleccion, enfocar }) {
   return (
     <div>
       <div className="barra">
-        <span>{data.partes.length} piezas. Doble clic en una fila para verla sola.</span>
+        <span>{data.partes.length} piezas. {TACTIL ? 'Doble toque' : 'Doble clic'} en una fila para verla sola.</span>
         <button onClick={exportar}>Exportar CSV</button>
       </div>
-      <table>
+      <table className="tabla-despiece">
         <thead>
           <tr>
             <th>Id</th>
@@ -47,11 +49,24 @@ export function Despiece({ data, cfg, seleccion, setSeleccion, enfocar }) {
             const d = [p.sx, p.sy, p.sz].sort((a, b) => b - a);
             const mat = p.tipo === 'liston' ? cfg.listones[p.mat].nombre : cfg.materiales[p.mat].nombre;
             return (
-              <tr key={p.id} id={`fila-${p.id}`} className={seleccion === p.id ? 'sel' : ''} onClick={() => setSeleccion(p.id)} onDoubleClick={() => enfocar(p.id)}>
-                <td>{p.id}</td>
-                <td>{p.nombre}</td>
-                <td>{mat}</td>
-                <td>
+              <tr key={p.id} id={`fila-${p.id}`} className={seleccion === p.id ? 'sel' : ''} onClick={(e) => (esDoble(p.id, e.timeStamp) ? enfocar(p.id) : setSeleccion(p.id))}>
+                <td className="c-id">{p.id}</td>
+                <td className="c-nom">
+                  {p.nombre}
+                  {seleccion === p.id && (
+                    <button
+                      className="ver-sola"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        enfocar(p.id);
+                      }}
+                    >
+                      Ver sola
+                    </button>
+                  )}
+                </td>
+                <td className="c-mat">{mat}</td>
+                <td className="c-dim">
                   {n0(d[0])} x {n0(d[1])} x {n0(d[2])}
                 </td>
               </tr>
@@ -65,15 +80,16 @@ export function Despiece({ data, cfg, seleccion, setSeleccion, enfocar }) {
 
 // ---------- Plano de placas ----------
 function Hoja({ hoja, mat, recorte, onSel, onEnfocar, seleccion }) {
+  const esDoble = useDobleToque();
   const esc = 0.22;
   const W = mat.hojaL;
   const H = mat.hojaA;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ background: '#f6efe2', border: '1px solid #9c8359' }}>
+    <svg className="hoja-svg" viewBox={`0 0 ${W} ${H}`} width="100%" style={{ background: '#f6efe2', border: '1px solid #9c8359' }}>
       <rect x={recorte} y={recorte} width={W - 2 * recorte} height={H - 2 * recorte} fill="none" stroke="#c9b48a" strokeDasharray="12 8" />
       {hoja.tiras.map((t) =>
         t.items.map((it) => (
-          <g key={it.id} onClick={() => onSel(it.id)} onDoubleClick={() => onEnfocar(it.id)} style={{ cursor: 'pointer' }}>
+          <g key={it.id} onClick={(e) => (esDoble(it.id, e.timeStamp) ? onEnfocar(it.id) : onSel(it.id))} style={{ cursor: 'pointer' }}>
             <rect
               x={recorte + it.x}
               y={recorte + t.y}
@@ -96,9 +112,21 @@ function Hoja({ hoja, mat, recorte, onSel, onEnfocar, seleccion }) {
   );
 }
 
-export function Placas({ plan, cfg, seleccion, setSeleccion, enfocar }) {
+export function Placas({ plan, cfg, partes, seleccion, setSeleccion, enfocar }) {
+  const sel = partes.find((p) => p.id === seleccion);
   return (
     <div>
+      <p className="nota">
+        {TACTIL ? 'Tocá una pieza para elegirla y doble toque para verla sola. Deslizá a los costados para recorrer la hoja.' : 'Doble clic en una pieza para verla sola.'}
+      </p>
+      {sel && (
+        <div className="pieza-elegida">
+          <span>
+            <b>{sel.id}</b> {sel.nombre}
+          </span>
+          <button onClick={() => enfocar(sel.id)}>Ver sola</button>
+        </div>
+      )}
       {Object.entries(plan.planPlacas).map(([mat, res]) => (
         <section key={mat}>
           <h3>
@@ -112,7 +140,9 @@ export function Placas({ plan, cfg, seleccion, setSeleccion, enfocar }) {
               <h4>
                 Hoja {h.numero} ({Math.round(h.aprovechamiento * 100)} % usado)
               </h4>
-              <Hoja hoja={h} mat={cfg.materiales[mat]} recorte={res.recorte} onSel={setSeleccion} onEnfocar={enfocar} seleccion={seleccion} />
+              <div className="hoja-scroll">
+                <Hoja hoja={h} mat={cfg.materiales[mat]} recorte={res.recorte} onSel={setSeleccion} onEnfocar={enfocar} seleccion={seleccion} />
+              </div>
               <details>
                 <summary>Cómo cortar esta hoja</summary>
                 <pre>{pasosDeCorte(h, cfg.corte).join('\n')}</pre>

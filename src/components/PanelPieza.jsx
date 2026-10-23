@@ -1,6 +1,7 @@
 // Tarjeta del modo pieza: nombre, medidas, cortes y botones para pasar a la pieza anterior o siguiente.
 import React from 'react';
 import { describirPieza, COLOR_CORTE, fmt } from '../engine/enfoque.js';
+import { TACTIL } from '../util/pantalla.js';
 
 const LEYENDA = [
   ['medida', 'Medidas'],
@@ -25,7 +26,7 @@ export default function PanelPieza({ partes, id, cfg, invertir, setInvertir, ver
           <span className="enfoque-grupo">{p.grupo}</span>
         </div>
         <button className="enfoque-salir" onClick={salir} title="Volver al mueble completo">
-          Salir (Esc)
+          {TACTIL ? 'Salir' : 'Salir (Esc)'}
         </button>
       </div>
 

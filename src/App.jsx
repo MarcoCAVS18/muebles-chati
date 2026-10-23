@@ -13,8 +13,21 @@ import PanelElemento from './components/PanelElemento.jsx';
 import PanelPieza from './components/PanelPieza.jsx';
 import { Seccion, SECCIONES_CFG, escribir } from './components/Campos.jsx';
 import { Despiece, Placas, Herrajes, Electrica, Compras } from './components/Paneles.jsx';
+import { useEsMovil, TACTIL } from './util/pantalla.js';
+import { Icono } from './components/Icono.jsx';
 
 const TABS = ['Despiece', 'Placas y cortes', 'Herrajes', 'Eléctrica', 'Compras'];
+
+// Barra de abajo en el celular: el 3D, las medidas y las pestañas de la derecha
+const ITEMS_MOVIL = [
+  { clave: '3D', etiqueta: '3D', icono: 'cubo' },
+  { clave: 'Medidas', etiqueta: 'Medidas', icono: 'regla' },
+  { clave: 'Despiece', etiqueta: 'Despiece', icono: 'lista' },
+  { clave: 'Placas y cortes', etiqueta: 'Cortes', icono: 'hoja' },
+  { clave: 'Herrajes', etiqueta: 'Herrajes', icono: 'llave' },
+  { clave: 'Eléctrica', etiqueta: 'Eléctrica', icono: 'rayo' },
+  { clave: 'Compras', etiqueta: 'Compras', icono: 'carrito' },
+];
 
 // Mezcla lo guardado con los valores iniciales: solo se conservan las claves que existen hoy
 function mezclar(base, guardado) {
@@ -48,6 +61,11 @@ export default function App() {
   const [invertir, setInvertir] = useState(false);
   const [verContexto, setVerContexto] = useState(false);
   const [vista, setVista] = useState({ clave: 'foto', n: 0 });
+  const esMovil = useEsMovil();
+  const [panel, setPanel] = useState('3D'); // en el celular: '3D', 'Medidas' o 'Tabs' (las pestañas de la derecha)
+  const [opciones, setOpciones] = useState(false); // en el celular los controles del 3D se abren y se cierran
+  const [reserva, setReserva] = useState({ y: 0, x: 0, derecha: 0 }); // lo que tapa la tarjeta del modo pieza, en px
+  const origen = useRef(null); // panel desde el que se abrió una pieza o un equipo, para volver a él
   const [visibles, setVisibles] = useState({
     'Mueble trasero': true,
     Cama: true,
@@ -116,13 +134,51 @@ export default function App() {
   const cambiar = (ruta, valor) => setCfg((c) => escribir(c, ruta, valor));
 
   // Modo pieza: doble clic en la madera (3D, despiece o plano de cortes); flechas para pasar de una a otra
+  // En el celular el 3D y las listas no se ven a la vez: se pasa al 3D y al cerrar se vuelve a la lista
+  const aPanel3D = () => {
+    if (esMovil && panel !== '3D') {
+      origen.current = panel;
+      setPanel('3D');
+    }
+  };
+  const volverDel3D = () => {
+    if (origen.current) {
+      setPanel(origen.current);
+      origen.current = null;
+    }
+  };
   const enfocar = (id) => {
     setElemento('');
     setSeleccion(id);
     setInvertir(false);
+    setOpciones(false);
+    aPanel3D();
     setEnfoque(id);
   };
-  const salir = () => setEnfoque('');
+  const salir = () => {
+    setEnfoque('');
+    volverDel3D();
+  };
+  const abrirElemento = (id) => {
+    setElemento(id);
+    if (id) aPanel3D();
+  };
+  const cerrarElemento = () => {
+    setElemento('');
+    volverDel3D();
+  };
+  const irA = (clave) => {
+    if (enfoque) setEnfoque('');
+    setElemento('');
+    setOpciones(false);
+    origen.current = null;
+    if (clave === '3D' || clave === 'Medidas') setPanel(clave);
+    else {
+      if (clave !== tab || panel !== 'Tabs') requestAnimationFrame(() => document.querySelector('.contenido')?.scrollTo(0, 0));
+      setTab(clave);
+      setPanel('Tabs');
+    }
+  };
   const ir = (paso) => {
     const lista = data.partes;
     const i = lista.findIndex((p) => p.id === enfoque);
@@ -149,11 +205,40 @@ export default function App() {
   useEffect(() => {
     if (enfoque) document.getElementById(`fila-${enfoque}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [enfoque]);
+  // Cuánto tapa la tarjeta del modo pieza (abajo, o a un costado en el celular apaisado): el 3D encuadra la pieza en el resto
+  useEffect(() => {
+    if (!enfoque) return undefined;
+    const visor = document.querySelector('.visor');
+    const tarjeta = visor && visor.querySelector('.enfoque');
+    if (!tarjeta) return undefined;
+    const medir = () => {
+      const lateral = tarjeta.offsetWidth < visor.offsetWidth * 0.7;
+      const barra = visor.querySelector('.controles');
+      const arriba = barra && !esMovil ? barra.offsetTop + barra.offsetHeight : 0;
+      const abajo = lateral ? 0 : tarjeta.offsetHeight + 12;
+      const derecha = lateral ? tarjeta.offsetWidth + 12 : 0;
+      setReserva({ y: (abajo - arriba) / 2, x: derecha / 2, derecha });
+    };
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(tarjeta);
+    ro.observe(visor);
+    return () => ro.disconnect();
+  }, [!!enfoque, esMovil]);
+
   const parteSel = data.partes.find((p) => p.id === seleccion);
   const avisos = [...data.avisos, ...plan.lista.avisos];
 
   return (
-    <div className="app">
+    <div className={`app${esMovil ? ' movil' : ''}${enfoque ? ' en-enfoque' : ''}`} data-panel={panel}>
+      {esMovil && (
+        <header className="cabecera-movil">
+          <b>La Chata</b>
+          <span className={`chip-nube${nube === 'error' ? ' mal' : ''}`}>
+            {{ apagada: 'Sin nube', cargando: 'Cargando...', guardando: 'Guardando...', guardado: 'Guardado', error: 'Error de nube' }[nube]}
+          </span>
+        </header>
+      )}
       <aside className="lateral">
         <h1>La Chata</h1>
         <p className="nota">Muebles a medida. Medidas en mm.</p>
@@ -166,7 +251,7 @@ export default function App() {
       </aside>
 
       <main className="centro">
-        <div className="visor">
+        <div className="visor" onPointerDown={(e) => opciones && !e.target.closest('.controles, .btn-opciones') && setOpciones(false)}>
           <Scene3D
             data={data}
             elec3d={elec3d}
@@ -181,7 +266,7 @@ export default function App() {
             seleccion={seleccion}
             setSeleccion={setSeleccion}
             elemento={elemento}
-            setElemento={setElemento}
+            setElemento={abrirElemento}
             setHover={setHover}
             vista={vista}
             transparentar={transparentar}
@@ -190,9 +275,14 @@ export default function App() {
             setEnfoque={enfocar}
             invertir={invertir}
             verContexto={verContexto}
+            reserva={reserva}
+            visible={!esMovil || panel === '3D'}
           />
           <div className="hud">
-            <div className="controles">
+            <button className="btn-opciones" onClick={() => setOpciones((o) => !o)} aria-expanded={opciones}>
+              {opciones ? 'Cerrar' : 'Opciones'}
+            </button>
+            <div className={`controles${opciones ? ' abierto' : ''}`}>
               {data.grupos.map((g) => (
                 <label key={g}>
                   <input
@@ -223,7 +313,7 @@ export default function App() {
                 <input type="checkbox" checked={transparentar} onChange={(e) => setTransparentar(e.target.checked)} />
                 Ver interior
               </label>
-              <label>
+              <label className="ctl-arriba">
                 Vista
                 <select
                   value={vista.clave}
@@ -239,18 +329,23 @@ export default function App() {
                   ))}
                 </select>
               </label>
-              <label>
+              <label className="ctl-arriba">
                 Cama: {Math.round((cfg.cama.ancho + cfg.cama.extension * camaAbierta) / 10)} cm
                 <input type="range" min="0" max="1" step="0.05" value={camaAbierta} onChange={(e) => setCamaAbierta(parseFloat(e.target.value))} />
               </label>
-              <label>
+              <label className="ctl-arriba">
                 Vista explotada
                 <input type="range" min="0" max="1" step="0.05" value={explosion} onChange={(e) => setExplosion(parseFloat(e.target.value))} />
               </label>
             </div>
             {!enfoque && (
               <div className="info">
-                {hover || (parteSel ? `${parteSel.id} - ${parteSel.nombre}` : 'Pasá el mouse sobre una pieza. Doble clic en una madera para verla sola. Clic en un equipo o cable eléctrico para ver el video.')}
+                {hover ||
+                  (parteSel
+                    ? `${parteSel.id} - ${parteSel.nombre}`
+                    : TACTIL
+                      ? 'Tocá una pieza. Doble toque en una madera para verla sola. Tocá un equipo o cable eléctrico para ver el video.'
+                      : 'Pasá el mouse sobre una pieza. Doble clic en una madera para verla sola. Clic en un equipo o cable eléctrico para ver el video.')}
               </div>
             )}
           </div>
@@ -273,13 +368,13 @@ export default function App() {
             dataEquipos={data.equipos}
             tramos={resElec.tramos}
             elec={elec}
-            cerrar={() => setElemento('')}
+            cerrar={cerrarElemento}
           />
         </div>
         <div className="estado">
           <span>Peso aprox. de los muebles: {Math.round(peso)} kg</span>
           <span>{data.partes.length} piezas</span>
-          <span className={nube === 'error' ? 'mal' : ''}>
+          <span className={`nube${nube === 'error' ? ' mal' : ''}`}>
             Nube:{' '}
             {{ apagada: 'sin configurar', cargando: 'cargando...', guardando: 'guardando...', guardado: 'guardado', error: 'error al sincronizar' }[nube]}
           </span>
@@ -306,7 +401,7 @@ export default function App() {
         </nav>
         <div className="contenido">
           {tab === 'Despiece' && <Despiece data={data} cfg={cfg} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} />}
-          {tab === 'Placas y cortes' && <Placas plan={plan} cfg={cfg} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} />}
+          {tab === 'Placas y cortes' && <Placas plan={plan} cfg={cfg} partes={data.partes} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} />}
           {tab === 'Herrajes' && <Herrajes data={data} fijaciones={fijaciones} />}
           {tab === 'Eléctrica' && (
             <Electrica
@@ -317,12 +412,26 @@ export default function App() {
               setElec={setElec}
               elementos={elementos}
               elemento={elemento}
-              setElemento={setElemento}
+              setElemento={abrirElemento}
             />
           )}
           {tab === 'Compras' && <Compras filas={compras} />}
         </div>
       </section>
+
+      {esMovil && (
+        <nav className="barra-movil" aria-label="Secciones">
+          {ITEMS_MOVIL.map((it) => {
+            const activo = it.clave === '3D' ? panel === '3D' : it.clave === 'Medidas' ? panel === 'Medidas' : panel === 'Tabs' && tab === it.clave;
+            return (
+              <button key={it.clave} className={activo ? 'activa' : ''} onClick={() => irA(it.clave)} aria-current={activo ? 'page' : undefined}>
+                <Icono n={it.icono} />
+                <span>{it.etiqueta}</span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 }

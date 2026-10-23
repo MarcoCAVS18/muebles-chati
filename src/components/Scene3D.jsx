@@ -5,6 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import { Caja, PlacaCortada, COLORES, aplicarFade, m } from './Piezas3D.jsx';
 import { PiezaEnfoque, AnotacionesDe, aMundo } from './Enfoque.jsx';
 import { posarCamara } from '../engine/enfoque.js';
+import { useDobleToque, TACTIL } from '../util/pantalla.js';
 
 const COLOR_CABLE = {
   dc: { pos: '#d32f2f', neg: '#212121' },
@@ -31,21 +32,33 @@ export const VISTAS = {
   asientos: { nombre: 'Batería del auto (bajo el asiento)', pos: [-0.5, 1.5, 3.7], target: [-1.35, 0.2, 2.75] },
 };
 
+const FOTO_VERTICAL = { pos: [1.7, 4.3, -3.1], target: [-0.86, 0.2, 1.35] };
+
 // Cámara: salta a una vista guardada y vuela (con arco y frenado suave) hacia la pieza elegida y de vuelta
 const suave = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 function Camara({ vista, controles, anim, previa }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
+  const medido = size.width > 0 && size.height > 0;
+  const aspecto = medido ? size.width / size.height : 1;
   useEffect(() => {
-    const v = VISTAS[vista.clave] || VISTAS.foto;
+    const angosta = aspecto < 0.8;
+    // En una pantalla angosta (celular en vertical) la foto se toma mirando a lo largo de la van para llenar el alto
+    const v = angosta && vista.clave === 'foto' ? FOTO_VERTICAL : VISTAS[vista.clave] || VISTAS.foto;
     anim.current = null;
     previa.current = null;
-    camera.position.set(...v.pos);
+    // En las demás vistas la cámara se aleja para que entre todo el ancho
+    const k = angosta && vista.clave === 'foto' ? 1 : Math.min(2, Math.max(1, 0.8 / aspecto));
+    const pos = new THREE.Vector3(...v.pos);
+    const tgt = new THREE.Vector3(...v.target);
+    pos.sub(tgt).multiplyScalar(k).add(tgt);
+    camera.position.copy(pos);
     if (controles.current) {
-      controles.current.target.set(...v.target);
+      controles.current.target.copy(tgt);
       controles.current.update();
     }
-  }, [vista, camera, controles, anim, previa]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vista, camera, controles, anim, previa, medido]);
   useFrame((_, dt) => {
     const a = anim.current;
     if (!a || !controles.current) return;
@@ -146,8 +159,9 @@ function Escena(props) {
   const {
     data, elec3d, tramos, van, visibles, explosion, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
     seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar, camaAbierta,
-    enfoque, setEnfoque, invertir, verContexto,
+    enfoque, setEnfoque, invertir, verContexto, reserva,
   } = props;
+  const esDoble = useDobleToque();
   const controles = useRef();
   const anim = useRef(null); // vuelo de la cámara en curso
   const previa = useRef(null); // vista que había antes de entrar al modo pieza
@@ -202,10 +216,10 @@ function Escena(props) {
   const camFoco = useMemo(
     () =>
       parteFoco
-        ? posarCamara(colocada(parteFoco), { invertir, xMedio: van.ancho / 2, aspecto: size.width / size.height, fovDeg: camera.fov })
+        ? posarCamara(colocada(parteFoco), { invertir, xMedio: van.ancho / 2, aspecto: (size.width - (reserva?.derecha || 0)) / size.height, fovDeg: camera.fov })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [parteFoco, explosion, camaAbierta, invertir, van.ancho, size.width, size.height]
+    [parteFoco, explosion, camaAbierta, invertir, van.ancho, size.width, size.height, reserva?.derecha]
   );
   const [vivas, setVivas] = useState([]);
   const entradas = useRef({});
@@ -229,8 +243,13 @@ function Escena(props) {
     esperaCotas.current = foco;
   }, [foco, invertir]);
 
-  // Vuelo de la cámara hacia la pieza, de una pieza a la otra y de vuelta a la vista anterior
+  // Vuelo de la cámara hacia la pieza, de una pieza a la otra y de vuelta a la vista anterior.
+  // Arranca en el primer cuadro después del cambio, cuando ya se midió cuánto tapa la tarjeta de abajo.
+  const arranque = useRef(false);
   useEffect(() => {
+    arranque.current = true;
+  }, [foco, invertir]);
+  const lanzarVuelo = () => {
     const c = controles.current;
     if (!c) return;
     let destino = null;
@@ -248,11 +267,14 @@ function Escena(props) {
     const d0 = d0v.clone().normalize();
     const d1 = d1v.clone().normalize();
     anim.current = { t: 0, dur: 1.0, t0, t1: destino.target.clone(), d0, l0: d0v.length(), l1: d1v.length(), giro: new THREE.Quaternion().setFromUnitVectors(d0, d1) };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [foco, invertir]);
+  };
 
   // Fundido de todo lo demás y luz que acompaña a la cámara mientras se mira una pieza
   useFrame((_, dt) => {
+    if (arranque.current) {
+      arranque.current = false;
+      lanzarVuelo();
+    }
     if (esperaCotas.current && !anim.current) {
       setAnotId(esperaCotas.current);
       esperaCotas.current = '';
@@ -266,9 +288,13 @@ function Escena(props) {
         grupoCtx.current.visible = fade.current > 0.004;
       }
     }
-    // El encuadre sube un poco para que la tarjeta de abajo no tape la pieza
+    // El encuadre se corre para que la tarjeta (abajo o al costado) no tape la pieza
     const sube = 1 - fade.current;
-    if (sube > 0.001) camera.setViewOffset(size.width, size.height, 0, Math.round(0.06 * size.height * sube), size.width, size.height);
+    if (sube > 0.001) {
+      const dx = reserva?.x || 0;
+      const dy = reserva ? reserva.y : 0.06 * size.height;
+      camera.setViewOffset(size.width, size.height, Math.round(dx * sube), Math.round(dy * sube), size.width, size.height);
+    }
     else if (camera.view && camera.view.enabled) camera.clearViewOffset();
     if (luzCamara.current) {
       luzCamara.current.intensity = 0.8 * (1 - fade.current);
@@ -331,19 +357,18 @@ function Escena(props) {
             onClick: (e) => {
               e.stopPropagation();
               if (activo) return;
+              // Doble clic o doble toque: la madera se queda sola en pantalla con sus medidas y cortes
+              if (esDoble(p.id, e.nativeEvent && e.nativeEvent.timeStamp)) {
+                setElemento('');
+                setSeleccion(p.id);
+                setEnfoque(p.id);
+                return;
+              }
               // Las puertas de la heladera, del gas y de lo eléctrico abren la ficha del equipo
               if (p.abre) setElemento(p.abre);
               else setSeleccion(p.id);
             },
-            // Doble clic: la madera se queda sola en pantalla con sus medidas y cortes
-            onDoubleClick: (e) => {
-              e.stopPropagation();
-              if (activo) return;
-              setElemento('');
-              setSeleccion(p.id);
-              setEnfoque(p.id);
-            },
-            onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? ' (clic para ver el equipo y el video)' : ''} - doble clic para verla sola`),
+            onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? ` (${TACTIL ? 'toque' : 'clic'} para ver el equipo y el video)` : ''} - ${TACTIL ? 'doble toque' : 'doble clic'} para verla sola`),
             onOut: () => setHover(''),
           };
           return p.radio || p.calado ? <PlacaCortada key={p.id} p={q} {...comun} /> : <Caja key={p.id} {...comun} />;
@@ -377,7 +402,7 @@ function Escena(props) {
                 bordes="#222"
                 resaltar={elemento === e.id}
                 onClick={clic(e.id)}
-                onOver={sobre(`${e.nombre}: ${e.nota || ''} (clic para ver el video)`)}
+                onOver={sobre(`${e.nombre}: ${e.nota || ''} (${TACTIL ? 'toque' : 'clic'} para ver el video)`)}
                 onOut={() => setHover('')}
               />
             );
@@ -402,7 +427,7 @@ function Escena(props) {
               bordes="#111"
               resaltar={elemento === e.id}
               onClick={clic(e.id)}
-              onOver={sobre(`${e.nombre}: ${e.nota || ''} (clic para ver el video)`)}
+              onOver={sobre(`${e.nombre}: ${e.nota || ''} (${TACTIL ? 'toque' : 'clic'} para ver el video)`)}
               onOut={() => setHover('')}
             />
           );
@@ -419,7 +444,7 @@ function Escena(props) {
             seccion={seccionDe[c.id]}
             elegido={elemento === c.id}
             onClick={clic(c.id)}
-            onOver={sobre(`${c.nombre} (clic para ver el video)`)}
+            onOver={sobre(`${c.nombre} (${TACTIL ? 'toque' : 'clic'} para ver el video)`)}
             onOut={() => setHover('')}
           />
         ))}
@@ -454,6 +479,8 @@ export default function Scene3D(props) {
   const { van } = props;
   return (
     <Canvas
+      frameloop={props.visible === false ? 'never' : 'always'}
+      dpr={[1, 2]}
       camera={{ position: VISTAS.foto.pos, fov: 45, near: 0.05, far: 60 }}
       onPointerMissed={() => {
         props.setSeleccion('');

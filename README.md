@@ -47,6 +47,11 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   el recorte o el arco calado y marcas de ángulo recto en los cortes rectos. Flechas del teclado (o los botones) para pasar a la
   pieza anterior o siguiente, "Dar vuelta" para ver la otra cara, "Ver el mueble de fondo" para ver dónde va y Esc para volver.
   El contorno de cada pieza y las cotas salen de `src/engine/enfoque.js`; `npm run check` los prueba en las 127 piezas.
+- Versión para celular y tablet (pantallas de hasta 1100 px de ancho o poca altura): una sola sección por vez, con barra de
+  abajo (3D, Medidas, Despiece, Cortes, Herrajes, Eléctrica, Compras). Los controles del 3D están en el botón "Opciones", el
+  doble toque en una madera la deja sola (también desde el despiece y las hojas de corte, con un botón "Ver sola"), y al salir
+  se vuelve a la lista de donde se vino. En vertical la cámara inicial mira a lo largo de la van para llenar la pantalla; en
+  horizontal la tarjeta de la pieza va a un costado. El panel con el video de cada equipo sube desde abajo.
 - Lista de compras agrupada.
 - Avisos si una pieza choca con otro mueble, con el pasarruedas o se sale de la van.
 

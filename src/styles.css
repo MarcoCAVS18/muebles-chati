@@ -19,6 +19,13 @@ body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--texto);
   background: var(--fondo);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* El botón de opciones y la barra de abajo solo existen en el celular */
+.btn-opciones {
+  display: none;
 }
 
 .app {
@@ -92,8 +99,10 @@ button {
   font-size: 13px;
 }
 
-button:hover {
-  background: var(--madera-oscura);
+@media (hover: hover) {
+  button:hover {
+    background: var(--madera-oscura);
+  }
 }
 
 .centro {
@@ -309,17 +318,6 @@ pre {
 .resumen span {
   font-size: 11.5px;
   color: var(--suave);
-}
-
-@media (max-width: 1100px) {
-  .app {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-
-  .visor {
-    height: 60vh;
-  }
 }
 
 /* Panel de video y datos de un elemento eléctrico */
@@ -656,4 +654,540 @@ pre {
   .enfoque-cuerpo {
     flex-direction: column;
   }
+}
+
+
+/* ============================================================
+   Versión para celular y tablet en vertical (clase .movil, la pone App.jsx)
+   Una sola sección a la vez: 3D, medidas o una de las pestañas, con la barra de abajo
+   ============================================================ */
+.app.movil {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.movil .cabecera-movil {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(8px + env(safe-area-inset-top)) 14px 8px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--borde);
+}
+
+.cabecera-movil b {
+  font-size: 18px;
+}
+
+.chip-nube {
+  font-size: 11.5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e8f3e8;
+  color: var(--bien);
+  font-weight: 600;
+}
+
+.chip-nube.mal {
+  background: #fdecea;
+  color: var(--mal);
+}
+
+.movil .lateral,
+.movil .centro,
+.movil .derecha {
+  display: none;
+  flex: 1 1 0;
+  min-height: 0;
+  border: 0;
+}
+
+.movil[data-panel='3D'] .centro {
+  display: flex;
+}
+
+.movil[data-panel='Medidas'] .lateral {
+  display: block;
+  padding: 10px 14px 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.movil[data-panel='Tabs'] .derecha {
+  display: flex;
+}
+
+.movil .derecha nav {
+  display: none;
+}
+
+.movil .contenido {
+  padding: 10px 12px 28px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.barra-movil {
+  flex: 0 0 auto;
+  display: flex;
+  overflow-x: auto;
+  background: var(--panel);
+  border-top: 1px solid var(--borde);
+  padding-bottom: env(safe-area-inset-bottom);
+  scrollbar-width: none;
+}
+
+.barra-movil::-webkit-scrollbar {
+  display: none;
+}
+
+.barra-movil button {
+  flex: 1 1 0;
+  min-width: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 56px;
+  padding: 6px 4px;
+  background: none;
+  color: var(--suave);
+  border-radius: 0;
+  font-size: 11px;
+  box-shadow: inset 0 3px 0 transparent;
+}
+
+.barra-movil button.activa {
+  color: var(--madera-oscura);
+  font-weight: 700;
+  box-shadow: inset 0 3px 0 var(--madera);
+  background: #faf5ea;
+}
+
+/* Medidas */
+.movil .lateral h1,
+.movil .lateral > .nota {
+  display: none;
+}
+
+.movil .campo {
+  min-height: 44px;
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.movil .campo input[type='number'],
+.movil .mini {
+  height: 40px;
+  font-size: 16px;
+  padding: 4px 8px;
+}
+
+.movil .campo input[type='number'] {
+  width: 100px;
+}
+
+.movil .mini {
+  width: 56px;
+}
+
+.movil th,
+.movil td {
+  padding: 4px 4px;
+}
+
+.movil .campo input[type='checkbox'],
+.movil .controles input[type='checkbox'] {
+  width: 22px;
+  height: 22px;
+}
+
+.movil .reset {
+  min-height: 46px;
+  margin: 8px 0 16px;
+}
+
+/* El 3D */
+.movil .centro {
+  flex-direction: column;
+}
+
+.movil .visor {
+  min-height: 0;
+  touch-action: none;
+}
+
+.movil .hud {
+  padding: 8px;
+}
+
+.movil .btn-opciones {
+  display: block;
+  pointer-events: auto;
+  align-self: flex-start;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--texto);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+}
+
+.movil .controles {
+  display: none;
+  position: absolute;
+  top: 56px;
+  left: 8px;
+  right: 8px;
+  max-height: calc(100% - 130px);
+  overflow-y: auto;
+  align-self: auto;
+  padding: 10px 12px;
+  gap: 4px 12px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(43, 36, 24, 0.25);
+}
+
+.movil .controles.abierto {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.movil .controles label {
+  min-height: 40px;
+  gap: 8px;
+}
+
+.movil .controles .ctl-arriba {
+  order: -1;
+  grid-column: 1 / -1;
+  justify-content: space-between;
+}
+
+.movil .controles .ctl-arriba select,
+.movil .controles .ctl-arriba input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.movil .controles .ctl-arriba select {
+  height: 38px;
+}
+
+.movil .controles .ctl-arriba input[type='range'] {
+  height: 30px;
+}
+
+.movil .info {
+  align-self: stretch;
+  max-width: none;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.movil .estado {
+  flex: 0 0 auto;
+  gap: 14px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.movil .estado .nube {
+  display: none;
+}
+
+.movil .avisos {
+  flex: 0 0 auto;
+  max-height: 64px;
+  font-size: 11.5px;
+}
+
+.movil.en-enfoque .estado,
+.movil.en-enfoque .avisos,
+.movil.en-enfoque .btn-opciones,
+.movil.en-enfoque .controles {
+  display: none;
+}
+
+/* Panel con el video y los datos de un equipo: hoja que sube desde abajo */
+.movil .panel-elemento {
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-height: 74%;
+  border-radius: 16px 16px 0 0;
+  border-bottom: 0;
+  padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
+}
+
+/* Tarjeta del modo pieza */
+@keyframes enfoque-sube-movil {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.movil .enfoque {
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  width: auto;
+  transform: none;
+  padding: 8px 12px 8px;
+  gap: 6px;
+  border-radius: 14px;
+  max-height: 62%;
+  overflow-y: auto;
+  animation-name: enfoque-sube-movil;
+}
+
+.movil .enfoque-grupo,
+.movil .enfoque-leyenda {
+  display: none;
+}
+
+.movil .enfoque-titulo {
+  font-size: 13.5px;
+}
+
+.movil .enfoque-salir {
+  min-height: 38px;
+  padding: 6px 14px;
+}
+
+.movil .enfoque-cuerpo {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.movil .enfoque-medidas {
+  width: 100%;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.movil .enfoque-medidas b {
+  font-size: 17px;
+}
+
+.movil .enfoque-medidas .enfoque-material b {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.movil .enfoque-cortes {
+  font-size: 12px;
+  gap: 3px;
+}
+
+.movil .enfoque-nav {
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+.movil .enfoque-nav > button {
+  min-height: 42px;
+}
+
+.movil .enfoque-nav > button:first-child,
+.movil .enfoque-nav > button:nth-of-type(2) {
+  flex: 1 1 30%;
+}
+
+.movil .enfoque-cuenta {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.movil .enfoque-sec {
+  flex: 1 1 40%;
+  margin-left: 0;
+}
+
+.movil .enfoque-contexto {
+  flex: 1 1 50%;
+  min-height: 42px;
+  font-size: 13px;
+}
+
+.movil .enfoque-contexto input {
+  width: 20px;
+  height: 20px;
+}
+
+.movil .cota {
+  font-size: 11px;
+  padding: 3px 6px;
+}
+
+/* Despiece: una tarjeta por pieza */
+.movil .tabla-despiece thead {
+  display: none;
+}
+
+.movil .tabla-despiece,
+.movil .tabla-despiece tbody {
+  display: block;
+}
+
+.movil .tabla-despiece tr {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  column-gap: 10px;
+  padding: 9px 4px;
+  border-bottom: 1px solid #eee7d6;
+}
+
+.movil .tabla-despiece td {
+  padding: 0;
+  border: 0;
+}
+
+.movil .tabla-despiece .c-id {
+  grid-row: 1 / span 3;
+  font-weight: 700;
+  color: var(--madera-oscura);
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+
+.movil .tabla-despiece .c-nom {
+  font-size: 14px;
+}
+
+.movil .tabla-despiece .c-mat {
+  font-size: 11.5px;
+  color: var(--suave);
+}
+
+.movil .tabla-despiece .c-dim {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1c4f9c;
+}
+
+.ver-sola {
+  margin-left: 8px;
+  padding: 3px 10px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.movil .ver-sola {
+  display: block;
+  margin: 6px 0 2px;
+  min-height: 38px;
+  padding: 6px 16px;
+  font-size: 13.5px;
+}
+
+.pieza-elegida {
+  position: sticky;
+  top: -10px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  background: #fff3e0;
+  border: 1px solid #f0d9b8;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.movil .pieza-elegida button {
+  min-height: 38px;
+  padding: 6px 14px;
+  white-space: nowrap;
+}
+
+/* Hojas de corte: se recorren deslizando para que los números se lean */
+.hoja-scroll {
+  overflow-x: auto;
+}
+
+.movil .hoja-svg {
+  min-width: 880px;
+}
+
+.movil table {
+  font-size: 13px;
+}
+
+.movil summary {
+  padding: 8px 0;
+}
+
+/* Celular apaisado: poca altura */
+@media (max-height: 500px) {
+  .movil .cabecera-movil {
+    display: none;
+  }
+
+  .barra-movil button {
+    flex-direction: row;
+    gap: 6px;
+    min-height: 44px;
+    font-size: 12px;
+  }
+
+  .movil .enfoque {
+    left: auto;
+    top: 8px;
+    bottom: 8px;
+    width: min(46%, 400px);
+    max-height: none;
+  }
+
+  .movil .controles {
+    top: 52px;
+    max-height: calc(100% - 60px);
+  }
+
+  .movil .panel-elemento {
+    left: auto;
+    width: min(60%, 460px);
+    max-height: 100%;
+    border-radius: 12px 0 0 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .barra-movil button {
+    font-size: 10px;
+  }
+}
+
+/* Las filas se tocan dos veces: sin selección de texto */
+.tabla-despiece tr,
+.hoja-svg,
+.hud,
+.enfoque {
+  -webkit-user-select: none;
+  user-select: none;
 }
