@@ -17,7 +17,7 @@ const csv = (filas) =>
   filas.map((f) => f.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
 
 // ---------- Despiece ----------
-export function Despiece({ data, cfg, seleccion, setSeleccion }) {
+export function Despiece({ data, cfg, seleccion, setSeleccion, enfocar }) {
   const exportar = () => {
     const filas = [['Id', 'Mueble', 'Pieza', 'Material', 'Largo', 'Ancho', 'Espesor']];
     for (const p of data.partes) {
@@ -30,7 +30,7 @@ export function Despiece({ data, cfg, seleccion, setSeleccion }) {
   return (
     <div>
       <div className="barra">
-        <span>{data.partes.length} piezas</span>
+        <span>{data.partes.length} piezas. Doble clic en una fila para verla sola.</span>
         <button onClick={exportar}>Exportar CSV</button>
       </div>
       <table>
@@ -47,7 +47,7 @@ export function Despiece({ data, cfg, seleccion, setSeleccion }) {
             const d = [p.sx, p.sy, p.sz].sort((a, b) => b - a);
             const mat = p.tipo === 'liston' ? cfg.listones[p.mat].nombre : cfg.materiales[p.mat].nombre;
             return (
-              <tr key={p.id} className={seleccion === p.id ? 'sel' : ''} onClick={() => setSeleccion(p.id)}>
+              <tr key={p.id} id={`fila-${p.id}`} className={seleccion === p.id ? 'sel' : ''} onClick={() => setSeleccion(p.id)} onDoubleClick={() => enfocar(p.id)}>
                 <td>{p.id}</td>
                 <td>{p.nombre}</td>
                 <td>{mat}</td>
@@ -64,7 +64,7 @@ export function Despiece({ data, cfg, seleccion, setSeleccion }) {
 }
 
 // ---------- Plano de placas ----------
-function Hoja({ hoja, mat, recorte, onSel, seleccion }) {
+function Hoja({ hoja, mat, recorte, onSel, onEnfocar, seleccion }) {
   const esc = 0.22;
   const W = mat.hojaL;
   const H = mat.hojaA;
@@ -73,7 +73,7 @@ function Hoja({ hoja, mat, recorte, onSel, seleccion }) {
       <rect x={recorte} y={recorte} width={W - 2 * recorte} height={H - 2 * recorte} fill="none" stroke="#c9b48a" strokeDasharray="12 8" />
       {hoja.tiras.map((t) =>
         t.items.map((it) => (
-          <g key={it.id} onClick={() => onSel(it.id)} style={{ cursor: 'pointer' }}>
+          <g key={it.id} onClick={() => onSel(it.id)} onDoubleClick={() => onEnfocar(it.id)} style={{ cursor: 'pointer' }}>
             <rect
               x={recorte + it.x}
               y={recorte + t.y}
@@ -96,7 +96,7 @@ function Hoja({ hoja, mat, recorte, onSel, seleccion }) {
   );
 }
 
-export function Placas({ plan, cfg, seleccion, setSeleccion }) {
+export function Placas({ plan, cfg, seleccion, setSeleccion, enfocar }) {
   return (
     <div>
       {Object.entries(plan.planPlacas).map(([mat, res]) => (
@@ -112,7 +112,7 @@ export function Placas({ plan, cfg, seleccion, setSeleccion }) {
               <h4>
                 Hoja {h.numero} ({Math.round(h.aprovechamiento * 100)} % usado)
               </h4>
-              <Hoja hoja={h} mat={cfg.materiales[mat]} recorte={res.recorte} onSel={setSeleccion} seleccion={seleccion} />
+              <Hoja hoja={h} mat={cfg.materiales[mat]} recorte={res.recorte} onSel={setSeleccion} onEnfocar={enfocar} seleccion={seleccion} />
               <details>
                 <summary>Cómo cortar esta hoja</summary>
                 <pre>{pasosDeCorte(h, cfg.corte).join('\n')}</pre>

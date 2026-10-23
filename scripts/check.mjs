@@ -8,6 +8,7 @@ import { electrico3d } from '../src/engine/electrico3d.js';
 import { videosDe, VIDEOS } from '../src/data/videos.js';
 import { ELEMENTOS } from '../src/data/elementos.js';
 import { disposicionTrasero } from '../src/engine/disposicion.js';
+import { contorno, describirPieza, posarCamara, anotarPieza } from '../src/engine/enfoque.js';
 
 const data = construir(CONFIG_INICIAL);
 const plan = planificar(data.partes, CONFIG_INICIAL);
@@ -257,5 +258,28 @@ for (const id of ['anafe', 'garrafa', 'regulador', 'valvulaGas', 'detectorGas'])
 exigir(e3.mangueras.filter((m) => m.tipo === 'gas').length === 2, 'faltan las mangueras de gas');
 // La bomba de agua sigue conectada
 exigir(e3.cables.some((c) => c.hasta === 'bomba') && CARGAS_INICIALES.some((c) => c.id === 'bomba'), 'la bomba de 12 V debería estar conectada');
+
+// ---- Modo pieza: contorno, descripción de cortes, cámara y cotas ----
+const conContorno = data.partes.filter((p) => contorno(p));
+exigir(conContorno.length === 5, `deberían tener contorno propio 5 piezas (2 placas, 2 bandejas y el frente con arco), hay ${conContorno.length}`);
+const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
+exigir(contorno(cab).esquinas === 5 && contorno(cab).recorte, 'la placa de la cabecera debería tener 5 esquinas redondeadas y un recorte');
+exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /261 x 150/.test(l.texto)), 'la descripción de la cabecera debería decir el recorte de 261 x 150');
+const frenteArco = data.partes.find((p) => /calar arco/.test(p.nombre));
+exigir(frenteArco && contorno(frenteArco).arco && contorno(frenteArco).arco.r === 170, 'el frente con arco debería llevar el arco de R170');
+for (const p of data.partes) {
+  for (const invertir of [false, true]) {
+    const cam = posarCamara(p, { invertir });
+    const an = anotarPieza(p, cam);
+    const todo = JSON.stringify([cam.pos, cam.dist, an.cotas, an.arcos, an.marcas, an.radios]);
+    exigir(!/null|NaN|Infinity/.test(todo), `el modo pieza arma mal las cotas de ${p.id}`);
+    const d = [p.sx, p.sy, p.sz].sort((a, b) => b - a);
+    const medidas = an.cotas.filter((c) => c.tipo === 'medida').map((c) => Math.round(c.valor * 10)).sort((a, b) => b - a);
+    exigir(medidas.join() === d.map((v) => Math.round(v * 10)).join(), `las cotas de ${p.id} no coinciden con sus medidas (${medidas} contra ${d})`);
+    exigir(cam.dist > 0 && Math.abs(Math.hypot(...cam.dir) - 1) < 1e-6, `la cámara del modo pieza de ${p.id} es inválida`);
+  }
+}
+const sinContorno = data.partes.find((p) => !contorno(p));
+exigir(describirPieza(sinContorno, CONFIG_INICIAL).lineas[0].tipo === 'recto', 'una pieza recta debería describirse con corte recto a 90 grados');
 
 process.exit(fallos ? 1 : 0);

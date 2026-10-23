@@ -10,6 +10,7 @@ import { electrico3d } from './engine/electrico3d.js';
 import { VERSION } from './almacen.js';
 import Scene3D, { VISTAS } from './components/Scene3D.jsx';
 import PanelElemento from './components/PanelElemento.jsx';
+import PanelPieza from './components/PanelPieza.jsx';
 import { Seccion, SECCIONES_CFG, escribir } from './components/Campos.jsx';
 import { Despiece, Placas, Herrajes, Electrica, Compras } from './components/Paneles.jsx';
 
@@ -43,6 +44,9 @@ export default function App() {
   const [transparentar, setTransparentar] = useState(false);
   const [camaAbierta, setCamaAbierta] = useState(0);
   const [elemento, setElemento] = useState('');
+  const [enfoque, setEnfoque] = useState(''); // id de la madera que se mira sola (doble clic)
+  const [invertir, setInvertir] = useState(false);
+  const [verContexto, setVerContexto] = useState(false);
   const [vista, setVista] = useState({ clave: 'foto', n: 0 });
   const [visibles, setVisibles] = useState({
     'Mueble trasero': true,
@@ -101,6 +105,41 @@ export default function App() {
   );
 
   const cambiar = (ruta, valor) => setCfg((c) => escribir(c, ruta, valor));
+
+  // Modo pieza: doble clic en la madera (3D, despiece o plano de cortes); flechas para pasar de una a otra
+  const enfocar = (id) => {
+    setElemento('');
+    setSeleccion(id);
+    setInvertir(false);
+    setEnfoque(id);
+  };
+  const salir = () => setEnfoque('');
+  const ir = (paso) => {
+    const lista = data.partes;
+    const i = lista.findIndex((p) => p.id === enfoque);
+    if (i >= 0) enfocar(lista[(i + paso + lista.length) % lista.length].id);
+  };
+  useEffect(() => {
+    if (!enfoque) return undefined;
+    const tecla = (e) => {
+      if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.key !== 'Escape') return;
+      if (e.key === 'Escape') salir();
+      else if (e.key === 'ArrowRight') ir(1);
+      else if (e.key === 'ArrowLeft') ir(-1);
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener('keydown', tecla);
+    return () => window.removeEventListener('keydown', tecla);
+  });
+  // Si la pieza deja de existir al cambiar las medidas, se sale del modo pieza
+  useEffect(() => {
+    if (enfoque && !data.partes.some((p) => p.id === enfoque)) setEnfoque('');
+  }, [data, enfoque]);
+  // La fila de la pieza se acerca sola en la lista
+  useEffect(() => {
+    if (enfoque) document.getElementById(`fila-${enfoque}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [enfoque]);
   const parteSel = data.partes.find((p) => p.id === seleccion);
   const avisos = [...data.avisos, ...plan.lista.avisos];
 
@@ -138,6 +177,10 @@ export default function App() {
             vista={vista}
             transparentar={transparentar}
             camaAbierta={camaAbierta}
+            enfoque={enfoque}
+            setEnfoque={enfocar}
+            invertir={invertir}
+            verContexto={verContexto}
           />
           <div className="hud">
             <div className="controles">
@@ -173,7 +216,13 @@ export default function App() {
               </label>
               <label>
                 Vista
-                <select value={vista.clave} onChange={(e) => setVista({ clave: e.target.value, n: vista.n + 1 })}>
+                <select
+                  value={vista.clave}
+                  onChange={(e) => {
+                    setEnfoque('');
+                    setVista({ clave: e.target.value, n: vista.n + 1 });
+                  }}
+                >
                   {Object.entries(VISTAS).map(([k, v]) => (
                     <option key={k} value={k}>
                       {v.nombre}
@@ -190,10 +239,25 @@ export default function App() {
                 <input type="range" min="0" max="1" step="0.05" value={explosion} onChange={(e) => setExplosion(parseFloat(e.target.value))} />
               </label>
             </div>
-            <div className="info">
-              {hover || (parteSel ? `${parteSel.id} - ${parteSel.nombre}` : 'Pasá el mouse sobre una pieza. Clic en un equipo o cable eléctrico para ver el video.')}
-            </div>
+            {!enfoque && (
+              <div className="info">
+                {hover || (parteSel ? `${parteSel.id} - ${parteSel.nombre}` : 'Pasá el mouse sobre una pieza. Doble clic en una madera para verla sola. Clic en un equipo o cable eléctrico para ver el video.')}
+              </div>
+            )}
           </div>
+          {enfoque && (
+            <PanelPieza
+              partes={data.partes}
+              id={enfoque}
+              cfg={cfg}
+              invertir={invertir}
+              setInvertir={setInvertir}
+              verContexto={verContexto}
+              setVerContexto={setVerContexto}
+              ir={ir}
+              salir={salir}
+            />
+          )}
           <PanelElemento
             id={elemento}
             elec3d={elec3d}
@@ -232,8 +296,8 @@ export default function App() {
           ))}
         </nav>
         <div className="contenido">
-          {tab === 'Despiece' && <Despiece data={data} cfg={cfg} seleccion={seleccion} setSeleccion={setSeleccion} />}
-          {tab === 'Placas y cortes' && <Placas plan={plan} cfg={cfg} seleccion={seleccion} setSeleccion={setSeleccion} />}
+          {tab === 'Despiece' && <Despiece data={data} cfg={cfg} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} />}
+          {tab === 'Placas y cortes' && <Placas plan={plan} cfg={cfg} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} />}
           {tab === 'Herrajes' && <Herrajes data={data} fijaciones={fijaciones} />}
           {tab === 'Eléctrica' && (
             <Electrica

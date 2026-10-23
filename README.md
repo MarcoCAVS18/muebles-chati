@@ -42,6 +42,11 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   detector de gas, con la ventilación al exterior por el piso.
 - Al hacer clic en cualquier equipo, cable o manguera (en el 3D o en la pestaña Eléctrica) se abre un panel con qué
   es, dónde va, cómo se conecta y un video de YouTube recomendado.
+- Modo pieza: doble clic en una madera (en el 3D, en la lista de despiece o en el plano de cortes) y las demás se desvanecen:
+  la cámara vuela hasta la pieza y la deja sola, con las tres medidas en cotas, las esquinas redondeadas con su radio,
+  el recorte o el arco calado y marcas de ángulo recto en los cortes rectos. Flechas del teclado (o los botones) para pasar a la
+  pieza anterior o siguiente, "Dar vuelta" para ver la otra cara, "Ver el mueble de fondo" para ver dónde va y Esc para volver.
+  El contorno de cada pieza y las cotas salen de `src/engine/enfoque.js`; `npm run check` los prueba en las 127 piezas.
 - Lista de compras agrupada.
 - Avisos si una pieza choca con otro mueble, con el pasarruedas o se sale de la van.
 

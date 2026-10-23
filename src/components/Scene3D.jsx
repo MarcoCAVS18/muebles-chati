@@ -1,13 +1,10 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Edges } from '@react-three/drei';
-
-const COLORES = {
-  'Mueble trasero': '#dcbc8c',
-  Cama: '#e8d2a6',
-  'Mueble derecho': '#cfae7c',
-};
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import { Caja, PlacaCortada, COLORES, aplicarFade, m } from './Piezas3D.jsx';
+import { PiezaEnfoque, AnotacionesDe, aMundo } from './Enfoque.jsx';
+import { posarCamara } from '../engine/enfoque.js';
 
 const COLOR_CABLE = {
   dc: { pos: '#d32f2f', neg: '#212121' },
@@ -16,8 +13,6 @@ const COLOR_CABLE = {
   agua: { pos: '#29b6f6', neg: null },
   gas: { pos: '#ff9800', neg: null },
 };
-
-const m = (v) => v / 1000;
 
 // El modelo usa x = 0 en la pared izquierda mirando hacia los asientos (eje que no es el de three.js).
 // Se espeja el eje x al dibujar para que izquierda y derecha se vean como en la van real.
@@ -36,79 +31,38 @@ export const VISTAS = {
   asientos: { nombre: 'Batería del auto (bajo el asiento)', pos: [-0.5, 1.5, 3.7], target: [-1.35, 0.2, 2.75] },
 };
 
-function Camara({ vista, controles }) {
+// Cámara: salta a una vista guardada y vuela (con arco y frenado suave) hacia la pieza elegida y de vuelta
+const suave = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+function Camara({ vista, controles, anim, previa }) {
   const { camera } = useThree();
   useEffect(() => {
     const v = VISTAS[vista.clave] || VISTAS.foto;
+    anim.current = null;
+    previa.current = null;
     camera.position.set(...v.pos);
     if (controles.current) {
       controles.current.target.set(...v.target);
       controles.current.update();
     }
-  }, [vista, camera, controles]);
+  }, [vista, camera, controles, anim, previa]);
+  useFrame((_, dt) => {
+    const a = anim.current;
+    if (!a || !controles.current) return;
+    a.t += Math.min(dt, 0.05);
+    const k = Math.min(1, a.t / a.dur);
+    const e = suave(k);
+    // El destino se desplaza en línea recta y la cámara gira alrededor de él cambiando la distancia
+    const objetivo = new THREE.Vector3().lerpVectors(a.t0, a.t1, e);
+    const q = new THREE.Quaternion().slerp(a.giro, e);
+    const dir = a.d0.clone().applyQuaternion(q);
+    const largo = THREE.MathUtils.lerp(a.l0, a.l1, e);
+    camera.position.copy(objetivo).addScaledVector(dir, largo);
+    controles.current.target.copy(objetivo);
+    controles.current.update();
+    if (k >= 1) anim.current = null;
+  });
   return null;
-}
-
-function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f2a', onClick, onOver, onOut, emisivo, resaltar }) {
-  return (
-    <mesh position={[m(x + sx / 2), m(y + sy / 2), m(z + sz / 2)]} onClick={onClick} onPointerOver={onOver} onPointerOut={onOut}>
-      <boxGeometry args={[m(sx), m(sy), m(sz)]} />
-      <meshStandardMaterial
-        key={opacidad < 1 ? 'transparente' : 'opaco'}
-        color={color}
-        transparent={opacidad < 1}
-        opacity={opacidad}
-        depthWrite={opacidad >= 1}
-        emissive={resaltar ? '#ff7043' : emisivo ? color : '#000000'}
-        emissiveIntensity={resaltar ? 0.6 : emisivo ? 0.9 : 0}
-      />
-      {bordes && <Edges color={bordes} />}
-    </mesh>
-  );
-}
-
-// Placa con las cuatro esquinas redondeadas en planta (x, z) y espesor en y. Puede llevar un recorte
-// rectangular en la esquina delantera derecha (x alto, z alto): recDx es dónde empieza en x y recDz cuánto entra en z (mm).
-function PlacaRedonda({ x, y, z, sx, sy, sz, radio, recDx, recDz, color, opacidad = 1, bordes, onClick, onOver, onOut }) {
-  const geometria = useMemo(() => {
-    const r = Math.min(m(radio), m(sx) / 2, m(sz) / 2);
-    const w = m(sx);
-    const h = m(sz);
-    // La forma se dibuja en (u, v) y al rotar el eje x -90 grados v queda como -z
-    const forma = new THREE.Shape();
-    forma.moveTo(r, 0);
-    forma.lineTo(w - r, 0);
-    forma.absarc(w - r, -r, r, Math.PI / 2, 0, true);
-    if (recDx != null) {
-      const nx = m(recDx);
-      const vf = -(h - m(recDz)); // borde delantero de la parte que queda a la derecha
-      forma.lineTo(w, vf + r);
-      forma.absarc(w - r, vf + r, r, 0, -Math.PI / 2, true);
-      forma.lineTo(nx, vf);
-      forma.lineTo(nx, -h + r);
-      forma.absarc(nx - r, -h + r, r, 0, -Math.PI / 2, true);
-    } else {
-      forma.lineTo(w, -h + r);
-      forma.absarc(w - r, -h + r, r, 0, -Math.PI / 2, true);
-    }
-    forma.lineTo(r, -h);
-    forma.absarc(r, -h + r, r, -Math.PI / 2, -Math.PI, true);
-    forma.lineTo(0, -r);
-    forma.absarc(r, -r, r, Math.PI, Math.PI / 2, true);
-    return new THREE.ExtrudeGeometry(forma, { depth: m(sy), bevelEnabled: false, curveSegments: 10 });
-  }, [sx, sy, sz, radio, recDx, recDz]);
-  return (
-    <mesh geometry={geometria} position={[m(x), m(y), m(z)]} rotation={[-Math.PI / 2, 0, 0]} onClick={onClick} onPointerOver={onOver} onPointerOut={onOut}>
-      <meshStandardMaterial
-        key={opacidad < 1 ? 'transparente' : 'opaco'}
-        color={color}
-        transparent={opacidad < 1}
-        opacity={opacidad}
-        depthWrite={opacidad >= 1}
-      />
-      {bordes && <Edges color={bordes} threshold={20} />}
-    </mesh>
-  );
 }
 
 // Un tramo recto de cable: cilindro entre dos puntos
@@ -192,8 +146,17 @@ function Escena(props) {
   const {
     data, elec3d, tramos, van, visibles, explosion, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
     seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar, camaAbierta,
+    enfoque, setEnfoque, invertir, verContexto,
   } = props;
   const controles = useRef();
+  const anim = useRef(null); // vuelo de la cámara en curso
+  const previa = useRef(null); // vista que había antes de entrar al modo pieza
+  const grupoCtx = useRef(); // todo lo que no es la pieza elegida: se desvanece en el modo pieza
+  const fade = useRef(1);
+  const luzCamara = useRef();
+  const { camera, size } = useThree();
+  const foco = enfoque;
+  const activo = !!foco;
 
   // Centro de cada grupo para separar las piezas al "explotar" la vista
   const centros = useMemo(() => {
@@ -222,6 +185,97 @@ function Escena(props) {
     };
   };
 
+  // Posición actual de una pieza: con la vista explotada y con las bandejas de la cama abiertas
+  const colocada = (p) => {
+    const q = { ...desplazar(p, p.grupo) };
+    if (p.ext) q.x += (data.layout.cama?.extension || 0) * camaAbierta;
+    if (p.recorte) {
+      const dx = q.x - p.x;
+      const dz = q.z - p.z;
+      q.recorte = { ...p.recorte, x0: p.recorte.x0 + dx, x1: p.recorte.x1 + dx, z0: p.recorte.z0 + dz, z1: p.recorte.z1 + dz };
+    }
+    return q;
+  };
+
+  // Modo pieza: la pieza que se muestra, desde dónde se mira y qué piezas siguen en escena mientras se van o llegan
+  const parteFoco = useMemo(() => data.partes.find((p) => p.id === foco), [data, foco]);
+  const camFoco = useMemo(
+    () =>
+      parteFoco
+        ? posarCamara(colocada(parteFoco), { invertir, xMedio: van.ancho / 2, aspecto: size.width / size.height, fovDeg: camera.fov })
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [parteFoco, explosion, camaAbierta, invertir, van.ancho, size.width, size.height]
+  );
+  const [vivas, setVivas] = useState([]);
+  const entradas = useRef({});
+  const [anotId, setAnotId] = useState('');
+  const quitar = useCallback((id) => setVivas((v) => v.filter((i) => i !== id)), []);
+
+  useEffect(() => {
+    if (!foco) return;
+    setVivas((v) => {
+      if (v.includes(foco)) return v;
+      const primera = fade.current > 0.9; // viene de la escena completa: la pieza ya está ahí y no hace falta hacerla aparecer
+      entradas.current[foco] = { alfaInicial: primera ? 1 : 0, retraso: primera ? 0 : 0.3, desdeSeleccion: primera };
+      return [...v, foco];
+    });
+  }, [foco]);
+
+  // Las cotas aparecen cuando la cámara ya llegó (se avisa desde el cuadro de animación)
+  const esperaCotas = useRef('');
+  useEffect(() => {
+    setAnotId('');
+    esperaCotas.current = foco;
+  }, [foco, invertir]);
+
+  // Vuelo de la cámara hacia la pieza, de una pieza a la otra y de vuelta a la vista anterior
+  useEffect(() => {
+    const c = controles.current;
+    if (!c) return;
+    let destino = null;
+    if (camFoco) {
+      if (!previa.current) previa.current = { pos: camera.position.clone(), target: c.target.clone() };
+      destino = { pos: new THREE.Vector3(...aMundo(camFoco.pos)), target: new THREE.Vector3(...aMundo(camFoco.ctr)) };
+    } else if (previa.current) {
+      destino = previa.current;
+      previa.current = null;
+    }
+    if (!destino) return;
+    const t0 = c.target.clone();
+    const d0v = camera.position.clone().sub(t0);
+    const d1v = destino.pos.clone().sub(destino.target);
+    const d0 = d0v.clone().normalize();
+    const d1 = d1v.clone().normalize();
+    anim.current = { t: 0, dur: 1.0, t0, t1: destino.target.clone(), d0, l0: d0v.length(), l1: d1v.length(), giro: new THREE.Quaternion().setFromUnitVectors(d0, d1) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [foco, invertir]);
+
+  // Fundido de todo lo demás y luz que acompaña a la cámara mientras se mira una pieza
+  useFrame((_, dt) => {
+    if (esperaCotas.current && !anim.current) {
+      setAnotId(esperaCotas.current);
+      esperaCotas.current = '';
+    }
+    const objetivo = foco ? (verContexto ? 0.1 : 0) : 1;
+    if (fade.current !== objetivo) {
+      fade.current += (objetivo - fade.current) * Math.min(1, Math.min(dt, 0.05) * 8);
+      if (Math.abs(fade.current - objetivo) < 0.003) fade.current = objetivo;
+      if (grupoCtx.current) {
+        aplicarFade(grupoCtx.current, fade.current);
+        grupoCtx.current.visible = fade.current > 0.004;
+      }
+    }
+    // El encuadre sube un poco para que la tarjeta de abajo no tape la pieza
+    const sube = 1 - fade.current;
+    if (sube > 0.001) camera.setViewOffset(size.width, size.height, 0, Math.round(0.06 * size.height * sube), size.width, size.height);
+    else if (camera.view && camera.view.enabled) camera.clearViewOffset();
+    if (luzCamara.current) {
+      luzCamara.current.intensity = 0.8 * (1 - fade.current);
+      luzCamara.current.position.copy(camera.position);
+    }
+  });
+
   const seccionDe = useMemo(() => {
     const mapa = {};
     for (const t of tramos) mapa[t.id] = t.seccion;
@@ -230,11 +284,11 @@ function Escena(props) {
 
   const sobre = (texto) => (ev) => {
     ev.stopPropagation();
-    setHover(texto);
+    if (!activo) setHover(texto);
   };
   const clic = (id) => (ev) => {
     ev.stopPropagation();
-    setElemento(id);
+    if (!activo) setElemento(id);
   };
 
   return (
@@ -242,7 +296,9 @@ function Escena(props) {
       <ambientLight intensity={0.7} />
       <directionalLight position={[3, 5, -2]} intensity={0.9} />
       <directionalLight position={[-3, 3, 4]} intensity={0.4} />
+      <pointLight ref={luzCamara} decay={0} intensity={0} />
 
+      <group ref={grupoCtx}>
       <group scale={[-1, 1, 1]}>
       {/* Piso y contorno interior de la van */}
       <Caja x={0} y={-12} z={0} sx={van.ancho} sy={12} sz={van.largo} color="#8d6e4a" bordes="#4b3a24" />
@@ -257,10 +313,9 @@ function Escena(props) {
       {mostrarAsientos && elec3d.decos.map((d) => <Caja key={d.nombre} {...d} bordes={null} />)}
 
       {data.partes
-        .filter((p) => visibles[p.grupo])
+        .filter((p) => visibles[p.grupo] && p.id !== foco)
         .map((p) => {
-          const q = { ...desplazar(p, p.grupo) };
-          if (p.ext) q.x += (data.layout.cama?.extension || 0) * camaAbierta; // las bandejas salen al pasillo
+          const q = colocada(p);
           const elegida = seleccion === p.id;
           const color = elegida ? '#ff7043' : p.tipo === 'liston' ? '#c49a5e' : p.color || COLORES[p.grupo];
           const comun = {
@@ -275,14 +330,23 @@ function Escena(props) {
             bordes: elegida ? '#bf360c' : '#6b4f2a',
             onClick: (e) => {
               e.stopPropagation();
+              if (activo) return;
               // Las puertas de la heladera, del gas y de lo eléctrico abren la ficha del equipo
               if (p.abre) setElemento(p.abre);
               else setSeleccion(p.id);
             },
-            onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? ' (clic para ver el equipo y el video)' : ''}`),
+            // Doble clic: la madera se queda sola en pantalla con sus medidas y cortes
+            onDoubleClick: (e) => {
+              e.stopPropagation();
+              if (activo) return;
+              setElemento('');
+              setSeleccion(p.id);
+              setEnfoque(p.id);
+            },
+            onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? ' (clic para ver el equipo y el video)' : ''} - doble clic para verla sola`),
             onOut: () => setHover(''),
           };
-          return p.radio ? <PlacaRedonda key={p.id} {...comun} radio={p.radio} recDx={p.recorte ? p.recorte.x0 - p.x : undefined} recDz={p.recorte ? p.z + p.sz - p.recorte.z0 : undefined} /> : <Caja key={p.id} {...comun} />;
+          return p.radio || p.calado ? <PlacaCortada key={p.id} p={q} {...comun} /> : <Caja key={p.id} {...comun} />;
         })}
 
       {data.decos
@@ -361,9 +425,27 @@ function Escena(props) {
         ))}
 
       </group>
+      </group>
+
+      {/* Modo pieza: la madera elegida (fuera del grupo que se desvanece) y sus cotas */}
+      {vivas.map((id) => {
+        const p = data.partes.find((x) => x.id === id);
+        if (!p) return null;
+        const q = colocada(p);
+        const color = p.tipo === 'liston' ? '#c49a5e' : p.color || COLORES[p.grupo];
+        const ent = entradas.current[id] || { alfaInicial: 1, retraso: 0, desdeSeleccion: false };
+        return (
+          <React.Fragment key={id}>
+            <group scale={[-1, 1, 1]}>
+              <PiezaEnfoque q={q} color={color} activa={id === foco} {...ent} onFin={() => quitar(id)} />
+            </group>
+            <AnotacionesDe key={`${id}:${invertir}`} q={q} invertir={invertir} xMedio={van.ancho / 2} fov={camera.fov} visible={id === foco && anotId === id} />
+          </React.Fragment>
+        );
+      })}
 
       <OrbitControls ref={controles} makeDefault />
-      <Camara vista={vista} controles={controles} />
+      <Camara vista={vista} controles={controles} anim={anim} previa={previa} />
     </>
   );
 }

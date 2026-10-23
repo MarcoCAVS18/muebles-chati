@@ -58,7 +58,7 @@ export function cama(ctx, G) {
   P('Frente del pie - izquierdo', x0, 0, zPie, aX0 - x0, yB, t);
   P('Frente del pie - derecho', aX1, 0, zPie, x1 - aX1, yB, t);
   P('Frente del pie - bajo la abertura', aX0, 0, zPie, aX1 - aX0, aY0, t);
-  P('Frente del pie - sobre la abertura (calar arco)', aX0, aCy, zPie, aX1 - aX0, yB - aCy, t);
+  P('Frente del pie - sobre la abertura (calar arco)', aX0, aCy, zPie, aX1 - aX0, yB - aCy, t, { calado: { tipo: 'arco', radio: radioArco } });
   ctx.deco({ grupo: G, nombre: 'Arco de la abertura', forma: 'arco', cx: (aX0 + aX1) / 2, cy: aCy, z: zPie - 0.6, radio: radioArco, sz: 0.8 });
   ctx.herraje(G, `Plantilla de arco R${radioArco} mm`, 1, 'Marcar el arco en la pieza sobre la abertura y calar con caladora');
   const zInt = Math.min(zPie + 385, arcoIni - 10); // fondo de la caja (termina antes del pasarruedas)
