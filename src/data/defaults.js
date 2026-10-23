@@ -11,7 +11,7 @@
 //                  enchufes y cajones de cocina; esta sección es la L: llega a 570 mm de profundidad
 //       centro:    anafe, cajón de la garrafa de gas y heladera al piso
 //       derecha:   grifo y fregadero, con los dos bidones de agua al piso
-//   - Cama extensible (90 a 120 cm) de plywood con esquinas redondeadas, con caja con arco al pie
+//   - Cama extensible (90 a 120 cm) de plywood, como la del instructivo: dos módulos (120 y 60) con ventanas y placas con ranuras
 //   - Mueble derecho con cajones, puerta bajo la mesa plegable y alacena alta
 
 export const CONFIG_INICIAL = {
@@ -68,8 +68,12 @@ export const CONFIG_INICIAL = {
     plataforma: 440, // altura de la cara superior: la placa (15 mm) apoya justo sobre el pasarruedas (425)
     largoCabecera: 1200, // largo de la placa de la cabecera (la otra placa, de 600 mm, va al pie)
     huecoMueble: 430, // espacio libre bajo la cama, frente al mueble trasero (bidones y puertas bajas)
-    cajonCabecera: { fondo: 560, alto: 200 },
-    cajonPie: { fondo: 600, alto: 200 },
+    // Calados de las placas y bandejas (ranuras de esquinas redondeadas que cruzan la cama a lo ancho)
+    ranura: { ancho: 70, costilla: 50, margen: 50, radio: 20 },
+    // Ventanas de los costados (hueco de cada cajón): zócalo y cabezal son la madera que queda abajo y arriba
+    ventana: { radio: 40, zocalo: 40, cabezal: 50, apoyoCajon: 45 },
+    cajonCabecera: { fondo: 560 }, // el alto lo da la ventana
+    cajonPie: { fondo: 600 },
   },
 
   // Mueble derecho: módulo de cajones (atrás), módulo con puerta bajo la mesa y alacena

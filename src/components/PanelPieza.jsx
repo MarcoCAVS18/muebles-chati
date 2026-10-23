@@ -7,7 +7,7 @@ const LEYENDA = [
   ['medida', 'Medidas'],
   ['recto', 'Corte recto a 90°'],
   ['redondo', 'Esquina redondeada'],
-  ['arco', 'Arco o recorte'],
+  ['arco', 'Arco, recorte o calado'],
 ];
 
 export default function PanelPieza({ partes, id, cfg, invertir, setInvertir, verContexto, setVerContexto, ir, salir }) {

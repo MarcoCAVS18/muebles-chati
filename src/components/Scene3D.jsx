@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { Caja, PlacaCortada, COLORES, aplicarFade, m } from './Piezas3D.jsx';
+import { Caja, PlacaCortada, COLORES, aplicarFade, m, tieneContorno } from './Piezas3D.jsx';
 import { PiezaEnfoque, AnotacionesDe, aMundo } from './Enfoque.jsx';
 import { posarCamara } from '../engine/enfoque.js';
 import { useDobleToque, TACTIL } from '../util/pantalla.js';
@@ -371,7 +371,7 @@ function Escena(props) {
             onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? ` (${TACTIL ? 'toque' : 'clic'} para ver el equipo y el video)` : ''} - ${TACTIL ? 'doble toque' : 'doble clic'} para verla sola`),
             onOut: () => setHover(''),
           };
-          return p.radio || p.calado ? <PlacaCortada key={p.id} p={q} {...comun} /> : <Caja key={p.id} {...comun} />;
+          return tieneContorno(p) ? <PlacaCortada key={p.id} p={q} {...comun} /> : <Caja key={p.id} {...comun} />;
         })}
 
       {data.decos

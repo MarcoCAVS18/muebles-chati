@@ -3,7 +3,7 @@ import React, { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Line, Html } from '@react-three/drei';
-import { Caja, PlacaCortada, aplicarFade } from './Piezas3D.jsx';
+import { Caja, PlacaCortada, aplicarFade, tieneContorno } from './Piezas3D.jsx';
 import { anotarPieza, posarCamara, COLOR_CORTE, fmt } from '../engine/enfoque.js';
 
 // Coordenadas de la van en mm a coordenadas del mundo 3D en metros (el 3D espeja el eje x)
@@ -44,7 +44,7 @@ export function PiezaEnfoque({ q, color, activa, alfaInicial, retraso, desdeSele
   const comun = { x: q.x, y: q.y, z: q.z, color, bordes: '#3f2d14', matRef: mat };
   return (
     <group ref={grupo}>
-      {q.radio || q.calado ? <PlacaCortada p={q} {...comun} /> : <Caja sx={q.sx} sy={q.sy} sz={q.sz} {...comun} />}
+      {tieneContorno(q) ? <PlacaCortada p={q} {...comun} /> : <Caja sx={q.sx} sy={q.sy} sz={q.sz} {...comun} />}
     </group>
   );
 }

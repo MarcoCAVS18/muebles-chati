@@ -30,9 +30,48 @@ export const COLOR_CORTE = {
 };
 
 // ---------- Contorno ----------
-// Las piezas con esquinas redondeadas, recorte o arco no son una caja. El contorno se da como comandos en el
-// sistema de la forma (u, v): en las placas planas (plano 'xz') u = x y v = -z; en las de frente (plano 'xy') u = x y v = y.
-// Las esquinas llevan la marca 'esquina' y el arco calado la marca 'arco'.
+// Las piezas con esquinas redondeadas, recorte, arco o calados interiores no son una caja. El contorno se da como comandos
+// en el sistema de la forma (u, v): en las placas planas (plano 'xz') u = x y v = -z; en las de frente (plano 'xy')
+// u = x y v = y; en los costados (plano 'zy') u = z y v = y. Las esquinas llevan la marca 'esquina' y el arco calado 'arco'.
+// Los calados interiores (ranuras y ventanas) se dan en la pieza como huecos { tipo, a0, a1, b0, b1, r } en las
+// coordenadas de su cara (a, b), medidas desde la esquina mínima: ver marcoVisible.
+const aMarco = (plano, u, v) => (plano === 'xz' ? [u, -v] : plano === 'zy' ? [v, u] : [u, v]);
+const aForma = (plano, a, b) => (plano === 'xz' ? [a, -b] : plano === 'zy' ? [b, a] : [a, b]);
+
+// Rectángulo con esquinas redondeadas en la forma (u, v), recorrido en sentido horario como el contorno de afuera
+function rectRedondo(u0, v0, u1, v1, r) {
+  if (r < 0.01)
+    return [
+      { t: 'M', u: u0, v: v1 },
+      { t: 'L', u: u1, v: v1 },
+      { t: 'L', u: u1, v: v0 },
+      { t: 'L', u: u0, v: v0 },
+    ];
+  return [
+    { t: 'M', u: u0 + r, v: v1 },
+    { t: 'L', u: u1 - r, v: v1 },
+    { t: 'A', cu: u1 - r, cv: v1 - r, r, a0: PI / 2, a1: 0, tag: 'esquina' },
+    { t: 'L', u: u1, v: v0 + r },
+    { t: 'A', cu: u1 - r, cv: v0 + r, r, a0: 0, a1: -PI / 2, tag: 'esquina' },
+    { t: 'L', u: u0 + r, v: v0 },
+    { t: 'A', cu: u0 + r, cv: v0 + r, r, a0: -PI / 2, a1: -PI, tag: 'esquina' },
+    { t: 'L', u: u0, v: v1 - r },
+    { t: 'A', cu: u0 + r, cv: v1 - r, r, a0: PI, a1: PI / 2, tag: 'esquina' },
+  ];
+}
+
+function huecosDe(p, plano) {
+  return (p.huecos || []).map((h) => {
+    const r = Math.max(0, Math.min(h.r || 0, (h.a1 - h.a0) / 2, (h.b1 - h.b0) / 2));
+    const [ua, va] = aForma(plano, h.a0, h.b0);
+    const [ub, vb] = aForma(plano, h.a1, h.b1);
+    return { ...h, r, cmds: rectRedondo(Math.min(ua, ub), Math.min(va, vb), Math.max(ua, ub), Math.max(va, vb), r) };
+  });
+}
+
+// Hay que dibujarla con contorno propio (no como caja)
+export const tieneContorno = (p) => !!(p.radio || p.calado || (p.huecos && p.huecos.length) || p.redondeo);
+
 export function contorno(p) {
   if (p.calado && p.calado.tipo === 'arco') {
     const w = p.sx;
@@ -55,6 +94,7 @@ export function contorno(p) {
       esquinas: 0,
       recorte: null,
       arco: { a: w / 2, b: 0, r: R },
+      huecos: [],
     };
   }
   if (p.radio) {
@@ -84,9 +124,50 @@ export function contorno(p) {
     cmds.push({ t: 'A', cu: r, cv: -h + r, r, a0: -PI / 2, a1: -PI, tag: 'esquina' });
     cmds.push({ t: 'L', u: 0, v: -r });
     cmds.push({ t: 'A', cu: r, cv: -r, r, a0: PI, a1: PI / 2, tag: 'esquina' });
-    return { plano: 'xz', w, h, cmds, escuadras, esquinas: rec ? 5 : 4, radio: r, recorte: rec, arco: null };
+    return { plano: 'xz', w, h, cmds, escuadras, esquinas: rec ? 5 : 4, radio: r, recorte: rec, arco: null, huecos: huecosDe(p, 'xz') };
+  }
+  if ((p.huecos && p.huecos.length) || p.redondeo) {
+    // Pieza plana de cualquier cara con calados interiores y, si lleva, las 4 esquinas redondeadas
+    const plano = ['zy', 'xz', 'xy'][[p.sx, p.sy, p.sz].indexOf(Math.min(p.sx, p.sy, p.sz))];
+    const [w, h] = plano === 'zy' ? [p.sz, p.sy] : plano === 'xz' ? [p.sx, p.sz] : [p.sx, p.sy];
+    const r = Math.min(p.redondeo || 0, w / 2, h / 2);
+    const cmds = rectRedondo(0, plano === 'xz' ? -h : 0, w, plano === 'xz' ? 0 : h, r);
+    const [la, lb] = plano === 'zy' ? [p.sy, p.sz] : plano === 'xz' ? [p.sx, p.sz] : [p.sx, p.sy];
+    const escuadras = r
+      ? []
+      : [
+          [0, 0, 1, 1],
+          [la, 0, -1, 1],
+          [la, lb, -1, -1],
+          [0, lb, 1, -1],
+        ];
+    return { plano, w, h, cmds, escuadras, esquinas: r ? 4 : 0, radio: r, recorte: null, arco: null, huecos: huecosDe(p, plano) };
   }
   return null;
+}
+
+
+// Agrupa los calados de una pieza por tipo: cantidad, el que se acota (uno entero del medio, para que las cotas caigan
+// en el centro de la pieza) y la madera que queda entre ese y el que sigue
+export function gruposDeHuecos(c) {
+  const por = {};
+  for (const h of c.huecos || []) (por[h.tipo] = por[h.tipo] || []).push(h);
+  return Object.entries(por).map(([tipo, lista]) => {
+    const largoMax = Math.max(...lista.map((h) => h.a1 - h.a0));
+    const completos = lista.filter((h) => h.a1 - h.a0 >= largoMax - 0.5);
+    const ref = completos[Math.floor((completos.length - 1) / 2)];
+    const sig = lista[lista.indexOf(ref) + 1] || null;
+    return {
+      tipo,
+      n: lista.length,
+      cortos: lista.length - completos.length,
+      primero: ref,
+      siguiente: sig,
+      costilla: sig ? Math.abs(sig.b0 - ref.b1) : 0,
+      bordeA: ref.a0,
+      bordeB: ref.b0,
+    };
+  });
 }
 
 // ---------- Descripción de los cortes ----------
@@ -113,6 +194,25 @@ export function describirPieza(p, cfg) {
         texto: `Recorte rectangular de ${fmt(c.recorte.a1 - c.recorte.a0)} x ${fmt(c.recorte.b1 - c.recorte.b0)} mm en una esquina; su ángulo interior queda a 90°`,
       });
     }
+    for (const g of gruposDeHuecos(c)) {
+      const h = g.primero;
+      const largo = Math.max(h.a1 - h.a0, h.b1 - h.b0);
+      const ancho = Math.min(h.a1 - h.a0, h.b1 - h.b0);
+      if (h.tipo === 'ranura') {
+        lineas.push({
+          tipo: 'arco',
+          texto: `${g.n} ranuras iguales de ${fmt(largo)} x ${fmt(ancho)} mm, con esquinas R${fmt(h.r)}, a lo ancho de la pieza${g.costilla ? ` y ${fmt(g.costilla)} mm de madera entre una y otra` : ''}${g.cortos ? `; las ${g.cortos} que quedan junto al recorte son más cortas` : ''} (taladro en cada esquina, caladora y fresadora o lija para pulirlas)`,
+        });
+      } else {
+        // En los costados (plano zy) la coordenada a es la altura; en los frentes (plano xy) es el costado
+        const abajo = c.plano === 'zy' ? g.bordeA : g.bordeB;
+        const lateral = c.plano === 'zy' ? g.bordeB : g.bordeA;
+        lineas.push({
+          tipo: 'arco',
+          texto: `Ventana de ${fmt(largo)} x ${fmt(ancho)} mm con esquinas R${fmt(h.r)}: queda a ${fmt(abajo)} mm del borde de abajo y a ${fmt(lateral)} mm del borde lateral (taladro en las esquinas, caladora y fresadora; la pieza que sale sirve para otra parte)`,
+        });
+      }
+    }
     if (c.arco) {
       lineas.push({
         tipo: 'arco',
@@ -135,7 +235,7 @@ export function ejeFino(p) {
 
 export function ejeVista(p) {
   const c = contorno(p);
-  if (c) return c.plano === 'xz' ? 1 : 2;
+  if (c) return c.plano === 'xz' ? 1 : c.plano === 'zy' ? 0 : 2;
   return ejeFino(p);
 }
 
@@ -149,9 +249,6 @@ export function marcoVisible(p, ax, sgn) {
 
 export const aVan = (m, a, b, d = 0) => resta(suma(suma(m.O, por(m.U, a)), por(m.V, b)), por(m.N, d));
 
-// Pasa un punto de la forma (u, v) a las coordenadas (a, b) del marco
-const aMarco = (plano, u, v) => (plano === 'xz' ? [u, -v] : [u, v]);
-
 // ---------- Cámara ----------
 // Lado por el que se ve cada eje: x hacia el centro de la van, y desde arriba, z desde la puerta trasera
 const signoDe = (ax, ctr, xMedio) => (ax === 0 ? (ctr[0] < xMedio ? 1 : -1) : ax === 1 ? 1 : -1);
@@ -159,7 +256,7 @@ const signoDe = (ax, ctr, xMedio) => (ax === 0 ? (ctr[0] < xMedio ? 1 : -1) : ax
 export function posarCamara(p, { invertir = false, xMedio = 860, aspecto = 1.6, fovDeg = 45 } = {}) {
   const ctr = [p.x + p.sx / 2, p.y + p.sy / 2, p.z + p.sz / 2];
   const ax = ejeVista(p);
-  const lado = signoDe(ax, ctr, xMedio) * (invertir ? -1 : 1);
+  const lado = (p.lado || signoDe(ax, ctr, xMedio)) * (invertir ? -1 : 1);
   const dims = [p.sx, p.sy, p.sz];
   const otros = [0, 1, 2].filter((i) => i !== ax).sort((i, j) => dims[j] - dims[i]);
   // Las placas planas se miran desde atrás y arriba (la pieza queda derecha en la pantalla); el resto, con una leve vuelta
@@ -290,6 +387,52 @@ export function anotarPieza(p, cam) {
       } else {
         const [a, b] = aMarco(c.plano, k.cu, k.cv);
         arcos.push({ pts, tipo: 'arco', etiqueta: '', pos: V(a, b) });
+      }
+    }
+    // Calados interiores: las esquinas de todos y las medidas del primero de cada tipo
+    const referencias = new Set(gruposDeHuecos(c).map((g) => g.primero));
+    for (const h of c.huecos) {
+      let rotulado = !referencias.has(h);
+      for (const k of h.cmds) {
+        if (k.t !== 'A') continue;
+        const pts = [];
+        const n = 12;
+        for (let i = 0; i <= n; i++) {
+          const ang = k.a0 + ((k.a1 - k.a0) * i) / n;
+          const [a, b] = aMarco(c.plano, k.cu + k.r * Math.cos(ang), k.cv + k.r * Math.sin(ang));
+          pts.push(V(a, b));
+        }
+        let etiqueta = '';
+        let pos = pts[Math.floor(n / 2)];
+        if (!rotulado) {
+          rotulado = true;
+          etiqueta = `R${fmt(k.r)}`;
+          const mitad = (k.a0 + k.a1) / 2;
+          const [a, b] = aMarco(c.plano, k.cu + (k.r + 22) * Math.cos(mitad), k.cv + (k.r + 22) * Math.sin(mitad));
+          pos = V(a, b);
+        }
+        arcos.push({ pts, tipo: 'redondo', etiqueta, pos });
+      }
+    }
+    for (const g of gruposDeHuecos(c)) {
+      const h = g.primero;
+      const am = (h.a0 + h.a1) / 2;
+      const bm = (h.b0 + h.b1) / 2;
+      const nom = h.tipo === 'ranura' ? 'Ranura' : 'Ventana';
+      const aEn = (f) => h.a0 + f * (h.a1 - h.a0);
+      // La etiqueta puede ir en otro lugar de la línea para que las de una misma ranura no se pisen
+      const cota = (ini, fin, valor, nombre, etiquetaPos) => cotas.push({ ini, fin, ext: [], valor, nombre, tipo: 'arco', ...(etiquetaPos ? { etiquetaPos } : {}) });
+      if (h.tipo === 'ranura') {
+        // Las ranuras se repiten: el largo, el ancho y la madera entre una y otra se leen en distintos lugares
+        cota(V(h.a0, bm), V(h.a1, bm), h.a1 - h.a0, `Ranura de ${fmt(h.b1 - h.b0)} x`, V(aEn(0.27), bm));
+        if (g.siguiente && g.costilla > 12) cota(V(aEn(0.78), h.b1), V(aEn(0.78), g.siguiente.b0), g.costilla, 'Entre ranuras');
+      } else {
+        const nomA = c.plano === 'zy' ? 'Del borde de abajo' : 'Del borde lateral';
+        const nomB = c.plano === 'zy' ? 'Del borde lateral' : 'Del borde de abajo';
+        cota(V(h.a0, bm), V(h.a1, bm), h.a1 - h.a0, nom);
+        cota(V(aEn(0.12), h.b0), V(aEn(0.12), h.b1), h.b1 - h.b0, nom);
+        if (h.b0 > 12) cota(V(aEn(0.85), 0), V(aEn(0.85), h.b0), h.b0, nomB);
+        if (h.a0 > 12) cota(V(0, bm), V(h.a0, bm), h.a0, nomA);
       }
     }
     if (c.arco) {

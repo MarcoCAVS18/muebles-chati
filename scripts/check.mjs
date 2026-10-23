@@ -261,12 +261,39 @@ exigir(e3.cables.some((c) => c.hasta === 'bomba') && CARGAS_INICIALES.some((c) =
 
 // ---- Modo pieza: contorno, descripción de cortes, cámara y cotas ----
 const conContorno = data.partes.filter((p) => contorno(p));
-exigir(conContorno.length === 5, `deberían tener contorno propio 5 piezas (2 placas, 2 bandejas y el frente con arco), hay ${conContorno.length}`);
+exigir(conContorno.length === 9, `deberían tener contorno propio 9 piezas (2 placas, 2 bandejas, el frente del pie, 2 costados y 2 frentes de cajón), hay ${conContorno.length}`);
 const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
 exigir(contorno(cab).esquinas === 5 && contorno(cab).recorte, 'la placa de la cabecera debería tener 5 esquinas redondeadas y un recorte');
 exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /261 x 250/.test(l.texto)), 'la descripción de la cabecera debería decir el recorte de 261 x 250');
-const frenteArco = data.partes.find((p) => /calar arco/.test(p.nombre));
-exigir(frenteArco && contorno(frenteArco).arco && contorno(frenteArco).arco.r === 170, 'el frente con arco debería llevar el arco de R170');
+
+// Cama como la del instructivo: placas con ranuras de esquinas redondeadas y costados con ventana (hueco del cajón)
+const pie = data.partes.find((p) => /^Placa del pie/.test(p.nombre));
+exigir(contorno(cab).huecos.length === 9 && contorno(pie).huecos.length === 4, 'las placas deberían llevar 9 y 4 ranuras');
+exigir(contorno(cab).huecos.every((h) => h.tipo === 'ranura' && h.r === CONFIG_INICIAL.cama.ranura.radio), 'las ranuras de la placa deberían llevar esquinas redondeadas');
+const rec = contorno(cab).recorte;
+exigir(contorno(cab).huecos.every((h) => h.a1 <= rec.a0 - 49 || h.b1 <= rec.b0 + 0.5), 'las ranuras junto al recorte tienen que quedar antes de él');
+const zAbs = (p, h) => [p.z + h.b0, p.z + h.b1].map((v) => Math.round(v * 10));
+for (const b of data.partes.filter((p) => p.ext && p.radio)) {
+  const placa = b.z + b.sz / 2 > cab.z ? cab : pie;
+  const grilla = new Set(contorno(placa).huecos.map((h) => zAbs(placa, h).join()));
+  exigir(b.huecos.length >= 4 && b.huecos.every((h) => grilla.has(zAbs(b, h).join())), `las ranuras de ${b.id} deberían quedar en línea con las de su placa`);
+  exigir(b.huecos.every((h) => h.b0 >= 29.5 && b.sz - h.b1 >= 29.5), `las ranuras de ${b.id} dejan menos de 3 cm de madera junto a las correderas`);
+}
+const costados = data.partes.filter((p) => /^Costado del pasillo/.test(p.nombre));
+exigir(costados.length === 2 && costados.every((p) => p.huecos.length === 1 && p.huecos[0].tipo === 'ventana'), 'cada módulo debería llevar un costado del pasillo con una ventana');
+const yBandeja = Math.min(...data.partes.filter((p) => p.ext).map((p) => p.y));
+exigir(costados.every((p) => p.y + p.sy <= yBandeja - 3), 'los costados del pasillo no pueden tapar la salida de las bandejas');
+const frentesCajon = data.partes.filter((p) => /^Frente cajón de la cabecera|^Frente cajón del pie/.test(p.nombre));
+exigir(frentesCajon.length === 2, 'faltan los frentes de los cajones de la cama');
+for (const f of frentesCajon) {
+  const cos = costados.find((p) => f.z >= p.z && f.z + f.sz <= p.z + p.sz);
+  const v = cos && cos.huecos[0];
+  exigir(v && f.y >= cos.y + v.a0 + 2.5 && f.y + f.sy <= cos.y + v.a1 - 2.5 && f.z >= cos.z + v.b0 + 2.5 && f.z + f.sz <= cos.z + v.b1 - 2.5, `${f.id} debería entrar en la ventana de su costado con 3 mm de luz`);
+  exigir(Math.abs(contorno(f).radio - (v.r - 3)) < 0.01, `${f.id} debería llevar las esquinas del radio de la ventana menos la luz`);
+}
+exigir(data.partes.some((p) => /^Frente del pie/.test(p.nombre) && p.huecos && p.huecos.length === 1), 'el frente del pie debería llevar su ventana');
+const refPiso = data.partes.filter((p) => /^Refuerzo de piso/.test(p.nombre));
+exigir(refPiso.length === 4 && refPiso.every((p) => p.y === 0), 'deberían quedar 4 refuerzos de piso (2 por módulo)');
 for (const p of data.partes) {
   for (const invertir of [false, true]) {
     const cam = posarCamara(p, { invertir });

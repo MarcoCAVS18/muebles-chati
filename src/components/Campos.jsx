@@ -95,6 +95,12 @@ export const SECCIONES_CFG = [
       { ruta: 'cama.huecoMueble', etiqueta: 'Hueco libre bajo la cama frente al mueble' },
       { ruta: 'cama.plataforma', etiqueta: 'Altura de la plataforma' },
       { ruta: 'cama.largoCabecera', etiqueta: 'Largo placa cabecera' },
+      { ruta: 'cama.ranura.ancho', etiqueta: 'Ranuras: ancho' },
+      { ruta: 'cama.ranura.costilla', etiqueta: 'Ranuras: madera entre una y otra' },
+      { ruta: 'cama.ranura.radio', etiqueta: 'Ranuras: radio de esquinas' },
+      { ruta: 'cama.ventana.radio', etiqueta: 'Ventanas: radio de esquinas' },
+      { ruta: 'cama.ventana.zocalo', etiqueta: 'Ventanas: madera abajo' },
+      { ruta: 'cama.ventana.cabezal', etiqueta: 'Ventanas: madera arriba' },
     ],
   },
   {

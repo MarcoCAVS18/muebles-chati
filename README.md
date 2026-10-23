@@ -5,7 +5,7 @@ con la distribución de la foto de referencia: mueble trasero cruzado de pared a
 (de izquierda a derecha: eléctrico al piso con la batería acostada, inversor, DC-DC y fusibles, y sobre la cama el
 panel y los enchufes con dos cajones de cocina arriba; cocina con anafe, gas y heladera al piso, al centro; y agua con
 fregadero y bidones al piso, a la derecha), cama extensible de 90 a 120 cm de 180 cm de largo (placas de plywood con
-esquinas redondeadas, bandejas sobre correderas, caja con arco y cajones), y mueble
+esquinas redondeadas y ranuras, bandejas sobre correderas, costados con ventana y cajones), y mueble
 derecho con cajones, alacena y mesa plegable.
 
 ## Uso
@@ -44,9 +44,9 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   es, dónde va, cómo se conecta y un video de YouTube recomendado.
 - Modo pieza: doble clic en una madera (en el 3D, en la lista de despiece o en el plano de cortes) y las demás se desvanecen:
   la cámara vuela hasta la pieza y la deja sola, con las tres medidas en cotas, las esquinas redondeadas con su radio,
-  el recorte o el arco calado y marcas de ángulo recto en los cortes rectos. Flechas del teclado (o los botones) para pasar a la
+  el recorte, el arco, las ranuras y las ventanas (con su medida y su radio) y marcas de ángulo recto en los cortes rectos. Flechas del teclado (o los botones) para pasar a la
   pieza anterior o siguiente, "Dar vuelta" para ver la otra cara, "Ver el mueble de fondo" para ver dónde va y Esc para volver.
-  El contorno de cada pieza y las cotas salen de `src/engine/enfoque.js`; `npm run check` los prueba en las 127 piezas.
+  El contorno de cada pieza y las cotas salen de `src/engine/enfoque.js`; `npm run check` los prueba en las 128 piezas.
 - Versión para celular y tablet (pantallas de hasta 1100 px de ancho o poca altura): una sola sección por vez, con barra de
   abajo (3D, Medidas, Despiece, Cortes, Herrajes, Eléctrica, Compras). Los controles del 3D están en el botón "Opciones", el
   doble toque en una madera la deja sola (también desde el despiece y las hojas de corte, con un botón "Ver sola"), y al salir
@@ -100,14 +100,26 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El cajón de la garrafa necesita una rejilla de
   ventilación hacia el exterior por el piso, detector de gas y detector de monóxido de carbono.
 - Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
+- La cama es como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera) y otro de 60 cm (pie), unidos con dos
+  tornillos de 25 mm y fijados al piso con refuerzos de 4 tornillos de 25 mm por módulo. Cada módulo es una caja abierta con un
+  costado del lado del pasillo con una ventana grande de esquinas redondeadas (R40, 315 mm de alto); el frente del pie tiene otra.
+  En cada ventana de los costados va un cajón con el frente a ras (el frente toma el radio de la ventana menos la luz de 3 mm).
+  El lado de la pared no lleva costado: lo hace la pared de la van, y el pasarruedas pasa por ahí.
+- La plataforma son las mismas placas con ranuras de esquinas redondeadas cortadas en la madera (no hay varillas): 70 mm de ancho,
+  50 mm de madera entre una y otra y R20, a lo ancho de la cama. La placa de la cabecera lleva 9 (las 2 junto al recorte del gas
+  son más cortas) y la del pie 4. Las bandejas extensibles llevan las mismas ranuras en las mismas posiciones, y como se
+  mueven en el sentido de las ranuras quedan siempre en línea con las de la placa fija: la cama abierta tiene el mismo dibujo.
+  Se cambian en `cama.ranura` y `cama.ventana` (defaults.js).
 - Placas de la cama: cabecera de 1200 mm y pie de 600 mm de largo (900 mm de ancho, 3 mm de luz entre las dos), las dos con su
-  bandeja extensible. La de la cabecera mide 736,5 mm y la del pie unos 311 mm, porque los primeros 255 mm del pie son la caja con
-  arco. Se cambia en "Largo placa cabecera". Un guardado con la cama de 170 cm y la L de 670 mm pasa solo a 180 cm y 570 mm.
+  bandeja extensible. La de la cabecera mide 736,5 mm y la del pie 551,5 mm. Se cambia en "Largo placa cabecera". Un guardado con
+  la cama de 170 cm y la L de 670 mm pasa solo a 180 cm y 570 mm.
 - Con la L de 570 mm (10 cm menos que antes) el inversor va atravesado, con el largo sobre el ancho del mueble, para que entren
   uno detrás de otro los equipos del frente, el paso del cable largo y la batería. Los dos cajones de cocina de la L usan
   correderas de 500 mm. Si se vuelve a una L de 670 mm el inversor vuelve a ir de largo sobre z.
 - Cama extensible: al abrir, la bandeja queda 16 mm más baja que la placa fija (la cubre el colchón o un relleno de 15 mm).
-  La zona del pie (caja con arco) no se extiende: ahí la cama sigue en 90 cm. Con la cama abierta quedan 110 mm de pasillo.
+  Los costados del pasillo llegan 4 mm por debajo de las bandejas para que salgan por encima (por eso entre el costado y la placa
+  queda una luz de unos 20 mm, que cubre la bandeja cuando está cerrada). Las bandejas no llevan listones: la ranura deja 30 mm o más de
+  madera junto a las correderas. Con la cama abierta quedan 110 mm de pasillo.
 - Correderas de las bandejas: de carga, 500 mm, extensión total, 100 kg el par. Confirmar con la ficha de las que compres.
 - Mesa plegable reducida a 400 mm de ancho para que no pase sobre la cama de 90 cm.
 - Consumos de cada aparato.

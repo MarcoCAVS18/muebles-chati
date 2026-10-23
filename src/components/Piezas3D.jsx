@@ -4,6 +4,8 @@ import * as THREE from 'three';
 import { Edges } from '@react-three/drei';
 import { contorno } from '../engine/enfoque.js';
 
+export { tieneContorno } from '../engine/enfoque.js';
+
 export const m = (v) => v / 1000;
 
 export const COLORES = {
@@ -34,23 +36,35 @@ export function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f
 // Placa con esquinas redondeadas, recorte o arco calado. El contorno sale de enfoque.js (el mismo que usan las cotas).
 // p es la pieza original (da el contorno) y x, y, z su posición actual (puede estar desplazada por la vista explotada).
 export function PlacaCortada({ p, x, y, z, color, opacidad = 1, bordes, onClick, onDoubleClick, onOver, onOut, matRef }) {
-  const c = useMemo(() => contorno(p), [p.x, p.z, p.sx, p.sy, p.sz, p.radio, p.recorte, p.calado]);
+  const c = useMemo(() => contorno(p), [p.x, p.z, p.sx, p.sy, p.sz, p.radio, p.recorte, p.calado, p.huecos, p.redondeo]);
   const geometria = useMemo(() => {
+    const trazo = (cmds, destino) => {
+      for (const k of cmds) {
+        if (k.t === 'M') destino.moveTo(m(k.u), m(k.v));
+        else if (k.t === 'L') destino.lineTo(m(k.u), m(k.v));
+        else destino.absarc(m(k.cu), m(k.cv), m(k.r), k.a0, k.a1, true);
+      }
+    };
     const forma = new THREE.Shape();
-    for (const k of c.cmds) {
-      if (k.t === 'M') forma.moveTo(m(k.u), m(k.v));
-      else if (k.t === 'L') forma.lineTo(m(k.u), m(k.v));
-      else forma.absarc(m(k.cu), m(k.cv), m(k.r), k.a0, k.a1, true);
+    trazo(c.cmds, forma);
+    // Calados interiores (ranuras y ventanas): son agujeros de la forma
+    for (const h of c.huecos) {
+      const agujero = new THREE.Path();
+      trazo(h.cmds, agujero);
+      forma.holes.push(agujero);
     }
-    const espesor = c.plano === 'xz' ? p.sy : p.sz;
-    return new THREE.ExtrudeGeometry(forma, { depth: m(espesor), bevelEnabled: false, curveSegments: 28 });
-  }, [c, p.sy, p.sz]);
-  // En las placas planas la forma se dibuja en (u, v) y al rotar -90 grados en x, v queda como -z y el espesor como y
+    const espesor = c.plano === 'xz' ? p.sy : c.plano === 'zy' ? p.sx : p.sz;
+    return new THREE.ExtrudeGeometry(forma, { depth: m(espesor), bevelEnabled: false, curveSegments: 20 });
+  }, [c, p.sx, p.sy, p.sz]);
+  // La forma se dibuja en (u, v). En las placas planas, al rotar -90 grados en x, v queda como -z y el espesor como y.
+  // En los costados (plano zy) se gira -90 grados en y: u queda como z y el espesor sale hacia -x, por eso se parte de x + sx
+  const rotacion = c.plano === 'xz' ? [-Math.PI / 2, 0, 0] : c.plano === 'zy' ? [0, -Math.PI / 2, 0] : [0, 0, 0];
+  const posicion = c.plano === 'zy' ? [m(x + p.sx), m(y), m(z)] : [m(x), m(y), m(z)];
   return (
     <mesh
       geometry={geometria}
-      position={[m(x), m(y), m(z)]}
-      rotation={c.plano === 'xz' ? [-Math.PI / 2, 0, 0] : [0, 0, 0]}
+      position={posicion}
+      rotation={rotacion}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       onPointerOver={onOver}
