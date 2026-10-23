@@ -1,6 +1,7 @@
 // Lista de cortes, plano de placas, peso y lista de compras.
 import { optimizarPlacas, optimizarListones } from './packer.js';
 import { resumenFijaciones } from './fijaciones.js';
+import { NOMBRE_BOTON } from './contexto.js';
 
 const r1 = (n) => Math.round(n * 10) / 10;
 
@@ -88,7 +89,9 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
     mapa.set(k, (mapa.get(k) || 0) + h.cantidad);
   }
   for (const [item, cantidad] of mapa) {
-    filas.push({ categoria: 'Herrajes', item, cantidad, nota: '' });
+    // Los botones push se venden en packs de 10 con sus pestillos
+    const nota = item === NOMBRE_BOTON ? `Se vende en packs de 10 con sus pestillos y tornillos: ${Math.ceil(cantidad / 10)} pack(s)` : '';
+    filas.push({ categoria: 'Herrajes', item, cantidad, nota });
   }
   const fij = resumenFijaciones(data.uniones, data.anclajes);
   for (const f of fij.totales) {

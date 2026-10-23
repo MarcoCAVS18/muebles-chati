@@ -177,13 +177,66 @@ for (const id of ['panelSwitches', 'enchufe1', 'enchufe2']) {
 // La cama termina contra el frente de la L, y el cajón de cocina de la L queda sobre la cama
 exigir(Math.abs(data.layout.cama.zCab - (vn.largo - cfgI.trasero.profundidadL)) < 0.5, 'la cama debería terminar contra el frente de la L del mueble trasero');
 exigir(tra.find((p) => p.nombre === 'Frente cajón de cocina 1').y > cfgI.cama.plataforma, 'los cajones de cocina de la L deberían quedar sobre la cama');
-// Tres tiras LED y extractor sin conexión
-exigir(['ledA', 'ledB', 'ledC'].every((id) => e3.equipos.some((e) => e.id === id)), 'faltan las tres tiras LED');
-exigir(e3.largoC > 500, 'la tercera tira LED quedó muy corta');
+// Cuatro tiras LED con el mismo inicio y fin (dos centrales junto a la claraboya, dos laterales cerca de las paredes) y extractor sin conexión
+const tiras = ['ledA', 'ledB', 'ledC', 'ledD'].map((id) => e3.equipos.find((e) => e.id === id));
+exigir(tiras.every(Boolean), 'faltan las cuatro tiras LED');
+exigir(!e3.equipos.some((e) => e.id === 'ledE') && CONFIG_INICIAL.led.tiras === 4, 'debería haber exactamente cuatro tiras LED y ninguna central detrás del extractor');
+exigir(tiras.every((t) => t.z === tiras[0].z && t.sz === tiras[0].sz && t.sz >= 1900), 'las cuatro tiras LED deberían empezar y terminar en el mismo lugar');
+const [tA, tB, tC, tD] = tiras;
+const cx = (t) => t.x + t.sx / 2;
+exigir(cx(tA) < cx(tB) && cx(tC) < cx(tA) && cx(tD) > cx(tB), 'las laterales (3 y 4) deberían quedar fuera de las centrales (1 y 2), cerca de las paredes');
+exigir(cx(tC) < 400 && CONFIG_INICIAL.van.ancho - cx(tD) < 400, 'las tiras laterales deberían quedar cerca de las paredes de la van');
 exigir(!e3.cables.some((c) => c.desde === 'extractor' || c.hasta === 'extractor'), 'el extractor no debería tener cable');
 const ex = e3.equipos.find((e) => e.id === 'extractor');
 exigir(ex && ex.sx === 310 && ex.sz === 310, 'el extractor debería medir 310 x 310 mm con el marco');
+// Las dos tiras centrales pasan por los costados de la claraboya, a 6 cm del marco o más, sin tocarla
+exigir(Math.min(ex.x - (tA.x + tA.sx), tB.x - (ex.x + ex.sx)) >= 59, 'las tiras centrales deberían quedar a 6 cm o más del marco del extractor');
+exigir(!tiras.some((t) => solapan(t, ex)), 'una tira LED toca el extractor');
 exigir(ELECTRICA_INICIAL.switches.length === 5 && !ELECTRICA_INICIAL.switches.includes('Extractor'), 'el panel debería tener 5 interruptores sin el extractor');
+exigir(/centrales/.test(ELECTRICA_INICIAL.switches[0]) && /laterales/.test(ELECTRICA_INICIAL.switches[1]) && /Lámpara/.test(ELECTRICA_INICIAL.switches[2]), 'los interruptores 1, 2 y 3 deberían ser luces centrales, laterales y lámpara');
+exigir(e3.cables.some((c) => c.id === 'c_panel_ledC') && e3.cables.some((c) => c.id === 'c_panel_ledD') && !e3.cables.some((c) => /ledC.*centro/.test(c.nombre)), 'faltan los cables de las tiras laterales');
+// Lámpara flexible: pared izquierda, sobre la viga de 22 cm, a la altura del pecho acostado; el cable va por el techo y baja por la viga
+const lam = e3.equipos.find((e) => e.id === 'lampara');
+const zViga0 = vn.archInicio + vn.archLargo;
+exigir(lam && lam.x < 40, 'la lámpara debería estar pegada a la pared izquierda');
+exigir(lam && lam.z >= zViga0 && lam.z + lam.sz <= zViga0 + vn.puertaLateral.vigas, 'la lámpara debería quedar sobre la viga de 22 cm entre el pasarruedas y la puerta');
+exigir(lam && lam.y > cfgI.cama.plataforma + 100 && lam.y + lam.sy < cfgI.cama.plataforma + 400, 'la lámpara debería quedar a la altura del pecho de quien está acostado (sobre la cama)');
+exigir(e3.escenario.some((q) => /Viga sin aislar \(izquierda\)/.test(q.nombre)), 'falta la viga izquierda en el escenario');
+const cLam = e3.cables.find((c) => c.id === 'c_panel_lampara');
+exigir(cLam && cLam.hasta === 'lampara' && cLam.puntos.some((p) => p[1] >= vn.alto - 20), 'el cable de la lámpara debería ir por el techo');
+const ult = cLam.puntos.slice(-2);
+exigir(ult[0][0] === ult[1][0] && ult[0][2] === ult[1][2] && ult[0][1] > ult[1][1] + 300, 'el cable de la lámpara debería bajar recto por la viga hasta la lámpara');
+exigir(ult[1][2] >= zViga0 && ult[1][2] <= zViga0 + vn.puertaLateral.vigas, 'el cable de la lámpara debería bajar por la viga de 22 cm');
+exigir(CARGAS_INICIALES.some((c) => c.id === 'lampara') && CARGAS_INICIALES.some((c) => c.id === 'ledD') && !CARGAS_INICIALES.some((c) => /centro/.test(c.nombre)), 'las cargas deberían tener las cuatro tiras y la lámpara, sin la tira central');
+exigir(ele.caminos.some((c) => /lámpara/.test(c.nombre)) && ele.caminos.some((c) => /LED 4/.test(c.nombre)), 'faltan los caminos de la lámpara o de la tira 4');
+// Botones push: uno por frente, sobre la cara del frente, sin pisar otras piezas
+const cuentaB = {};
+for (const b of data.botones) cuentaB[b.grupo] = (cuentaB[b.grupo] || 0) + 1;
+exigir(cuentaB['Mueble trasero'] === 7 && cuentaB.Cama === 2 && cuentaB['Mueble derecho'] === 4, `cantidad de botones push inesperada: ${JSON.stringify(cuentaB)}`);
+const botonesDeco = data.decos.filter((d) => d.forma === 'boton');
+exigir(botonesDeco.length === data.botones.length, 'cada botón debería dibujarse en el 3D');
+for (const b of data.botones) {
+  const fr = data.partes.find((p) => p.grupo === b.grupo && p.nombre === b.nombre);
+  exigir(fr, `el botón "${b.nombre}" no tiene un frente con ese nombre`);
+  if (!fr) continue;
+  const r = 14 + 5; // radio del botón y 5 mm de aire hasta el borde del frente
+  if (b.eje[0] === 'z') {
+    exigir(b.cx - r >= fr.x && b.cx + r <= fr.x + fr.sx && b.cy - r >= fr.y && b.cy + r <= fr.y + fr.sy, `el botón "${b.nombre}" se sale del frente`);
+    exigir(Math.abs(b.cz - fr.z) < 0.5, `el botón "${b.nombre}" no está sobre la cara del frente`);
+  } else {
+    exigir(b.cz - r >= fr.z && b.cz + r <= fr.z + fr.sz && b.cy - r >= fr.y && b.cy + r <= fr.y + fr.sy, `el botón "${b.nombre}" se sale del frente`);
+    exigir(Math.abs(b.cx - (b.eje[1] === '+' ? fr.x + fr.sx : fr.x)) < 0.5, `el botón "${b.nombre}" no está sobre la cara del frente`);
+  }
+}
+for (const d of botonesDeco) {
+  for (const p of data.partes) {
+    if (p.nombre === d.nombre.replace('Botón push: ', '') && p.grupo === d.grupo) continue;
+    exigir(!solapan(d, p), `el botón "${d.nombre}" pisa la pieza ${p.id} (${p.nombre})`);
+  }
+}
+const filaBoton = compras.find((r) => /Cierre a botón/.test(r.item));
+exigir(filaBoton && filaBoton.cantidad === data.botones.length && /2 pack/.test(filaBoton.nota), 'la lista de compras debería sumar los botones push y decir cuántos packs de 10');
+exigir(!data.herrajes.some((h) => /Tirador embutido$/.test(h.nombre) || /Imán o cierre push/.test(h.nombre)), 'los tiradores y los imanes deberían haberse reemplazado por los botones push');
 exigir(!CARGAS_INICIALES.some((c) => c.id === 'extractor'), 'el extractor no debería tener consumo');
 // ---- Revisión eléctrica: protecciones y caídas de tensión ----
 const AMP = { 0.75: 8, 1: 10, 1.5: 15, 2.5: 20, 4: 30, 6: 40, 10: 60, 16: 80, 25: 100, 35: 125, 50: 150, 70: 190, 95: 230 };

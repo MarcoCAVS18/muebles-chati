@@ -144,6 +144,18 @@ export function trasero(ctx, G) {
     dir: 'z-',
   });
 
+  // Botones push en cada frente. Las puertas llevan el botón cerca del borde libre (se supone que las bisagras
+  // quedan a la izquierda de cada puerta), los cajones lo llevan al centro.
+  const bt = (nombre, x, y, z) => ctx.boton({ grupo: G, nombre, eje: 'z-', x, y, z });
+  const centro = (h) => (h.x0 + h.x1) / 2;
+  bt('Puerta de la batería y los equipos', hueco.E.x1 - 2 - 45, yTopeE - 2 - 70, zFL);
+  for (const c of E.cajones) bt(`Frente ${c.nombre.toLowerCase()}`, centro(hueco.E), (c.y0 + c.y1) / 2, zFL);
+  const yPuertaHel = K.yHeladera + eq.nevera.y + 2; // borde alto de la puerta de la heladera
+  bt('Puerta de la heladera', hueco.K.x1 - 2 - 45, yPuertaHel - 70, zF);
+  bt('Frente cajón del gas', centro(hueco.K), 785 - 45, zF);
+  bt('Frente cajón de bidones', centro(hueco.W), W.yEstante - 3 - 60, zF);
+  bt('Frente cajón bajo el fregadero', centro(hueco.W), (W.yCajonFregadero + 760) / 2, zF);
+
   // Uniones
   ctx.unir(G, 'cola_tornillo', tr.alto + prof + tr.alto + profL, 'Costados con base, fondo y tapas');
   ctx.unir(G, 'cola_tornillo', 2 * (largoInt + largoIntE) + 4 * (tr.alto - yBase), 'Divisores con base, tapa, fondo y frente');
@@ -163,8 +175,7 @@ export function trasero(ctx, G) {
 
   // Herrajes
   ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 5, 'Puerta de la heladera (2) y puerta de la batería y los equipos, que es ancha (3)');
-  ctx.herraje(G, 'Tirador embutido', 7, 'Dos cajones del agua, heladera, cajón del gas, puerta eléctrica y dos cajones de cocina');
-  ctx.herraje(G, 'Imán o cierre push para puertas', 2);
+  ctx.herrajeBotones(G); // un botón push por frente: reemplaza al tirador y al imán
   ctx.herraje(G, 'Soporte regulable de estante', 12, 'Estantes del eléctrico, la cocina y el agua');
   ctx.herraje(G, 'Sifón y desagüe para fregadero', 1, 'Con la salida hacia un bidón de aguas grises o al piso');
   ctx.herraje(G, 'Rejilla de ventilación 100 cm2 para el gas', 1, 'Al exterior por el piso, bajo el cajón de la garrafa: el gas pesa más que el aire');

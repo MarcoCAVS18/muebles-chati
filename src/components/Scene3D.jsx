@@ -31,6 +31,8 @@ export const VISTAS = {
   cocina: { nombre: 'Cocina: anafe, gas y heladera', pos: [-0.86, 1.2, 0.6], target: [-0.86, 0.45, 2.2] },
   electrico: { nombre: 'Zona eléctrica (ver interior)', pos: [-0.35, 1.2, 0.6], target: [-0.35, 0.4, 2.2] },
   techo: { nombre: 'Techo: tiras LED y extractor', pos: [-0.86, 0.5, 0.1], target: [-0.86, 1.25, 1.6] },
+  lampara: { nombre: 'Lámpara flexible (pared izquierda)', pos: [-1.1, 1.0, 0.3], target: [-0.04, 0.8, 1.23] },
+  botones: { nombre: 'Botones push (frente del mueble trasero)', pos: [-0.9, 0.95, 0.9], target: [-0.9, 0.45, 1.9] },
   asientos: { nombre: 'Batería del auto (bajo el asiento)', pos: [-0.5, 1.5, 3.7], target: [-1.35, 0.2, 2.75] },
 };
 
@@ -152,7 +154,28 @@ function Cable({ cable, seccion, elegido, onClick, onOver, onOut }) {
   );
 }
 
-function Deco({ d }) {
+function Deco({ d, onOver, onOut }) {
+  if (d.forma === 'boton') {
+    // Botón push redondo: aro contra el frente y botón negro que sobresale. La caja (x, y, z, sx, sy, sz) lo contiene
+    // y eje dice hacia dónde sale; el eje y local del cilindro apunta hacia afuera del frente.
+    const sg = d.eje[1] === '+' ? 1 : -1;
+    const rot = d.eje[0] === 'x' ? [0, 0, -sg * Math.PI / 2] : [sg * Math.PI / 2, 0, 0];
+    const largo = d.eje[0] === 'x' ? d.sx : d.sz;
+    const aro = 3;
+    const rBoton = d.sy / 2;
+    return (
+      <group position={[m(d.x + d.sx / 2), m(d.y + d.sy / 2), m(d.z + d.sz / 2)]} rotation={rot} onPointerOver={onOver} onPointerOut={onOut}>
+        <mesh position={[0, m(-largo / 2 + aro / 2), 0]}>
+          <cylinderGeometry args={[m(rBoton + 3), m(rBoton + 3), m(aro), 28]} />
+          <meshStandardMaterial color="#3a3a3a" />
+        </mesh>
+        <mesh position={[0, m(-largo / 2 + aro + (largo - aro) / 2), 0]}>
+          <cylinderGeometry args={[m(rBoton), m(rBoton), m(largo - aro), 28]} />
+          <meshStandardMaterial color={d.color} roughness={0.35} />
+        </mesh>
+      </group>
+    );
+  }
   if (d.forma === 'arco') {
     // Medio cilindro oscuro: marca la abertura en arco del frente de la caja del pie
     return (
@@ -264,9 +287,11 @@ function Escena(props) {
 
       {data.decos
         .filter((d) => visibles[d.grupo])
-        .map((d) => (
-          <Deco key={d.id} d={d.forma ? d : desplazar(d, d.grupo)} />
-        ))}
+        .map((d) => {
+          const q = d.forma && d.forma !== 'boton' ? d : desplazar(d, d.grupo);
+          // Los botones acompañan a su mueble en la vista explotada
+          return <Deco key={d.id} d={q} onOver={d.forma === 'boton' ? sobre(d.nombre) : undefined} onOut={() => setHover('')} />;
+        })}
 
       {/* Equipos de agua y cocina */}
       {mostrarEquipos &&

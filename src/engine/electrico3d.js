@@ -4,19 +4,22 @@
 // Camino de la energía:
 //   batería del auto (bajo el asiento del acompañante) -> fusible ANL -> cable largo por el piso bajo los asientos
 //   -> hueco inferior del mamparo -> DC-DC -> batería de 150 Ah -> fusible principal -> inversor -> enchufes
-//   batería -> caja de fusibles -> heladera y panel de 5 interruptores -> 3 tiras LED, bomba y mando del inversor
+//   batería -> caja de fusibles -> heladera y panel de 5 interruptores -> 4 tiras LED, lámpara flexible, bomba y mando del inversor
 //
 // Todo lo eléctrico del mueble está en la sección izquierda (E), al piso y bajo el plano de la cama, con la
 // batería acostada. El tablero con interruptores y enchufes queda sobre la cama, en el frente de esa misma
 // sección. Los cables del tablero van por el hueco que queda entre el estante y los cajones de cocina.
-// El extractor del techo no tiene conexión: se deja en el 3D para ubicar las luces.
+// El extractor del techo no tiene conexión: se deja en el 3D para ubicar las luces. Las 4 tiras LED van del mismo inicio
+// al mismo fin: las dos centrales a cada lado del extractor (interruptor 1) y las dos laterales cerca de las paredes
+// (interruptor 2). La lámpara flexible (interruptor 3) está en la pared izquierda, sobre la viga: su cable va por el
+// techo y baja por la viga.
 
 import { disposicionTrasero } from './disposicion.js';
 
 export const GRUPO_ELEC = 'Eléctrico';
 
 export function electrico3d(cfg) {
-  const { van, equipos: eq, vehiculo: ve, led, extractor: ex } = cfg;
+  const { van, equipos: eq, vehiculo: ve, led, extractor: ex, lampara: lamp } = cfg;
   const L = disposicionTrasero(cfg);
   const { zF, zFL, zB: zb, zFondo, yTapa, sec, E, K, W } = L;
   const bomba = W.bomba;
@@ -77,32 +80,31 @@ export function electrico3d(cfg) {
     nota: 'En el tablero del frente de la sección eléctrica, al lado del primero',
   });
 
-  // --- Techo: tres tiras LED y el extractor (sin conexión) ---
+  // --- Techo: cuatro tiras LED y el extractor (sin conexión) ---
   const yTecho = van.alto;
   const zLed0 = 250;
   const largoLed = led.largoM * 1000;
-  const zExtAtras = ex.z - ex.marco / 2; // borde del extractor hacia la puerta trasera
-  const zFinC = zExtAtras - 60; // la tercera tira sigue hacia la puerta trasera desde el extractor
-  const largoC = Math.max(zFinC - zLed0, 0);
-  const ledA = caja('ledA', `Tira LED ${led.largoM} m (1)`, led.x1 - 10, yTecho - 8, zLed0, 20, 8, largoLed, {
-    color: '#fff59d',
-    emisivo: true,
-    nota: 'Techo, lado izquierdo',
-  });
-  const ledB = caja('ledB', `Tira LED ${led.largoM} m (2)`, led.x2 - 10, yTecho - 8, zLed0, 20, 8, largoLed, {
-    color: '#fff59d',
-    emisivo: true,
-    nota: 'Techo, lado derecho',
-  });
-  const ledC = caja('ledC', `Tira LED ${(largoC / 1000).toFixed(1).replace('.', ',')} m (3)`, led.xC - 10, yTecho - 8, zLed0, 20, 8, largoC, {
-    color: '#fff59d',
-    emisivo: true,
-    nota: 'Techo, al centro, desde el extractor hacia la puerta trasera',
-  });
+  const tira = (id, n, xc, nota) =>
+    caja(id, `Tira LED ${led.largoM} m (${n})`, xc - 10, yTecho - 8, zLed0, 20, 8, largoLed, { color: '#fff59d', emisivo: true, nota });
+  const ledA = tira('ledA', 1, led.x1, 'Techo, central izquierda: pasa por el costado de la claraboya, a 6 cm del marco');
+  const ledB = tira('ledB', 2, led.x2, 'Techo, central derecha: pasa por el otro costado de la claraboya, a 6 cm del marco');
+  const ledC = tira('ledC', 3, led.x3, 'Techo, lateral izquierda, cerca de la pared de la cama');
+  const ledD = tira('ledD', 4, led.x4, 'Techo, lateral derecha, cerca de la pared del mueble derecho');
   const extractor = caja('extractor', 'Extractor de techo (sin conexión)', ex.x - ex.marco / 2, yTecho - 25, ex.z - ex.marco / 2, ex.marco, 25, ex.marco, {
     color: '#cfd8dc',
     nota: `Se abre a mano, sin ventilador. Hueco ${ex.hueco} mm, con el marco ${ex.marco} mm`,
   });
+
+  // --- Lámpara flexible en la pared izquierda, sobre la viga sin aislar, a la altura del pecho de quien está acostado ---
+  const lm = eq.lampara;
+  const xViga = 22; // la viga sobresale 22 mm de la pared
+  const zL = lamp.z;
+  const yL = lamp.y; // centro de la base
+  const lampara = caja('lampara', 'Lámpara flexible de lectura 12 V', xViga, yL - lm.y / 2, zL - lm.z / 2, lm.x, lm.y, lm.z, {
+    color: '#212121',
+    nota: 'Pared izquierda, sobre la viga sin aislar de 22 cm que queda entre el pasarruedas y la puerta; a la altura del pecho al estar acostado',
+  });
+  const yTopeL = lampara.y + lampara.sy; // cara de arriba de la base: ahí entra el cable
 
   // --- Batería del auto bajo el asiento del acompañante ---
   const ba = eq.bateriaAuto;
@@ -117,7 +119,7 @@ export function electrico3d(cfg) {
 
   const equipos = [
     bateria, fusibles, fusiblePrincipal, inversor, dcdc, panelSwitches, enchufe1, enchufe2,
-    ledA, ledB, ledC, extractor, bateriaAuto, anlCaja,
+    ledA, ledB, ledC, ledD, lampara, extractor, bateriaAuto, anlCaja,
   ];
 
   // --- Cables (puntos en mm). tipo: dc | ac | senal | agua | gas ---
@@ -128,6 +130,7 @@ export function electrico3d(cfg) {
   const zUnder = 2600; // recorrido bajo los asientos
   const yCan = yTecho - 12; // cota de los cables en el techo
   const zFinA = zLed0 + largoLed;
+  const xCeil = xViga + 90; // por el techo el cable de la lámpara corre cerca de la pared izquierda, antes de bajar por la viga
   const zAtras = zFondo - 5; // pegado al fondo del mueble
   const zTr = zFL + 2; // cara trasera del tablero
   const yHueco = 505; // altura de los cables del tablero en el hueco entre el estante y los cajones
@@ -274,58 +277,94 @@ export function electrico3d(cfg) {
     },
     {
       id: 'c_panel_ledA',
-      nombre: 'Panel a tira LED 1',
+      nombre: 'Panel a tira LED 1 (central izquierda)',
       tipo: 'dc',
       desde: 'panelSwitches',
       hasta: 'ledA',
       video: 'ledA',
       corriente: 'ledA',
       puntos: [
-        [xPan + 20, yHueco + 15, zTr],
-        [xPan + 20, yHueco + 15, zAtras - 10],
-        [xPan + 20, yCan, zAtras - 10],
-        [xPan + 20, yCan, zFinA],
+        [xPan + 10, yHueco + 15, zTr],
+        [xPan + 10, yHueco + 15, zAtras - 10],
+        [xPan + 10, yCan, zAtras - 10],
+        [xPan + 10, yCan, zFinA],
         [led.x1, yCan, zFinA],
         [led.x1, yTecho - 8, zFinA],
       ],
-      nota: 'Va por el hueco sobre el estante hasta el fondo del mueble, sube por atrás de los cajones, atraviesa la tapa por un pasacables y sigue por el techo hasta el extremo de la tira.',
+      nota: 'Interruptor 1 (luces centrales). Va por el hueco sobre el estante hasta el fondo del mueble, sube por atrás de los cajones, atraviesa la tapa por un pasacables y sigue por el techo hasta el extremo de la tira.',
     },
     {
       id: 'c_panel_ledB',
-      nombre: 'Panel a tira LED 2',
+      nombre: 'Panel a tira LED 2 (central derecha)',
       tipo: 'dc',
       desde: 'panelSwitches',
       hasta: 'ledB',
       video: 'ledB',
       corriente: 'ledB',
       puntos: [
-        [xPan + 40, yHueco + 15, zTr],
-        [xPan + 40, yHueco + 15, zAtras - 5],
-        [xPan + 40, yCan, zAtras - 5],
-        [xPan + 40, yCan, zFinA + 12],
+        [xPan + 24, yHueco + 15, zTr],
+        [xPan + 24, yHueco + 15, zAtras - 5],
+        [xPan + 24, yCan, zAtras - 5],
+        [xPan + 24, yCan, zFinA + 12],
         [led.x2, yCan, zFinA + 12],
         [led.x2, yTecho - 8, zFinA],
       ],
-      nota: 'Comparte el recorrido y el pasacables de la tapa con los otros cables de luz.',
+      nota: 'Interruptor 1, igual que la tira 1: los dos cables salen del mismo borne del interruptor. Comparte el recorrido y el pasacables de la tapa con los otros cables de luz.',
     },
     {
       id: 'c_panel_ledC',
-      nombre: 'Panel a tira LED 3 (centro)',
+      nombre: 'Panel a tira LED 3 (lateral izquierda)',
       tipo: 'dc',
       desde: 'panelSwitches',
       hasta: 'ledC',
       video: 'ledC',
       corriente: 'ledC',
       puntos: [
-        [xPan + 60, yHueco + 15, zTr],
-        [xPan + 60, yHueco + 15, zAtras],
-        [xPan + 60, yCan - 14, zAtras],
-        [ex.x + ex.marco / 2 + 85, yCan - 14, zAtras],
-        [ex.x + ex.marco / 2 + 85, yCan - 14, zLed0 + largoC],
-        [led.xC, yCan - 14, zLed0 + largoC],
-        [led.xC, yTecho - 8, zLed0 + largoC],
+        [xPan + 38, yHueco + 15, zTr],
+        [xPan + 38, yHueco + 15, zAtras],
+        [xPan + 38, yCan, zAtras],
+        [xPan + 38, yCan, zFinA + 24],
+        [led.x3, yCan, zFinA + 24],
+        [led.x3, yTecho - 8, zFinA],
       ],
-      nota: 'Sube con los otros dos, cruza el techo por atrás, baja a lo largo del extractor por el costado y llega a la tira por el lado del extractor. El extractor no lleva cable.',
+      nota: 'Interruptor 2 (luces laterales). Mismo recorrido que las otras tiras: sube por el fondo del mueble y llega por el extremo de la tira.',
+    },
+    {
+      id: 'c_panel_ledD',
+      nombre: 'Panel a tira LED 4 (lateral derecha)',
+      tipo: 'dc',
+      desde: 'panelSwitches',
+      hasta: 'ledD',
+      video: 'ledD',
+      corriente: 'ledD',
+      puntos: [
+        [xPan + 52, yHueco + 15, zTr],
+        [xPan + 52, yHueco + 15, zAtras - 15],
+        [xPan + 52, yCan, zAtras - 15],
+        [xPan + 52, yCan, zFinA + 36],
+        [led.x4, yCan, zFinA + 36],
+        [led.x4, yTecho - 8, zFinA],
+      ],
+      nota: 'Interruptor 2, igual que la tira 3. Cruza el techo de lado a lado por detrás de las tiras, antes de que empiecen, hasta el lado del mueble derecho.',
+    },
+    {
+      id: 'c_panel_lampara',
+      nombre: 'Panel a la lámpara flexible (pared izquierda)',
+      tipo: 'dc',
+      desde: 'panelSwitches',
+      hasta: 'lampara',
+      video: 'lampara',
+      corriente: 'lampara',
+      puntos: [
+        [xPan + 66, yHueco + 15, zTr],
+        [xPan + 66, yHueco + 15, zAtras - 20],
+        [xPan + 66, yCan, zAtras - 20],
+        [xCeil, yCan, zAtras - 20],
+        [xCeil, yCan, zL + 22],
+        [xViga + 2, yCan, zL + 22],
+        [xViga + 2, yTopeL + 1, zL + 22],
+      ],
+      nota: 'Interruptor 3. Sube con los cables de las tiras, cruza el techo hacia la pared izquierda, sigue por el techo hasta la altura de la viga de 22 cm y baja pegado a ella hasta la lámpara. La viga no está aislada: el cable va dentro de una canaleta o funda corrugada, bien sujeto.',
     },
     {
       id: 'c_panel_bomba',
@@ -479,6 +518,7 @@ export function electrico3d(cfg) {
   const zPuerta0 = van.largo - pl.desdeMamparo - pl.largo; // la puerta corrediza derecha termina 90 mm antes del mamparo
   const escenario = [
     { nombre: 'Puerta lateral corrediza derecha', x: van.ancho - 8, y: 0, z: zPuerta0, sx: 8, sy: 1100, sz: pl.largo, color: '#80cbc4', opacidad: 0.22 },
+    { nombre: 'Viga sin aislar (izquierda)', x: 0, y: 0, z: zPuerta0 - pl.vigas, sx: 22, sy: van.alto, sz: pl.vigas, color: '#a1887f', opacidad: 0.4 },
     { nombre: 'Vigas sin aislar (derecha)', x: van.ancho - 22, y: 0, z: zPuerta0 - pl.vigas, sx: 22, sy: van.alto, sz: pl.vigas, color: '#a1887f', opacidad: 0.4 },
     { nombre: 'Piso de la cabina', x: 0, y: -12, z: zb + 8, sx: van.ancho, sy: 12, sz: 900, color: '#6d5a44' },
     // Asiento del acompañante (lado derecho)
@@ -493,6 +533,9 @@ export function electrico3d(cfg) {
   ];
   // Detalles del techo que se ven junto con el eléctrico
   const decosElec = [
+    // Cuello flexible y cabeza de la lámpara: apuntan hacia la cama
+    { nombre: 'Cuello flexible de la lámpara', x: xViga + lm.x / 2 - 4, y: yTopeL, z: zL - 4, sx: 8, sy: 140, sz: 8, color: '#424242' },
+    { nombre: 'Cabeza de la lámpara', x: xViga + lm.x / 2 - 4, y: yTopeL + 125, z: zL - 15, sx: 55, sy: 30, sz: 30, color: '#212121' },
     {
       nombre: 'Hueco del extractor',
       x: ex.x - ex.hueco / 2,
@@ -505,5 +548,5 @@ export function electrico3d(cfg) {
     },
   ];
 
-  return { equipos, cables, mangueras, escenario, decos, decosElec, largoC };
+  return { equipos, cables, mangueras, escenario, decos, decosElec };
 }

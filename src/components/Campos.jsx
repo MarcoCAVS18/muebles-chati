@@ -135,15 +135,18 @@ export const SECCIONES_CFG = [
     ],
   },
   {
-    titulo: 'Techo (extractor y tiras LED)',
+    titulo: 'Techo (extractor, tiras LED) y lámpara',
     campos: [
       { ruta: 'extractor.x', etiqueta: 'Extractor: centro (x)' },
       { ruta: 'extractor.z', etiqueta: 'Extractor: centro (z desde atrás)' },
       { ruta: 'extractor.hueco', etiqueta: 'Extractor: hueco del techo' },
       { ruta: 'extractor.marco', etiqueta: 'Extractor: con el marco' },
-      { ruta: 'led.x1', etiqueta: 'Tira LED 1: posición (x)' },
-      { ruta: 'led.x2', etiqueta: 'Tira LED 2: posición (x)' },
-      { ruta: 'led.xC', etiqueta: 'Tira LED 3 (centro): posición (x)' },
+      { ruta: 'led.x1', etiqueta: 'Tira LED 1 (central izquierda): posición (x)' },
+      { ruta: 'led.x2', etiqueta: 'Tira LED 2 (central derecha): posición (x)' },
+      { ruta: 'led.x3', etiqueta: 'Tira LED 3 (lateral izquierda): posición (x)' },
+      { ruta: 'led.x4', etiqueta: 'Tira LED 4 (lateral derecha): posición (x)' },
+      { ruta: 'lampara.z', etiqueta: 'Lámpara flexible: posición (z desde atrás)' },
+      { ruta: 'lampara.y', etiqueta: 'Lámpara flexible: altura de la base' },
     ],
   },
 ];

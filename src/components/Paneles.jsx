@@ -221,7 +221,7 @@ export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, el
     <div>
       <p className="nota">
         Sistema: batería del auto, fusible ANL, cable largo bajo los asientos, DC-DC, batería de 150 Ah, caja de fusibles,
-        inversor, panel de 5 interruptores, 2 enchufes con USB-C y 3 tiras LED. El extractor no lleva conexión. Sin panel solar. Tocá cualquier elemento o cable
+        inversor, panel de 5 interruptores, 2 enchufes con USB-C, 4 tiras LED y la lámpara flexible. El extractor no lleva conexión. Sin panel solar. Tocá cualquier elemento o cable
         (acá o en el 3D) para ver cómo se instala en un video. Los consumos son estimados.
       </p>
       <div className="resumen">

@@ -47,7 +47,7 @@ export const ELEMENTOS = {
   panelSwitches: {
     descripcion: 'Panel con 5 interruptores. Cada uno enciende o apaga una parte de la instalación.',
     ubicacion: 'En el tablero del frente de la sección eléctrica, sobre la cama, arriba de la caja de fusibles (a la izquierda del mueble trasero).',
-    consejos: ['Cada interruptor lleva su fusible en la caja de fusibles.', 'Rotular cada interruptor.'],
+    consejos: ['Cada interruptor lleva su fusible en la caja de fusibles.', 'Los interruptores 1 y 2 prenden dos tiras LED cada uno (centrales y laterales); el 3 es la lámpara flexible, el 4 la bomba y el 5 el mando del inversor.', 'Rotular cada interruptor.'],
     busqueda: 'instalar panel de interruptores 12v camper',
   },
   enchufe1: {
@@ -63,26 +63,53 @@ export const ELEMENTOS = {
     busqueda: 'instalar enchufe 220v con usb camper furgoneta',
   },
   ledA: {
-    descripcion: 'Tira LED de 2 metros pegada al techo, lado izquierdo.',
-    ubicacion: 'Techo, a lo largo de la van, lado de la cama.',
-    consejos: ['Usar perfil de aluminio con difusor: la luz sale pareja y la tira no se despega.', 'Comprobar la polaridad antes de pegar.'],
+    descripcion: 'Tira LED de 2 metros pegada al techo, central izquierda: pasa por el costado de la claraboya.',
+    ubicacion: 'Techo, a lo largo de la van, a 6 cm del marco de la claraboya (lado de la cama). Empieza y termina igual que las otras tres.',
+    consejos: [
+      'Usar perfil de aluminio con difusor: la luz sale pareja y la tira no se despega.',
+      'Comprobar la polaridad antes de pegar.',
+      'Va al interruptor 1 del panel, junto con la tira 2: las dos luces centrales se prenden juntas.',
+    ],
     busqueda: 'instalar tira led techo furgoneta camper perfil aluminio',
   },
   ledB: {
-    descripcion: 'Tira LED de 2 metros pegada al techo, lado derecho.',
-    ubicacion: 'Techo, a lo largo de la van, lado del mueble derecho.',
-    consejos: ['Misma instalación que la tira 1.', 'Cada tira va a un interruptor distinto del panel.'],
+    descripcion: 'Tira LED de 2 metros pegada al techo, central derecha: pasa por el otro costado de la claraboya.',
+    ubicacion: 'Techo, a lo largo de la van, a 6 cm del marco de la claraboya (lado del mueble derecho).',
+    consejos: ['Misma instalación que la tira 1.', 'Va al interruptor 1 del panel, junto con la tira 1.'],
     busqueda: 'instalar tira led techo furgoneta camper perfil aluminio',
   },
   ledC: {
-    descripcion: 'Tercera tira LED, en el centro del techo. Sigue en línea con el extractor hacia la puerta trasera.',
-    ubicacion: 'Techo, al centro, desde el borde trasero del extractor hacia la puerta trasera (queda de menos de 2 m).',
+    descripcion: 'Tira LED de 2 metros pegada al techo, lateral izquierda: cerca de la pared de la cama.',
+    ubicacion: 'Techo, a lo largo de la van, a unos 25 cm de la pared izquierda. Empieza y termina igual que las centrales.',
     consejos: [
-      'Entre el extractor y la puerta no entran 2 m: cortar la tira por las marcas de corte o moverla más cerca de la puerta.',
-      'Va al interruptor 3 del panel.',
-      'El cable llega por el costado del extractor, no por encima.',
+      'Misma instalación que las centrales.',
+      'Va al interruptor 2 del panel, junto con la tira 4: las dos luces laterales se prenden juntas.',
+      'El techo se curva cerca de las paredes: confirmar en la van que el perfil apoya bien a esa distancia.',
     ],
     busqueda: 'instalar tira led techo furgoneta camper perfil aluminio',
+  },
+  ledD: {
+    descripcion: 'Tira LED de 2 metros pegada al techo, lateral derecha: cerca de la pared del mueble derecho.',
+    ubicacion: 'Techo, a lo largo de la van, a unos 25 cm de la pared derecha, sobre la alacena y el mueble derecho.',
+    consejos: [
+      'Su cable cruza el techo de lado a lado por detrás del inicio de las tiras.',
+      'Va al interruptor 2 del panel, junto con la tira 3.',
+      'Queda justo sobre la alacena (que llega a 125 cm): dejar espacio para el perfil.',
+    ],
+    busqueda: 'instalar tira led techo furgoneta camper perfil aluminio',
+  },
+  lampara: {
+    descripcion:
+      'Lámpara flexible de lectura de 12 V con cuello articulado, que se puede mover estando acostado. El modelo de referencia (MRYC) trae interruptor táctil y salida USB de 5 V y 2 A en la base. Se conecta a 12 V, no a 230 V.',
+    ubicacion:
+      'Pared izquierda, sobre la viga sin aislar de 22 cm que queda entre el pasarruedas y la puerta, a unos 68 cm del piso: más o menos el pecho de quien está acostado en la cama. El cable llega desde el panel por el techo y baja por la viga.',
+    consejos: [
+      'Va al interruptor 3 del panel: ese interruptor la deja sin energía y su propio botón táctil la prende y apaga.',
+      'La viga no está aislada: el cable baja dentro de una canaleta o funda corrugada, bien sujeto, sin tocar chapa afilada.',
+      'Confirmar con la ficha de la lámpara la tensión (12 V) y la corriente. Se calculó 3 W de luz más 10 W de la salida USB a máxima carga.',
+      'Probar la altura acostado antes de fijarla: el colchón cambia la altura del pecho.',
+    ],
+    busqueda: 'instalar luz de lectura flexible 12v furgoneta camper',
   },
   extractor: {
     descripcion:

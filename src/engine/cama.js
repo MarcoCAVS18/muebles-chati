@@ -99,17 +99,8 @@ export function cama(ctx, G) {
     const ancho = zona.z1 - zona.z0;
     cajon(ctx, { grupo: G, nombre, x: x1 - t - fondo, y: yCaj, z: zona.z0, ancho, alto, fondo, dir: 'x+' });
     P(`Frente ${nombre.toLowerCase()}`, x1 - t, yCaj - 5, zona.z0 - 2, t, alto + 10, ancho + 4);
-    // Agarradera ovalada del frente (visual)
-    ctx.deco({
-      grupo: G,
-      nombre: `Agarradera ${nombre.toLowerCase()}`,
-      x: x1 - 0.6,
-      y: yCaj + alto / 2 - 15,
-      z: zona.z0 + ancho / 2 - 70,
-      sx: 1.2,
-      sy: 30,
-      sz: 140,
-    });
+    // Botón push al centro del frente, hacia el pasillo
+    ctx.boton({ grupo: G, nombre: `Frente ${nombre.toLowerCase()}`, eje: 'x+', x: x1, y: yCaj + alto / 2, z: zona.z0 + ancho / 2 });
   };
   cajonConFrente('Cajón de la cabecera', zonaCab, ca.cajonCabecera.fondo, ca.cajonCabecera.alto);
   cajonConFrente('Cajón del pie', zonaPie, ca.cajonPie.fondo, ca.cajonPie.alto);
@@ -153,7 +144,8 @@ export function cama(ctx, G) {
   // Herrajes
   ctx.herraje(G, 'Par de correderas de carga 500 mm (100 kg, extensión total)', 2, 'Una por bandeja: una corredera a cada lado');
   ctx.herraje(G, 'Retén o traba para bandejas', 2, 'Para que no salgan solas al frenar');
-  ctx.herraje(G, 'Tirador embutido o agarradera ovalada', 4, 'Dos frentes de cajón y dos bandejas');
+  ctx.herrajeBotones(G); // un botón push en cada frente de cajón
+  ctx.herraje(G, 'Tirador embutido para las bandejas', 2, 'Una agarradera al borde de cada bandeja: el borde de 15 mm es muy fino para un botón push');
   ctx.herraje(G, 'Fresadora con fresa de radio o plantilla y lijadora', 1, `Para las esquinas R${R} de las placas y las bandejas`);
   ctx.herraje(G, 'Fieltro o goma antivibración 5 mm', 2, `Entre las placas y los pasarruedas (${(van.archLargo / 1000).toFixed(1)} m cada uno)`);
 

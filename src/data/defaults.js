@@ -110,10 +110,17 @@ export const CONFIG_INICIAL = {
     anl: { x: 60, y: 40, z: 40 },
     panelSwitches: { x: 130, y: 60, z: 25 },
     enchufe: { x: 70, y: 70, z: 25 },
+    lampara: { x: 25, y: 60, z: 60 }, // base de la lámpara flexible (profundidad, alto, ancho); el cuello y la cabeza se ven aparte
   },
 
-  // Tres tiras en el techo: dos de 2 m a los costados y una en el centro, detrás del extractor
-  led: { tiras: 3, largoM: 2, wPorM: 9.6, x1: 430, x2: 1290, xC: 860 },
+  // Cuatro tiras de 2 m en el techo, todas con el mismo inicio y fin: dos centrales a 6 cm del marco del extractor
+  // (una a cada lado) y dos laterales cerca de las paredes. x es el centro de cada tira.
+  led: { tiras: 4, largoM: 2, wPorM: 9.6, x1: 635, x2: 1085, x3: 250, x4: 1470 },
+
+  // Lámpara flexible de lectura, en la pared izquierda sobre la viga sin aislar (la de 22 cm entre el pasarruedas y la
+  // puerta). z es el centro de la lámpara desde la puerta trasera e y la altura de la base: más o menos el pecho de
+  // quien está acostado (cama a 44 cm, colchón y unos 20 cm más). El cable llega por el techo y baja por la viga.
+  lampara: { z: 1230, y: 680 },
 
   // Ventilación de techo: se abre a mano, no tiene conexión eléctrica ni ventilador
   extractor: { x: 860, z: 1650, hueco: 280, marco: 310 },
@@ -122,9 +129,12 @@ export const CONFIG_INICIAL = {
 // Consumos ESTIMADOS: editar con los valores reales de cada producto.
 export const CARGAS_INICIALES = [
   { id: 'nevera', nombre: 'Heladera compresor 12 V', w: 45, horas: 24, ciclo: 0.35, tipo: '12V' },
-  { id: 'ledA', nombre: 'Tira LED 1 del techo (2 m)', w: 19, horas: 4, ciclo: 1, tipo: '12V' },
-  { id: 'ledB', nombre: 'Tira LED 2 del techo (2 m)', w: 19, horas: 4, ciclo: 1, tipo: '12V' },
-  { id: 'ledC', nombre: 'Tira LED 3 del techo (centro, 1,2 m)', w: 12, horas: 4, ciclo: 1, tipo: '12V' },
+  { id: 'ledA', nombre: 'Tira LED 1 del techo (central izquierda, 2 m)', w: 19, horas: 4, ciclo: 1, tipo: '12V' },
+  { id: 'ledB', nombre: 'Tira LED 2 del techo (central derecha, 2 m)', w: 19, horas: 4, ciclo: 1, tipo: '12V' },
+  { id: 'ledC', nombre: 'Tira LED 3 del techo (lateral izquierda, 2 m)', w: 19, horas: 4, ciclo: 1, tipo: '12V' },
+  { id: 'ledD', nombre: 'Tira LED 4 del techo (lateral derecha, 2 m)', w: 19, horas: 4, ciclo: 1, tipo: '12V' },
+  // 3 W de luz más 10 W de la salida USB (5 V, 2 A) a máxima carga; se prende pocas horas
+  { id: 'lampara', nombre: 'Lámpara flexible de lectura 12 V (pared izquierda)', w: 13, horas: 0.5, ciclo: 1, tipo: '12V' },
   { id: 'bomba', nombre: 'Bomba de agua 12 V', w: 48, horas: 0.15, ciclo: 1, tipo: '12V' },
   { id: 'usbc', nombre: 'Carga de celulares por USB-C (230 V)', w: 40, horas: 3, ciclo: 0.6, tipo: '230V' },
   { id: 'notebook', nombre: 'Notebook (toma 230 V)', w: 60, horas: 3, ciclo: 0.7, tipo: '230V' },
@@ -147,5 +157,5 @@ export const ELECTRICA_INICIAL = {
   eficienciaInversor: 0.85,
   caidaMaxPct: 3,
   margenCable: 1.15, // sobrante de cable en cada tramo
-  switches: ['Luces del techo 1', 'Luces del techo 2', 'Luces del techo 3', 'Bomba de agua', 'Inversor (mando)'],
+  switches: ['Luces centrales del techo (tiras 1 y 2, junto a la claraboya)', 'Luces laterales del techo (tiras 3 y 4, junto a las paredes)', 'Lámpara flexible (lado izquierdo)', 'Bomba de agua', 'Inversor (mando)'],
 };

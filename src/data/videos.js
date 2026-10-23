@@ -51,6 +51,11 @@ const LED = [
   v('ARH_SAFBcZI', 'Cómo instalar luces LED en tu furgoneta camper'),
   v('PtDUrl1rLVY', 'Cómo soldar tira LED'),
 ];
+const LAMPARA = [
+  v('5sxIAzTGouI', '#18 Instalación de luces LED + toma de 12 V'),
+  v('9ValWTXneo0', 'Instalación de 12v en furgoneta'),
+  v('qe7YUEiuAYg', 'Instalación Eléctrica 12V CAMPER: guía paso a paso'),
+];
 const CABLEADO = [
   v('6LAfG9Vih94', 'Instalación eléctrica en furgoneta: guía completa'),
   v('uAlcXyG9IZc', '#7 Camperizar furgoneta: guía completa de la instalación eléctrica'),
@@ -113,6 +118,8 @@ export const VIDEOS = {
   ledA: LED,
   ledB: LED,
   ledC: LED,
+  ledD: LED,
+  lampara: LAMPARA,
   extractor: CLARABOYA,
   nevera: NEVERA,
   bomba: BOMBA,

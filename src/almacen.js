@@ -3,7 +3,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, firebaseActivo } from './firebase.js';
 
 // Cambia cuando se rediseñan los muebles: un guardado de otra versión no se carga
-export const VERSION = 5;
+export const VERSION = 6;
 
 const referencia = () => doc(db, 'proyectos', 'la-chata');
 

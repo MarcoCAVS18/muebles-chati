@@ -88,6 +88,7 @@ export function construir(cfg) {
     layout: ctx.layout,
     uniones: ctx.uniones,
     herrajes: ctx.herrajes,
+    botones: ctx.botones,
     equipos: ctx.equipos,
     anclajes: ctx.anclajes,
     arcos,

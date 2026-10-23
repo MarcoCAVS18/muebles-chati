@@ -88,6 +88,15 @@ export function derecho(ctx, G) {
   // Alacena sobre los cajones
   const xAl = xW - alt.profundidad;
   const yAl = alt.base;
+
+  // Botones push hacia el pasillo (x-): cajones al centro y puertas cerca del borde libre
+  // (se supone que las bisagras quedan del lado del frente del mueble)
+  const bt = (nombre, y, z, x = xF) => ctx.boton({ grupo: G, nombre, eje: 'x-', x, y, z });
+  const zCajC = (zA + 2 * t + zDiv - t + 2) / 2;
+  bt('Frente cajón inferior', (455 + 640) / 2, zCajC);
+  bt('Frente cajón superior', (655 + 840) / 2, zCajC);
+  bt('Puerta del módulo de la mesa', 735 - 80, zDiv + 2 * t + 5 + 2 + 45);
+  bt('Alacena - puerta', yAl + 20 + 60, zDiv - 2 - 45, xAl);
   P('Alacena - fondo', xW - tb, yAl + t, zA + t, tb, alt.alto - 2 * t, zDiv - zA - t, 'fondo');
   P('Alacena - base', xAl, yAl, zA + t, alt.profundidad - tb, t, zDiv - zA - t);
   P('Alacena - tapa', xAl, yAl + alt.alto - t, zA + t, alt.profundidad - tb, t, zDiv - zA - t);
@@ -117,7 +126,6 @@ export function derecho(ctx, G) {
 
   // Herrajes
   ctx.herraje(G, 'Bisagra de cazoleta 35 mm', 4, 'Puerta del módulo de la mesa x2, puerta de la alacena x2');
-  ctx.herraje(G, 'Tirador embutido', 4, 'Puerta, alacena y los dos cajones');
-  ctx.herraje(G, 'Imán o cierre push', 2);
+  ctx.herrajeBotones(G); // un botón push por frente: reemplaza al tirador y al imán
   ctx.herraje(G, 'Fieltro o goma antivibración 5 mm', 2, 'Entre el piso de los cajones y el estante de la puerta, y el pasarruedas derecho');
 }

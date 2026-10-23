@@ -25,15 +25,19 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Despiece completo con medidas, espesor y material de cada pieza (exporta CSV).
 - Plano de cortes por hoja, con los pasos de corte para sierra circular.
 - Dónde se fija cada mueble (piso, pared, entre muebles) y cuántos tornillos y escuadras.
-- Herrajes: correderas, bisagras, pistones, bisagras de piano, tiradores.
+- Herrajes: correderas, bisagras, pistones, bisagras de piano y cierres a botón (push) redondos, uno por frente.
 - Eléctrica: consumo diario, autonomía, horas de manejo para recargar, cables y fusibles. Los largos de cable
   salen del recorrido dibujado en 3D. Las corrientes se calculan a 12 V, la entrada del DC-DC se calcula aparte de su
   salida, la heladera y la bomba llevan fusible con margen de arranque, la línea de 230 V lleva disyuntor y diferencial, y la
   caída de tensión se suma a lo largo de cada camino (batería a bomba, a heladera, a luces...) y no tramo por tramo.
 - Sistema eléctrico en 3D: batería del auto bajo el asiento del acompañante, fusible ANL, cable largo bajo los
   asientos, DC-DC, batería de 150 Ah, caja de fusibles, inversor, panel de 5 interruptores, 2 enchufes con USB-C,
-  3 tiras LED en el techo (2 de 2 m y una al centro detrás del extractor), bomba y mangueras de agua y de gas. El extractor
-  del techo (310 x 310 mm con el marco) se abre a mano: está en el 3D pero sin conexión eléctrica.
+  4 tiras LED de 2 m en el techo (dos centrales a los costados del extractor y dos laterales cerca de las paredes, con el mismo
+  inicio y fin), lámpara flexible de lectura en la pared izquierda (el cable va por el techo y baja por la viga sin aislar de
+  22 cm), bomba y mangueras de agua y de gas. El extractor del techo (310 x 310 mm con el marco) se abre a mano: está en el 3D
+  pero sin conexión eléctrica.
+- Botones push: cada puerta y cada cajón de los tres muebles lleva un botón negro redondo en el 3D, para ver dónde va.
+  Las bandejas de la cama conservan un tirador embutido porque el canto de 15 mm es muy fino para el botón.
 - Sistema de gas en 3D: garrafa chica recargable en un cajón bajo el anafe, regulador, manguera, llave de corte y
   detector de gas, con la ventilación al exterior por el piso.
 - Al hacer clic en cualquier equipo, cable o manguera (en el 3D o en la pestaña Eléctrica) se abre un panel con qué
@@ -56,8 +60,16 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   84 cm desde lo alto del pasarruedas hasta el techo construible. La mampara entre los asientos ya no está: tenía una curva con
   10 cm libres abajo que se usan para pasar el cable largo.
 - Medidas de la batería de 150 Ah, inversor, DC-DC, caja de fusibles, batería del auto, fregadero y bidones (estimadas).
-- Potencia del inversor (se supuso 1000 W) y consumo de las tiras LED (9,6 W por metro).
-- Qué hace cada uno de los 5 interruptores (supuesto: luces 1, luces 2, luces 3, bomba y mando del inversor).
+- Potencia del inversor (se supuso 1000 W) y consumo de las tiras LED (9,6 W por metro, 4 horas por día cada una).
+- Qué hace cada uno de los 5 interruptores (supuesto: luces centrales del techo, luces laterales del techo, lámpara flexible,
+  bomba y mando del inversor).
+- Botones push: tamaño supuesto de 28 mm de diámetro y 12 mm de saliente (se venden en packs de 10). La bisagra de cada puerta
+  se supuso del lado del frente del mueble, por eso el botón queda cerca del borde libre.
+- Tiras LED: las centrales quedan a 6 cm del marco del extractor (x 635 y 1085) y las laterales a 25 cm de cada pared
+  (x 250 y 1470). Confirmar en la van si el techo curvo permite pegarlas ahí. Todas se calcularon con 4 h por día, y la
+  autonomía baja a 1,7 días; se edita en la pestaña Eléctrica.
+- Lámpara flexible (MRYC de 12 V con interruptor táctil y USB 5 V 2 A): 13 W estimados (3 W de luz y 10 W de USB) durante 0,5 h por día,
+  base a 68 cm del piso (z 1230, centro de la viga de 22 cm). Se asumió la viga izquierda igual a la derecha.
 - Mueble trasero de pared a pared (1720 mm) y de 500 mm de profundidad, con una L de 670 mm solo en la sección eléctrica
   (a la izquierda), que llega hasta el pie de la cama de 170 cm. Si tapa la puerta corrediza, achicar el ancho en la barra
   lateral. Secciones (x): eléctrico 15-617, cocina 632-1087 y agua 1102-1705.

@@ -16,6 +16,8 @@ const CAMINOS = [
   { nombre: 'Batería hasta la tira LED 1', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_ledA'] },
   { nombre: 'Batería hasta la tira LED 2', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_ledB'] },
   { nombre: 'Batería hasta la tira LED 3', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_ledC'] },
+  { nombre: 'Batería hasta la tira LED 4', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_ledD'] },
+  { nombre: 'Batería hasta la lámpara flexible', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_lampara'] },
 ];
 const RHO_COBRE = 0.0172; // ohm * mm2 / m
 
@@ -76,8 +78,10 @@ export function calcularElectrica(cargas, e, cables = []) {
     ledA: ampDe('ledA'),
     ledB: ampDe('ledB'),
     ledC: ampDe('ledC'),
+    ledD: ampDe('ledD'),
+    lampara: ampDe('lampara'),
     bomba: ampDe('bomba'),
-    switches: ampDe('ledA') + ampDe('ledB') + ampDe('ledC') + ampDe('bomba'),
+    switches: ampDe('ledA') + ampDe('ledB') + ampDe('ledC') + ampDe('ledD') + ampDe('lampara') + ampDe('bomba'),
     ac: e.inversorW / 230,
     senal: 0.5,
   };
