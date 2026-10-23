@@ -66,7 +66,7 @@ export const CONFIG_INICIAL = {
     radio: 50, // radio de las esquinas
     largo: 1700, // confirmado
     plataforma: 440, // altura de la cara superior: la placa (15 mm) apoya justo sobre el pasarruedas (425)
-    largoCabecera: 940, // largo de la placa de la cabecera (la otra placa va al pie)
+    largoCabecera: 1100, // largo de la placa de la cabecera (la otra placa, de 600 mm, va al pie)
     huecoMueble: 430, // espacio libre bajo la cama, frente al mueble trasero (bidones y puertas bajas)
     cajonCabecera: { fondo: 560, alto: 200 },
     cajonPie: { fondo: 600, alto: 200 },

@@ -95,6 +95,9 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El cajón de la garrafa necesita una rejilla de
   ventilación hacia el exterior por el piso, detector de gas y detector de monóxido de carbono.
 - Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
+- Placas de la cama: cabecera de 1100 mm y pie de 600 mm de largo (900 mm de ancho, 3 mm de luz entre las dos), las dos con su
+  bandeja extensible. La del pie mide unos 311 mm de largo porque los primeros 255 mm son la caja con arco. Se cambia en
+  "Largo placa cabecera" (un guardado con el valor anterior de 940 mm pasa solo a 1100).
 - Cama extensible: al abrir, la bandeja queda 16 mm más baja que la placa fija (la cubre el colchón o un relleno de 15 mm).
   La zona del pie (caja con arco) no se extiende: ahí la cama sigue en 90 cm. Con la cama abierta quedan 110 mm de pasillo.
 - Correderas de las bandejas: de carga, 500 mm, extensión total, 100 kg el par. Confirmar con la ficha de las que compres.

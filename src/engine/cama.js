@@ -61,7 +61,7 @@ export function cama(ctx, G) {
   P('Frente del pie - sobre la abertura (calar arco)', aX0, aCy, zPie, aX1 - aX0, yB - aCy, t, { calado: { tipo: 'arco', radio: radioArco } });
   ctx.deco({ grupo: G, nombre: 'Arco de la abertura', forma: 'arco', cx: (aX0 + aX1) / 2, cy: aCy, z: zPie - 0.6, radio: radioArco, sz: 0.8 });
   ctx.herraje(G, `Plantilla de arco R${radioArco} mm`, 1, 'Marcar el arco en la pieza sobre la abertura y calar con caladora');
-  const zInt = Math.min(zPie + 385, arcoIni - 10); // fondo de la caja (termina antes del pasarruedas)
+  const zInt = Math.min(zPie + 385, arcoIni - 25); // fondo de la caja (termina antes del pasarruedas, deja la bandeja del pie en más de 300 mm)
   P('Lateral izquierdo de la caja del pie', x0, 0, zPie + t, t, yB, zInt - zPie - t);
   P('Lateral derecho de la caja del pie', x1 - t, 0, zPie + t, t, yB, zInt - zPie - 2 * t);
   // Panel interior: además de cerrar la caja, es la guía de la bandeja y del cajón del pie

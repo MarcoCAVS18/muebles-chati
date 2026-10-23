@@ -66,7 +66,11 @@ export default function App() {
           const d = JSON.parse(p.datos);
           // Un guardado de un diseño anterior no sirve para el diseño nuevo
           if (d.version === VERSION) {
-            if (d.cfg) setCfg(mezclar(CONFIG_INICIAL, d.cfg));
+            if (d.cfg) {
+              // Un guardado con el reparto anterior de las placas (940 mm de cabecera) pasa al nuevo (1100 y 600 mm)
+              if (d.cfg.cama && d.cfg.cama.largoCabecera === 940) d.cfg.cama.largoCabecera = CONFIG_INICIAL.cama.largoCabecera;
+              setCfg(mezclar(CONFIG_INICIAL, d.cfg));
+            }
             if (Array.isArray(d.cargas)) setCargas(d.cargas);
             if (d.elec) setElec(mezclar(ELECTRICA_INICIAL, d.elec));
           }
