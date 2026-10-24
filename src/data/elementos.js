@@ -22,7 +22,7 @@ export const ELEMENTOS = {
   },
   bateria: {
     descripcion: 'Batería de litio (LiFePO4) de 150 Ah. Alimenta la heladera, las luces, la bomba y el inversor.',
-    ubicacion: 'Sección eléctrica (izquierda) del mueble trasero, al piso, acostada contra el fondo y bajo el plano de la cama. Queda lejos del fregadero y del gas.',
+    ubicacion: 'Sección eléctrica (izquierda) del mueble trasero, al piso, contra el fondo y bajo el plano de la cama. Queda lejos del fregadero y del gas.',
     consejos: ['Fijarla con un marco o correas: no puede moverse al frenar. Los bornes quedan arriba, con unos 11 cm libres hasta el estante.', 'Confirmar que el BMS entrega la corriente que pide el inversor.', 'El fusible principal va lo más cerca posible del borne positivo.'],
     busqueda: 'instalar batería de litio 12v camper furgoneta',
   },

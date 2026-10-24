@@ -7,7 +7,7 @@
 //   batería -> caja de fusibles -> heladera y panel de 5 interruptores -> 4 tiras LED, lámpara flexible, bomba y mando del inversor
 //
 // Todo lo eléctrico del mueble está en la sección izquierda (E), al piso y bajo el plano de la cama, con la
-// batería acostada. El tablero con interruptores y enchufes queda sobre la cama, en el frente de esa misma
+// batería (bornes arriba). El tablero con interruptores y enchufes queda sobre la cama, en el frente de esa misma
 // sección. Los cables del tablero van por el hueco que queda entre el estante y los cajones de cocina.
 // El extractor del techo no tiene conexión: se deja en el 3D para ubicar las luces. Las 4 tiras LED van del mismo inicio
 // al mismo fin: las dos centrales a cada lado del extractor (interruptor 1) y las dos laterales cerca de las paredes
@@ -29,10 +29,10 @@ export function electrico3d(cfg) {
 
   // --- Equipos dentro de la sección E (eléctrica), todos al piso ---
   const b = E.bateria;
-  const bateria = caja('bateria', 'Batería de litio 150 Ah (acostada)', b.x, b.y, b.z, b.sx, b.sy, b.sz, {
+  const bateria = caja('bateria', 'Batería de litio 150 Ah', b.x, b.y, b.z, b.sx, b.sy, b.sz, {
     en: EN,
     color: '#1565c0',
-    nota: 'Sección eléctrica (izquierda), al piso, acostada contra el fondo y bajo el plano de la cama',
+    nota: 'Sección eléctrica (izquierda), al piso, contra el fondo y bajo el plano de la cama',
   });
   const xTP = E.borne.x; // borne positivo (extremo derecho de la batería)
   const yTP = E.borne.y;
@@ -443,7 +443,7 @@ export function electrico3d(cfg) {
   const reg = eq.regulador;
   const yRegulador = K.yCajonGas + L.tb + eq.garrafa.y; // base del regulador, sobre la garrafa
   const zRegulador = L.zIn + 15 + 10 + 80 + reg.z / 2; // centro del regulador en z
-  const xBombaC = W.xBomba + 60; // centro de la bomba
+  const xBombaC = W.xBomba + W.bomba.sx / 2; // centro de la bomba
   const xCanillaC = W.xCanilla + 15; // centro de la canilla
   const xValvula = sec.K.x1 - 80;
   const zB = zb;

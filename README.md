@@ -2,7 +2,7 @@
 
 Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy y su sistema eléctrico,
 con la distribución de la foto de referencia: mueble trasero cruzado de pared a pared detrás de los asientos
-(de izquierda a derecha: eléctrico al piso con la batería acostada, inversor, DC-DC y fusibles, y sobre la cama el
+(de izquierda a derecha: eléctrico al piso con la batería, inversor, DC-DC y fusibles, y sobre la cama el
 panel y los enchufes con dos cajones de cocina arriba; cocina con anafe, gas y heladera al piso, al centro; y agua con
 fregadero y bidones al piso, a la derecha), cama extensible de 90 a 120 cm de 180 cm de largo (placas de plywood con
 esquinas redondeadas y ranuras, bandejas sobre correderas, costados con ventana y cajones), y mueble
@@ -113,9 +113,13 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Placas de la cama: cabecera de 1200 mm y pie de 600 mm de largo (900 mm de ancho, 3 mm de luz entre las dos), las dos con su
   bandeja extensible. La de la cabecera mide 736,5 mm y la del pie 551,5 mm. Se cambia en "Largo placa cabecera". Un guardado con
   la cama de 170 cm y la L de 670 mm pasa solo a 180 cm y 570 mm.
-- Con la L de 570 mm (10 cm menos que antes) el inversor va atravesado, con el largo sobre el ancho del mueble, para que entren
-  uno detrás de otro los equipos del frente, el paso del cable largo y la batería. Los dos cajones de cocina de la L usan
-  correderas de 500 mm. Si se vuelve a una L de 670 mm el inversor vuelve a ir de largo sobre z.
+- Equipos eléctricos con las medidas que tomó Marco (ancho x alto x profundidad, en cm): batería 29,5 x 28 x 20, inversor
+  25,5 x 19 x 9,5, DC-DC 18,5 x 12,3 x 6,7, caja de fusibles 9 x 14, panel de interruptores 16,5 x 4, enchufes 5 x 5 y bomba de
+  agua 16,4 x 9. Inversor y DC-DC van de frente a la puerta de los equipos (la profundidad es la que entra hacia el fondo) y la
+  batería contra el fondo con los bornes arriba. Todo lo demás de la lista de equipos sigue ESTIMADO (alto de la caja de
+  fusibles y profundidad de interruptores y enchufes también). Con la L de 570 mm entran uno detrás de otro los equipos del frente,
+  el paso del cable largo y la batería; si algún día la L se achica tanto que no entren, el inversor se pone atravesado solo.
+  Los dos cajones de cocina de la L usan correderas de 500 mm.
 - Cama extensible: al abrir, la bandeja queda 16 mm más baja que la placa fija (la cubre el colchón o un relleno de 15 mm).
   Los costados del pasillo llegan 4 mm por debajo de las bandejas para que salgan por encima (por eso entre el costado y la placa
   queda una luz de unos 20 mm, que cubre la bandeja cuando está cerrada). Las bandejas no llevan listones: la ranura deja 30 mm o más de

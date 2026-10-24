@@ -140,7 +140,7 @@ for (const id of ['fregadero', 'bidon1', 'bidon2', 'bomba', 'canilla']) {
   exigir(eqE(id).x >= xDiv2, `${id} debería estar en la sección del agua (derecha)`);
 }
 const bat = eqE('bateria');
-exigir(bat.sx > bat.sy && bat.sx > bat.sz, 'la batería debería ir acostada (el largo sobre x)');
+exigir(bat.sx === 295 && bat.sy === 280 && bat.sz === 200, 'la batería debería medir 295 x 280 x 200 mm (ancho, alto, profundidad)');
 exigir(bat.y + bat.sy < cfgI.cama.plataforma - 20, 'la batería debería quedar bajo el plano de la cama');
 function freg_dist(e) {
   const f = data.equipos.find((q) => q.id === 'fregadero');

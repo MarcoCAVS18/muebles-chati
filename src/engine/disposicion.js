@@ -58,7 +58,7 @@ export function disposicionTrasero(cfg) {
 
   // --- Sección E: eléctrico ---
   // Todo al piso. Fila del frente (se alcanza por la puerta): fusibles, DC-DC e inversor.
-  // Fila del fondo: la batería acostada (largo sobre x) y el fusible principal a su lado.
+  // Fila del fondo: la batería (con los bornes arriba) y el fusible principal a su lado.
   const zInE = zFL + t; // primera cara interior de la sección E
   const yE = yPiso + 3; // altura de lo que va apoyado en el piso
   const E = {
@@ -84,7 +84,7 @@ export function disposicionTrasero(cfg) {
   E.inversor = { x: sec.E.x1 - 15 - ivSx, y: yE, z: zInE + 15, sx: ivSx, sy: inv.y, sz: ivSz };
   E.dcdc = { x: E.inversor.x - 10 - dc.x, y: yE, z: zInE + 15, sx: dc.x, sy: dc.y, sz: dc.z };
   E.fusibles = { x: E.dcdc.x - 10 - fus.z, y: yE, z: zInE + 15, sx: fus.z, sy: fus.y, sz: fus.x };
-  // Batería acostada contra el fondo, con 70 mm de pasada para los cables
+  // Batería contra el fondo, con 70 mm de pasada para los cables
   E.bateria = { x: sec.E.x0 + 15, y: yE, z: zFondo - 70 - bat.z, sx: bat.x, sy: bat.y, sz: bat.z };
   E.yTopeBateria = yE + bat.y;
   // El fusible principal va a la derecha de la batería, pegado al borne positivo
@@ -128,7 +128,7 @@ export function disposicionTrasero(cfg) {
   W.xFregadero = sec.W.x0 + 25;
   W.xCanilla = W.xFregadero + eq.fregadero.x + 30;
   W.xBomba = sec.W.x0 + 250;
-  W.bomba = { x: W.xBomba, y: W.yEstante + t + 2, z: zF + 345, sx: 120, sy: 80, sz: 70 }; // sobre el estante, atrás del cajón bajo el fregadero
+  W.bomba = { x: W.xBomba, y: W.yEstante + t + 2, z: zF + 345, sx: 164, sy: 80, sz: 90 }; // sobre el estante, atrás del cajón bajo el fregadero
 
   return { t, tb, zF, zFL, zB, zIn, zFondo, x1, yBase, yPiso, yTapa, d1, d2, yCamaSup, yCamaInf, yTopeBajo, yInicioAlto, sec, hueco, E, K, W };
 }

@@ -7,7 +7,7 @@
 // La distribución sigue la foto de referencia:
 //   - Mueble trasero cruzado de pared a pared, pegado a la zona de los asientos (cabecera de la cama).
 //     Vista desde la puerta trasera, de izquierda a derecha:
-//       izquierda: electricidad al piso (batería acostada, inversor, DC-DC, fusibles) y arriba interruptores,
+//       izquierda: electricidad al piso (batería, inversor, DC-DC, fusibles) y arriba interruptores,
 //                  enchufes y cajones de cocina; esta sección es la L: llega a 570 mm de profundidad
 //       centro:    anafe, cajón de la garrafa de gas y heladera al piso
 //       derecha:   grifo y fregadero, con los dos bidones de agua al piso
@@ -96,12 +96,14 @@ export const CONFIG_INICIAL = {
     bateriaY: 130,
   },
 
-  // Dimensiones de equipos en el orden de los ejes de la van (ESTIMADAS, confirmar con cada ficha)
+  // Dimensiones de equipos en el orden de los ejes de la van (x ancho, y alto, z profundidad hacia el fondo del mueble).
+  // MEDIDAS por Marco: batería, inversor, DC-DC, caja de fusibles, interruptores, enchufes y bomba (la bomba está en disposicion.js).
+  // El resto sigue ESTIMADO: confirmar con cada ficha.
   equipos: {
-    bateria: { x: 483, y: 240, z: 170 }, // batería 150 Ah (largo, alto, ancho); va acostada, con el largo sobre x
-    fusibles: { x: 140, y: 50, z: 100 },
-    inversor: { x: 150, y: 75, z: 300 },
-    dcdc: { x: 110, y: 70, z: 200 },
+    bateria: { x: 295, y: 280, z: 200 }, // 29,5 x 28 x 20 cm (ancho, alto, profundidad), bornes arriba
+    fusibles: { x: 140, y: 50, z: 90 }, // caja de 9 x 14 cm (el alto es ESTIMADO); va apoyada con el lado de 14 cm hacia el fondo
+    inversor: { x: 255, y: 190, z: 95 }, // 25,5 x 19 x 9,5 cm: de frente a la puerta de los equipos
+    dcdc: { x: 185, y: 123, z: 67 }, // 18,5 x 12,3 x 6,7 cm: de frente a la puerta de los equipos
     bidon: { x: 215, y: 400, z: 290 }, // bidón de 20 L (grosor, alto, ancho)
     nevera: { x: 420, y: 300, z: 340 },
     fregadero: { x: 340, y: 130, z: 400 }, // los 400 mm son el fondo; el ancho es ESTIMADO
@@ -112,8 +114,8 @@ export const CONFIG_INICIAL = {
     detectorGas: { x: 40, y: 50, z: 22 },
     bateriaAuto: { x: 278, y: 190, z: 175 },
     anl: { x: 60, y: 40, z: 40 },
-    panelSwitches: { x: 130, y: 60, z: 25 },
-    enchufe: { x: 70, y: 70, z: 25 },
+    panelSwitches: { x: 165, y: 40, z: 25 }, // panel de 16,5 x 4 cm (la profundidad es ESTIMADA)
+    enchufe: { x: 50, y: 50, z: 25 }, // 5 x 5 cm (la profundidad es ESTIMADA)
     lampara: { x: 25, y: 60, z: 60 }, // base de la lámpara flexible (profundidad, alto, ancho); el cuello y la cabeza se ven aparte
   },
 
