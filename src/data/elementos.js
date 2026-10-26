@@ -36,7 +36,7 @@ export const ELEMENTOS = {
     ubicacion: 'Al piso de la sección eléctrica, delante de la batería (a la izquierda, junto al disyuntor 2), con la palanca hacia arriba.',
     consejos: [
       'Va en el cable positivo entre el DC-DC y la batería, lo más cerca posible del borne de la batería.',
-      'Es corte manual y último recurso (120 A es el límite del BMS): no protege a un cable más fino que lo que aguanta ese valor, así que el fusible de la línea se mantiene.',
+      'Es corte manual y último recurso: un disyuntor de 120 A no protege a un cable más fino que lo que aguanta ese valor, así que el fusible de la línea se mantiene. Confirmar con la ficha de la batería que 120 A es adecuado para su BMS.',
       'Se vende de a dos y trae terminales de ojal y tornillos. Apretar bien los dos bornes y poner la tapa de goma.',
       'Para dejar la instalación sin energía, bajar la palanca antes de tocar cables.',
     ],

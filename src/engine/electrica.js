@@ -198,7 +198,7 @@ export function calcularElectrica(cargas, e, cables = []) {
   if (inversor) {
     avisos.push('Lado de 230 V: el inversor necesita un diferencial de 30 mA y un disyuntor (6 A). El técnico define si hace falta puentear neutro y tierra según el modelo del inversor.');
   }
-  avisos.push('Los dos disyuntores de 120 A (DC-DC a batería y batería a caja de fusibles) son corte manual y protección de último recurso, igual al límite del BMS. No reemplazan a los fusibles: un disyuntor de 120 A no protege a un cable más fino, así que cada línea mantiene el fusible de la tabla.');
+  avisos.push('Los dos disyuntores de 120 A (DC-DC a batería y batería a caja de fusibles) son corte manual y protección de último recurso (supuesto: confirmar con la ficha de la batería que 120 A es adecuado para su BMS). No reemplazan a los fusibles: un disyuntor de 120 A no protege a un cable más fino, así que cada línea mantiene el fusible de la tabla.');
   avisos.push('Todavía no están en el diseño: corte manual para la línea del inversor, shunt o monitor de batería y una barra para el negativo general (la caja de 12 salidas ya trae negativos individuales, pero el negativo del DC-DC, del inversor y de la batería necesita una barra).');
   avisos.push('Calefactor de la batería: la almohadilla de 30 W va bajo la batería, sobre una plancha aislante, y el termostato la enciende a 4 grados y la apaga a 10 (sonda pegada a la batería, lejos de la almohadilla). Con su salida de 5 A en la caja de fusibles. Confirmar en la etiqueta o el manual de la batería hasta qué temperatura se puede cargar (invierno en Suecia).');
   if (caminosRes.some((c) => !c.ok)) avisos.push('Algún camino pasa la caída máxima aunque se usó la sección más grande de la lista: acortar el recorrido.');
