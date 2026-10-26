@@ -31,7 +31,9 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   salida, la heladera y la bomba llevan fusible con margen de arranque, la línea de 230 V lleva disyuntor y diferencial, y la
   caída de tensión se suma a lo largo de cada camino (batería a bomba, a heladera, a luces...) y no tramo por tramo.
 - Sistema eléctrico en 3D: batería del auto bajo el asiento del acompañante, fusible ANL, cable largo bajo los
-  asientos, DC-DC, batería de 150 Ah, caja de fusibles, inversor, panel de 5 interruptores, 2 enchufes con USB-C,
+  asientos, DC-DC, disyuntor de 120 A (DC-DC a batería), batería de 150 Ah, disyuntor de 120 A (batería a caja de fusibles),
+  caja de fusibles de 12 salidas, calefactor de la batería (plancha aislante y almohadilla de 30 W bajo ella, termostato con sonda
+  pegada a la batería y salida propia de 5 A), inversor, panel de 5 interruptores, 2 enchufes con USB-C,
   4 tiras LED de 2 m en el techo (dos centrales a los costados del extractor y dos laterales cerca de las paredes, con el mismo
   inicio y fin), lámpara flexible de lectura en la pared izquierda (el cable va por el techo y baja por la viga sin aislar de
   22 cm), bomba y mangueras de agua y de gas. El extractor del techo (310 x 310 mm con el marco) se abre a mano: está en el 3D
@@ -70,6 +72,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   84 cm desde lo alto del pasarruedas hasta el techo construible. La mampara entre los asientos ya no está: tenía una curva con
   10 cm libres abajo que se usan para pasar el cable largo.
 - Medidas de la batería de 150 Ah, inversor, DC-DC, caja de fusibles, batería del auto, fregadero y bidones (estimadas).
+- Medidas de los disyuntores de 120 A (80 x 45 x 70 mm, se montan con la palanca hacia arriba), de la almohadilla (150 x 150 x 3 mm), del aislante (305 x 10 x 230 mm) y del termostato (60 x 35 x 22 mm), y la potencia del calefactor (30 W, un quinto del tiempo encendido, 8 horas por día).
 - Potencia del inversor (se supuso 1000 W) y consumo de las tiras LED (9,6 W por metro, 4 horas por día cada una).
 - Qué hace cada uno de los 5 interruptores (supuesto: luces centrales del techo, luces laterales del techo, lámpara flexible,
   bomba y mando del inversor).

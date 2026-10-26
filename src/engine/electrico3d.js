@@ -3,8 +3,10 @@
 //
 // Camino de la energía:
 //   batería del auto (bajo el asiento del acompañante) -> fusible ANL -> cable largo por el piso bajo los asientos
-//   -> hueco inferior del mamparo -> DC-DC -> batería de 150 Ah -> fusible principal -> inversor -> enchufes
-//   batería -> caja de fusibles -> heladera y panel de 5 interruptores -> 4 tiras LED, lámpara flexible, bomba y mando del inversor
+//   -> hueco inferior del mamparo -> DC-DC -> disyuntor 1 (120 A) -> batería de 150 Ah -> fusible principal -> inversor -> enchufes
+//   batería -> disyuntor 2 (120 A) -> caja de fusibles de 12 salidas -> heladera y panel de 5 interruptores -> 4 tiras LED,
+//   lámpara flexible, bomba y mando del inversor; y una salida propia de 5 A al termostato del calefactor de la batería
+//   (almohadilla bajo la batería sobre una plancha aislante, con la sonda pegada a la batería)
 //
 // Todo lo eléctrico del mueble está en la sección izquierda (E), al piso y bajo el plano de la cama, con la
 // batería (bornes arriba). El tablero con interruptores y enchufes queda sobre la cama, en el frente de esa misma
@@ -63,6 +65,45 @@ export function electrico3d(cfg) {
     nota: 'Carga la batería de 150 Ah desde la del auto. Al piso, entre la caja de fusibles y el inversor',
   });
 
+  // --- Disyuntores de 120 A de rearme manual (pack de 2) ---
+  const c1 = E.cb1;
+  const c2 = E.cb2;
+  const cortacircuitos1 = caja('cortacircuitos1', 'Disyuntor 120 A (DC-DC a batería)', c1.x, c1.y, c1.z, c1.sx, c1.sy, c1.sz, {
+    en: EN,
+    color: '#212121',
+    estado: 'Falta comprar (se vende en pack de 2, con terminales de ojal)',
+    nota: 'Al piso, delante de la batería, con la palanca hacia arriba. Corta a mano la línea del DC-DC a la batería',
+  });
+  const cortacircuitos2 = caja('cortacircuitos2', 'Disyuntor 120 A (batería a caja de fusibles)', c2.x, c2.y, c2.z, c2.sx, c2.sy, c2.sz, {
+    en: EN,
+    color: '#212121',
+    estado: 'Falta comprar (se vende en pack de 2, con terminales de ojal)',
+    nota: 'Al piso, delante de la batería, al lado del primero. Corta a mano todo lo de 12 V que reparte la caja de fusibles',
+  });
+
+  // --- Calefactor de la batería contra el frío: aislante, almohadilla y termostato con sonda ---
+  const ai = E.aislante;
+  const aislante = caja('aislante', 'Aislante bajo la batería (espuma 10 mm)', ai.x, ai.y, ai.z, ai.sx, ai.sy, ai.sz, {
+    en: EN,
+    color: '#fdd835',
+    estado: 'Falta comprar',
+    nota: 'Plancha de espuma aislante de 10 mm entre el piso y la almohadilla; sobresale unos 5 mm a los costados y 15 mm al frente',
+  });
+  const ca = E.calefactor;
+  const calefactor = caja('calefactor', 'Almohadilla calefactora 12 V (30 W)', ca.x, ca.y, ca.z, ca.sx, ca.sy, ca.sz, {
+    en: EN,
+    color: '#d84315',
+    estado: 'Falta comprar',
+    nota: 'Plana, bajo la cara de abajo de la batería (queda tapada por ella), sobre el aislante',
+  });
+  const te = E.termostato;
+  const termostato = caja('termostato', 'Termostato con sonda (enciende a 4, apaga a 10 grados)', te.x, te.y, te.z, te.sx, te.sy, te.sz, {
+    en: EN,
+    color: '#1b5e20',
+    estado: 'Falta comprar',
+    nota: 'Al piso, delante de la batería. La sonda va pegada al costado de la batería, lejos de la almohadilla',
+  });
+
   // --- Tablero en el frente de la sección eléctrica, sobre la cama ---
   const ps = eq.panelSwitches;
   const ench = eq.enchufe;
@@ -118,7 +159,8 @@ export function electrico3d(cfg) {
   });
 
   const equipos = [
-    bateria, fusibles, fusiblePrincipal, inversor, dcdc, panelSwitches, enchufe1, enchufe2,
+    bateria, fusibles, fusiblePrincipal, inversor, dcdc, cortacircuitos1, cortacircuitos2, aislante, calefactor, termostato,
+    panelSwitches, enchufe1, enchufe2,
     ledA, ledB, ledC, ledD, lampara, extractor, bateriaAuto, anlCaja,
   ];
 
@@ -137,6 +179,12 @@ export function electrico3d(cfg) {
   const yHueco = 505; // altura de los cables del tablero en el hueco entre el estante y los cajones
   const yBajo = iv.y + iv.sy + 1; // por encima de los equipos de la fila del frente
   const xPan = panelSwitches.x;
+  const yAlto = dcdc.y + dcdc.sy + 14; // los cables del DC-DC pasan por encima de la caja de fusibles
+  const yCaja = 100; // el cable del segundo disyuntor a la caja de fusibles pasa por encima de ellos
+  const yCalef = 115; // el cable de la caja al termostato pasa por encima de los disyuntores
+  const zCalef = E.cb1.z - 5;
+  const xCalef = ca.x + ca.sx - 8; // por donde el cable del termostato entra a la almohadilla
+  const yBat = b.y;
 
   const cables = [
     {
@@ -179,21 +227,39 @@ export function electrico3d(cfg) {
       nota: 'Va por el piso bajo los asientos, cruza de lado a lado, entra al mueble por el hueco de 10 cm bajo la curva del mamparo (con pasacables en el fondo) y sigue pegado al piso, detrás del inversor, hasta la parte de atrás del DC-DC.',
     },
     {
-      id: 'c_dcdc_bat',
-      nombre: 'DC-DC a batería de 150 Ah',
+      id: 'c_dcdc_cb1',
+      nombre: 'DC-DC al disyuntor 1',
       tipo: 'dc',
       desde: 'dcdc',
-      hasta: 'bateria',
+      hasta: 'cortacircuitos1',
       video: 'dcdc',
       corriente: 'dcdc',
       puntos: [
         [dcdc.x + 18, dcdc.y + dcdc.sy + 1, dcdc.z + 30],
-        [dcdc.x + 18, yTP + 22, dcdc.z + 30],
-        [dcdc.x + 18, yTP + 22, zTP + 30],
+        [dcdc.x + 18, yAlto, dcdc.z + 30],
+        [dcdc.x + 18, yAlto, c1.z + 20],
+        [c1.x + 62, yAlto, c1.z + 20],
+        [c1.x + 62, c1.y + c1.sy + 1, c1.z + 20],
+      ],
+      nota: 'Salida del DC-DC al primer disyuntor, pasando por encima de la caja de fusibles. Usar el mismo calibre que la entrada.',
+    },
+    {
+      id: 'c_cb1_bat',
+      nombre: 'Disyuntor 1 a la batería',
+      tipo: 'dc',
+      desde: 'cortacircuitos1',
+      hasta: 'bateria',
+      video: 'dcdc',
+      corriente: 'dcdc',
+      sinFusible: true,
+      puntos: [
+        [c1.x + 18, c1.y + c1.sy + 1, c1.z + 50],
+        [c1.x + 18, yTP + 22, c1.z + 50],
+        [c1.x + 18, yTP + 22, zTP + 30],
         [xTP, yTP + 22, zTP + 30],
         [xTP, yTP + 1, zTP + 30],
       ],
-      nota: 'Salida del DC-DC al borne de la batería, por encima de ella. Usar el mismo calibre que la entrada.',
+      nota: 'Del disyuntor al borne positivo de la batería, por encima de ella. El fusible de esta línea es el del tramo anterior.',
     },
     {
       id: 'c_bat_fusp',
@@ -226,21 +292,39 @@ export function electrico3d(cfg) {
       nota: 'Cable corto y grueso, del fusible a la parte de atrás del inversor. Es el consumo más fuerte del sistema.',
     },
     {
-      id: 'c_bat_caja',
-      nombre: 'Batería a la caja de fusibles',
+      id: 'c_bat_cb2',
+      nombre: 'Batería al disyuntor 2',
       tipo: 'dc',
       desde: 'bateria',
-      hasta: 'fusibles',
+      hasta: 'cortacircuitos2',
       video: 'fusibles',
       corriente: 'carga12',
       puntos: [
         [xTP, yTP + 1, zTP + 15],
         [xTP, yTP + 47, zTP + 15],
-        [xTP, yTP + 47, fusibles.z + 70],
-        [fusibles.x + fusibles.sx / 2 - 30, yTP + 47, fusibles.z + 70],
+        [c2.x + 62, yTP + 47, zTP + 15],
+        [c2.x + 62, yTP + 47, c2.z + 20],
+        [c2.x + 62, c2.y + c2.sy + 1, c2.z + 20],
+      ],
+      nota: 'Alimenta todo lo de 12 V que no pasa por el inversor. Va por encima de la batería, bajo el estante, hasta el segundo disyuntor.',
+    },
+    {
+      id: 'c_cb2_caja',
+      nombre: 'Disyuntor 2 a la caja de fusibles',
+      tipo: 'dc',
+      desde: 'cortacircuitos2',
+      hasta: 'fusibles',
+      video: 'fusibles',
+      corriente: 'carga12',
+      sinFusible: true,
+      puntos: [
+        [c2.x + 18, c2.y + c2.sy + 1, c2.z + 50],
+        [c2.x + 18, yCaja, c2.z + 50],
+        [c2.x + 18, yCaja, fusibles.z + 70],
+        [fusibles.x + fusibles.sx / 2 - 30, yCaja, fusibles.z + 70],
         [fusibles.x + fusibles.sx / 2 - 30, fusibles.y + fusibles.sy + 1, fusibles.z + 70],
       ],
-      nota: 'Alimenta todo lo de 12 V que no pasa por el inversor. Va por encima de los equipos, bajo el estante.',
+      nota: 'Del disyuntor a la entrada de la caja de fusibles (12 salidas, cada una con su negativo individual). El fusible de esta línea es el del tramo anterior.',
     },
     {
       id: 'c_caja_nevera',
@@ -384,6 +468,55 @@ export function electrico3d(cfg) {
         [bomba.x + bomba.sx / 2, bomba.y + 60, bomba.z + bomba.sz + 1],
       ],
       nota: 'Va por el hueco sobre el estante y por atrás de los cajones, y cruza los dos divisores por la parte alta del fondo con pasacables hasta la bomba. Es el tramo más largo de 12 V del mueble: pasa detrás del anafe, así que va dentro de una funda o canaleta y lejos del caño de gas.',
+    },
+    {
+      id: 'c_caja_calef',
+      nombre: 'Caja de fusibles al termostato del calefactor',
+      tipo: 'dc',
+      desde: 'fusibles',
+      hasta: 'termostato',
+      video: 'fusibles',
+      corriente: 'calef',
+      puntos: [
+        [fusibles.x + fusibles.sx - 10, fusibles.y + fusibles.sy + 1, fusibles.z + 40],
+        [fusibles.x + fusibles.sx - 10, yCalef, fusibles.z + 40],
+        [fusibles.x + fusibles.sx - 10, yCalef, zCalef],
+        [te.x + te.sx / 2, yCalef, zCalef],
+        [te.x + te.sx / 2, yCalef, te.z + te.sz / 2],
+        [te.x + te.sx / 2, te.y + te.sy + 1, te.z + te.sz / 2],
+      ],
+      nota: 'Salida propia de la caja de fusibles con fusible de 5 A. Sin interruptor: el termostato decide cuándo se enciende.',
+    },
+    {
+      id: 'c_termo_calef',
+      nombre: 'Termostato a la almohadilla calefactora',
+      tipo: 'dc',
+      desde: 'termostato',
+      hasta: 'calefactor',
+      video: 'fusibles',
+      corriente: 'calef',
+      sinFusible: true,
+      puntos: [
+        [xCalef, te.y + 20, te.z + te.sz + 1],
+        [xCalef, ca.y + ca.sy / 2, te.z + te.sz + 6],
+        [xCalef, ca.y + ca.sy / 2, ca.z + 4],
+      ],
+      nota: 'Cable corto por el piso, entre el aislante y la batería, hasta la almohadilla. Lo protege el fusible de 5 A de la caja.',
+    },
+    {
+      id: 'c_termo_sonda',
+      nombre: 'Sonda del termostato a la batería',
+      tipo: 'senal',
+      desde: 'termostato',
+      hasta: 'bateria',
+      video: 'fusibles',
+      corriente: 'senal',
+      puntos: [
+        [te.x + 15, te.y + te.sy + 1, te.z + te.sz / 2],
+        [te.x + 15, yBat + 130, te.z + te.sz / 2],
+        [te.x + 15, yBat + 130, b.z - 1],
+      ],
+      nota: 'La sonda se pega con cinta térmica al costado de la batería que mira al frente, a media altura, lejos de la almohadilla, para medir la temperatura de la batería y no la del calefactor.',
     },
     {
       id: 'c_panel_mando',

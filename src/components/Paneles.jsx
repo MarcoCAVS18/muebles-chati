@@ -362,7 +362,7 @@ export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, el
               <td>{t.largoM.toFixed(2)} m</td>
               <td>{t.amperes.toFixed(1)}</td>
               <td>{t.seccion} mm2</td>
-              <td>{t.fusible} A</td>
+              <td>{t.sinFusible || t.tipo === 'senal' ? '-' : `${t.fusible} A`}</td>
               <td>{t.caidaPct.toFixed(1)} %</td>
             </tr>
           ))}

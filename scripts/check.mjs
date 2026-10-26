@@ -309,4 +309,41 @@ for (const p of data.partes) {
 const sinContorno = data.partes.find((p) => !contorno(p));
 exigir(describirPieza(sinContorno, CONFIG_INICIAL).lineas[0].tipo === 'recto', 'una pieza recta debería describirse con corte recto a 90 grados');
 
+// ---- Disyuntores de 120 A y calefactor de la batería ----
+{
+  const cb1 = eqE('cortacircuitos1');
+  const cb2 = eqE('cortacircuitos2');
+  exigir(cb1 && cb2 && !solapan(cb1, cb2), 'faltan los dos disyuntores de 120 A o se pisan');
+  exigir(cb1.y < 60 && cb2.y < 60 && cb1.x + cb1.sx <= xDiv1 && cb2.x + cb2.sx <= xDiv1, 'los disyuntores deberían ir al piso de la sección eléctrica');
+  const unen = (id, a, b) => {
+    const c = e3.cables.find((q) => q.id === id);
+    return c && c.desde === a && c.hasta === b;
+  };
+  exigir(unen('c_dcdc_cb1', 'dcdc', 'cortacircuitos1') && unen('c_cb1_bat', 'cortacircuitos1', 'bateria'), 'el disyuntor 1 debería ir entre el DC-DC y la batería');
+  exigir(unen('c_bat_cb2', 'bateria', 'cortacircuitos2') && unen('c_cb2_caja', 'cortacircuitos2', 'fusibles'), 'el disyuntor 2 debería ir entre la batería y la caja de fusibles');
+  exigir(!e3.cables.some((c) => c.id === 'c_bat_caja' || c.id === 'c_dcdc_bat'), 'los cables viejos sin disyuntor no deberían quedar');
+  // Calefactor: piso -> aislante -> almohadilla -> batería, con la almohadilla dentro de la huella de la batería
+  const ais = eqE('aislante');
+  const cal = eqE('calefactor');
+  const ter = eqE('termostato');
+  exigir(ais && cal && ter, 'faltan el aislante, la almohadilla o el termostato');
+  exigir(Math.abs(cal.y - (ais.y + ais.sy)) < 0.5 && Math.abs(bat.y - (cal.y + cal.sy)) < 0.5, 'la batería debería apoyar sobre la almohadilla y esta sobre el aislante');
+  exigir(cal.x >= bat.x && cal.x + cal.sx <= bat.x + bat.sx && cal.z >= bat.z && cal.z + cal.sz <= bat.z + bat.sz, 'la almohadilla debería quedar bajo la batería');
+  exigir(ais.x <= bat.x && ais.x + ais.sx >= bat.x + bat.sx && ais.z <= bat.z && ais.z + ais.sz >= bat.z + bat.sz, 'el aislante debería cubrir toda la cara de abajo de la batería');
+  exigir(ais.y < 60 && ter.y < 60, 'el aislante y el termostato deberían ir al piso');
+  const sonda = e3.cables.find((c) => c.id === 'c_termo_sonda');
+  exigir(sonda && sonda.tipo === 'senal' && sonda.hasta === 'bateria', 'la sonda del termostato debería llegar a la batería');
+  const pSonda = sonda.puntos[sonda.puntos.length - 1];
+  exigir(Math.abs(pSonda[2] - bat.z) <= 2 && pSonda[0] > cal.x && pSonda[0] < cal.x + cal.sx + 1, 'la sonda debería tocar la cara de la batería que mira al frente');
+  exigir(unen('c_caja_calef', 'fusibles', 'termostato') && unen('c_termo_calef', 'termostato', 'calefactor'), 'el calefactor debería salir de la caja de fusibles por el termostato');
+  exigir(compras.some((r) => /Fusible 5 A/.test(r.item)), 'falta el fusible de 5 A del calefactor en la lista de compras');
+  exigir(compras.some((r) => /Disyuntor 120 A \(DC-DC/.test(r.item) && /Falta comprar/.test(r.nota)) && compras.some((r) => /Almohadilla calefactora/.test(r.item) && /Falta comprar/.test(r.nota)), 'los disyuntores y la almohadilla deberían figurar como pendientes de compra');
+  exigir(tramoDe('c_caja_calef').fusible === 5 && tramoDe('c_termo_calef').sinFusible, 'el calefactor debería llevar un solo fusible de 5 A');
+  exigir(ele.filas.some((f) => f.id === 'calefBateria') && ele.caminos.some((c) => /calefactor/.test(c.nombre)), 'faltan el consumo y el camino del calefactor');
+  // Los bornes de la batería tienen que quedar bajo el estante con lugar para el cable
+  exigir(L_E().yEstante - (bat.y + bat.sy) >= 55, 'la batería quedó demasiado cerca del estante para los cables de los bornes');
+}
+function L_E() {
+  return disposicionTrasero(cfgI).E;
+}
 process.exit(fallos ? 1 : 0);

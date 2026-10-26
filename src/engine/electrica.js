@@ -9,15 +9,16 @@ const FACTOR_FUSIBLE = { nevera: 2.5, bomba: 2.5 };
 // Caminos de la energía de la batería a cada consumo: la caída de tensión se suma a lo largo de todo el camino
 const CAMINOS = [
   { nombre: 'Entrada del DC-DC (batería del auto hasta el DC-DC)', ids: ['c_auto_anl', 'c_largo'] },
-  { nombre: 'Salida del DC-DC hasta la batería de 150 Ah', ids: ['c_dcdc_bat'] },
+  { nombre: 'Salida del DC-DC hasta la batería de 150 Ah (pasa por el disyuntor 1)', ids: ['c_dcdc_cb1', 'c_cb1_bat'] },
   { nombre: 'Batería hasta el inversor', ids: ['c_bat_fusp', 'c_fusp_inv'] },
-  { nombre: 'Batería hasta la heladera', ids: ['c_bat_caja', 'c_caja_nevera'] },
-  { nombre: 'Batería hasta la bomba', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_bomba'] },
-  { nombre: 'Batería hasta la tira LED 1', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_ledA'] },
-  { nombre: 'Batería hasta la tira LED 2', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_ledB'] },
-  { nombre: 'Batería hasta la tira LED 3', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_ledC'] },
-  { nombre: 'Batería hasta la tira LED 4', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_ledD'] },
-  { nombre: 'Batería hasta la lámpara flexible', ids: ['c_bat_caja', 'c_caja_panel', 'c_panel_lampara'] },
+  { nombre: 'Batería hasta la heladera', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_nevera'] },
+  { nombre: 'Batería hasta la bomba', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_bomba'] },
+  { nombre: 'Batería hasta la tira LED 1', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledA'] },
+  { nombre: 'Batería hasta la tira LED 2', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledB'] },
+  { nombre: 'Batería hasta la tira LED 3', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledC'] },
+  { nombre: 'Batería hasta la tira LED 4', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledD'] },
+  { nombre: 'Batería hasta la lámpara flexible', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_lampara'] },
+  { nombre: 'Batería hasta el calefactor de la batería', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_calef', 'c_termo_calef'] },
 ];
 const RHO_COBRE = 0.0172; // ohm * mm2 / m
 
@@ -81,6 +82,7 @@ export function calcularElectrica(cargas, e, cables = []) {
     ledD: ampDe('ledD'),
     lampara: ampDe('lampara'),
     bomba: ampDe('bomba'),
+    calef: ampDe('calefBateria'),
     switches: ampDe('ledA') + ampDe('ledB') + ampDe('ledC') + ampDe('ledD') + ampDe('lampara') + ampDe('bomba'),
     ac: e.inversorW / 230,
     senal: 0.5,
@@ -196,8 +198,9 @@ export function calcularElectrica(cargas, e, cables = []) {
   if (inversor) {
     avisos.push('Lado de 230 V: el inversor necesita un diferencial de 30 mA y un disyuntor (6 A). El técnico define si hace falta puentear neutro y tierra según el modelo del inversor.');
   }
-  avisos.push('Todavía no están en el diseño: corta-baterías general, shunt o monitor de batería, barras de distribución positiva y negativa, y el fusible de la salida del DC-DC pegado al borne.');
-  avisos.push('La batería de litio no se debe cargar con menos de 0 grados: confirmar que tiene protección por baja temperatura o calefacción propia (invierno en Suecia).');
+  avisos.push('Los dos disyuntores de 120 A (DC-DC a batería y batería a caja de fusibles) son corte manual y protección de último recurso, igual al límite del BMS. No reemplazan a los fusibles: un disyuntor de 120 A no protege a un cable más fino, así que cada línea mantiene el fusible de la tabla.');
+  avisos.push('Todavía no están en el diseño: corte manual para la línea del inversor, shunt o monitor de batería y una barra para el negativo general (la caja de 12 salidas ya trae negativos individuales, pero el negativo del DC-DC, del inversor y de la batería necesita una barra).');
+  avisos.push('Calefactor de la batería: la almohadilla de 30 W va bajo la batería, sobre una plancha aislante, y el termostato la enciende a 4 grados y la apaga a 10 (sonda pegada a la batería, lejos de la almohadilla). Con su salida de 5 A en la caja de fusibles. Confirmar en la etiqueta o el manual de la batería hasta qué temperatura se puede cargar (invierno en Suecia).');
   if (caminosRes.some((c) => !c.ok)) avisos.push('Algún camino pasa la caída máxima aunque se usó la sección más grande de la lista: acortar el recorrido.');
   avisos.push('Los largos de cable salen del recorrido dibujado en 3D, con 15 % de sobrante. Medir en la van antes de cortar.');
 

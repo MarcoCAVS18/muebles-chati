@@ -103,7 +103,7 @@ export default function PanelElemento({ id, elec3d, dataEquipos, tramos, elec, c
                 </tr>
                 <tr>
                   <td>Fusible</td>
-                  <td>{tramo.fusible} A</td>
+                  <td>{tramo.sinFusible || tramo.tipo === 'senal' ? 'Sin fusible propio (lo protege el tramo anterior)' : `${tramo.fusible} A`}</td>
                 </tr>
                 <tr>
                   <td>Caída de tensión</td>

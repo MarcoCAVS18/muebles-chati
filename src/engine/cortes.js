@@ -102,7 +102,7 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
   }
   if (elec3d) {
     for (const e of elec3d.equipos) {
-      filas.push({ categoria: 'Equipos', item: e.nombre, cantidad: 1, nota: 'Ya comprado' });
+      filas.push({ categoria: 'Equipos', item: e.nombre, cantidad: 1, nota: e.estado || 'Ya comprado' });
     }
   }
   if (resElec) {
@@ -113,7 +113,8 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
     const fus = new Map();
     const disy = new Map();
     for (const t of resElec.tramos) {
-      if (t.tipo === 'senal') continue;
+      // La señal no lleva fusible; los tramos marcados sinFusible ya los protege el fusible o el disyuntor del tramo anterior
+      if (t.tipo === 'senal' || t.sinFusible) continue;
       if (t.tipo === 'ac') {
         // De 230 V: un disyuntor por línea (las dos tomas comparten el del inversor), no un fusible
         disy.set(t.fusible, 1);
@@ -131,9 +132,10 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
     if (disy.size) {
       filas.push({ categoria: 'Cables y protecciones', item: 'Interruptor diferencial 30 mA (2 polos)', cantidad: 1, nota: 'A la salida del inversor. El técnico confirma el puenteo neutro-tierra' });
     }
-    filas.push({ categoria: 'Cables y protecciones', item: 'Corta-baterías general', cantidad: 1, nota: 'Falta en el diseño: confirmar con el técnico dónde va' });
+    filas.push({ categoria: 'Cables y protecciones', item: 'Corte manual para la línea del inversor', cantidad: 1, nota: 'Falta en el diseño: los dos disyuntores de 120 A cubren el DC-DC y la caja de fusibles, no el inversor' });
     filas.push({ categoria: 'Cables y protecciones', item: 'Shunt o monitor de batería', cantidad: 1, nota: 'Falta en el diseño: confirmar con el técnico' });
-    filas.push({ categoria: 'Cables y protecciones', item: 'Barras de distribución positiva y negativa', cantidad: 2, nota: 'Falta en el diseño: reparten los cables del borne de la batería' });
+    filas.push({ categoria: 'Cables y protecciones', item: 'Barra para el negativo general', cantidad: 1, nota: 'Falta en el diseño: la caja de 12 salidas ya trae negativos individuales, pero el DC-DC, el inversor y la batería necesitan una barra' });
+    filas.push({ categoria: 'Cables y protecciones', item: 'Cinta térmica para la sonda del termostato y bridas', cantidad: 1, nota: 'Para pegar la sonda a la batería y sujetar la almohadilla' });
     filas.push({ categoria: 'Cables y protecciones', item: 'Terminales de ojal y termocontraíbles', cantidad: 1, nota: 'Un surtido para todos los calibres' });
     filas.push({ categoria: 'Cables y protecciones', item: 'Pasacables de goma 20 mm', cantidad: 13, nota: 'Estantes, divisores, tablero, fondo y mamparo' });
     filas.push({ categoria: 'Cables y protecciones', item: 'Manguera de grado alimenticio, abrazaderas y T', cantidad: 1, nota: 'Bidones, bomba y canilla' });

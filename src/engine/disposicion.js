@@ -84,9 +84,36 @@ export function disposicionTrasero(cfg) {
   E.inversor = { x: sec.E.x1 - 15 - ivSx, y: yE, z: zInE + 15, sx: ivSx, sy: inv.y, sz: ivSz };
   E.dcdc = { x: E.inversor.x - 10 - dc.x, y: yE, z: zInE + 15, sx: dc.x, sy: dc.y, sz: dc.z };
   E.fusibles = { x: E.dcdc.x - 10 - fus.z, y: yE, z: zInE + 15, sx: fus.z, sy: fus.y, sz: fus.x };
-  // Batería contra el fondo, con 70 mm de pasada para los cables
-  E.bateria = { x: sec.E.x0 + 15, y: yE, z: zFondo - 70 - bat.z, sx: bat.x, sy: bat.y, sz: bat.z };
-  E.yTopeBateria = yE + bat.y;
+  // Batería contra el fondo, con 70 mm de pasada para los cables. Apoya sobre la almohadilla calefactora y esta
+  // sobre una plancha aislante: así el frío del piso no le llega y el calor no se pierde hacia abajo.
+  const aisl = eq.aislante;
+  const cal = eq.calefactor;
+  const xBat = sec.E.x0 + 15;
+  const zBat = zFondo - 70 - bat.z;
+  const yBat = yE + aisl.y + cal.y;
+  E.bateria = { x: xBat, y: yBat, z: zBat, sx: bat.x, sy: bat.y, sz: bat.z };
+  E.yTopeBateria = yBat + bat.y;
+  // La plancha aislante es más grande que la batería (sobresale en el frente y los costados)
+  E.aislante = {
+    x: xBat - (aisl.x - bat.x) / 2,
+    y: yE,
+    z: zBat - (aisl.z - bat.z) + (aisl.z - bat.z) / 2,
+    sx: aisl.x,
+    sy: aisl.y,
+    sz: aisl.z,
+  };
+  E.calefactor = { x: xBat + (bat.x - cal.x) / 2, y: yE + aisl.y, z: zBat + (bat.z - cal.z) / 2, sx: cal.x, sy: cal.y, sz: cal.z };
+  // Dos disyuntores de 120 A de rearme manual, al piso con la palanca hacia arriba, entre la fila del frente y la
+  // batería: el primero en la línea del DC-DC a la batería y el segundo en la que va a la caja de fusibles.
+  const cb = eq.cortacircuitos;
+  const zFinFila = Math.max(E.fusibles.z + E.fusibles.sz, E.dcdc.z + E.dcdc.sz, E.inversor.z + E.inversor.sz);
+  const zCb = zFinFila + 20;
+  E.cb1 = { x: xBat + 10, y: yE, z: zCb, sx: cb.x, sy: cb.y, sz: cb.z };
+  E.cb2 = { x: E.cb1.x + cb.x + 10, y: yE, z: zCb, sx: cb.x, sy: cb.y, sz: cb.z };
+  // El termostato va en el piso, delante de la batería y del aislante, a la derecha de los disyuntores;
+  // la sonda se apoya en la cara de la batería que mira al frente, lejos de la almohadilla
+  const ter = eq.termostato;
+  E.termostato = { x: E.cb2.x + cb.x + 25, y: yE, z: E.aislante.z - 12 - ter.z, sx: ter.x, sy: ter.y, sz: ter.z };
   // El fusible principal va a la derecha de la batería, pegado al borne positivo
   E.anl = { x: E.bateria.x + bat.x + 12, y: yE, z: E.bateria.z + 20, sx: anl.x, sy: anl.y, sz: anl.z };
   // Borne positivo en el extremo derecho de la batería, en la cara de arriba

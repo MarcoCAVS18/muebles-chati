@@ -23,8 +23,65 @@ export const ELEMENTOS = {
   bateria: {
     descripcion: 'Batería de litio (LiFePO4) de 150 Ah. Alimenta la heladera, las luces, la bomba y el inversor.',
     ubicacion: 'Sección eléctrica (izquierda) del mueble trasero, al piso, contra el fondo y bajo el plano de la cama. Queda lejos del fregadero y del gas.',
-    consejos: ['Fijarla con un marco o correas: no puede moverse al frenar. Los bornes quedan arriba, con unos 11 cm libres hasta el estante.', 'Confirmar que el BMS entrega la corriente que pide el inversor.', 'El fusible principal va lo más cerca posible del borne positivo.'],
+    consejos: [
+      'Fijarla con un marco o correas: no puede moverse al frenar. Los bornes quedan arriba, con unos 6 cm libres hasta el estante.',
+      'Apoya sobre la almohadilla calefactora y la plancha aislante: con frío (menos de 0 grados) no se debe cargar.',
+      'Confirmar que el BMS entrega la corriente que pide el inversor.',
+      'El fusible principal va lo más cerca posible del borne positivo.',
+    ],
     busqueda: 'instalar batería de litio 12v camper furgoneta',
+  },
+  cortacircuitos1: {
+    descripcion: 'Disyuntor de 120 A de rearme manual (12-48 V, montaje en superficie, resistente al agua). Corta a mano la línea que carga la batería desde el DC-DC y salta si hay un cortocircuito.',
+    ubicacion: 'Al piso de la sección eléctrica, delante de la batería (a la izquierda, junto al disyuntor 2), con la palanca hacia arriba.',
+    consejos: [
+      'Va en el cable positivo entre el DC-DC y la batería, lo más cerca posible del borne de la batería.',
+      'Es corte manual y último recurso (120 A es el límite del BMS): no protege a un cable más fino que lo que aguanta ese valor, así que el fusible de la línea se mantiene.',
+      'Se vende de a dos y trae terminales de ojal y tornillos. Apretar bien los dos bornes y poner la tapa de goma.',
+      'Para dejar la instalación sin energía, bajar la palanca antes de tocar cables.',
+    ],
+    busqueda: 'instalar disyuntor 120A rearme manual batería camper',
+  },
+  cortacircuitos2: {
+    descripcion: 'Segundo disyuntor de 120 A de rearme manual. Corta a mano todo lo de 12 V que reparte la caja de fusibles (heladera, luces, bomba y calefactor).',
+    ubicacion: 'Al piso de la sección eléctrica, delante de la batería, al lado del disyuntor 1.',
+    consejos: [
+      'Va en el positivo entre la batería y la caja de fusibles. El inversor tiene su propio fusible principal y no pasa por acá.',
+      'Con este disyuntor abierto se apaga toda la instalación de 12 V menos el inversor (a menos que se corte aparte).',
+      'Es la última protección: cada salida de la caja sigue llevando su fusible.',
+    ],
+    busqueda: 'instalar disyuntor 120A rearme manual batería camper',
+  },
+  calefactor: {
+    descripcion: 'Almohadilla calefactora de silicona de 12 V y unos 30 W. Mantiene la batería de litio sobre 0 grados para poder cargarla con frío.',
+    ubicacion: 'Plana, debajo de la batería y sobre la plancha aislante (queda tapada por la batería).',
+    consejos: [
+      'Tiene que estar en contacto con toda la cara de abajo de la batería: sin huecos de aire.',
+      'La alimenta el termostato por una salida propia de 5 A de la caja de fusibles.',
+      'Elegir una almohadilla de silicona con adhesivo y fusible o corte térmico propio.',
+    ],
+    busqueda: 'calefactor batería litio manta térmica 12v termostato camper',
+  },
+  termostato: {
+    descripcion: 'Termostato de 12 V con sonda. Enciende la almohadilla cuando la batería baja de unos 4 grados y la apaga a unos 10.',
+    ubicacion: 'Al piso, delante de la batería. La sonda sube pegada al costado de la batería que mira al frente.',
+    consejos: [
+      'Poner la sonda sobre la pared de la batería, lejos de la almohadilla, con cinta térmica o de aluminio: así mide la batería y no el calefactor.',
+      'Con 4 y 10 grados queda margen antes de llegar a 0.',
+      'Elegir uno que soporte 10 A o más de salida y que sea para 12 V continuo.',
+      'Se alimenta siempre: no lleva interruptor.',
+    ],
+    busqueda: 'termostato 12v con sonda calefactor batería litio camper',
+  },
+  aislante: {
+    descripcion: 'Plancha de espuma aislante de 10 mm. Evita que el frío del piso de la van le llegue a la batería y que el calor de la almohadilla se pierda hacia abajo.',
+    ubicacion: 'Entre el piso del mueble y la almohadilla. Sobresale un poco de la batería en el frente y los costados.',
+    consejos: [
+      'Sirve espuma de goma tipo Armaflex o XPS; si se puede, rodear también los lados de la batería con 10 a 20 mm.',
+      'No tapar los bornes ni cerrar la batería sin aire alrededor del cableado.',
+      'Material no combustible o autoextinguible, si es posible.',
+    ],
+    busqueda: 'aislar batería litio frío espuma aislante camper',
   },
   fusiblePrincipal: {
     descripcion: 'Fusible principal del inversor. Protege el cable más grueso de la instalación.',
@@ -33,9 +90,14 @@ export const ELEMENTOS = {
     busqueda: 'fusible principal inversor camper instalación',
   },
   fusibles: {
-    descripcion: 'Caja de fusibles que reparte los 12 V a los equipos. Cada línea lleva su fusible.',
+    descripcion: 'Caja de fusibles de 12 salidas que reparte los 12 V a los equipos. Cada línea lleva su fusible y se puede conectar su negativo individual.',
     ubicacion: 'Sección eléctrica del mueble trasero, al piso y junto a la puerta de los equipos.',
-    consejos: ['Rotular cada fusible con lo que protege.', 'Dejar lugar libre para sumar líneas más adelante.', 'Alimentar con el cable de la tabla de cables (batería a caja).'],
+    consejos: [
+      'Rotular cada fusible con lo que protege.',
+      'Sobran salidas: dejar lugar libre para sumar líneas más adelante.',
+      'Alimentar con el cable de la tabla de cables, pasando por el disyuntor 2 (batería a caja).',
+      'Usos hoy: heladera, panel de interruptores y calefactor de la batería (salida propia de 5 A).',
+    ],
     busqueda: 'instalar caja de fusibles 12v camper',
   },
   inversor: {

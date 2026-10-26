@@ -94,7 +94,8 @@ export default function App() {
               }
               setCfg(mezclar(CONFIG_INICIAL, d.cfg));
             }
-            if (Array.isArray(d.cargas)) setCargas(d.cargas);
+            // Un guardado viejo no trae los consumos nuevos: se suman los que falten
+            if (Array.isArray(d.cargas)) setCargas([...d.cargas, ...CARGAS_INICIALES.filter((c) => !d.cargas.some((g) => g.id === c.id))]);
             if (d.elec) setElec(mezclar(ELECTRICA_INICIAL, d.elec));
           }
         }

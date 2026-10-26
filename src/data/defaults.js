@@ -114,6 +114,12 @@ export const CONFIG_INICIAL = {
     detectorGas: { x: 40, y: 50, z: 22 },
     bateriaAuto: { x: 278, y: 190, z: 175 },
     anl: { x: 60, y: 40, z: 40 },
+    // Protección de la batería contra el frío (ESTIMADOS: confirmar con cada producto). Van debajo y al lado de la batería.
+    calefactor: { x: 150, y: 3, z: 150 }, // almohadilla de silicona 12 V de 30 W, plana (x ancho, y espesor, z fondo)
+    aislante: { x: 305, y: 10, z: 230 }, // plancha de espuma aislante bajo la almohadilla; sobresale de la batería
+    termostato: { x: 60, y: 35, z: 22 }, // módulo con sonda: enciende a 4 grados y apaga a 10
+    // Disyuntor de 120 A de rearme manual, de montaje en superficie (ESTIMADO: confirmar con el producto). Se monta con la cara hacia arriba
+    cortacircuitos: { x: 80, y: 45, z: 70 },
     panelSwitches: { x: 165, y: 40, z: 25 }, // panel de 16,5 x 4 cm (la profundidad es ESTIMADA)
     enchufe: { x: 50, y: 50, z: 25 }, // 5 x 5 cm (la profundidad es ESTIMADA)
     lampara: { x: 25, y: 60, z: 60 }, // base de la lámpara flexible (profundidad, alto, ancho); el cuello y la cabeza se ven aparte
@@ -142,6 +148,8 @@ export const CARGAS_INICIALES = [
   // 3 W de luz más 10 W de la salida USB (5 V, 2 A) a máxima carga; se prende pocas horas
   { id: 'lampara', nombre: 'Lámpara flexible de lectura 12 V (pared izquierda)', w: 13, horas: 0.5, ciclo: 1, tipo: '12V' },
   { id: 'bomba', nombre: 'Bomba de agua 12 V', w: 48, horas: 0.15, ciclo: 1, tipo: '12V' },
+  // Solo trabaja con frío (la batería se mantiene sobre 4 grados): 8 h en el día y un quinto del tiempo encendida
+  { id: 'calefBateria', nombre: 'Calefactor de la batería (solo con frío, 30 W)', w: 30, horas: 8, ciclo: 0.2, tipo: '12V' },
   { id: 'usbc', nombre: 'Carga de celulares por USB-C (230 V)', w: 40, horas: 3, ciclo: 0.6, tipo: '230V' },
   { id: 'notebook', nombre: 'Notebook (toma 230 V)', w: 60, horas: 3, ciclo: 0.7, tipo: '230V' },
 ];
