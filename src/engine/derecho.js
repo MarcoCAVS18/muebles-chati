@@ -81,9 +81,22 @@ export function derecho(ctx, G) {
   // Cajones, se tiran hacia el pasillo (x-)
   const zCaj = zA + t + 13;
   const anchoCaj = zDiv - zA - t - 26;
-  const fondoCaj = xW - t - (xF + t) - 5;
-  cajon(ctx, { grupo: G, nombre: 'Cajón inferior', x: xF + t + 5, y: 462, z: zCaj, ancho: anchoCaj, alto: 170, fondo: fondoCaj, dir: 'x-' });
-  cajon(ctx, { grupo: G, nombre: 'Cajón superior', x: xF + t + 5, y: 662, z: zCaj, ancho: anchoCaj, alto: 170, fondo: fondoCaj, dir: 'x-' });
+  // La caja arranca detrás del panel delantero (15 mm), que va pegado a la cara de atrás del frente
+  const fondoCaj = xW - t - (xF + 2 * t);
+  cajon(ctx, { grupo: G, nombre: 'Cajón inferior', x: xF + 2 * t, y: 462, z: zCaj, ancho: anchoCaj, alto: 170, fondo: fondoCaj, dir: 'x-' });
+  cajon(ctx, { grupo: G, nombre: 'Cajón superior', x: xF + 2 * t, y: 662, z: zCaj, ancho: anchoCaj, alto: 170, fondo: fondoCaj, dir: 'x-' });
+
+  // Panel delantero de cada cajón (ancho completo, delante de los laterales); el frente se atornilla a él desde adentro
+  P('Cajón inferior - delantera', xF + t, 462, zCaj, t, 170, anchoCaj);
+  P('Cajón superior - delantera', xF + t, 662, zCaj, t, 170, anchoCaj);
+  ctx.unir(G, 'directo', 0, 'Delanteras de los cajones atornilladas a los laterales (por la cara de adelante, que queda tapada por el frente)', {
+    herraje: 'Tornillo aglomerado 4x40 mm',
+    cantidad: 2 * 4,
+  });
+  ctx.unir(G, 'directo', 0, 'Frentes de los cajones atornillados a su delantera, desde adentro de la caja', {
+    herraje: 'Tornillo 4x25 mm (cara contra cara de 15 mm)',
+    cantidad: 2 * 4,
+  });
 
   // Alacena sobre los cajones
   const xAl = xW - alt.profundidad;
@@ -115,7 +128,11 @@ export function derecho(ctx, G) {
   ctx.unir(G, 'cola_tornillo', 2 * (yCaj + de.largo), 'Costados, panel trasero, bases y división');
   ctx.unir(G, 'cola_tornillo', 2 * (zDiv - zA) + 2 * (zZ - zDiv), 'Mesadas con costados y división');
   ctx.unir(G, 'cola_tornillo', 2 * (alt.alto + alt.profundidad) + 2 * (zDiv - zA), 'Alacena: tapa, base, fondo y lateral');
-  ctx.unir(G, 'cola_tornillo', 2 * (yCaj - de.zocalo) + 4 * (zDiv - zA), 'Marcos de los frentes');
+  // Los montantes miden 15 mm de ancho: un 4x40 los atraviesa, por eso los marcos llevan tornillos 4x25
+  ctx.unir(G, 'directo', 0, 'Marcos de los frentes (cara contra cara de 15 mm)', {
+    herraje: 'Tornillo 4x25 mm (cara contra cara de 15 mm)',
+    cantidad: Math.ceil((2 * (yCaj - de.zocalo) + 4 * (zDiv - zA)) / 150) + 1,
+  });
   ctx.unir(G, 'piso', de.largo + de.profundidad, 'Base del mueble al piso de la van');
   ctx.unir(G, 'pared', yCaj + de.largo, 'Costado de pared a la pared derecha');
   ctx.unir(G, 'pared', 1250, 'Panel trasero alto al cierre trasero');

@@ -23,7 +23,8 @@ export function trasero(ctx, G) {
   // Costados, fondo, base y zócalo
   P('Costado izquierdo', 0, 0, zFL, t, tr.alto - t, profL - tb);
   P('Costado derecho', x1 - t, 0, zF, t, tr.alto - t, prof - tb);
-  P('Fondo (contra el mamparo)', t, yBase, zB - tb, x1 - 2 * t, tr.alto - t - yBase, tb, 'fondo');
+  // El fondo va en dos mitades, una por módulo (el mueble se arma en dos módulos que se unen adentro de la van)
+  P('Fondo eléctrico (contra el mamparo)', t, yBase, zB - tb, d1, tr.alto - t - yBase, tb, 'fondo');
   P('Base (eléctrico)', t, yBase, L.E.zIn, d1 + t - t, t, largoIntE);
   P('Base (cocina y agua)', d1 + t, yBase, zIn, x1 - t - (d1 + t), t, largoInt);
   P('Zócalo frontal (eléctrico)', t, 0, zFL, d1 + t - t, yBase, t);
@@ -143,6 +144,59 @@ export function trasero(ctx, G) {
     dir: 'z-',
   });
 
+  // Lo que sigue se agrega al final para no mover los ids de las demás piezas.
+  // Segunda mitad del fondo (cocina y agua), contra el mamparo
+  P('Fondo cocina y agua (contra el mamparo)', d1 + t, yBase, zB - tb, x1 - t - (d1 + t), tr.alto - t - yBase, tb, 'fondo');
+  // Apoyos bajo las bases: la base queda a yBase del piso, y sin apoyo se pandea con la carga de los bidones y la batería.
+  // Son tiras de canto (de recorte de la hoja de 15 mm) en el sentido del ancho: adelante, al medio y atrás. Cruzan los
+  // listones del piso, que van a lo largo de la van, y ahí se atornillan.
+  const apoyos = (sufijo, x, sx, zIni) => {
+    const zAtras = zFondo - t;
+    for (const [lugar, z] of [
+      ['adelante', zIni],
+      ['al medio', (zIni + zAtras) / 2],
+      ['atrás', zAtras],
+    ]) {
+      P(`Apoyo bajo la base, ${lugar} (${sufijo})`, x, 0, z, sx, yBase, t);
+    }
+  };
+  apoyos('eléctrico', t, d1, E.zIn);
+  apoyos('cocina y agua', d1 + t, x1 - t - (d1 + t), zIn);
+  ctx.unir(G, 'directo', 0, 'Apoyos bajo las bases pegados y atornillados desde arriba (un tornillo cada 150 mm)', {
+    herraje: 'Tornillo 3,5x30 mm (cajones)',
+    cantidad: 3 * Math.ceil(d1 / 150) + 3 * Math.ceil((x1 - 2 * t - d1) / 150),
+  });
+  // Panel delantero de cada cajón: la caja arranca 15 mm detrás del frente (zIn + 15) justamente para que entre este panel.
+  // Va delante de los laterales, ancho completo; el frente (que cierra a ras del marco) se atornilla a él desde adentro.
+  const delantera = (nombre, x, y, ancho, alto) => P(`${nombre} - delantera`, x, y, zIn, ancho, alto, t);
+  for (const c of K.cajones) delantera(c.nombre, K.xCajon, c.y0 + 5, K.anchoCajon, c.y1 - c.y0 - 25);
+  delantera('Cajón de bidones', W.xCajon, W.yCajonBidones, W.anchoCajon, W.altoCajonBidones);
+  delantera('Cajón bajo el fregadero', W.xCajon, W.yCajonFregadero, W.anchoCajon, W.altoCajonFregadero);
+  delantera('Cajón de la garrafa', K.xCajon, K.yCajonGas, K.anchoCajon, K.altoCajonGas);
+  ctx.unir(G, 'directo', 0, 'Delanteras de los cajones atornilladas a los laterales (por la cara de adelante, que queda tapada por el frente)', {
+    herraje: 'Tornillo aglomerado 4x40 mm',
+    cantidad: 5 * 4,
+  });
+  ctx.unir(G, 'directo', 0, 'Frentes de los cajones atornillados a su delantera, desde adentro de la caja', {
+    herraje: 'Tornillo 4x25 mm (cara contra cara de 15 mm)',
+    cantidad: 5 * 4,
+  });
+
+  // Los dos módulos se arman afuera y se unen adentro de la van, contra la cara derecha del divisor 1.
+  // El módulo de la cocina y el agua no tiene pared izquierda: la pared es el divisor del módulo eléctrico.
+  ctx.unir(G, 'directo', 0, 'Unión de los dos módulos: desde el compartimento eléctrico, a través del divisor 1, al montante izquierdo de la cocina', {
+    herraje: 'Tornillo 4x25 mm (unión de los dos módulos)',
+    cantidad: 3,
+  });
+  ctx.unir(G, 'directo', 0, 'Dos escuadras L bajo la tapa 2, contra la cara del divisor 1, para que el borde izquierdo de la tapa no quede colgado', {
+    herraje: 'Escuadra L 40x40 mm (pared)',
+    cantidad: 2,
+  });
+  ctx.unir(G, 'directo', 0, 'Tornillos cortos de esas escuadras: no pueden pasar los 15 mm de la tapa ni del divisor', {
+    herraje: 'Tornillo 3,5x12 mm (escuadras de unión)',
+    cantidad: 8,
+  });
+
   // Botones push en cada frente. Las puertas llevan el botón cerca del borde libre (se supone que las bisagras
   // quedan a la izquierda de cada puerta), los cajones lo llevan al centro.
   const bt = (nombre, x, y, z) => ctx.boton({ grupo: G, nombre, eje: 'z-', x, y, z });
@@ -156,7 +210,11 @@ export function trasero(ctx, G) {
   // Uniones
   ctx.unir(G, 'cola_tornillo', tr.alto + prof + tr.alto + profL, 'Costados con base, fondo y tapas');
   ctx.unir(G, 'cola_tornillo', 2 * (largoInt + largoIntE) + 4 * (tr.alto - yBase), 'Divisores con base, tapa, fondo y frente');
-  ctx.unir(G, 'cola_tornillo', 2 * (x1 - 2 * t) + 6 * (tr.alto - yBase), 'Marcos de los frentes con costados, base y tapas');
+  // Los montantes miden 15 mm de ancho: un 4x40 los atraviesa, por eso los marcos llevan tornillos 4x25
+  ctx.unir(G, 'directo', 0, 'Marcos de los frentes con costados, base y tapas (cara contra cara de 15 mm)', {
+    herraje: 'Tornillo 4x25 mm (cara contra cara de 15 mm)',
+    cantidad: Math.ceil((2 * (x1 - 2 * t) + 6 * (tr.alto - yBase)) / 150) + 1,
+  });
   ctx.unir(G, 'cola_tornillo', 2 * (x1 - 2 * t), 'Estantes con divisores y costados');
   ctx.unir(G, 'cola_tornillo', 2 * x1, 'Tapas con costados y divisores (atornilladas desde arriba)');
 

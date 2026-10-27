@@ -13,10 +13,12 @@ import PanelElemento from './components/PanelElemento.jsx';
 import PanelPieza from './components/PanelPieza.jsx';
 import { Seccion, SECCIONES_CFG, escribir } from './components/Campos.jsx';
 import { Despiece, Placas, Herrajes, Electrica, Compras } from './components/Paneles.jsx';
+import { Armado } from './components/Armado.jsx';
+import { armarTutorial } from './engine/tutorial.js';
 import { useEsMovil, TACTIL } from './util/pantalla.js';
 import { Icono } from './components/Icono.jsx';
 
-const TABS = ['Despiece', 'Placas y cortes', 'Herrajes', 'Eléctrica', 'Compras'];
+const TABS = ['Despiece', 'Placas y cortes', 'Herrajes', 'Eléctrica', 'Armado', 'Compras'];
 
 // Barra de abajo en el celular: el 3D, las medidas y las pestañas de la derecha
 const ITEMS_MOVIL = [
@@ -26,6 +28,7 @@ const ITEMS_MOVIL = [
   { clave: 'Placas y cortes', etiqueta: 'Cortes', icono: 'hoja' },
   { clave: 'Herrajes', etiqueta: 'Herrajes', icono: 'llave' },
   { clave: 'Eléctrica', etiqueta: 'Eléctrica', icono: 'rayo' },
+  { clave: 'Armado', etiqueta: 'Armado', icono: 'libro' },
   { clave: 'Compras', etiqueta: 'Compras', icono: 'carrito' },
 ];
 
@@ -140,6 +143,7 @@ export default function App() {
   const peso = useMemo(() => pesoEstimado(data.partes, cfg), [data, cfg]);
   const elec3d = useMemo(() => electrico3d(cfg), [cfg]);
   const resElec = useMemo(() => calcularElectrica(cargas, elec, elec3d.cables), [cargas, elec, elec3d]);
+  const tutorial = useMemo(() => armarTutorial(data, plan, cfg, elec3d), [data, plan, cfg, elec3d]);
   const compras = useMemo(() => listaDeCompras(data, plan, cfg, resElec, elec3d), [data, plan, cfg, resElec, elec3d]);
   const elementos = useMemo(
     () => [...elec3d.equipos, ...data.equipos].map((e) => ({ id: e.id, nombre: e.nombre, nota: e.nota })),
@@ -430,6 +434,7 @@ export default function App() {
               setElemento={abrirElemento}
             />
           )}
+          {tab === 'Armado' && <Armado tutorial={tutorial} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} />}
           {tab === 'Compras' && <Compras filas={compras} />}
         </div>
       </section>

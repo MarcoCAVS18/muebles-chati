@@ -9,6 +9,7 @@ import { videosDe, VIDEOS } from '../src/data/videos.js';
 import { ELEMENTOS } from '../src/data/elementos.js';
 import { disposicionTrasero } from '../src/engine/disposicion.js';
 import { contorno, describirPieza, posarCamara, anotarPieza } from '../src/engine/enfoque.js';
+import { armarTutorial, agujerosDe, caladosDe } from '../src/engine/tutorial.js';
 
 const data = construir(CONFIG_INICIAL);
 const plan = planificar(data.partes, CONFIG_INICIAL);
@@ -98,7 +99,7 @@ exigir(vn.archInicio + vn.archLargo + vn.puertaLateral.vigas + vn.puertaLateral.
 exigir(cfgI.cama.largo === 1800, 'la cama debería medir 180 cm de largo');
 exigir(cfgI.cama.plataforma >= 430 && cfgI.cama.plataforma <= 440, 'la cama debería quedar apenas sobre el pasarruedas (43 a 44 cm)');
 exigir(Math.abs(vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL) >= 0 && vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL < vn.archInicio, 'la cama más la L deberían terminar antes del pasarruedas');
-exigir(cfgI.trasero.ancho === cfgI.van.ancho, 'el mueble trasero debería ir de pared a pared');
+exigir(cfgI.trasero.ancho === 1560 && cfgI.trasero.ancho <= cfgI.van.ancho, 'el mueble trasero debería medir 1560 mm de ancho y caber en la van');
 exigir(tra.every((p) => p.z + p.sz <= cfgI.van.largo + 0.5), 'el mueble trasero se sale del mamparo');
 
 // Cada equipo y cada cable tiene un video propio (sin caer en el video genérico) y una ficha
@@ -118,7 +119,8 @@ for (let i = 0; i < interiores.length; i++) {
     exigir(!solapan(interiores[i], interiores[j]), `los equipos ${interiores[i].id} y ${interiores[j].id} se pisan`);
   }
 }
-const ENCASTRADOS = ['fregadero', 'anafe', 'canilla', 'detectorGas'];
+// La heladera asoma por la tapa 1 (la tapa lleva el recorte), por eso también está encastrada
+const ENCASTRADOS = ['fregadero', 'anafe', 'canilla', 'detectorGas', 'nevera'];
 for (const e of interiores) {
   if (ENCASTRADOS.includes(e.id)) continue;
   for (const p of tra) exigir(!solapan(e, p), `el equipo ${e.id} atraviesa la pieza ${p.id} (${p.nombre})`);
@@ -131,9 +133,10 @@ const xDiv2 = cfgI.trasero.divisor2;
 for (const id of ['bateria', 'inversor', 'dcdc', 'fusibles', 'fusiblePrincipal']) {
   const e = eqE(id);
   exigir(e && e.x + e.sx <= xDiv1, `${id} debería estar en la sección eléctrica (izquierda)`);
-  exigir(e && freg_dist(e) > 400, `${id} debería quedar lejos del fregadero`);
+  exigir(e && freg_dist(e) >= 400, `${id} debería quedar lejos del fregadero`);
 }
-for (const id of ['nevera', 'garrafa', 'regulador', 'anafe']) {
+exigir(centroX('nevera') < xDiv1, 'la heladera debería estar en la sección eléctrica (arriba de la batería)');
+for (const id of ['garrafa', 'regulador', 'anafe']) {
   exigir(centroX(id) > xDiv1 && centroX(id) < xDiv2, `${id} debería estar en la sección de la cocina (centro)`);
 }
 for (const id of ['fregadero', 'bidon1', 'bidon2', 'bomba', 'canilla']) {
@@ -213,7 +216,7 @@ exigir(ele.caminos.some((c) => /lámpara/.test(c.nombre)) && ele.caminos.some((c
 // Botones push: uno por frente, sobre la cara del frente, sin pisar otras piezas
 const cuentaB = {};
 for (const b of data.botones) cuentaB[b.grupo] = (cuentaB[b.grupo] || 0) + 1;
-exigir(cuentaB['Mueble trasero'] === 7 && cuentaB.Cama === 2 && cuentaB['Mueble derecho'] === 4, `cantidad de botones push inesperada: ${JSON.stringify(cuentaB)}`);
+exigir(cuentaB['Mueble trasero'] === 6 && cuentaB.Cama === 2 && cuentaB['Mueble derecho'] === 4, `cantidad de botones push inesperada: ${JSON.stringify(cuentaB)}`);
 const botonesDeco = data.decos.filter((d) => d.forma === 'boton');
 exigir(botonesDeco.length === data.botones.length, 'cada botón debería dibujarse en el 3D');
 for (const b of data.botones) {
@@ -264,7 +267,7 @@ const conContorno = data.partes.filter((p) => contorno(p));
 exigir(conContorno.length === 9, `deberían tener contorno propio 9 piezas (2 placas, 2 bandejas, el frente del pie, 2 costados y 2 frentes de cajón), hay ${conContorno.length}`);
 const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
 exigir(contorno(cab).esquinas === 5 && contorno(cab).recorte, 'la placa de la cabecera debería tener 5 esquinas redondeadas y un recorte');
-exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /261 x 250/.test(l.texto)), 'la descripción de la cabecera debería decir el recorte de 261 x 250');
+exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /243 x 250/.test(l.texto)), 'la descripción de la cabecera debería decir el recorte de 243 x 250');
 
 // Cama como la del instructivo: placas con ranuras de esquinas redondeadas y costados con ventana (hueco del cajón)
 const pie = data.partes.find((p) => /^Placa del pie/.test(p.nombre));
@@ -345,5 +348,46 @@ exigir(describirPieza(sinContorno, CONFIG_INICIAL).lineas[0].tipo === 'recto', '
 }
 function L_E() {
   return disposicionTrasero(cfgI).E;
+}
+
+// ---- Mueble trasero: fondo en dos mitades, apoyos bajo las bases y delanteras de los cajones ----
+{
+  const L = disposicionTrasero(cfgI);
+  const fondos = tra.filter((p) => /^Fondo /.test(p.nombre));
+  exigir(fondos.length === 2 && Math.abs(fondos.reduce((s, p) => s + p.sx, 0) - (L.x1 - 2 * L.t)) < 0.5, 'las dos mitades del fondo deberían sumar el ancho interior del mueble');
+  exigir(fondos.every((p) => Math.abs(p.z + p.sz - L.zB) < 0.5), 'el fondo debería apoyar contra el mamparo');
+  const apoyos = tra.filter((p) => /^Apoyo bajo la base/.test(p.nombre));
+  exigir(apoyos.length === 6 && apoyos.every((p) => p.y === 0 && Math.abs(p.sy - L.yBase) < 0.5), 'deberían ser 6 apoyos que llenan el hueco entre el piso y la base');
+  const delanteras = tra.filter((p) => / - delantera$/.test(p.nombre));
+  exigir(delanteras.length === 5, `cada cajón del mueble trasero debería tener su delantera, hay ${delanteras.length}`);
+  for (const d of delanteras) {
+    const nom = d.nombre.replace(/ - delantera$/, '');
+    const lat = tra.find((p) => p.nombre === `${nom} - lateral`);
+    exigir(lat && Math.abs(lat.z - (d.z + d.sz)) < 0.5, `la delantera de "${nom}" debería tocar el frente de sus laterales`);
+    exigir(Math.abs(d.z - L.zIn) < 0.5, `la delantera de "${nom}" debería quedar pegada a la cara de atrás del marco`);
+  }
+  const der = data.partes.filter((p) => p.grupo === 'Mueble derecho');
+  exigir(der.filter((p) => / - delantera$/.test(p.nombre)).length === 2, 'los dos cajones del mueble derecho deberían tener delantera');
+}
+
+// ---- Tutorial de armado ----
+{
+  const e3t = electrico3d(CONFIG_INICIAL);
+  const tut = armarTutorial(data, plan, CONFIG_INICIAL, e3t);
+  exigir(tut.muebles.length === 3, 'el tutorial debería tener un capítulo por mueble');
+  for (const m of tut.muebles) {
+    const vistas = new Set(m.pasos.flatMap((p) => p.piezas.map((x) => x.id)));
+    const sin = data.partes.filter((p) => p.grupo === m.grupo && !vistas.has(p.id));
+    exigir(sin.length === 0, `el tutorial de "${m.grupo}" no nombra estas piezas: ${sin.map((p) => p.id).join(', ')}`);
+    exigir(m.pasos.every((p) => p.titulo && p.intro && p.hacer.length), `el tutorial de "${m.grupo}" tiene un paso sin texto`);
+    exigir(new Set(m.pasos.map((p) => p.id)).size === m.pasos.length, `el tutorial de "${m.grupo}" repite el id de un paso`);
+    exigir(m.lista.herrajes.length > 0 && m.esperar.length > 0, `el tutorial de "${m.grupo}" debería traer la lista de herrajes y lo que falta definir`);
+    // Las piezas de cada paso tienen que ser reales y traer la hoja de la que salen
+    for (const p of m.pasos) for (const x of p.piezas) exigir(data.partes.some((q) => q.id === x.id) && x.corte, `el paso ${p.id} nombra la pieza ${x.id} sin hoja de corte`);
+  }
+  const ag = agujerosDe(data, e3t).filter((a) => a.grupo === 'Mueble trasero');
+  exigir(ag.length >= 8, `el tutorial debería listar los agujeros de los cables y mangueras, hay ${ag.length}`);
+  const cal = caladosDe(data, e3t);
+  for (const id of ['Heladera', 'Anafe', 'Fregadero']) exigir(cal.some((c) => c.aparato.startsWith(id)), `falta el calado de ${id} en el tutorial`);
 }
 process.exit(fallos ? 1 : 0);

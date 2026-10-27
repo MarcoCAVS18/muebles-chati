@@ -1191,3 +1191,198 @@ pre {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* ---------- Armado (tutorial por mueble) ---------- */
+.armado-muebles {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0 10px;
+}
+
+.armado-muebles button {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 7px 4px;
+  background: #efe8d8;
+  color: var(--texto);
+  font-size: 13px;
+}
+
+.armado-muebles button small {
+  font-size: 11px;
+  color: var(--suave);
+}
+
+.armado-muebles button.activa {
+  background: var(--madera);
+  color: #fff;
+}
+
+.armado-muebles button.activa small {
+  color: #fff;
+}
+
+.armado-bloque {
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.armado-bloque summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--madera-oscura);
+  padding: 4px 0;
+}
+
+.armado-bloque ul,
+.armado-bloque ol,
+.armado-resumen {
+  margin: 4px 0 8px;
+  padding-left: 20px;
+  line-height: 1.45;
+}
+
+.armado-progreso {
+  height: 6px;
+  background: #eee7d6;
+  border-radius: 3px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+
+.armado-progreso div {
+  height: 100%;
+  background: var(--bien);
+  transition: width 0.2s;
+}
+
+.paso {
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  margin: 8px 0;
+  background: #fffdf8;
+}
+
+.paso.hecho {
+  background: #f1f6ee;
+  border-color: #b9d3b3;
+}
+
+.paso header {
+  display: flex;
+  align-items: stretch;
+}
+
+.paso-check {
+  display: flex;
+  align-items: center;
+  padding: 0 4px 0 10px;
+}
+
+.paso-check input {
+  width: 20px;
+  height: 20px;
+}
+
+.paso .paso-titulo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  background: none;
+  color: var(--texto);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 10px 10px 4px;
+  min-height: 44px;
+}
+
+.paso.hecho .paso-titulo > span:nth-child(2) {
+  text-decoration: line-through;
+  color: var(--suave);
+}
+
+.paso-num {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--madera);
+  color: #fff;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paso-flecha {
+  margin-left: auto;
+  color: var(--suave);
+  font-size: 18px;
+}
+
+.paso-cuerpo {
+  padding: 0 12px 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.paso-cuerpo ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.paso-cuerpo li {
+  margin-bottom: 5px;
+}
+
+.ojo {
+  background: #fff3e0;
+  border-left: 3px solid #ef6c00;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.armado-scroll {
+  overflow-x: auto;
+}
+
+.armado-tabla h4 {
+  margin: 12px 0 2px;
+}
+
+.armado-tabla td,
+.armado-tabla th {
+  white-space: normal;
+  min-width: 70px;
+}
+
+.tarjetas {
+  display: flex;
+  flex-direction: column;
+}
+
+.tarjeta {
+  padding: 7px 2px;
+  border-bottom: 1px solid #eee7d6;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.tarjeta b {
+  display: block;
+  color: var(--madera-oscura);
+  margin-bottom: 2px;
+}
+
+.tarjeta span {
+  color: var(--suave);
+}

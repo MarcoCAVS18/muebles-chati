@@ -24,6 +24,11 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 
 - Despiece completo con medidas, espesor y material de cada pieza (exporta CSV).
 - Plano de cortes por hoja, con los pasos de corte para sierra circular.
+- Armado: un tutorial por mueble (pestaña Armado) con los pasos para construirlo y instalarlo: qué madera, de qué hoja sale,
+  tornillos, cola, correderas de los cajones, bisagras, botones push, agujeros para cables y mangueras, y los calados de la
+  heladera, el anafe y el fregadero. Sale del mismo modelo que el despiece (`src/engine/tutorial.js`), así que si cambia una
+  medida cambia el tutorial. Cada paso se tilda y se recuerda en el navegador; lo que todavía no se puede decidir va en
+  "Qué falta definir" y lo que el diseño deja abierto va marcado con "Ojo".
 - Dónde se fija cada mueble (piso, pared, entre muebles) y cuántos tornillos y escuadras.
 - Herrajes: correderas, bisagras, pistones, bisagras de piano y cierres a botón (push) redondos, uno por frente.
 - Eléctrica: consumo diario, autonomía, horas de manejo para recargar, cables y fusibles. Los largos de cable
@@ -48,9 +53,9 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   la cámara vuela hasta la pieza y la deja sola, con las tres medidas en cotas, las esquinas redondeadas con su radio,
   el recorte, el arco, las ranuras y las ventanas (con su medida y su radio) y marcas de ángulo recto en los cortes rectos. Flechas del teclado (o los botones) para pasar a la
   pieza anterior o siguiente, "Dar vuelta" para ver la otra cara, "Ver el mueble de fondo" para ver dónde va y Esc para volver.
-  El contorno de cada pieza y las cotas salen de `src/engine/enfoque.js`; `npm run check` los prueba en las 128 piezas.
+  El contorno de cada pieza y las cotas salen de `src/engine/enfoque.js`; `npm run check` los prueba en todas las piezas.
 - Versión para celular y tablet (pantallas de hasta 1100 px de ancho o poca altura): una sola sección por vez, con barra de
-  abajo (3D, Medidas, Despiece, Cortes, Herrajes, Eléctrica, Compras). Los controles del 3D están en el botón "Opciones", el
+  abajo (3D, Medidas, Despiece, Cortes, Herrajes, Eléctrica, Armado, Compras). Los controles del 3D están en el botón "Opciones", el
   doble toque en una madera la deja sola (también desde el despiece y las hojas de corte, con un botón "Ver sola"), y al salir
   se vuelve a la lista de donde se vino. En vertical la cámara inicial mira a lo largo de la van para llenar la pantalla; en
   horizontal la tarjeta de la pieza va a un costado. El panel con el video de cada equipo sube desde abajo.
@@ -89,12 +94,17 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - La cama queda a 44 cm, apenas sobre el pasarruedas, y apoya sobre él. Bajo la cama, frente a la L, queda un hueco libre de
   430 mm para abrir la puerta de la batería. Todo lo eléctrico queda al piso, debajo del plano de la cama; el panel y los
   enchufes van sobre la cama, en el tablero de arriba, y los cajones de cocina de la L van sobre el tablero.
+- Mueble trasero: se arma en dos módulos que pasan por las puertas y se unen adentro de la van: el eléctrico (izquierda, con el
+  divisor 1 como pared derecha) y el de cocina y agua (sin pared izquierda: apoya contra ese divisor). Por eso el fondo es de
+  dos piezas. La base queda 20 mm sobre el piso y apoya en 6 tiras de canto (adelante, al medio y atrás de cada base). Cada
+  cajón lleva un panel delantero de 15 mm al que se atornilla el frente, que cierra a ras del marco. Los marcos y las
+  delanteras se unen cara contra cara de 15 mm, por eso llevan tornillos 4x25 y no 4x40.
 - Mueble derecho: se apoya sobre el pasarruedas derecho. Bajo 43 cm solo queda libre la franja del frente (cerrada con un
   frente ciego) y los dos cajones se acomodan arriba, a partir de los 45 cm.
 - El frente de la cocina y del agua está en z = 1910, 70 mm detrás del frente de la L (z = 1840), donde termina la placa de la
   cabecera. La garrafa se carga una vez por semana: el cajón del gas (correderas de 300 mm, frente alto) se tira entero y la
   garrafa queda fuera del mueble para levantarla, con el regulador y la manguera quedando en el cajón. Para que el frente alto
-  no choque con la cama, la placa de la cabecera lleva un recorte de 261 x 250 mm en la esquina del lado de la cocina (el
+  no choque con la cama, la placa de la cabecera lleva un recorte de 243 x 250 mm en la esquina del lado de la cocina (el
   colchón lleva el mismo recorte). `npm run check` verifica que el cajón no choque al sacarlo.
   La sección de agua tapa parte de la puerta lateral derecha (z 1340 a 2320).
 - Gas: la rejilla de ventilación al piso hoy cae bajo la heladera, no bajo la garrafa. Falta definir cómo ventila el cajón del gas.
