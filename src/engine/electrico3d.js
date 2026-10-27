@@ -570,9 +570,8 @@ export function electrico3d(cfg) {
   ];
 
   // --- Mangueras de agua y de gas ---
-  const bid = eq.bidon;
-  const bidon2x = W.xCajon + L.t + 2 + (bid.x + 10);
-  const cuello = [bidon2x + bid.x / 2, W.yPisoBidones + bid.y, zF + 35 + bid.z - 40]; // boca del segundo bidón
+  const bl = W.bidones[0]; // bidón de agua limpia, atrás y cerca de la bomba
+  const cuello = [bl.x + bl.sx - 30, bl.y + bl.sy, bl.z + bl.sz / 2]; // boca del bidón, del lado de la pared derecha
   const reg = eq.regulador;
   const yRegulador = K.yCajonGas + L.tb + eq.garrafa.y; // base del regulador, sobre la garrafa
   const zRegulador = L.zIn + 15 + 10 + 80 + reg.z / 2; // centro del regulador en z
@@ -583,9 +582,9 @@ export function electrico3d(cfg) {
   const mangueras = [
     {
       id: 'm_bidon_bomba',
-      nombre: 'Manguera del bidón a la bomba',
+      nombre: 'Manguera del bidón de agua limpia a la bomba',
       tipo: 'agua',
-      desde: 'bidon2',
+      desde: 'bidon1',
       hasta: 'bomba',
       video: 'bomba',
       puntos: [
@@ -594,7 +593,7 @@ export function electrico3d(cfg) {
         [cuello[0], 520, zF + 380],
         [W.xBomba + 120 + 1, 520, zF + 380],
       ],
-      nota: 'Manguera de grado alimenticio. Sube por un agujero del estante. Unir los dos bidones en paralelo con una T.',
+      nota: 'Manguera de grado alimenticio, con conexión rápida para soltarla antes de tirar el cajón. Sube por un agujero del estante.',
     },
     {
       id: 'm_bomba_canilla',
@@ -604,7 +603,7 @@ export function electrico3d(cfg) {
       hasta: 'canilla',
       video: 'canilla',
       puntos: [
-        [xBombaC, 561, zF + 380],
+        [xBombaC, W.bomba.y + W.bomba.sy + 1, zF + 380],
         [xBombaC, 600, zF + 380],
         [W.xCanilla - 12, 600, zF + 380],
         [W.xCanilla - 12, 830, zF + 380],

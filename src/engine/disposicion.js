@@ -142,11 +142,26 @@ export function disposicionTrasero(cfg) {
   const W = {
     yCajonBidones: yPiso + 1,
     altoCajonBidones: 260,
-    fondoCajonBidones: 340,
     anchoCajon: hueco.W.x1 - hueco.W.x0 - 26,
     xCajon: hueco.W.x0 + 13,
   };
   W.yPisoBidones = W.yCajonBidones + t; // el piso del cajón de bidones es de 15 mm
+  // Los dos bidones planos van girados (el largo a lo ancho del cajón) y uno detrás del otro: de frente no entran
+  // con la canilla en el fondo del cajón. El de agua limpia va atrás, cerca de la bomba; el de aguas grises, adelante.
+  // La canilla y la boca miran hacia la pared derecha.
+  const sepBid = 10;
+  const canBid = bid.canilla ?? 0;
+  const zBid0 = zIn + 15 + 5; // 5 mm de luz contra el frente del cajón
+  const xBid = W.xCajon + t + 2;
+  W.bidones = [
+    { nombre: 'limpia', x: xBid, y: W.yPisoBidones, z: zBid0 + bid.z + sepBid, sx: bid.x, sy: bid.y, sz: bid.z },
+    { nombre: 'grises', x: xBid, y: W.yPisoBidones, z: zBid0, sx: bid.x, sy: bid.y, sz: bid.z },
+  ];
+  // Fondo del cajón: luz, los dos bidones, separación, luz y la trasera; las correderas vienen de a 50 mm
+  const fondoNecesario = 5 + 2 * bid.z + sepBid + 5 + t;
+  W.fondoCajonBidones = Math.min(Math.ceil(fondoNecesario / 50) * 50, zFondo - (zIn + 15));
+  // Sobra a lo ancho: lado interior del cajón menos el largo del bidón con la canilla y las luces
+  W.sobraBidones = W.anchoCajon - 2 * t - (2 + bid.x + canBid + 2);
   W.yEstante = W.yPisoBidones + bid.y + 12; // estante sobre los bidones
   W.yCajonFregadero = 510;
   W.altoCajonFregadero = 120;

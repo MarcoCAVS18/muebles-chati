@@ -219,20 +219,26 @@ export function trasero(ctx, G) {
     sz: freg.z - 30,
     color: '#90a4ae',
   });
-  for (let i = 0; i < 2; i++) {
+  // El bidón 1 es el de agua limpia (atrás, cerca de la bomba) y el 2 el de aguas grises (adelante)
+  const papeles = [
+    { nombre: 'Bidón de agua limpia (20 L, plano)', color: '#4fc3f7', nota: 'Atrás en el cajón de bidones, girado: la boca y la canilla miran a la pared derecha' },
+    { nombre: 'Bidón de aguas grises (20 L, plano)', color: '#a1887f', nota: 'Adelante en el cajón de bidones, girado: recibe el desagüe del fregadero' },
+  ];
+  W.bidones.forEach((b, i) => {
     E_({
       id: `bidon${i + 1}`,
-      nombre: `Bidón de agua ${i + 1} (20 L)`,
-      x: W.xCajon + t + 2 + i * (bid.x + 10),
-      y: W.yPisoBidones,
-      z: zIn + 15 + 5,
-      sx: bid.x,
-      sy: bid.y,
-      sz: bid.z,
-      color: '#4fc3f7',
-      nota: 'En el cajón que llega hasta el piso, bajo el fregadero',
+      nombre: papeles[i].nombre,
+      x: b.x,
+      y: b.y,
+      z: b.z,
+      sx: b.sx,
+      sy: b.sy,
+      sz: b.sz,
+      color: papeles[i].color,
+      estado: 'A comprar: plano con canilla de 416 x 203 x 408 mm (Camping4u o Scandihills). Medirlo al llegar',
+      nota: papeles[i].nota,
     });
-  }
+  });
   E_({
     id: 'bomba',
     nombre: 'Bomba de agua 12 V',

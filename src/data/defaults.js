@@ -10,7 +10,7 @@
 //       izquierda: electricidad al piso (batería, inversor, DC-DC, fusibles) y arriba interruptores,
 //                  enchufes y cajones de cocina; esta sección es la L: llega a 570 mm de profundidad
 //       centro:    anafe, cajón de la garrafa de gas y heladera al piso
-//       derecha:   grifo y fregadero, con los dos bidones de agua al piso
+//       derecha:   grifo y fregadero, con dos bidones al piso (uno de agua limpia y uno de aguas grises)
 //   - Cama extensible (90 a 120 cm) de plywood, como la del instructivo: dos módulos (120 y 60) con ventanas y placas con ranuras
 //   - Mueble derecho con cajones, puerta bajo la mesa plegable y alacena alta
 
@@ -104,7 +104,9 @@ export const CONFIG_INICIAL = {
     fusibles: { x: 140, y: 50, z: 90 }, // caja de 9 x 14 cm (el alto es ESTIMADO); va apoyada con el lado de 14 cm hacia el fondo
     inversor: { x: 255, y: 190, z: 95 }, // 25,5 x 19 x 9,5 cm: de frente a la puerta de los equipos
     dcdc: { x: 185, y: 123, z: 67 }, // 18,5 x 12,3 x 6,7 cm: de frente a la puerta de los equipos
-    bidon: { x: 215, y: 400, z: 290 }, // bidón de 20 L (grosor, alto, ancho)
+    // Bidón plano de 20 L con canilla (Camping4u / Scandihills). Va girado: el largo a lo ancho del cajón y los dos uno detrás del otro.
+    // La canilla sobresale por el lado del largo (medida estimada con la foto: confirmar al llegar)
+    bidon: { x: 416, y: 408, z: 203, canilla: 40 }, // largo, alto, grosor
     nevera: { x: 420, y: 300, z: 340 },
     fregadero: { x: 340, y: 130, z: 400 }, // los 400 mm son el fondo; el ancho es ESTIMADO
     anafe: { x: 420, y: 55, z: 300 }, // anafe de 2 hornallas empotrado

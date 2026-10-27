@@ -92,6 +92,9 @@ export default function App() {
                 cm.largoCabecera = CONFIG_INICIAL.cama.largoCabecera;
                 tr.profundidadL = CONFIG_INICIAL.trasero.profundidadL;
               }
+              // Un guardado con el bidón de 215 x 400 x 290 pasa al bidón plano de 416 x 203 x 408
+              const bd = d.cfg.equipos && d.cfg.equipos.bidon;
+              if (bd && bd.x === 215 && bd.y === 400 && bd.z === 290) d.cfg.equipos.bidon = { ...CONFIG_INICIAL.equipos.bidon };
               setCfg(mezclar(CONFIG_INICIAL, d.cfg));
             }
             // Un guardado viejo no trae los consumos nuevos: se suman los que falten

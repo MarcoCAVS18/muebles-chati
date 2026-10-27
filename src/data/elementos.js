@@ -200,7 +200,7 @@ export const ELEMENTOS = {
     consejos: [
       'Calar la tapa con la plantilla del fregadero.',
       'Sellar el borde con silicona.',
-      'Desagüe con sifón hacia un bidón de aguas grises.',
+      'Desagüe con sifón hacia el bidón de aguas grises (el de adelante), con una manguera que se suelte antes de tirar el cajón.',
       'Medir el ancho real del fregadero: en el 3D es una estimación.',
     ],
     busqueda: 'instalar fregadero y grifo camper',
@@ -224,20 +224,27 @@ export const ELEMENTOS = {
     busqueda: 'instalar bomba de agua 12v camper',
   },
   bidon1: {
-    descripcion: 'Primer bidón de agua limpia de 20 L. Va parado en el cajón que llega hasta el piso, abajo del fregadero.',
-    ubicacion: 'Sección del agua, cajón de abajo (bajo la cama): se tira hacia el hueco libre frente al mueble.',
+    descripcion: 'Bidón plano de agua limpia de 20 L (416 x 203 x 408 mm, con canilla). Va parado y girado en el cajón que llega hasta el piso, abajo del fregadero.',
+    ubicacion: 'Sección del agua, cajón de abajo: atrás, cerca de la bomba. El cajón se tira hacia el hueco libre frente al mueble.',
     consejos: [
       'Dos bidones de 20 L llenos pesan unos 40 kg: correderas de carga de 45 kg o más y piso de 15 mm.',
       'Sujetar los bidones con correa dentro del cajón.',
-      'Unir con el otro bidón mediante una T.',
+      'La boca y la canilla miran a la pared derecha: salida a la bomba con manguera de grado alimenticio y conexión rápida.',
+      'Medir el bidón al llegar, con la tapa puesta y la canilla: el 3D usa 416 x 203 x 408 y 40 mm de canilla estimados.',
+      'Dejar 12 mm sobre el bidón hasta el estante: si la tapa sobresale más, subir el estante.',
     ],
     busqueda: 'instalar depósito de agua camper bidones',
   },
   bidon2: {
-    descripcion: 'Segundo bidón de agua limpia de 20 L, al lado del primero en el mismo cajón.',
-    ubicacion: 'Sección del agua, cajón de abajo, a la derecha del otro bidón.',
-    consejos: ['Salida a la bomba por la boca, con manguera de grado alimenticio.', 'Sacar el cajón entero para llenarlos o sacarlos.'],
-    busqueda: 'instalar depósito de agua camper bidones',
+    descripcion: 'Bidón plano de aguas grises de 20 L, igual al de agua limpia. Recibe el desagüe del fregadero.',
+    ubicacion: 'Sección del agua, cajón de abajo: adelante, delante del bidón de agua limpia.',
+    consejos: [
+      'Marcarlo bien (otro color o etiqueta) para no confundirlo con el de agua limpia: nunca se bebe.',
+      'Desagüe del fregadero con manguera y conexión rápida: soltarla antes de tirar el cajón.',
+      'En invierno se saca el bidón y se vacía entero, sin dejar agua adentro para que no se congele.',
+      'Sacar el cajón entero para llenar o vaciar los bidones.',
+    ],
+    busqueda: 'instalar depósito de aguas grises camper',
   },
   anafe: {
     descripcion: 'Anafe de 2 hornallas empotrado en la tapa 2, en la sección del medio. Con válvula de seguridad (termocupla) que corta el gas si se apaga la llama.',
