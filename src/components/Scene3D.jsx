@@ -24,7 +24,7 @@ export const VISTAS = {
   arriba: { nombre: 'Desde arriba', pos: [-0.86, 4.6, 1.25], target: [-0.86, 0, 1.2] },
   cabecera: { nombre: 'Mueble trasero (completo)', pos: [-0.86, 1.1, -0.35], target: [-0.86, 0.5, 2.2] },
   agua: { nombre: 'Agua: fregadero y bidones', pos: [-1.4, 1.2, 0.6], target: [-1.4, 0.45, 2.2] },
-  cocina: { nombre: 'Cocina: anafe, gas y heladera', pos: [-0.86, 1.2, 0.6], target: [-0.86, 0.45, 2.2] },
+  cocina: { nombre: 'Cocina: anafe y gas', pos: [-0.86, 1.2, 0.6], target: [-0.86, 0.45, 2.2] },
   electrico: { nombre: 'Zona eléctrica (ver interior)', pos: [-0.35, 1.2, 0.6], target: [-0.35, 0.4, 2.2] },
   techo: { nombre: 'Techo: tiras LED y extractor', pos: [-0.86, 0.5, 0.1], target: [-0.86, 1.25, 1.6] },
   lampara: { nombre: 'Lámpara flexible (pared izquierda)', pos: [-1.1, 1.0, 0.3], target: [-0.04, 0.8, 1.23] },

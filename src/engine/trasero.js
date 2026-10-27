@@ -1,7 +1,7 @@
 // Mueble cruzado detrás de los asientos, de pared a pared, con frentes planos y puertas a ras.
 // Origen: x = 0 es la pared izquierda, el fondo apoya contra el mamparo (z = largo).
-// Las secciones (ver disposicion.js), de izquierda a derecha: E eléctrico (la L, más profunda),
-// K cocina y W agua.
+// Las secciones (ver disposicion.js), de izquierda a derecha: E eléctrico (la L, más profunda, con la
+// heladera arriba), K cocina (angosta) y W agua.
 import { cajon } from './cajon.js';
 import { frenteZ } from './frentes.js';
 import { disposicionTrasero } from './disposicion.js';
@@ -35,8 +35,10 @@ export function trasero(ctx, G) {
   P('Divisor cocina y agua', d2, yPiso, zIn, t, altoDiv, largoInt);
 
   // Estantes
-  P('Estante de los cajones de cocina (cierra el eléctrico)', sec.E.x0, E.yEstante, E.zIn, sec.E.x1 - sec.E.x0, t, largoIntE);
-  P('Estante bajo el gas (sobre la heladera)', sec.K.x0, K.yEstante, zIn, sec.K.x1 - sec.K.x0, t, largoInt);
+  P('Estante que cierra el compartimento eléctrico', sec.E.x0, E.yEstante, E.zIn, sec.E.x1 - sec.E.x0, t, largoIntE);
+  // El estante de la heladera empieza 10 mm antes que ella: delante queda libre para que bajen los cables del tablero
+  P('Estante de la heladera', sec.E.x0, E.yEstanteNevera, E.zNevera - 10, sec.E.x1 - sec.E.x0, t, largoIntE - (E.zNevera - 10 - E.zIn));
+  P('Estante sobre la garrafa (bajo los cajones de cocina)', sec.K.x0, K.yEstante, zIn, sec.K.x1 - sec.K.x0, t, largoInt);
   P('Estante sobre los bidones', sec.W.x0, W.yEstante, zIn, sec.W.x1 - sec.W.x0, t, largoInt);
 
   // Tapas: una por sección, atornilladas desde arriba
@@ -57,15 +59,11 @@ export function trasero(ctx, G) {
     hx0: hueco.E.x0,
     hx1: hueco.E.x1,
     marco: 'Frente eléctrico',
-    tope: 'Frente de los cajones de cocina - travesaño superior',
+    tope: 'Frente de la heladera - travesaño superior',
     huecos: [
       { nombre: 'Puerta de la batería y los equipos', y0: yBase, y1: yTopeE, color: '#ffe082', abre: 'bateria', marcoBajo: 'Frente eléctrico - travesaño' },
-      ...E.cajones.map((c, i) => ({
-        nombre: `Frente ${c.nombre.toLowerCase()}`,
-        y0: c.y0,
-        y1: c.y1,
-        marcoBajo: i === 0 ? 'Tablero del panel y los enchufes' : 'Frente eléctrico - travesaño',
-      })),
+      // Frente fijo de la heladera, con rejillas: la heladera se abre por arriba. Se saca con tornillos para llegar al compresor.
+      { nombre: 'Frente fijo de la heladera (con rejillas)', y0: E.yTableroFin, y1: yTapa - 25, color: '#cfd8dc', abre: 'nevera', marcoBajo: 'Tablero del panel y los enchufes' },
     ],
   });
   const f = { grupo: G, zf: zF, ya: yBase, yb: yTapa };
@@ -77,8 +75,9 @@ export function trasero(ctx, G) {
     hx1: hueco.K.x1,
     marco: 'Frente cocina',
     huecos: [
-      { nombre: 'Puerta de la heladera', y0: yBase, y1: K.yHeladera + eq.nevera.y + 2, color: '#cfd8dc', abre: 'nevera' },
-      { nombre: 'Frente cajón del gas', y0: K.yEstante + 17, y1: 785, color: '#ffcc80', abre: 'garrafa' },
+      // El frente del cajón de la garrafa sube hasta el estante: viaja con el cajón y pasa por el recorte de la cama
+      { nombre: 'Frente cajón del gas', y0: yBase, y1: K.yEstante - 3, color: '#ffcc80', abre: 'garrafa' },
+      ...K.cajones.map((c) => ({ nombre: `Frente ${c.nombre.toLowerCase()}`, y0: c.y0, y1: c.y1 })),
     ],
   });
   frenteZ(ctx, {
@@ -94,17 +93,17 @@ export function trasero(ctx, G) {
     ],
   });
 
-  // Cajones (se tiran hacia la cama o el pasillo)
-  for (const c of E.cajones) {
+  // Cajones (se tiran hacia el pasillo)
+  for (const c of K.cajones) {
     cajon(ctx, {
       grupo: G,
       nombre: c.nombre,
-      x: hueco.E.x0 + 13,
+      x: K.xCajon,
       y: c.y0 + 5,
-      z: E.zIn + 15,
-      ancho: hueco.E.x1 - hueco.E.x0 - 26,
+      z: zIn + 15,
+      ancho: K.anchoCajon,
       alto: c.y1 - c.y0 - 25,
-      fondo: Math.min(560, Math.floor((zFondo - (E.zIn + 15) - 15) / 50) * 50), // correderas de 500 mm cuando la L mide 570 mm
+      fondo: K.fondoCajonCocina, // cortos: atrás quedan libres la llave de corte y el caño del gas
       dir: 'z-',
     });
   }
@@ -149,10 +148,8 @@ export function trasero(ctx, G) {
   const bt = (nombre, x, y, z) => ctx.boton({ grupo: G, nombre, eje: 'z-', x, y, z });
   const centro = (h) => (h.x0 + h.x1) / 2;
   bt('Puerta de la batería y los equipos', hueco.E.x1 - 2 - 45, yTopeE - 2 - 70, zFL);
-  for (const c of E.cajones) bt(`Frente ${c.nombre.toLowerCase()}`, centro(hueco.E), (c.y0 + c.y1) / 2, zFL);
-  const yPuertaHel = K.yHeladera + eq.nevera.y + 2; // borde alto de la puerta de la heladera
-  bt('Puerta de la heladera', hueco.K.x1 - 2 - 45, yPuertaHel - 70, zF);
-  bt('Frente cajón del gas', centro(hueco.K), 785 - 45, zF);
+  bt('Frente cajón del gas', centro(hueco.K), K.yEstante - 3 - 60, zF);
+  for (const c of K.cajones) bt(`Frente ${c.nombre.toLowerCase()}`, centro(hueco.K), (c.y0 + c.y1) / 2, zF);
   bt('Frente cajón de bidones', centro(hueco.W), W.yEstante - 3 - 60, zF);
   bt('Frente cajón bajo el fregadero', centro(hueco.W), (W.yCajonFregadero + 760) / 2, zF);
 
@@ -174,14 +171,14 @@ export function trasero(ctx, G) {
   ctx.anclaje(G, 'Mamparo', 'Escuadras L al fondo, arriba y abajo', 6, 'Dejar el pasacables del eléctrico sin tapar');
 
   // Herrajes
-  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 5, 'Puerta de la heladera (2) y puerta de la batería y los equipos, que es ancha (3)');
+  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 3, 'Puerta de la batería y los equipos, que es ancha');
   ctx.herrajeBotones(G); // un botón push por frente: reemplaza al tirador y al imán
-  ctx.herraje(G, 'Soporte regulable de estante', 12, 'Estantes del eléctrico, la cocina y el agua');
+  ctx.herraje(G, 'Soporte regulable de estante', 16, 'Estantes del eléctrico (2), la cocina y el agua');
   ctx.herraje(G, 'Sifón y desagüe para fregadero', 1, 'Con la salida hacia un bidón de aguas grises o al piso');
   ctx.herraje(G, 'Rejilla de ventilación 100 cm2 para el gas', 1, 'Al exterior por el piso, bajo el cajón de la garrafa: el gas pesa más que el aire');
   ctx.herraje(G, 'Detector de monóxido de carbono', 1, 'Con la cocina a gas en un espacio cerrado es obligatorio en la práctica');
   ctx.herraje(G, 'Extintor de polvo ABC de 1 kg', 1, 'Cerca de la puerta, lejos de la cocina');
-  ctx.herraje(G, 'Rejilla de ventilación de la heladera', 2, 'Una abajo y una arriba, para el aire del compresor');
+  ctx.herraje(G, 'Rejilla de ventilación de la heladera', 2, 'Una abajo y una arriba del frente fijo, para el aire del compresor');
   ctx.herraje(G, 'Rejilla de ventilación para el inversor y el DC-DC', 2, 'En la puerta de la batería y los equipos: se calientan con carga');
 
   // ---- Equipos que no son eléctricos ----
@@ -259,25 +256,29 @@ export function trasero(ctx, G) {
     nota: 'Sobre la tapa 3, al lado del fregadero',
   });
 
-  // Cocina (centro): heladera abajo, cajón del gas en el medio y anafe arriba
+  // Heladera (izquierda, arriba del eléctrico): de tapa arriba, con la tapa a ras de la mesada (sobresale 3 mm como el fregadero)
   E_({
     id: 'nevera',
-    nombre: 'Heladera de compresor',
-    x: K.xHeladera,
-    y: K.yHeladera,
-    z: zIn + 5,
+    nombre: 'Heladera de compresor (Alpicool G22, 25 L)',
+    x: E.xNevera,
+    y: E.yNevera,
+    z: E.zNevera,
     sx: fri.x,
-    sy: fri.y,
+    sy: fri.y + 3,
     sz: fri.z,
     color: '#cfd8dc',
-    nota: 'Sección de la cocina, abajo del cajón del gas; se abre por la puerta gris',
+    estado: 'A comprar: Alpicool G22 de 25 L (unas 2 000 kr)',
+    nota: 'Sección eléctrica, arriba, apoyada en su estante; se abre por un corte de la tapa 1',
   });
+
+  // Cocina (centro): anafe arriba, dos cajones de cocina y cajón de la garrafa al piso
+  const zAna = zF + (prof - ana.z) / 2; // el anafe queda centrado en el fondo del mueble
   E_({
     id: 'anafe',
     nombre: 'Anafe de 2 hornallas',
     x: K.xCentro - ana.x / 2,
     y: K.yAnafe,
-    z: zF + 60,
+    z: zAna,
     sx: ana.x,
     sy: ana.y + 8,
     sz: ana.z,
@@ -285,13 +286,13 @@ export function trasero(ctx, G) {
     estado: 'Confirmar medidas',
     nota: 'Empotrado en la tapa 2, sección de la cocina',
   });
-  for (const dx of [-100, 100]) {
+  for (const dz of [-100, 100]) {
     ctx.deco({
       grupo: G,
       nombre: 'Hornalla',
-      x: K.xCentro + dx - 45,
+      x: K.xCentro - 45,
       y: tr.alto + 8.1,
-      z: zF + 60 + ana.z / 2 - 45,
+      z: zAna + ana.z / 2 + dz - 45,
       sx: 90,
       sy: 1,
       sz: 90,
@@ -328,14 +329,14 @@ export function trasero(ctx, G) {
     id: 'valvulaGas',
     nombre: 'Llave de corte de gas',
     x: sec.K.x1 - 100,
-    y: 740,
-    z: zF + 380,
+    y: K.yAnafe - val.y - 15,
+    z: zFondo - 20 - val.z,
     sx: val.x,
     sy: val.y,
     sz: val.z,
     color: '#d84315',
     estado: 'A comprar',
-    nota: 'Atrás del anafe, se alcanza sacando el cajón del gas',
+    nota: 'Contra el fondo, bajo el anafe y detrás de los cajones de cocina; se alcanza sacando el cajón de arriba',
   });
   E_({
     id: 'detectorGas',

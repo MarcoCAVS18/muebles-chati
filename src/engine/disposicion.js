@@ -5,8 +5,8 @@
 // (x = 0 es la pared izquierda):
 //   E  eléctrico (la L, 570 mm de fondo): al piso la batería acostada, el inversor, el DC-DC y los
 //      fusibles, bajo el plano de la cama; sobre la cama, el tablero con interruptores y enchufes
-//      y dos cajones para cosas de cocina
-//   K  cocina (500 mm): anafe arriba, cajón de la garrafa y heladera al piso
+//      y la heladera de tapa arriba, con la tapa a ras de la mesada
+//   K  cocina (500 mm, angosta): anafe arriba, dos cajones de cocina y el cajón de la garrafa al piso
 //   W  agua (500 mm): fregadero arriba, cajón bajo el fregadero y cajón de bidones al piso
 //
 // La cama (plataforma a 440 mm, 1800 mm de largo) termina contra el frente de la sección E. Lo que está bajo la cama sale
@@ -68,12 +68,15 @@ export function disposicionTrasero(cfg) {
     yEstante: yTopeBajo + 2, // estante que cierra el compartimento eléctrico y es el piso de los cajones
     // Tablero con interruptores y enchufes, sobre la cama
     yTablero: yCamaSup + 40,
-    // Cajones de cocina (sobre el tablero)
-    cajones: [
-      { nombre: 'Cajón de cocina 1', y0: 570, y1: 690 },
-      { nombre: 'Cajón de cocina 2', y0: 720, y1: 805 },
-    ],
+    yTableroFin: 570, // arriba del tablero empieza el frente fijo de la heladera
   };
+  // Heladera de tapa arriba, sobre el compartimento eléctrico: su tapa queda a ras de la mesada y se abre por un corte de la
+  // tapa 1. Va 80 mm detrás del frente: ahí bajan los cables del tablero. Atrás queda un hueco de unos 130 mm para el aire y los cables.
+  E.yNevera = tr.alto - fri.y;
+  E.yEstanteNevera = E.yNevera - t; // estante que la sostiene
+  E.zNevera = zInE + 80;
+  E.xNevera = t + (d1 - t - fri.x) / 2;
+  E.huecoCables = E.yEstanteNevera - (E.yEstante + t); // hueco entre los dos estantes: por ahí corren los cables del tablero
   // Inversor y DC-DC contra el borde derecho; los fusibles a su izquierda.
   // Si la L es profunda el inversor va de largo sobre z (como los demás equipos). Si es angosta (570 mm), el inversor,
   // el paso del cable largo y la batería no entran uno detrás de otro: el inversor va atravesado, con el largo sobre x.
@@ -120,23 +123,31 @@ export function disposicionTrasero(cfg) {
   E.borne = { x: E.bateria.x + bat.x - 55, y: E.yTopeBateria, z: E.bateria.z + 40 };
 
   // --- Sección K: cocina ---
-  const K = {
-    yHeladera: yPiso + 3,
-    xHeladera: sec.K.x0 + (sec.K.x1 - sec.K.x0 - fri.x) / 2,
-  };
-  K.zNeveraFondo = zIn + 5 + fri.z; // cara trasera de la heladera
-  K.yEstante = K.yHeladera + fri.y + 7; // estante bajo el cajón del gas
-  K.yCajonGas = K.yEstante + t + 2;
+  const gar = eq.garrafa;
+  const reg = eq.regulador;
+  const K = {};
+  K.yCajonGas = yPiso + 1; // el cajón de la garrafa va al piso
   K.altoCajonGas = 150;
   K.fondoCajonGas = 340;
+  K.yEstante = K.yCajonGas + tb + gar.y + reg.y + 15; // estante sobre la garrafa con su regulador
   K.anchoCajon = hueco.K.x1 - hueco.K.x0 - 26;
   K.xCajon = hueco.K.x0 + 13;
   // Al sacar la garrafa el cajón se tira entero hasta que la garrafa queda fuera del mueble. El frente alto
   // (hasta el anafe) viaja con él y barre este volumen: la cama tiene que dejarle lugar.
   K.recorridoGas = Math.floor(K.fondoCajonGas / 50) * 50; // largo de las correderas
-  K.barridoGas = { x0: hueco.K.x0 + 2, x1: hueco.K.x1 - 2, z0: zF - K.recorridoGas - 20, z1: zF, y0: K.yCajonGas, y1: 785 };
+  K.barridoGas = { x0: hueco.K.x0 + 2, x1: hueco.K.x1 - 2, z0: zF - K.recorridoGas - 20, z1: zF, y0: K.yCajonGas, y1: K.yEstante };
   K.xCentro = (sec.K.x0 + sec.K.x1) / 2;
   K.yAnafe = tr.alto - eq.anafe.y; // cara inferior del anafe
+  // Dos cajones de cocina entre el estante de la garrafa y el anafe. Son cortos para dejar libre el fondo
+  // (llave de corte y caño del gas)
+  const yCajIni = K.yEstante + t + 12;
+  const yCajFin = K.yAnafe - 25;
+  const altoCaj = (yCajFin - yCajIni - 15) / 2;
+  K.cajones = [
+    { nombre: 'Cajón de cocina 1', y0: yCajIni, y1: yCajIni + altoCaj },
+    { nombre: 'Cajón de cocina 2', y0: yCajIni + altoCaj + 15, y1: yCajFin },
+  ];
+  K.fondoCajonCocina = 340;
 
   // --- Sección W: agua ---
   const W = {

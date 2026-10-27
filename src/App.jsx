@@ -92,6 +92,17 @@ export default function App() {
                 cm.largoCabecera = CONFIG_INICIAL.cama.largoCabecera;
                 tr.profundidadL = CONFIG_INICIAL.trasero.profundidadL;
               }
+              // Un guardado con el mueble de 1720 mm (secciones de 617 y 1087) pasa al de 1560 mm, con la heladera de la G22 y el anafe angosto
+              const mt = d.cfg.trasero;
+              if (mt && mt.ancho === 1720 && mt.divisor1 === 617 && mt.divisor2 === 1087) {
+                mt.ancho = CONFIG_INICIAL.trasero.ancho;
+                mt.divisor1 = CONFIG_INICIAL.trasero.divisor1;
+                mt.divisor2 = CONFIG_INICIAL.trasero.divisor2;
+              }
+              const ne = d.cfg.equipos && d.cfg.equipos.nevera;
+              if (ne && ne.x === 420 && ne.y === 300 && ne.z === 340) d.cfg.equipos.nevera = { ...CONFIG_INICIAL.equipos.nevera };
+              const an = d.cfg.equipos && d.cfg.equipos.anafe;
+              if (an && an.x === 420 && an.y === 55 && an.z === 300) d.cfg.equipos.anafe = { ...CONFIG_INICIAL.equipos.anafe };
               // Un guardado con el bidón de 215 x 400 x 290 pasa al bidón plano de 416 x 203 x 408
               const bd = d.cfg.equipos && d.cfg.equipos.bidon;
               if (bd && bd.x === 215 && bd.y === 400 && bd.z === 290) d.cfg.equipos.bidon = { ...CONFIG_INICIAL.equipos.bidon };

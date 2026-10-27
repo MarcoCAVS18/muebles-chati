@@ -10,7 +10,8 @@
 //
 // Todo lo eléctrico del mueble está en la sección izquierda (E), al piso y bajo el plano de la cama, con la
 // batería (bornes arriba). El tablero con interruptores y enchufes queda sobre la cama, en el frente de esa misma
-// sección. Los cables del tablero van por el hueco que queda entre el estante y los cajones de cocina.
+// sección, con la heladera arriba. Los cables del tablero van por el hueco que queda entre el estante del eléctrico y
+// el de la heladera.
 // El extractor del techo no tiene conexión: se deja en el 3D para ubicar las luces. Las 4 tiras LED van del mismo inicio
 // al mismo fin: las dos centrales a cada lado del extractor (interruptor 1) y las dos laterales cerca de las paredes
 // (interruptor 2). La lámpara flexible (interruptor 3) está en la pared izquierda, sobre la viga: su cable va por el
@@ -176,7 +177,8 @@ export function electrico3d(cfg) {
   const xCeil = xViga + 90; // por el techo el cable de la lámpara corre cerca de la pared izquierda, antes de bajar por la viga
   const zAtras = zFondo - 5; // pegado al fondo del mueble
   const zTr = zFL + 2; // cara trasera del tablero
-  const yHueco = 505; // altura de los cables del tablero en el hueco entre el estante y los cajones
+  const yHueco = 505; // altura del tablero: de ahí bajan los cables al hueco entre los estantes
+  const yGap = L.E.yEstante + 15 + 28; // altura de los cables en el hueco entre el estante del eléctrico y el de la heladera
   const yBajo = iv.y + iv.sy + 1; // por encima de los equipos de la fila del frente
   const xPan = panelSwitches.x;
   const yAlto = dcdc.y + dcdc.sy + 14; // los cables del DC-DC pasan por encima de la caja de fusibles
@@ -336,14 +338,13 @@ export function electrico3d(cfg) {
       corriente: 'nevera',
       puntos: [
         [fusibles.x + fusibles.sx / 2 + 20, fusibles.y + fusibles.sy + 1, fusibles.z + 125],
-        [fusibles.x + fusibles.sx / 2 + 20, 200, fusibles.z + 125],
-        [fusibles.x + fusibles.sx / 2 + 20, 200, zF + 85],
-        [sec.K.x0 + 8, 200, zF + 85],
-        [sec.K.x0 + 8, 200, K.zNeveraFondo + 15],
-        [K.xHeladera + 60, 200, K.zNeveraFondo + 15],
-        [K.xHeladera + 60, 200, K.zNeveraFondo + 1],
+        [fusibles.x + fusibles.sx / 2 + 20, yGap + 45, fusibles.z + 125],
+        [fusibles.x + fusibles.sx / 2 + 20, yGap + 45, zFondo - 30],
+        [E.xNevera + 60, yGap + 45, zFondo - 30],
+        [E.xNevera + 60, E.yNevera + 40, zFondo - 30],
+        [E.xNevera + 60, E.yNevera + 40, E.zNevera + eq.nevera.z + 1],
       ],
-      nota: 'Pasa el divisor por un agujero con pasacables, sigue por el costado de la heladera y entra por atrás. Sin interruptor.',
+      nota: 'Sube por un pasacables del estante hasta el hueco entre estantes, corre hasta el fondo, sube por atrás y entra a la heladera por su costado del compresor. Sin interruptor.',
     },
     {
       id: 'c_caja_panel',
@@ -369,8 +370,9 @@ export function electrico3d(cfg) {
       video: 'ledA',
       corriente: 'ledA',
       puntos: [
-        [xPan + 10, yHueco + 15, zTr],
-        [xPan + 10, yHueco + 15, zAtras - 10],
+        [xPan + 10, yHueco, zTr],
+        [xPan + 10, yGap + 15, zTr],
+        [xPan + 10, yGap + 15, zAtras - 10],
         [xPan + 10, yCan, zAtras - 10],
         [xPan + 10, yCan, zFinA],
         [led.x1, yCan, zFinA],
@@ -387,8 +389,9 @@ export function electrico3d(cfg) {
       video: 'ledB',
       corriente: 'ledB',
       puntos: [
-        [xPan + 24, yHueco + 15, zTr],
-        [xPan + 24, yHueco + 15, zAtras - 5],
+        [xPan + 24, yHueco, zTr],
+        [xPan + 24, yGap + 15, zTr],
+        [xPan + 24, yGap + 15, zAtras - 5],
         [xPan + 24, yCan, zAtras - 5],
         [xPan + 24, yCan, zFinA + 12],
         [led.x2, yCan, zFinA + 12],
@@ -405,8 +408,9 @@ export function electrico3d(cfg) {
       video: 'ledC',
       corriente: 'ledC',
       puntos: [
-        [xPan + 38, yHueco + 15, zTr],
-        [xPan + 38, yHueco + 15, zAtras],
+        [xPan + 38, yHueco, zTr],
+        [xPan + 38, yGap + 15, zTr],
+        [xPan + 38, yGap + 15, zAtras],
         [xPan + 38, yCan, zAtras],
         [xPan + 38, yCan, zFinA + 24],
         [led.x3, yCan, zFinA + 24],
@@ -423,8 +427,9 @@ export function electrico3d(cfg) {
       video: 'ledD',
       corriente: 'ledD',
       puntos: [
-        [xPan + 52, yHueco + 15, zTr],
-        [xPan + 52, yHueco + 15, zAtras - 15],
+        [xPan + 52, yHueco, zTr],
+        [xPan + 52, yGap + 15, zTr],
+        [xPan + 52, yGap + 15, zAtras - 15],
         [xPan + 52, yCan, zAtras - 15],
         [xPan + 52, yCan, zFinA + 36],
         [led.x4, yCan, zFinA + 36],
@@ -441,8 +446,9 @@ export function electrico3d(cfg) {
       video: 'lampara',
       corriente: 'lampara',
       puntos: [
-        [xPan + 66, yHueco + 15, zTr],
-        [xPan + 66, yHueco + 15, zAtras - 20],
+        [xPan + 66, yHueco, zTr],
+        [xPan + 66, yGap + 15, zTr],
+        [xPan + 66, yGap + 15, zAtras - 20],
         [xPan + 66, yCan, zAtras - 20],
         [xCeil, yCan, zAtras - 20],
         [xCeil, yCan, zL + 22],
@@ -460,8 +466,9 @@ export function electrico3d(cfg) {
       video: 'bomba',
       corriente: 'bomba',
       puntos: [
-        [xPan + 80, yHueco + 30, zTr],
-        [xPan + 80, yHueco + 30, zAtras],
+        [xPan + 80, yHueco, zTr],
+        [xPan + 80, yGap + 30, zTr],
+        [xPan + 80, yGap + 30, zAtras],
         [xPan + 80, yTapa - 17, zAtras],
         [bomba.x + bomba.sx / 2, yTapa - 17, zAtras],
         [bomba.x + bomba.sx / 2, bomba.y + 60, zAtras],
@@ -577,7 +584,9 @@ export function electrico3d(cfg) {
   const zRegulador = L.zIn + 15 + 10 + 80 + reg.z / 2; // centro del regulador en z
   const xBombaC = W.xBomba + W.bomba.sx / 2; // centro de la bomba
   const xCanillaC = W.xCanilla + 15; // centro de la canilla
-  const xValvula = sec.K.x1 - 80;
+  const xValvula = sec.K.x1 - 100 + eq.valvulaGas.x / 2; // centro de la llave de corte (ver trasero.js)
+  const yValvula = K.yAnafe - eq.valvulaGas.y - 15;
+  const zValvula = zFondo - 20 - eq.valvulaGas.z / 2;
   const zB = zb;
   const mangueras = [
     {
@@ -622,11 +631,11 @@ export function electrico3d(cfg) {
       video: 'gas',
       puntos: [
         [K.xCentro, yRegulador + reg.y + 1, zRegulador],
-        [K.xCentro, 775, zRegulador],
-        [xValvula, 775, zRegulador],
-        [xValvula, 775, zF + 400],
+        [xValvula, yRegulador + reg.y + 1, zRegulador],
+        [xValvula, yRegulador + reg.y + 1, zValvula],
+        [xValvula, yValvula - 1, zValvula],
       ],
-      nota: 'Manguera flexible certificada para gas con abrazaderas, con bucle suficiente para que el cajón se abra sin tirar.',
+      nota: 'Manguera flexible certificada para gas con abrazaderas. Corre bajo el estante hasta el fondo y sube por atrás de los cajones de cocina; con bucle suficiente para que el cajón de la garrafa se abra sin tirar.',
     },
     {
       id: 'm_gas_anafe',
@@ -636,10 +645,8 @@ export function electrico3d(cfg) {
       hasta: 'anafe',
       video: 'gas',
       puntos: [
-        [xValvula, 781, zF + 400],
-        [xValvula, 790, zF + 400],
-        [xValvula, 790, zF + 340],
-        [xValvula, 797, zF + 340],
+        [xValvula, yValvula + eq.valvulaGas.y + 1, zValvula],
+        [xValvula, K.yAnafe - 1, zValvula],
       ],
       nota: 'Tramo corto y fijo hasta la entrada del anafe. Probar todas las uniones con agua jabonosa.',
     },

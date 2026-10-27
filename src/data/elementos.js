@@ -185,12 +185,14 @@ export const ELEMENTOS = {
     busqueda: 'instalar claraboya techo furgoneta camper',
   },
   nevera: {
-    descripcion: 'Heladera de compresor 12 V. Va abajo de la cocina, en la sección del medio del mueble trasero, apoyada casi en el piso.',
-    ubicacion: 'Sección de la cocina, parte baja, detrás de la puerta gris (abajo del cajón del gas).',
+    descripcion: 'Heladera de compresor 12 V de 25 L, de tapa arriba (Alpicool G22: 585 x 335 x 350 mm). Va en la sección eléctrica (izquierda) del mueble trasero, sobre el compartimento de la batería, con la tapa a ras de la mesada.',
+    ubicacion: 'Sección eléctrica, arriba, detrás del frente fijo con rejillas (gris). Se abre hacia arriba por un corte de la tapa 1.',
     consejos: [
-      'Dejar aire alrededor: necesita ventilar el compresor (rejilla abajo y arriba).',
+      'Calar la tapa 1 con la plantilla de la heladera (585 x 335) y dejar libre el alto de la tapa abierta.',
+      'Mide 585 sin manijas y unos 598 con ellas: la sección tiene 620, así que sobran unos 22 mm. Confirmar con la heladera real.',
+      'Dejar aire alrededor: necesita ventilar el compresor (rejilla abajo y arriba del frente fijo, y el hueco de atrás). Confirmar con el manual cuánto pide de cada lado.',
       'Línea propia en la caja de fusibles, sin interruptor.',
-      'Queda en un compartimento aparte del cajón del gas, con su estante en el medio.',
+      'Queda lejos del gas: el gas está al piso de la cocina, en otra sección.',
     ],
     busqueda: 'instalar nevera compresor 12v furgoneta camper',
   },
@@ -248,9 +250,10 @@ export const ELEMENTOS = {
   },
   anafe: {
     descripcion: 'Anafe de 2 hornallas empotrado en la tapa 2, en la sección del medio. Con válvula de seguridad (termocupla) que corta el gas si se apaga la llama.',
-    ubicacion: 'Sección de la cocina, arriba. Abajo tiene el cajón de la garrafa y, más abajo, la heladera.',
+    ubicacion: 'Sección de la cocina, arriba. Abajo tiene dos cajones de cocina y, al piso, el cajón de la garrafa.',
     consejos: [
-      'Confirmar las medidas reales del anafe y del corte de la tapa.',
+      'La cocina mide 330 mm de ancho y 500 de fondo: buscar uno de hasta 300 de ancho y 440 de fondo (el corte tiene que dejar unos 25 mm de tapa por lado). Las de 30 cm tipo domino suelen medir 510 de fondo: no entran sin profundizar la cocina.',
+      'El 3D usa 300 x 440 x 70 mm como medida a elegir: confirmar con el anafe real y con la plantilla de corte.',
       'Cocinar siempre con la claraboya abierta.',
       'Dejar libre alrededor del anafe: nada de cortinas ni telas cerca.',
       'Fijar el anafe a la tapa con los soportes que trae.',
@@ -259,11 +262,11 @@ export const ELEMENTOS = {
   },
   garrafa: {
     descripcion:
-      'Garrafa chica recargable, parada dentro del cajón de la cocina, justo debajo del anafe. Se saca una vez por semana, se carga afuera y se vuelve a colocar.',
-    ubicacion: 'Cajón de la cocina (sección del medio, entre el anafe y la heladera).',
+      'Garrafa chica recargable, parada dentro del cajón de la cocina, al piso del mueble y debajo de los dos cajones de cocina. Se saca una vez por semana, se carga afuera y se vuelve a colocar.',
+    ubicacion: 'Cajón de la garrafa, al piso de la sección del medio (debajo de los cajones de cocina y del anafe).',
     consejos: [
       'Para sacarla: cerrar la llave de corte y la válvula de la garrafa, tirar el cajón entero (30 cm, hasta que la garrafa quede fuera del mueble), desenroscar el regulador y levantarla. El regulador y la manguera quedan en el cajón.',
-      'Para que el cajón salga entero, la placa de la cabecera de la cama y el colchón llevan un recorte en la esquina del lado de la cocina (26 x 15 cm). Sin ese recorte el frente alto del cajón choca con la cama a los 17 cm.',
+      'Para que el cajón salga entero, la placa de la cabecera de la cama y el colchón llevan un recorte en la esquina del lado de la cocina (ver el 3D). Sin ese recorte el frente del cajón y el regulador chocan con la panza de la cama.',
       'La manguera tiene que ser lo bastante larga para acompañar al cajón en todo su recorrido, con un bucle holgado.',
       'Siempre parada y con correa. Nunca acostada.',
       'El cajón del gas tiene que ser un compartimento aparte del resto del mueble, con una rejilla de ventilación de unos 100 cm2 hacia el exterior por el piso: el gas pesa más que el aire y tiene que poder salir sin entrar a la van.',
@@ -285,13 +288,13 @@ export const ELEMENTOS = {
   },
   valvulaGas: {
     descripcion: 'Llave de corte de gas. Permite cortar el gas al anafe sin abrir la garrafa.',
-    ubicacion: 'Atrás del anafe, en la parte alta de la sección de la cocina. Se alcanza sacando el cajón del gas.',
+    ubicacion: 'Contra el fondo, bajo el anafe y detrás de los cajones de cocina. Se alcanza sacando el cajón de cocina de arriba.',
     consejos: ['Usar llave de bola apta para gas.', 'Rotularla y que se pueda alcanzar rápido.', 'Cerrarla siempre que no se cocina.'],
     busqueda: 'instalación de gas furgoneta camper llave de corte',
   },
   detectorGas: {
     descripcion: 'Detector de gas GLP con alarma. El gas es más pesado que el aire y se junta cerca del piso.',
-    ubicacion: 'En el montante entre el eléctrico y la cocina, cerca del piso, al lado de la puerta de la heladera.',
+    ubicacion: 'En el montante entre el eléctrico y la cocina, cerca del piso, al lado del frente del cajón del gas.',
     consejos: [
       'Instalarlo a unos 30 cm del piso y lejos del anafe y de las rejillas de ventilación.',
       'Sumar un detector de monóxido de carbono a la altura de la cama.',

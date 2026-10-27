@@ -8,8 +8,8 @@
 //   - Mueble trasero cruzado de pared a pared, pegado a la zona de los asientos (cabecera de la cama).
 //     Vista desde la puerta trasera, de izquierda a derecha:
 //       izquierda: electricidad al piso (batería, inversor, DC-DC, fusibles) y arriba interruptores,
-//                  enchufes y cajones de cocina; esta sección es la L: llega a 570 mm de profundidad
-//       centro:    anafe, cajón de la garrafa de gas y heladera al piso
+//                  enchufes y la heladera, con la tapa a ras de la mesada; esta sección es la L: llega a 570 mm de profundidad
+//       centro:    anafe angosto, dos cajones de cocina y el cajón de la garrafa de gas al piso
 //       derecha:   grifo y fregadero, con dos bidones al piso (uno de agua limpia y uno de aguas grises)
 //   - Cama extensible (90 a 120 cm) de plywood, como la del instructivo: dos módulos (120 y 60) con ventanas y placas con ranuras
 //   - Mueble derecho con cajones, puerta bajo la mesa plegable y alacena alta
@@ -48,13 +48,14 @@ export const CONFIG_INICIAL = {
   // eléctrica (la L, más profunda), cocina y agua. Las posiciones x son la cara izquierda de cada
   // divisor (el divisor tiene el espesor de la placa).
   trasero: {
-    ancho: 1720,
+    ancho: 1560, // MEDIDO por Marco: libre, con aislación y revestimiento (solo vale para el mueble; el resto de la van sigue con 1720)
     profundidad: 500, // cocina y agua (el fregadero mide 400 mm de fondo)
     profundidadL: 570, // sección izquierda: llega hasta la cabecera de la cama
     alto: 850,
     zocalo: 20,
-    divisor1: 617, // fin de la sección eléctrica
-    divisor2: 1087, // fin de la cocina (queda centrada en el mueble)
+    // Interiores de 620 (eléctrica con la heladera arriba), 330 (cocina) y 550 (agua con los bidones girados): suman 1500
+    divisor1: 635, // fin de la sección eléctrica
+    divisor2: 980, // fin de la cocina
   },
 
   // Cama extensible de 90 a 120 cm: placas de plywood con esquinas redondeadas y bandejas que se tiran al pasillo
@@ -107,9 +108,9 @@ export const CONFIG_INICIAL = {
     // Bidón plano de 20 L con canilla (Camping4u / Scandihills). Va girado: el largo a lo ancho del cajón y los dos uno detrás del otro.
     // La canilla sobresale por el lado del largo (medida estimada con la foto: confirmar al llegar)
     bidon: { x: 416, y: 408, z: 203, canilla: 40 }, // largo, alto, grosor
-    nevera: { x: 420, y: 300, z: 340 },
+    nevera: { x: 585, y: 350, z: 335 }, // Alpicool G22 de 25 L, de tapa arriba: 585 sin manijas (unos 598 con ellas), alto 350, fondo 335
     fregadero: { x: 340, y: 130, z: 400 }, // los 400 mm son el fondo; el ancho es ESTIMADO
-    anafe: { x: 420, y: 55, z: 300 }, // anafe de 2 hornallas empotrado
+    anafe: { x: 300, y: 70, z: 440 }, // ESTIMADO, a elegir: 2 hornallas empotradas de hasta 300 de ancho y 440 de fondo (la cocina mide 330 de ancho)
     garrafa: { x: 230, y: 330, z: 230 }, // garrafa chica recargable (ESTIMADA)
     regulador: { x: 70, y: 60, z: 70 },
     valvulaGas: { x: 40, y: 40, z: 40 },
