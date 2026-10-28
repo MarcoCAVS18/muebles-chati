@@ -19,6 +19,7 @@ import { useEsMovil, TACTIL } from './util/pantalla.js';
 import { Icono } from './components/Icono.jsx';
 
 const TABS = ['Despiece', 'Placas y cortes', 'Herrajes', 'Eléctrica', 'Armado', 'Compras'];
+const ICONO_TAB = { Despiece: 'lista', 'Placas y cortes': 'hoja', Herrajes: 'llave', Eléctrica: 'rayo', Armado: 'libro', Compras: 'carrito' };
 
 // Barra de abajo en el celular: el 3D, las medidas y las pestañas de la derecha
 const ITEMS_MOVIL = [
@@ -64,6 +65,7 @@ export default function App() {
   const [invertir, setInvertir] = useState(false);
   const [verContexto, setVerContexto] = useState(false);
   const [vista, setVista] = useState({ clave: 'foto', n: 0 });
+  const [pasoVivo, setPasoVivo] = useState(null); // paso del Armado que está abierto: sus piezas se ven rosa en el 3D
   const esMovil = useEsMovil();
   const [panel, setPanel] = useState('3D'); // en el celular: '3D', 'Medidas' o 'Tabs' (las pestañas de la derecha)
   const [opciones, setOpciones] = useState(false); // en el celular los controles del 3D se abren y se cierran
@@ -246,6 +248,7 @@ export default function App() {
   }, [!!enfoque, esMovil]);
 
   const parteSel = data.partes.find((p) => p.id === seleccion);
+  const resaltadas = useMemo(() => (tab === 'Armado' && pasoVivo && pasoVivo.ids.length ? new Set(pasoVivo.ids) : null), [tab, pasoVivo]);
   const avisos = [...data.avisos, ...plan.lista.avisos];
 
   return (
@@ -296,6 +299,7 @@ export default function App() {
             verContexto={verContexto}
             reserva={reserva}
             visible={!esMovil || panel === '3D'}
+            resaltadas={resaltadas}
           />
           <div className="hud">
             <button className="btn-opciones" onClick={() => setOpciones((o) => !o)} aria-expanded={opciones}>
@@ -357,12 +361,20 @@ export default function App() {
                 <input type="range" min="0" max="1" step="0.05" value={explosion} onChange={(e) => setExplosion(parseFloat(e.target.value))} />
               </label>
             </div>
+            {esMovil && resaltadas && !enfoque && (
+              <button className="volver-paso" onClick={() => irA('Armado')}>
+                <Icono n="izq" />
+                Volver al paso {pasoVivo.numero}
+              </button>
+            )}
             {!enfoque && (
               <div className="info">
                 {hover ||
                   (parteSel
                     ? `${parteSel.id} - ${parteSel.nombre}`
-                    : TACTIL
+                    : resaltadas
+                      ? `Paso ${pasoVivo.numero} de ${pasoVivo.total}: ${pasoVivo.titulo}. Las piezas de este paso están en rosa.`
+                      : TACTIL
                       ? 'Tocá una pieza. Doble toque en una madera para verla sola. Tocá un equipo o cable eléctrico para ver el video.'
                       : 'Pasá el mouse sobre una pieza. Doble clic en una madera para verla sola. Clic en un equipo o cable eléctrico para ver el video.')}
               </div>
@@ -414,6 +426,7 @@ export default function App() {
         <nav>
           {TABS.map((t) => (
             <button key={t} className={t === tab ? 'activa' : ''} onClick={() => setTab(t)}>
+              <Icono n={ICONO_TAB[t]} />
               {t}
             </button>
           ))}
@@ -434,7 +447,7 @@ export default function App() {
               setElemento={abrirElemento}
             />
           )}
-          {tab === 'Armado' && <Armado tutorial={tutorial} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} />}
+          {tab === 'Armado' && <Armado tutorial={tutorial} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} setPasoVivo={setPasoVivo} ver3D={() => irA('3D')} esMovil={esMovil} />}
           {tab === 'Compras' && <Compras filas={compras} />}
         </div>
       </section>

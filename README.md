@@ -27,8 +27,14 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Armado: un tutorial por mueble (pestaña Armado) con los pasos para construirlo y instalarlo: qué madera, de qué hoja sale,
   tornillos, cola, correderas de los cajones, bisagras, botones push, agujeros para cables y mangueras, y los calados de la
   heladera, el anafe y el fregadero. Sale del mismo modelo que el despiece (`src/engine/tutorial.js`), así que si cambia una
-  medida cambia el tutorial. Cada paso se tilda y se recuerda en el navegador; lo que todavía no se puede decidir va en
-  "Qué falta definir" y lo que el diseño deja abierto va marcado con "Ojo".
+  medida cambia el tutorial. Cada mueble abre con una portada con una escalera de pasos que se va pintando de madera a
+  medida que se terminan; cada paso tiene sus tareas tildables, las maderas como tablitas con su id y botones para pasar
+  al siguiente. Mientras un paso está abierto, sus maderas se ven en rosa en el 3D (en el celular, con el botón "Ver estas
+  maderas en el 3D"). Todo lo tildado se recuerda en el navegador; lo que todavía no se puede decidir va en "Qué falta
+  definir" y lo que el diseño deja abierto va marcado con "Ojo".
+- Diseño: fondo violeta con hojas claras encima, la madera contrachapada como protagonista y los ids escritos a lápiz.
+  Las tipografías (Bricolage Grotesque, Instrument Sans y Permanent Marker) se instalan con npm y salen del propio sitio,
+  sin pedirlas a Google.
 - Dónde se fija cada mueble (piso, pared, entre muebles) y cuántos tornillos y escuadras.
 - Herrajes: correderas, bisagras, pistones, bisagras de piano y cierres a botón (push) redondos, uno por frente.
 - Eléctrica: consumo diario, autonomía, horas de manejo para recargar, cables y fusibles. Los largos de cable

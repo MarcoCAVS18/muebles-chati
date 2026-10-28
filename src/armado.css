@@ -1,0 +1,1013 @@
+/* ============================================================
+   Armado: el camino de pasos de cada mueble
+   La portada es un bloque violeta como el fondo de la app, con una escalera isométrica: un escalón por paso.
+   Los escalones hechos se ven de contrachapado, el que sigue en rosa, los pendientes de lila.
+   ============================================================ */
+.armado.en-mapa {
+  padding-bottom: 12px;
+}
+
+/* El pie del paso es pegajoso: se come el margen de abajo de la hoja para quedar contra el borde */
+.armado.en-paso {
+  margin-bottom: -40px;
+}
+
+.movil .armado.en-paso {
+  margin-bottom: -28px;
+}
+
+/* ---------- Elegir mueble ---------- */
+.a-muebles {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  margin: 2px 0 14px;
+  background: var(--lila);
+  border-radius: 999px;
+}
+
+.a-muebles button {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 6px;
+  background: transparent;
+  color: var(--violeta-hondo);
+  box-shadow: none;
+  font-size: 13.5px;
+  min-height: 42px;
+}
+
+.a-muebles button small {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--violeta-hondo);
+  font-variant-numeric: tabular-nums;
+}
+
+.a-muebles button.activa {
+  background: var(--violeta);
+  color: #fff;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28), 0 3px 0 var(--violeta-sombra);
+}
+
+.a-muebles button:active {
+  transform: none;
+}
+
+/* ---------- Portada del mueble ---------- */
+.a-hero {
+  background: var(--violeta);
+  color: #fff;
+  border-radius: 32px;
+  padding: 22px 20px 20px;
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.22), 0 8px 0 var(--violeta-sombra);
+  margin-bottom: 22px;
+}
+
+.a-hero h2 {
+  margin: 0;
+  font-size: clamp(34px, 9vw, 44px);
+  font-weight: 800;
+  font-variation-settings: 'wdth' 80;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+
+.a-hero-texto {
+  margin: 10px 0 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  max-width: 52ch;
+  color: #fff;
+}
+
+/* Los datos del mueble ocupan el rincón vacío de arriba a la izquierda, sobre la escalera */
+.a-escena {
+  position: relative;
+  margin-top: 6px;
+}
+
+.a-datos {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.a-datos div {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.a-datos dd {
+  margin: 0;
+  font-family: var(--f-titulo);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.a-datos dt {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.a-hero-pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 6px;
+}
+
+.a-hero-estado {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.a-hero.completo .a-hero-estado {
+  color: var(--verde);
+  font-weight: 800;
+}
+
+.a-cta {
+  --canto: #d99a00;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 12px 24px;
+  background: var(--amarillo);
+  color: var(--violeta-noche);
+  font: 800 16.5px/1.1 var(--f-titulo);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 5px 0 var(--canto);
+}
+
+.a-cta svg {
+  width: 22px;
+  height: 22px;
+}
+
+.a-cta:active {
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 2px 0 var(--canto);
+  transform: translateY(3px);
+}
+
+@media (hover: hover) {
+  .a-cta:hover {
+    background: #ffd25f;
+  }
+}
+
+/* ---------- La escalera ---------- */
+.esc {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 340px;
+  margin: 0 0 8px;
+  overflow: visible;
+}
+
+.esc polygon {
+  stroke-linejoin: round;
+  stroke-width: 1.4;
+  stroke: rgba(29, 18, 89, 0.3);
+}
+
+.esc-paso {
+  cursor: pointer;
+  outline: none;
+}
+
+.esc-paso:focus-visible .esc-top {
+  stroke: #fff;
+  stroke-width: 3.2;
+}
+
+.esc-hecho .esc-top {
+  fill: #f3d9ae;
+}
+.esc-hecho .esc-izq {
+  fill: #e3b678;
+}
+.esc-hecho .esc-der {
+  fill: #c99555;
+}
+
+.esc-actual .esc-top {
+  fill: #ff8db5;
+}
+.esc-actual .esc-izq {
+  fill: #ff4f8b;
+}
+.esc-actual .esc-der {
+  fill: #d93a72;
+}
+
+.esc-pend polygon {
+  stroke: rgba(255, 255, 255, 0.45);
+}
+.esc-pend .esc-top {
+  fill: rgba(255, 255, 255, 0.3);
+}
+.esc-pend .esc-izq {
+  fill: rgba(255, 255, 255, 0.17);
+}
+.esc-pend .esc-der {
+  fill: rgba(255, 255, 255, 0.08);
+}
+
+.esc-num {
+  font-family: var(--f-marca);
+  font-size: 25px;
+  pointer-events: none;
+  fill: #fff;
+}
+
+.esc-hecho .esc-num,
+.esc-actual .esc-num {
+  fill: var(--violeta-noche);
+}
+
+.esc-asta {
+  fill: rgba(255, 255, 255, 0.7);
+  stroke: none !important;
+}
+
+.esc-banderin {
+  fill: rgba(255, 255, 255, 0.5);
+  stroke: none !important;
+}
+
+.esc-banderin.ok {
+  fill: var(--verde);
+}
+
+/* El escalón que sigue rebota: es lo único que se mueve solo en toda la pestaña */
+.esc-actual {
+  animation: rebote 1.7s ease-in-out infinite;
+}
+
+@keyframes rebote {
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+.esc-nuevo {
+  animation: asentar 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+@keyframes asentar {
+  from {
+    transform: translateY(-46px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ---------- Secciones sueltas ---------- */
+.a-bloque {
+  margin: 20px 0;
+}
+
+.a-bloque h3,
+.a-det h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--violeta-noche);
+}
+
+.a-det h4 {
+  font-size: 15px;
+  margin: 14px 0 6px;
+}
+
+.a-cuenta {
+  display: inline-flex;
+  align-items: center;
+  font: 700 12px/1 var(--f-texto);
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--lila);
+  color: var(--violeta-hondo);
+  font-variant-numeric: tabular-nums;
+}
+
+.a-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.a-lista li {
+  position: relative;
+  padding: 3px 0 3px 20px;
+  max-width: 62ch;
+}
+
+.a-lista li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.8em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--violeta);
+}
+
+.a-lista-aviso li {
+  display: flex;
+  gap: 9px;
+  padding-left: 0;
+}
+
+.a-lista-aviso li::before {
+  display: none;
+}
+
+.a-lista-aviso svg {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: #b87500;
+}
+
+.a-lista-orden {
+  counter-reset: orden;
+}
+
+.a-lista-orden li::before {
+  counter-increment: orden;
+  content: counter(orden);
+  width: 22px;
+  height: 22px;
+  top: 4px;
+  left: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font: 700 12px var(--f-texto);
+  color: #fff;
+}
+
+.a-lista-orden li {
+  padding-left: 28px;
+}
+
+/* ---------- Bloques que se abren ---------- */
+.a-det {
+  background: var(--lila-suave);
+  border-radius: 22px;
+  padding: 0 16px;
+  margin: 12px 0;
+}
+
+.a-det[open] {
+  padding-bottom: 14px;
+}
+
+.a-det summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  cursor: pointer;
+  list-style: none;
+  font: 800 16px/1.2 var(--f-titulo);
+  color: var(--violeta-noche);
+}
+
+.a-det summary::-webkit-details-marker {
+  display: none;
+}
+
+.a-det summary > span:first-child {
+  flex: 1;
+}
+
+.a-det summary svg {
+  width: 20px;
+  height: 20px;
+  color: var(--violeta-hondo);
+  transition: transform 0.2s ease;
+}
+
+.a-det[open] > summary svg {
+  transform: rotate(180deg);
+}
+
+.a-falta {
+  background: var(--amarillo-suave);
+}
+
+.a-falta .a-cuenta {
+  background: var(--amarillo);
+  color: var(--violeta-noche);
+}
+
+/* ---------- Antes de empezar ---------- */
+.a-segmentos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.a-segmentos button {
+  --canto: var(--canto-lila);
+  background: var(--lila);
+  color: var(--violeta-hondo);
+  font-size: 12.5px;
+  padding: 7px 12px;
+  min-height: 36px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.7), 0 2px 0 var(--canto);
+}
+
+.a-segmentos button.activa {
+  --canto: var(--violeta-sombra);
+  background: var(--violeta);
+  color: #fff;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28), 0 2px 0 var(--canto);
+}
+
+.a-lista-tilde {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.a-lista-tilde li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 8px 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.a-lista-tilde li > span {
+  cursor: pointer;
+  max-width: 60ch;
+}
+
+.a-lista-tilde li.ok > span {
+  opacity: 0.55;
+}
+
+/* ---------- Casilla redonda para tildar ---------- */
+.a-check {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: transparent;
+  border: 2.5px solid var(--violeta);
+  box-shadow: none;
+}
+
+.a-check:active {
+  transform: scale(0.9);
+  box-shadow: none;
+}
+
+.a-check svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 3.2;
+}
+
+.a-check[aria-checked='true'] {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: var(--violeta-noche);
+  animation: tilde 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@keyframes tilde {
+  from {
+    transform: scale(0.7);
+  }
+}
+
+@media (hover: hover) {
+  .a-check:hover {
+    background: var(--lila);
+  }
+  .a-check[aria-checked='true']:hover {
+    background: var(--verde);
+  }
+}
+
+/* ---------- Camino de pasos ---------- */
+.a-camino {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.a-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px 14px 10px 10px;
+  text-align: left;
+  background: var(--lila-suave);
+  color: var(--violeta-noche);
+  border-radius: 22px;
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.a-fila:active {
+  transform: scale(0.99);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .a-fila:hover {
+    background: var(--lila);
+  }
+}
+
+.a-fila > svg {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  color: var(--violeta-hondo);
+}
+
+.a-fila.ahora {
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--violeta), var(--sombra-flota);
+}
+
+.a-num {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--madera-clara) repeating-linear-gradient(98deg, rgba(138, 90, 34, 0.1) 0 2px, transparent 2px 9px);
+  color: var(--madera-tinta);
+  font: 400 21px var(--f-marca);
+}
+
+.a-num svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 3;
+}
+
+.a-fila.hecho .a-num {
+  background: var(--verde);
+  color: var(--violeta-noche);
+}
+
+.a-fila-texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.a-fila-titulo {
+  font: 700 15.5px/1.2 var(--f-titulo);
+}
+
+.a-fila.hecho .a-fila-titulo {
+  color: var(--suave);
+}
+
+.a-fila-meta {
+  font-size: 12.5px;
+  color: var(--suave);
+}
+
+.a-ahora {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--rosa);
+  color: var(--violeta-noche);
+  font: 700 12px/1 var(--f-texto);
+}
+
+/* ---------- Un paso abierto ---------- */
+.a-paso-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.a-sec {
+  --canto: var(--canto-lila);
+  background: var(--lila);
+  color: var(--violeta-hondo);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.7), 0 3px 0 var(--canto);
+}
+
+@media (hover: hover) {
+  .a-sec:hover {
+    background: #ddd4ff;
+  }
+}
+
+.a-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+}
+
+.a-volver svg,
+.a-ver3d svg {
+  width: 18px;
+  height: 18px;
+}
+
+.a-posicion {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.a-cinta {
+  display: flex;
+  gap: 4px;
+  margin: 12px 0 0;
+}
+
+.a-cinta i {
+  flex: 1;
+  height: 7px;
+  border-radius: 4px;
+  background: var(--lila);
+}
+
+.a-cinta i.pasado {
+  background: var(--violeta);
+}
+
+.a-cinta i.ahora {
+  background: var(--rosa);
+}
+
+.a-titulo-paso {
+  margin: 18px 0 8px;
+  font-size: clamp(28px, 7vw, 36px);
+  font-weight: 800;
+  font-variation-settings: 'wdth' 84;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.a-intro {
+  margin: 0 0 14px;
+  font-size: 15.5px;
+  line-height: 1.55;
+  max-width: 60ch;
+}
+
+.a-ver3d {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  margin: 0 0 6px;
+  background: var(--rosa);
+  color: var(--violeta-noche);
+  --canto: #d93a72;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.a-aviso3d {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--suave);
+}
+
+.a-aviso3d i {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--rosa);
+}
+
+/* Tareas */
+.a-tareas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.a-tarea {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 8px 0;
+  padding: 14px 14px 14px 12px;
+  background: var(--lila-suave);
+  border-radius: 20px;
+}
+
+.a-tarea-texto {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  cursor: pointer;
+}
+
+.a-tarea-texto b {
+  font-weight: 700;
+}
+
+.a-tarea.ok .a-tarea-texto {
+  opacity: 0.5;
+}
+
+/* Ojo: cinta de obra a la izquierda */
+.a-ojo {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 13px 14px 13px 26px;
+  background: var(--amarillo-suave);
+  border-radius: 16px;
+  overflow: hidden;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.a-ojo::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 11px;
+  background: repeating-linear-gradient(45deg, var(--violeta-noche) 0 6px, var(--amarillo) 6px 12px);
+}
+
+.a-ojo svg {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  color: #b87500;
+}
+
+/* Maderas del paso: tablitas con el id escrito a lápiz */
+.a-maderas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.a-madera {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 12px 10px;
+  text-align: left;
+  border-radius: 6px 16px 16px 6px;
+  color: var(--madera-tinta);
+  background: var(--madera-clara) repeating-linear-gradient(98deg, rgba(138, 90, 34, 0.1) 0 2px, transparent 2px 11px);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), 0 3px 0 #c99555;
+}
+
+.a-madera:active {
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 1px 0 #c99555;
+}
+
+@media (hover: hover) {
+  .a-madera:hover {
+    background-color: #f8e3bf;
+  }
+}
+
+.a-madera.sel {
+  outline: 3px solid var(--rosa);
+  outline-offset: 2px;
+}
+
+.a-madera .a-id {
+  font: 400 17px/1.1 var(--f-marca);
+}
+
+.a-madera .a-nombre {
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.a-madera .a-medida {
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.a-madera .a-corte {
+  font-size: 11.5px;
+  opacity: 0.85;
+}
+
+.a-ver-mas {
+  display: block;
+  margin: 10px auto 0;
+}
+
+/* Tablas del paso, una tarjeta por fila */
+.a-tarjetas {
+  display: flex;
+  flex-direction: column;
+}
+
+.a-tarjeta {
+  margin: 4px 0;
+  padding: 11px 13px;
+  background: #fff;
+  border-radius: 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.a-tarjeta b {
+  display: block;
+  margin-bottom: 3px;
+  font: 700 14.5px/1.25 var(--f-titulo);
+}
+
+.a-tarjeta span {
+  display: inline-block;
+  margin-right: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--violeta-hondo);
+}
+
+/* Botones de abajo: quedan a mano mientras se lee el paso */
+.a-pie {
+  position: sticky;
+  bottom: -40px; /* se pega al borde de la hoja, por encima del relleno de abajo */
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+  margin: 22px -16px 0;
+  padding: 12px 16px 16px;
+  background: var(--panel);
+  box-shadow: 0 -12px 16px -12px rgba(22, 8, 96, 0.25);
+}
+
+.a-pie button {
+  min-height: 52px;
+}
+
+.a-pie-ant {
+  width: 52px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.a-pie-ant svg {
+  width: 22px;
+  height: 22px;
+}
+
+.a-principal {
+  --canto: #17a97a;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--verde);
+  color: var(--violeta-noche);
+  font: 800 16px/1.1 var(--f-titulo);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45), 0 4px 0 var(--canto);
+}
+
+.a-principal svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (hover: hover) {
+  .a-principal:hover {
+    background: #4de0ab;
+  }
+}
+
+/* Compras del mueble */
+.a-cantidades {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.a-cantidades li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 7px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.a-cantidades b {
+  flex: 0 0 auto;
+  min-width: 46px;
+  padding: 3px 6px;
+  text-align: center;
+  border-radius: 8px;
+  background: var(--madera-clara);
+  color: var(--madera-tinta);
+  font: 400 18px/1.2 var(--f-marca);
+  font-variant-numeric: tabular-nums;
+}
+
+.a-cantidades small {
+  display: block;
+  color: var(--suave);
+  font-size: 12.5px;
+}
+
+/* Celular: el contenido tiene 12 px de margen en vez de 16 */
+.movil .a-pie {
+  bottom: -28px;
+  margin: 22px -12px 0;
+  padding: 12px 12px 14px;
+}
+
+.movil .a-hero {
+  padding: 20px 16px 18px;
+  border-radius: 28px;
+}
+
+@media (max-width: 380px) {
+  .a-datos {
+    gap: 10px;
+  }
+
+  .a-datos dd {
+    font-size: 28px;
+  }
+  .a-cta {
+    padding: 12px 18px;
+    font-size: 15.5px;
+  }
+}

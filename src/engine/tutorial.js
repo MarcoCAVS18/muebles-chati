@@ -899,10 +899,13 @@ function derecho(data, plan, cfg, e3, cortes) {
 
 export function armarTutorial(data, plan, cfg, e3) {
   const cortes = indiceCortes(plan, cfg);
-  return {
-    generales: generales(cfg),
-    muebles: [trasero(data, plan, cfg, e3, cortes), cama(data, plan, cfg, e3, cortes), derecho(data, plan, cfg, e3, cortes)],
-  };
+  const muebles = [trasero(data, plan, cfg, e3, cortes), cama(data, plan, cfg, e3, cortes), derecho(data, plan, cfg, e3, cortes)];
+  // Datos para la portada de cada mueble: cuántas maderas lleva y cuántos herrajes hay que comprar
+  for (const m of muebles) {
+    m.cantidadPiezas = data.partes.filter((x) => x.grupo === m.grupo).length;
+    m.cantidadHerrajes = m.lista.herrajes.reduce((t, h) => t + (h.cantidad || 0), 0);
+  }
+  return { generales: generales(cfg), muebles };
 }
 
 export const MUEBLES_TUTORIAL = GRUPOS;

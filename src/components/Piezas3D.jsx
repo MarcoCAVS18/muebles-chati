@@ -14,7 +14,7 @@ export const COLORES = {
   'Mueble derecho': '#cfae7c',
 };
 
-export function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f2a', onClick, onDoubleClick, onOver, onOut, emisivo, resaltar, matRef }) {
+export function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f2a', onClick, onDoubleClick, onOver, onOut, emisivo, resaltar, brillo, matRef }) {
   return (
     <mesh position={[m(x + sx / 2), m(y + sy / 2), m(z + sz / 2)]} onClick={onClick} onDoubleClick={onDoubleClick} onPointerOver={onOver} onPointerOut={onOut}>
       <boxGeometry args={[m(sx), m(sy), m(sz)]} />
@@ -25,8 +25,8 @@ export function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f
         transparent={opacidad < 1}
         opacity={opacidad}
         depthWrite={opacidad >= 1}
-        emissive={resaltar ? '#ff7043' : emisivo ? color : '#000000'}
-        emissiveIntensity={resaltar ? 0.6 : emisivo ? 0.9 : 0}
+        emissive={brillo || (resaltar ? '#ff7043' : emisivo ? color : '#000000')}
+        emissiveIntensity={brillo ? 0.38 : resaltar ? 0.6 : emisivo ? 0.9 : 0}
       />
       {bordes && <Edges color={bordes} />}
     </mesh>
@@ -35,7 +35,7 @@ export function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f
 
 // Placa con esquinas redondeadas, recorte o arco calado. El contorno sale de enfoque.js (el mismo que usan las cotas).
 // p es la pieza original (da el contorno) y x, y, z su posición actual (puede estar desplazada por la vista explotada).
-export function PlacaCortada({ p, x, y, z, color, opacidad = 1, bordes, onClick, onDoubleClick, onOver, onOut, matRef }) {
+export function PlacaCortada({ p, x, y, z, color, opacidad = 1, bordes, onClick, onDoubleClick, onOver, onOut, brillo, matRef }) {
   const c = useMemo(() => contorno(p), [p.x, p.z, p.sx, p.sy, p.sz, p.radio, p.recorte, p.calado, p.huecos, p.redondeo]);
   const geometria = useMemo(() => {
     const trazo = (cmds, destino) => {
@@ -77,6 +77,8 @@ export function PlacaCortada({ p, x, y, z, color, opacidad = 1, bordes, onClick,
         transparent={opacidad < 1}
         opacity={opacidad}
         depthWrite={opacidad >= 1}
+        emissive={brillo || '#000000'}
+        emissiveIntensity={brillo ? 0.38 : 0}
       />
       {bordes && <Edges color={bordes} threshold={20} />}
     </mesh>

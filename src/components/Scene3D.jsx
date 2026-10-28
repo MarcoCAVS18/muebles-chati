@@ -159,7 +159,7 @@ function Escena(props) {
   const {
     data, elec3d, tramos, van, visibles, explosion, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
     seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar, camaAbierta,
-    enfoque, setEnfoque, invertir, verContexto, reserva,
+    enfoque, setEnfoque, invertir, verContexto, reserva, resaltadas,
   } = props;
   const esDoble = useDobleToque();
   const controles = useRef();
@@ -327,10 +327,10 @@ function Escena(props) {
       <group ref={grupoCtx}>
       <group scale={[-1, 1, 1]}>
       {/* Piso y contorno interior de la van */}
-      <Caja x={0} y={-12} z={0} sx={van.ancho} sy={12} sz={van.largo} color="#8d6e4a" bordes="#4b3a24" />
-      <Caja x={0} y={0} z={0} sx={van.ancho} sy={van.alto} sz={van.largo} color="#9aa5b1" opacidad={0.04} bordes="#7a8794" />
+      <Caja x={0} y={-12} z={0} sx={van.ancho} sy={12} sz={van.largo} color="#cfc4ff" bordes="#8f7bff" />
+      <Caja x={0} y={0} z={0} sx={van.ancho} sy={van.alto} sz={van.largo} color="#e8e2ff" opacidad={0.05} bordes="#b9aaff" />
 
-      {mostrarArcos && data.arcos.map((a) => <Caja key={a.nombre} {...a} color="#555b63" opacidad={0.75} bordes="#2b2f33" />)}
+      {mostrarArcos && data.arcos.map((a) => <Caja key={a.nombre} {...a} color="#3a2a8f" opacidad={0.8} bordes="#1d1259" />)}
 
       {mostrarAsientos &&
         elec3d.escenario.map((e) => (
@@ -343,7 +343,10 @@ function Escena(props) {
         .map((p) => {
           const q = colocada(p);
           const elegida = seleccion === p.id;
-          const color = elegida ? '#ff7043' : p.tipo === 'liston' ? '#c49a5e' : p.color || COLORES[p.grupo];
+          // Las piezas del paso que se está armando se ven rosa; el resto se apaga si el paso es de pocas piezas
+          const enPaso = !!resaltadas && resaltadas.has(p.id);
+          const apagar = !!resaltadas && !enPaso && !elegida && resaltadas.size < data.partes.length * 0.6;
+          const color = elegida ? '#ff7043' : enPaso ? '#ff4f8b' : p.tipo === 'liston' ? '#c49a5e' : p.color || COLORES[p.grupo];
           const comun = {
             x: q.x,
             y: q.y,
@@ -352,8 +355,9 @@ function Escena(props) {
             sy: p.sy,
             sz: p.sz,
             color,
-            opacidad: transparentar ? 0.12 : 1,
-            bordes: elegida ? '#bf360c' : '#6b4f2a',
+            opacidad: transparentar ? 0.12 : apagar ? 0.16 : 1,
+            bordes: elegida ? '#bf360c' : enPaso ? '#8a1b45' : '#6b4f2a',
+            brillo: enPaso && !elegida ? '#ff4f8b' : undefined,
             onClick: (e) => {
               e.stopPropagation();
               if (activo) return;
@@ -487,7 +491,7 @@ export default function Scene3D(props) {
         props.setElemento('');
       }}
     >
-      <color attach="background" args={['#eef1f4']} />
+      <color attach="background" args={['#6a47f2']} />
       <Escena {...props} />
     </Canvas>
   );

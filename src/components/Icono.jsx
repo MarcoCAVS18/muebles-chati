@@ -10,6 +10,15 @@ const TRAZOS = {
   rayo: ['M13 2 4 14h7l-1 8 9-12h-7l1-8Z'],
   carrito: ['M3 4h2l2.4 11h10.2l2-8H6', 'M9 20h.01', 'M17 20h.01'],
   libro: ['M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z', 'M4 19a2 2 0 0 0 2 2h13', 'M9 8h6', 'M9 12h4'],
+  izq: ['M15 5l-7 7 7 7'],
+  der: ['M9 5l7 7-7 7'],
+  check: ['M5 12.5l4.5 4.5L19 7.5'],
+  aviso: ['M12 4 3 20h18L12 4Z', 'M12 10v4', 'M12 17h.01'],
+  abajo: ['M6 9l6 6 6-6'],
+  arriba: ['M6 15l6-6 6 6'],
+  cerrar: ['M6 6l12 12', 'M18 6 6 18'],
+  bandera: ['M6 21V4', 'M6 4h11l-2.5 4L17 12H6'],
+  martillo: ['M13 4l7 7-3 3-7-7 3-3Z', 'M10 9 3.5 15.5a2 2 0 0 0 2.8 2.8L12.8 11.8'],
 };
 
 export function Icono({ n }) {

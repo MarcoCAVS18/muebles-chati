@@ -11,6 +11,9 @@
     "deploy": "vite build && firebase deploy"
   },
   "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/instrument-sans": "^5.3.0",
+    "@fontsource/permanent-marker": "^5.3.0",
     "@react-three/drei": "^9.99.0",
     "@react-three/fiber": "^8.15.19",
     "firebase": "^13.1.0",
