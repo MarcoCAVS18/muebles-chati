@@ -35,6 +35,10 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Diseño: fondo violeta con hojas claras encima, la madera contrachapada como protagonista y los ids escritos a lápiz.
   Las tipografías (Bricolage Grotesque, Instrument Sans y Permanent Marker) se instalan con npm y salen del propio sitio,
   sin pedirlas a Google.
+- Visor 3D con barra de píldoras (al estilo de madera.app, en violeta): tres modos (Armado, Abierto con los cajones y las
+  puertas abiertos y las bandejas de la cama afuera, y Explotado), cotas del ancho, alto y fondo de cada mueble, y colores por
+  rol (amarillo frentes y puertas, celeste costados, verde bases y estantes, lila fondos y cajones por dentro, madera listones).
+  La bisagra de cada puerta se ubica del lado contrario a su botón push. El piso es una grilla de puntos con sombra suave.
 - Dónde se fija cada mueble (piso, pared, entre muebles) y cuántos tornillos y escuadras.
 - Herrajes: correderas, bisagras, pistones, bisagras de piano y cierres a botón (push) redondos, uno por frente.
 - Eléctrica: consumo diario, autonomía, horas de manejo para recargar, cables y fusibles. Los largos de cable
@@ -61,7 +65,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   pieza anterior o siguiente, "Dar vuelta" para ver la otra cara, "Ver el mueble de fondo" para ver dónde va y Esc para volver.
   El contorno de cada pieza y las cotas salen de `src/engine/enfoque.js`; `npm run check` los prueba en todas las piezas.
 - Versión para celular y tablet (pantallas de hasta 1100 px de ancho o poca altura): una sola sección por vez, con barra de
-  abajo (3D, Medidas, Despiece, Cortes, Herrajes, Eléctrica, Armado, Compras). Los controles del 3D están en el botón "Opciones", el
+  abajo (3D, Medidas, Despiece, Cortes, Herrajes, Eléctrica, Armado, Compras). Los modos del 3D están en la barra de arriba (lo demás, en "Opciones"), el
   doble toque en una madera la deja sola (también desde el despiece y las hojas de corte, con un botón "Ver sola"), y al salir
   se vuelve a la lista de donde se vino. En vertical la cámara inicial mira a lo largo de la van para llenar la pantalla; en
   horizontal la tarjeta de la pieza va a un costado. El panel con el video de cada equipo sube desde abajo.
@@ -73,6 +77,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - `src/data/defaults.js`: medidas de la van, materiales, equipos y consumos iniciales.
 - `src/engine/trasero.js`, `cama.js`, `derecho.js`: los tres muebles. `frentes.js` arma los frentes con puertas a ras.
 - `src/engine/electrico3d.js`: posición de cada equipo eléctrico y recorrido 3D de cada cable.
+- `src/engine/colores.js`: rol de color de cada madera. `src/engine/abrir.js`: cómo se mueve cada cajón y cada puerta en el modo Abierto.
 - `src/engine/electrica.js`: cálculo de cables, fusibles y batería.
 - `src/data/videos.js`: videos de YouTube de cada elemento. `src/data/elementos.js`: textos del panel.
 

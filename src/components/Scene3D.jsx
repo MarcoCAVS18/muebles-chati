@@ -4,7 +4,11 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Caja, PlacaCortada, COLORES, aplicarFade, m, tieneContorno } from './Piezas3D.jsx';
 import { PiezaEnfoque, AnotacionesDe, aMundo } from './Enfoque.jsx';
+import { Piso } from './Piso3D.jsx';
+import { CotasGlobales } from './Cotas3D.jsx';
 import { posarCamara } from '../engine/enfoque.js';
+import { rolDe, ROLES, oscurecer } from '../engine/colores.js';
+import { planAbrir } from '../engine/abrir.js';
 import { useDobleToque, TACTIL } from '../util/pantalla.js';
 
 const COLOR_CABLE = {
@@ -155,11 +159,20 @@ function Deco({ d, onOver, onOut }) {
   return <Caja x={d.x} y={d.y} z={d.z} sx={d.sx} sy={d.sy} sz={d.sz} color={d.color} bordes={null} />;
 }
 
+// Una puerta que gira sobre su bisagra (eje vertical que pasa por pivote = [x, z] en mm)
+function Giro({ pivote, giro, children }) {
+  return (
+    <group position={[m(pivote[0]), 0, m(pivote[1])]} rotation={[0, giro, 0]}>
+      <group position={[-m(pivote[0]), 0, -m(pivote[1])]}>{children}</group>
+    </group>
+  );
+}
+
 function Escena(props) {
   const {
-    data, elec3d, tramos, van, visibles, explosion, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
-    seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar, camaAbierta,
-    enfoque, setEnfoque, invertir, verContexto, reserva, resaltadas,
+    data, elec3d, tramos, van, visibles, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
+    seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar,
+    enfoque, setEnfoque, invertir, verContexto, reserva, resaltadas, colores, cotas,
   } = props;
   const esDoble = useDobleToque();
   const controles = useRef();
@@ -171,6 +184,30 @@ function Escena(props) {
   const { camera, size } = useThree();
   const foco = enfoque;
   const activo = !!foco;
+
+  // Explotar, abrir los cajones y sacar las bandejas se animan: los valores de la escena siguen a los de los controles
+  const act = useRef({ ex: props.explosion, ab: props.abierto, ca: props.camaAbierta });
+  const [, latir] = useState(0);
+  useFrame((_, dt) => {
+    const k = 1 - Math.exp(-Math.min(dt, 0.05) * 8);
+    let cambio = false;
+    for (const [c, meta] of [['ex', props.explosion], ['ab', props.abierto], ['ca', props.camaAbierta]]) {
+      const d = meta - act.current[c];
+      if (Math.abs(d) < 0.0004) continue;
+      act.current[c] = Math.abs(d) < 0.004 ? meta : act.current[c] + d * k;
+      cambio = true;
+    }
+    if (cambio) latir((n) => n + 1);
+  });
+  const explosion = act.current.ex;
+  const abierto = act.current.ab;
+  const camaAbierta = act.current.ca;
+
+  // Rol de color de cada madera y cómo se mueve cada una al abrir
+  const roles = useMemo(() => Object.fromEntries(data.partes.map((p) => [p.id, rolDe(p)])), [data]);
+  const abrir = useMemo(() => planAbrir(data), [data]);
+  const colorDe = (p) => (colores ? ROLES[roles[p.id]].color : p.tipo === 'liston' ? '#c49a5e' : p.color || COLORES[p.grupo]);
+  const bordeDe = (p) => (colores ? oscurecer(ROLES[roles[p.id]].color, 0.5) : '#6b4f2a');
 
   // Centro de cada grupo para separar las piezas al "explotar" la vista
   const centros = useMemo(() => {
@@ -188,6 +225,21 @@ function Escena(props) {
     return acc;
   }, [data]);
 
+  const cajasCotas = useMemo(() => {
+    const acc = {};
+    for (const p of data.partes) {
+      if (!visibles[p.grupo]) continue;
+      const b = (acc[p.grupo] = acc[p.grupo] || [1e9, 1e9, 1e9, -1e9, -1e9, -1e9]);
+      b[0] = Math.min(b[0], p.x);
+      b[1] = Math.min(b[1], p.y);
+      b[2] = Math.min(b[2], p.z);
+      b[3] = Math.max(b[3], p.x + p.sx);
+      b[4] = Math.max(b[4], p.y + p.sy);
+      b[5] = Math.max(b[5], p.z + p.sz);
+    }
+    return Object.entries(acc).map(([grupo, caja]) => ({ grupo, caja }));
+  }, [data, visibles]);
+
   const desplazar = (p, grupo) => {
     const c = centros[grupo];
     if (!explosion || !c) return p;
@@ -203,6 +255,11 @@ function Escena(props) {
   const colocada = (p) => {
     const q = { ...desplazar(p, p.grupo) };
     if (p.ext) q.x += (data.layout.cama?.extension || 0) * camaAbierta;
+    const mov = abrir.porParte[p.id];
+    if (mov && mov.tipo === 'cajon') {
+      q.x += mov.v[0] * abierto;
+      q.z += mov.v[2] * abierto;
+    }
     if (p.recorte) {
       const dx = q.x - p.x;
       const dz = q.z - p.z;
@@ -219,7 +276,7 @@ function Escena(props) {
         ? posarCamara(colocada(parteFoco), { invertir, xMedio: van.ancho / 2, aspecto: (size.width - (reserva?.derecha || 0)) / size.height, fovDeg: camera.fov })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [parteFoco, explosion, camaAbierta, invertir, van.ancho, size.width, size.height, reserva?.derecha]
+    [parteFoco, explosion, abierto, camaAbierta, invertir, van.ancho, size.width, size.height, reserva?.derecha]
   );
   const [vivas, setVivas] = useState([]);
   const entradas = useRef({});
@@ -319,15 +376,16 @@ function Escena(props) {
 
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[3, 5, -2]} intensity={0.9} />
-      <directionalLight position={[-3, 3, 4]} intensity={0.4} />
+      <hemisphereLight args={['#ffffff', '#c9bcff', 0.68]} />
+      <directionalLight position={[2, 5, -4]} intensity={0.6} />
+      <directionalLight position={[-3, 3, 4]} intensity={0.3} />
       <pointLight ref={luzCamara} decay={0} intensity={0} />
 
       <group ref={grupoCtx}>
+      <Piso van={van} />
       <group scale={[-1, 1, 1]}>
       {/* Piso y contorno interior de la van */}
-      <Caja x={0} y={-12} z={0} sx={van.ancho} sy={12} sz={van.largo} color="#cfc4ff" bordes="#8f7bff" />
+      <Caja x={0} y={-12} z={0} sx={van.ancho} sy={12} sz={van.largo} color="#b6a4ff" bordes="#8f7bff" />
       <Caja x={0} y={0} z={0} sx={van.ancho} sy={van.alto} sz={van.largo} color="#e8e2ff" opacidad={0.05} bordes="#b9aaff" />
 
       {mostrarArcos && data.arcos.map((a) => <Caja key={a.nombre} {...a} color="#3a2a8f" opacidad={0.8} bordes="#1d1259" />)}
@@ -346,7 +404,7 @@ function Escena(props) {
           // Las piezas del paso que se está armando se ven rosa; el resto se apaga si el paso es de pocas piezas
           const enPaso = !!resaltadas && resaltadas.has(p.id);
           const apagar = !!resaltadas && !enPaso && !elegida && resaltadas.size < data.partes.length * 0.6;
-          const color = elegida ? '#ff7043' : enPaso ? '#ff4f8b' : p.tipo === 'liston' ? '#c49a5e' : p.color || COLORES[p.grupo];
+          const color = elegida ? '#ff7043' : enPaso ? '#ff4f8b' : colorDe(p);
           const comun = {
             x: q.x,
             y: q.y,
@@ -356,7 +414,7 @@ function Escena(props) {
             sz: p.sz,
             color,
             opacidad: transparentar ? 0.12 : apagar ? 0.16 : 1,
-            bordes: elegida ? '#bf360c' : enPaso ? '#8a1b45' : '#6b4f2a',
+            bordes: elegida ? '#bf360c' : enPaso ? '#8a1b45' : bordeDe(p),
             brillo: enPaso && !elegida ? '#ff4f8b' : undefined,
             onClick: (e) => {
               e.stopPropagation();
@@ -375,6 +433,15 @@ function Escena(props) {
             onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? ` (${TACTIL ? 'toque' : 'clic'} para ver el equipo y el video)` : ''} - ${TACTIL ? 'doble toque' : 'doble clic'} para verla sola`),
             onOut: () => setHover(''),
           };
+          const mov = abrir.porParte[p.id];
+          if (mov && mov.tipo === 'puerta') {
+            const pivote = [mov.pivote[0] + (q.x - p.x), mov.pivote[1] + (q.z - p.z)];
+            return (
+              <Giro key={p.id} pivote={pivote} giro={mov.giro * abierto}>
+                {tieneContorno(p) ? <PlacaCortada p={q} {...comun} /> : <Caja {...comun} />}
+              </Giro>
+            );
+          }
           return tieneContorno(p) ? <PlacaCortada key={p.id} p={q} {...comun} /> : <Caja key={p.id} {...comun} />;
         })}
 
@@ -382,9 +449,21 @@ function Escena(props) {
         .filter((d) => visibles[d.grupo])
         .map((d) => {
           const q = d.forma && d.forma !== 'boton' ? d : desplazar(d, d.grupo);
-          // Los botones acompañan a su mueble en la vista explotada
-          return <Deco key={d.id} d={q} onOver={d.forma === 'boton' ? sobre(d.nombre) : undefined} onOut={() => setHover('')} />;
+          // Los botones acompañan a su mueble en la vista explotada y a su cajón o puerta al abrir
+          const mov = abrir.porDeco[d.id];
+          const deco = (qq) => <Deco key={d.id} d={qq} onOver={d.forma === 'boton' ? sobre(d.nombre) : undefined} onOut={() => setHover('')} />;
+          if (mov && mov.tipo === 'cajon') return deco({ ...q, x: q.x + mov.v[0] * abierto, z: q.z + mov.v[2] * abierto });
+          if (mov && mov.tipo === 'puerta') {
+            const pivote = [mov.pivote[0] + (q.x - d.x), mov.pivote[1] + (q.z - d.z)];
+            return (
+              <Giro key={d.id} pivote={pivote} giro={mov.giro * abierto}>
+                {deco(q)}
+              </Giro>
+            );
+          }
+          return deco(q);
         })}
+
 
       {/* Equipos de agua y cocina */}
       {mostrarEquipos &&
@@ -454,6 +533,7 @@ function Escena(props) {
         ))}
 
       </group>
+      {cotas && !activo && explosion < 0.02 && abierto < 0.02 && camaAbierta < 0.02 && <CotasGlobales cajas={cajasCotas} />}
       </group>
 
       {/* Modo pieza: la madera elegida (fuera del grupo que se desvanece) y sus cotas */}
@@ -461,12 +541,12 @@ function Escena(props) {
         const p = data.partes.find((x) => x.id === id);
         if (!p) return null;
         const q = colocada(p);
-        const color = p.tipo === 'liston' ? '#c49a5e' : p.color || COLORES[p.grupo];
+        const color = colorDe(p);
         const ent = entradas.current[id] || { alfaInicial: 1, retraso: 0, desdeSeleccion: false };
         return (
           <React.Fragment key={id}>
             <group scale={[-1, 1, 1]}>
-              <PiezaEnfoque q={q} color={color} activa={id === foco} {...ent} onFin={() => quitar(id)} />
+              <PiezaEnfoque q={q} color={color} bordes={bordeDe(p)} activa={id === foco} {...ent} onFin={() => quitar(id)} />
             </group>
             <AnotacionesDe key={`${id}:${invertir}`} q={q} invertir={invertir} xMedio={van.ancho / 2} fov={camera.fov} visible={id === foco && anotId === id} />
           </React.Fragment>
@@ -483,6 +563,7 @@ export default function Scene3D(props) {
   const { van } = props;
   return (
     <Canvas
+      flat
       frameloop={props.visible === false ? 'never' : 'always'}
       dpr={[1, 2]}
       camera={{ position: VISTAS.foto.pos, fov: 45, near: 0.05, far: 60 }}

@@ -12,7 +12,7 @@ export const aMundo = (v) => [-v[0] / 1000, v[1] / 1000, v[2] / 1000];
 const suave = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 // La pieza elegida. Aparece (o se va) con un fundido y pasa del color de selección al color de la madera.
-export function PiezaEnfoque({ q, color, activa, alfaInicial, retraso, desdeSeleccion, onFin }) {
+export function PiezaEnfoque({ q, color, bordes, activa, alfaInicial, retraso, desdeSeleccion, onFin }) {
   const grupo = useRef();
   const mat = useRef();
   const alfa = useRef(alfaInicial);
@@ -41,7 +41,7 @@ export function PiezaEnfoque({ q, color, activa, alfaInicial, retraso, desdeSele
     }
   });
 
-  const comun = { x: q.x, y: q.y, z: q.z, color, bordes: '#3f2d14', matRef: mat };
+  const comun = { x: q.x, y: q.y, z: q.z, color, bordes: bordes || '#3f2d14', matRef: mat };
   return (
     <group ref={grupo}>
       {tieneContorno(q) ? <PlacaCortada p={q} {...comun} /> : <Caja sx={q.sx} sy={q.sy} sz={q.sz} {...comun} />}

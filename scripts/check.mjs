@@ -10,6 +10,8 @@ import { ELEMENTOS } from '../src/data/elementos.js';
 import { disposicionTrasero } from '../src/engine/disposicion.js';
 import { contorno, describirPieza, posarCamara, anotarPieza } from '../src/engine/enfoque.js';
 import { armarTutorial, agujerosDe, caladosDe } from '../src/engine/tutorial.js';
+import { rolDe, ROLES, oscurecer } from '../src/engine/colores.js';
+import { planAbrir, llaveCajon } from '../src/engine/abrir.js';
 
 const data = construir(CONFIG_INICIAL);
 const plan = planificar(data.partes, CONFIG_INICIAL);
@@ -389,5 +391,29 @@ function L_E() {
   exigir(ag.length >= 8, `el tutorial debería listar los agujeros de los cables y mangueras, hay ${ag.length}`);
   const cal = caladosDe(data, e3t);
   for (const id of ['Heladera', 'Anafe', 'Fregadero']) exigir(cal.some((c) => c.aparato.startsWith(id)), `falta el calado de ${id} en el tutorial`);
+}
+// ---- Colores por rol y modo Abierto del 3D ----
+{
+  const rol = (id) => rolDe(data.partes.find((p) => p.id === id));
+  const esperado = {
+    'TRA-01': 'lateral', 'TRA-19': 'frente', 'TRA-37': 'interior', 'TRA-40': 'interior', 'TRA-57': 'interior', 'TRA-14': 'horizontal',
+    'TRA-61': 'liston', 'CAM-01': 'horizontal', 'CAM-08': 'horizontal', 'CAM-14': 'frente', 'CAM-15': 'liston', 'DER-25': 'frente',
+    'DER-02': 'lateral', 'DER-01': 'interior', 'DER-34': 'interior', 'DER-38': 'horizontal', 'DER-40': 'frente',
+  };
+  for (const [id, r] of Object.entries(esperado)) exigir(rol(id) === r, `${id} debería ser ${r} y es ${rol(id)}`);
+  exigir(data.partes.every((p) => ROLES[rolDe(p)]), 'alguna pieza quedó sin rol de color');
+  exigir(oscurecer('#ffffff', 0) === '#ffffff' && oscurecer('#ffffff', 1) === '#1d1259', 'oscurecer debería mezclar con el violeta de noche');
+
+  const ab = planAbrir(data);
+  const cajones = new Set(Object.values(ab.porParte).filter((m) => m.tipo === 'cajon'));
+  const puertas = Object.entries(ab.porParte).filter(([, m]) => m.tipo === 'puerta');
+  exigir(cajones.size === 9, `deberían abrirse 9 cajones y se abren ${cajones.size}`);
+  exigir(puertas.length === 3, `deberían abrirse 3 puertas y se abren ${puertas.length}`);
+  // Todos los cajones llevan su frente y su caja: el frente y la caja del gas son el mismo cajón
+  exigir(llaveCajon('Frente cajón del gas') === llaveCajon('Cajón de la garrafa - lateral'), 'el frente del gas y la caja de la garrafa deberían ser el mismo cajón');
+  for (const m of cajones) exigir(Math.abs(m.v[0]) + Math.abs(m.v[2]) > 0 && m.v[1] === 0, 'un cajón debería deslizar en horizontal');
+  // Las bisagras están del lado contrario al botón: la de la batería queda en x = 32 (el botón está hacia x = 587)
+  const bateria = ab.porParte['TRA-19'];
+  exigir(bateria && Math.abs(bateria.pivote[0] - 32) < 1, 'la puerta de la batería debería girar sobre su borde izquierdo');
 }
 process.exit(fallos ? 1 : 0);

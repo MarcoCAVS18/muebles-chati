@@ -9,6 +9,7 @@ import { calcularElectrica } from './engine/electrica.js';
 import { electrico3d } from './engine/electrico3d.js';
 import { VERSION } from './almacen.js';
 import Scene3D, { VISTAS } from './components/Scene3D.jsx';
+import Barra3D, { Leyenda } from './components/Barra3D.jsx';
 import PanelElemento from './components/PanelElemento.jsx';
 import PanelPieza from './components/PanelPieza.jsx';
 import { Seccion, SECCIONES_CFG, escribir } from './components/Campos.jsx';
@@ -68,7 +69,16 @@ export default function App() {
   const [pasoVivo, setPasoVivo] = useState(null); // paso del Armado que está abierto: sus piezas se ven rosa en el 3D
   const esMovil = useEsMovil();
   const [panel, setPanel] = useState('3D'); // en el celular: '3D', 'Medidas' o 'Tabs' (las pestañas de la derecha)
-  const [opciones, setOpciones] = useState(false); // en el celular los controles del 3D se abren y se cierran
+  const [abierto, setAbierto] = useState(0); // cajones y puertas: 0 cerrados, 1 abiertos
+  const [cotas, setCotas] = useState(false);
+  const [colores, setColores] = useState(true); // colores por rol de la madera
+  // El modo sale de los controles, así que los controles finos y los tres botones siempre coinciden
+  const modo = explosion > 0.02 ? 'explotado' : abierto > 0.02 || camaAbierta > 0.02 ? 'abierto' : 'armado';
+  const elegirModo = (m) => {
+    setExplosion(m === 'explotado' ? 0.5 : 0);
+    setAbierto(m === 'abierto' ? 1 : 0);
+    setCamaAbierta(m === 'abierto' ? 1 : 0);
+  };
   const [reserva, setReserva] = useState({ y: 0, x: 0, derecha: 0 }); // lo que tapa la tarjeta del modo pieza, en px
   const origen = useRef(null); // panel desde el que se abrió una pieza o un equipo, para volver a él
   const [visibles, setVisibles] = useState({
@@ -172,7 +182,6 @@ export default function App() {
     setElemento('');
     setSeleccion(id);
     setInvertir(false);
-    setOpciones(false);
     aPanel3D();
     setEnfoque(id);
   };
@@ -191,7 +200,6 @@ export default function App() {
   const irA = (clave) => {
     if (enfoque) setEnfoque('');
     setElemento('');
-    setOpciones(false);
     origen.current = null;
     if (clave === '3D' || clave === 'Medidas') setPanel(clave);
     else {
@@ -234,7 +242,7 @@ export default function App() {
     if (!tarjeta) return undefined;
     const medir = () => {
       const lateral = tarjeta.offsetWidth < visor.offsetWidth * 0.7;
-      const barra = visor.querySelector('.controles');
+      const barra = visor.querySelector('.hud-arriba');
       const arriba = barra && !esMovil ? barra.offsetTop + barra.offsetHeight : 0;
       const abajo = lateral ? 0 : tarjeta.offsetHeight + 12;
       const derecha = lateral ? tarjeta.offsetWidth + 12 : 0;
@@ -273,7 +281,7 @@ export default function App() {
       </aside>
 
       <main className="centro">
-        <div className="visor" onPointerDown={(e) => opciones && !e.target.closest('.controles, .btn-opciones') && setOpciones(false)}>
+        <div className="visor">
           <Scene3D
             data={data}
             elec3d={elec3d}
@@ -293,6 +301,9 @@ export default function App() {
             vista={vista}
             transparentar={transparentar}
             camaAbierta={camaAbierta}
+            abierto={abierto}
+            cotas={cotas}
+            colores={colores}
             enfoque={enfoque}
             setEnfoque={enfocar}
             invertir={invertir}
@@ -302,73 +313,54 @@ export default function App() {
             resaltadas={resaltadas}
           />
           <div className="hud">
-            <button className="btn-opciones" onClick={() => setOpciones((o) => !o)} aria-expanded={opciones}>
-              {opciones ? 'Cerrar' : 'Opciones'}
-            </button>
-            <div className={`controles${opciones ? ' abierto' : ''}`}>
-              {data.grupos.map((g) => (
-                <label key={g}>
-                  <input
-                    type="checkbox"
-                    checked={visibles[g]}
-                    onChange={(e) => setVisibles({ ...visibles, [g]: e.target.checked })}
-                  />
-                  {g}
-                </label>
-              ))}
-              <label>
-                <input type="checkbox" checked={mostrarEquipos} onChange={(e) => setMostrarEquipos(e.target.checked)} />
-                Agua, cocina y gas
-              </label>
-              <label>
-                <input type="checkbox" checked={mostrarElectrico} onChange={(e) => setMostrarElectrico(e.target.checked)} />
-                Eléctrico y mangueras
-              </label>
-              <label>
-                <input type="checkbox" checked={mostrarAsientos} onChange={(e) => setMostrarAsientos(e.target.checked)} />
-                Asientos
-              </label>
-              <label>
-                <input type="checkbox" checked={mostrarArcos} onChange={(e) => setMostrarArcos(e.target.checked)} />
-                Pasarruedas
-              </label>
-              <label>
-                <input type="checkbox" checked={transparentar} onChange={(e) => setTransparentar(e.target.checked)} />
-                Ver interior
-              </label>
-              <label className="ctl-arriba">
-                Vista
-                <select
-                  value={vista.clave}
-                  onChange={(e) => {
-                    setEnfoque('');
-                    setVista({ clave: e.target.value, n: vista.n + 1 });
-                  }}
-                >
-                  {Object.entries(VISTAS).map(([k, v]) => (
-                    <option key={k} value={k}>
-                      {v.nombre}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="ctl-arriba">
-                Cama: {Math.round((cfg.cama.ancho + cfg.cama.extension * camaAbierta) / 10)} cm
-                <input type="range" min="0" max="1" step="0.05" value={camaAbierta} onChange={(e) => setCamaAbierta(parseFloat(e.target.value))} />
-              </label>
-              <label className="ctl-arriba">
-                Vista explotada
-                <input type="range" min="0" max="1" step="0.05" value={explosion} onChange={(e) => setExplosion(parseFloat(e.target.value))} />
-              </label>
-            </div>
-            {esMovil && resaltadas && !enfoque && (
-              <button className="volver-paso" onClick={() => irA('Armado')}>
-                <Icono n="izq" />
-                Volver al paso {pasoVivo.numero}
-              </button>
-            )}
+            <Barra3D
+              vistas={VISTAS}
+              vista={vista}
+              cambiarVista={(clave) => {
+                setEnfoque('');
+                setVista({ clave, n: vista.n + 1 });
+              }}
+              modo={modo}
+              elegirModo={elegirModo}
+              cotas={cotas}
+              setCotas={setCotas}
+              colores={colores}
+              setColores={setColores}
+              grupos={data.grupos}
+              visibles={visibles}
+              setVisibles={setVisibles}
+              capas={[
+                { etiqueta: 'Agua, cocina y gas', valor: mostrarEquipos, poner: setMostrarEquipos },
+                { etiqueta: 'Eléctrico y mangueras', valor: mostrarElectrico, poner: setMostrarElectrico },
+                { etiqueta: 'Asientos', valor: mostrarAsientos, poner: setMostrarAsientos },
+                { etiqueta: 'Pasarruedas', valor: mostrarArcos, poner: setMostrarArcos },
+                { etiqueta: 'Ver interior', valor: transparentar, poner: setTransparentar },
+              ]}
+              camaTexto={`Cama: ${Math.round((cfg.cama.ancho + cfg.cama.extension * camaAbierta) / 10)} cm`}
+              camaAbierta={camaAbierta}
+              setCamaAbierta={setCamaAbierta}
+              abierto={abierto}
+              setAbierto={setAbierto}
+              explosion={explosion}
+              setExplosion={setExplosion}
+              derecha={
+                resaltadas && esMovil ? (
+                  <button className="pill-cta volver-paso" onClick={() => irA('Armado')}>
+                    <Icono n="izq" />
+                    Paso {pasoVivo.numero}
+                  </button>
+                ) : tab === 'Armado' && !esMovil ? null : (
+                  <button className="pill-cta" onClick={() => irA('Armado')}>
+                    <Icono n="martillo" />
+                    Cómo se arma
+                  </button>
+                )
+              }
+            />
             {!enfoque && (
-              <div className="info">
+              <div className="hud-abajo">
+                {colores && !resaltadas && <Leyenda />}
+                <div className="info">
                 {hover ||
                   (parteSel
                     ? `${parteSel.id} - ${parteSel.nombre}`
@@ -377,6 +369,7 @@ export default function App() {
                       : TACTIL
                       ? 'Tocá una pieza. Doble toque en una madera para verla sola. Tocá un equipo o cable eléctrico para ver el video.'
                       : 'Pasá el mouse sobre una pieza. Doble clic en una madera para verla sola. Clic en un equipo o cable eléctrico para ver el video.')}
+                </div>
               </div>
             )}
           </div>
