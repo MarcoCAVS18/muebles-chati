@@ -355,9 +355,9 @@ exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /ranuras/.test(l.t
   }
 }
 const costados = data.partes.filter((p) => /^Costado del pasillo/.test(p.nombre));
-exigir(costados.length === 2 && costados.every((p) => p.silueta && p.silueta.tipo === 'costado' && !(p.huecos && p.huecos.length)), 'cada módulo debería llevar un costado fijo del pasillo, abierto hacia arriba');
+exigir(costados.length === 2 && costados.every((p) => !p.silueta && p.huecos.length === 1 && p.huecos[0].tipo === 'ventana'), 'cada módulo debería llevar un costado fijo del pasillo, un marco cerrado con una ventana');
 // Los costados del pasillo son FIJOS (CAM-04 y CAM-05): quedan un poco sobre el piso y llegan hasta debajo de los listones de las correderas,
-// que pasan por encima con luz. El portal que sale con las varillas va por afuera de cada uno
+// que pasan por encima con 5 mm de luz. El portal que sale con las varillas va por afuera de cada uno
 const lay = data.layout.cama;
 exigir(costados.every((p) => !p.ext && p.y > 0 && p.y <= 10 && Math.abs(p.y + p.sy - lay.yCostado) < 0.01 && Math.abs(p.x - (lay.x1 - p.sx)) < 0.01), 'los costados del pasillo deberían quedar fijos, sobre el piso y bajo los listones de las correderas');
 const listonesCorr = data.partes.filter((p) => /^Listón de la corredera/.test(p.nombre));
@@ -367,13 +367,14 @@ for (const po of portales) {
   const cos = costados.find((q) => Math.abs(q.z - po.z) < 0.01 && Math.abs(q.sz - po.sz) < 0.01);
   exigir(cos && Math.abs(po.x - (cos.x + cos.sx)) < 0.01, `el portal ${po.id} debería ir pegado por afuera del costado fijo`);
   exigir(Math.abs(po.y + po.sy - lay.yT) < 0.01 && po.y > 0 && po.y <= 10, `el portal ${po.id} debería llegar a la cara de arriba de la cama (a ras de las varillas) y no tocar el piso`);
-  exigir(cos && Math.abs(po.silueta.n0 - cos.silueta.n0) < 0.01 && Math.abs(po.silueta.n1 - cos.silueta.n1) < 0.01, `el calado del portal ${po.id} debería coincidir con el del costado fijo`);
-  exigir(cos && Math.abs(po.y + po.silueta.a1 - (cos.y + cos.sy)) < 0.01, `el travesaño del portal ${po.id} debería arrancar donde termina el costado fijo`);
+  const vc = cos && cos.huecos[0];
+  exigir(vc && Math.abs(po.silueta.n0 - vc.b0) < 0.01 && Math.abs(po.silueta.n1 - vc.b1) < 0.01 && Math.abs(po.y + po.silueta.a1 - (cos.y + vc.a1)) < 0.01, `el calado del portal ${po.id} debería coincidir con la ventana del costado fijo`);
+  exigir(po.y + po.sy - (cos.y + cos.sy) >= 40, `el travesaño del portal ${po.id} debería tapar la franja entre el costado fijo y la placa`);
   // Los listones de las correderas terminan contra una pata del portal (por dentro) y pasan sobre el costado fijo
   for (const l of listonesCorr.filter((q) => q.z >= po.z && q.z + q.sz <= po.z + po.sz)) {
     const enPata = (l.z >= po.z && l.z + l.sz <= po.z + po.silueta.n0) || (l.z >= po.z + po.silueta.n1 && l.z + l.sz <= po.z + po.sz);
     exigir(enPata && Math.abs(l.x + l.sx - po.x) < 0.01, `el listón ${l.id} debería terminar contra una pata del portal ${po.id}`);
-    exigir(l.y - (cos.y + cos.sy) >= 5, `el listón ${l.id} debería pasar al menos 5 mm por encima del costado fijo`);
+    exigir(l.y - (cos.y + cos.sy) >= 5 - 1e-6, `el listón ${l.id} debería pasar al menos 5 mm por encima del costado fijo`);
   }
 }
 exigir(Math.abs(Math.max(...portales.map((q) => q.x + q.sx)) - (lay.x1 + portales[0].sx)) < 0.01, 'el portal debería sumar su espesor al ancho de la cama cerrada');
@@ -399,9 +400,9 @@ exigir(frentesCajon.every((p) => !p.ext && p.bisagraAbajo), 'las puertas de la c
 }
 for (const f of frentesCajon) {
   const cos = costados.find((p) => f.z >= p.z && f.z + f.sz <= p.z + p.sz);
-  const s = cos && cos.silueta;
-  exigir(s && Math.abs(f.x - cos.x) < 0.01 && f.y >= cos.y + s.a0 + 2.5 && f.y + f.sy <= cos.y + s.h - 2.5 && f.z >= cos.z + s.n0 + 2.5 && f.z + f.sz <= cos.z + s.n1 - 2.5, `${f.id} debería entrar en el calado de su costado con 3 mm de luz`);
-  exigir(Math.abs(contorno(f).radio - (s.radio - 3)) < 0.01, `${f.id} debería llevar las esquinas del radio del calado menos la luz`);
+  const v = cos && cos.huecos[0];
+  exigir(v && Math.abs(f.x - cos.x) < 0.01 && f.y >= cos.y + v.a0 + 2.5 && f.y + f.sy <= cos.y + v.a1 - 2.5 && f.z >= cos.z + v.b0 + 2.5 && f.z + f.sz <= cos.z + v.b1 - 2.5, `${f.id} debería entrar en la ventana de su costado con 3 mm de luz`);
+  exigir(Math.abs(contorno(f).radio - (v.r - 3)) < 0.01, `${f.id} debería llevar las esquinas del radio de la ventana menos la luz`);
   // Cerrada, la puerta sale por el calado del portal que tiene delante
   const po = portales.find((q) => Math.abs(q.z - cos.z) < 0.01);
   exigir(po && f.z >= po.z + po.silueta.n0 && f.z + f.sz <= po.z + po.silueta.n1 && f.y >= po.y && f.y + f.sy <= po.y + po.silueta.a1, `${f.id} debería pasar por el calado del portal al abrir`);

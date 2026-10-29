@@ -634,13 +634,10 @@ function cama(data, plan, cfg, e3, cortes) {
   const ventanas = [...frentePie, ...costados, ...portales].map((p) => {
     const s = p.silueta;
     if (s) {
-      const alto = s.tipo === 'portal' ? s.a1 : s.h - s.a0;
       return [
         `${p.id} ${p.nombre.replace(/\(.*$/, '').trim()}`,
-        `${r0(s.n1 - s.n0)} mm de largo x ${r0(alto)} mm de alto`,
-        s.tipo === 'portal'
-          ? `abierto hacia abajo, esquinas de arriba R${r0(s.radio)}; empieza a ${r0(s.n0)} mm del borde del frente`
-          : `abierto hacia arriba, esquinas de abajo R${r0(s.radio)}; empieza a ${r0(s.n0)} mm del borde del frente y baja hasta ${r0(s.a0)} mm del borde de abajo`,
+        `${r0(s.n1 - s.n0)} mm de largo x ${r0(s.a1)} mm de alto`,
+        `abierto hacia abajo, esquinas de arriba R${r0(s.radio)}; empieza a ${r0(s.n0)} mm del borde del frente`,
       ];
     }
     const h = (p.huecos || []).find((q) => q.tipo === 'ventana');
@@ -673,7 +670,7 @@ function cama(data, plan, cfg, e3, cortes) {
   pasos.push({
     id: 'cam-2',
     titulo: 'Calar el peine, los calados y las esquinas',
-    intro: 'Cada placa es un peine: dedos fijos y ranuras abiertas hacia el pasillo. Los pedazos que salen de las ranuras son las varillas que se extienden. Los calados de los costados y de los portales se hacen igual, con plantilla: el costado fijo queda abierto hacia arriba y el portal, hacia abajo.',
+    intro: 'Cada placa es un peine: dedos fijos y ranuras abiertas hacia el pasillo. Los pedazos que salen de las ranuras son las varillas que se extienden. Las ventanas de los costados fijos y los calados de los portales se hacen igual, con plantilla: el costado lleva una ventana cerrada y el portal un calado abierto hacia abajo, del mismo tamaño.',
     hacer: [
       `Hacé una plantilla de cartón o MDF de una ranura (esquinas del fondo R${cm.ranura.radio}) y de una ventana (esquinas R${cm.ventana.radio}). Marcá todas con la misma.`,
       pfCab && pfPie
@@ -713,13 +710,13 @@ function cama(data, plan, cfg, e3, cortes) {
       'Módulo del pie: frente (con ventana) y panel central. Cola y 4x40 contra los refuerzos del piso.',
       'Módulo de la cabecera: panel central y la guía, que cierra el extremo contra el frente del mueble trasero.',
       `Alturas: el frente del pie y la guía llegan a ${lay.yT} mm, a ras de la superficie donde dormís; el panel central llega a ${lay.yB} mm, justo bajo las placas.`,
-      `Costados del pasillo (${ids(costados)}): son FIJOS. Van de pie contra el frente del pie, el panel central y la guía, con las patas apoyadas en esas tapas (cola y 4x40 desde afuera, y a la punta de los refuerzos de piso). Miden ${r0(lay.yCostado - 5)} mm de alto y quedan 5 mm sobre el piso. Como no tienen travesaño arriba, los listones de las correderas pasan por encima con ${r0(lay.yB - 30 - lay.yCostado)} mm de luz.`,
+      `Costados del pasillo (${ids(costados)}): son FIJOS. Van de pie contra el frente del pie, el panel central y la guía (cola y 4x40 desde afuera, y a la punta de los refuerzos de piso). Miden ${r0(lay.yCostado - 5)} mm de alto y quedan 5 mm sobre el piso. No llegan hasta la placa: los listones de las correderas pasan por encima con ${r0(lay.yB - 30 - lay.yCostado)} mm de luz.`,
       'Todo parado y a escuadra. Pegá cada pieza contra su refuerzo y atornillá a través del refuerzo, no al piso.',
     ],
     piezas: [...filas(frentePie, cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...filas(costados, cortes)],
     ojo: [
       'El panel central se acorta para esquivar el pasarruedas: probalo en seco contra el arco antes de pegar.',
-      'Con el costado abierto arriba, cada caja se sostiene con el frente, el panel central, la guía, los refuerzos del piso, los largueros y la pared: revisá que no se abra ni se deforme antes de seguir.',
+      'Cada caja se sostiene con el frente, el panel central, la guía, los refuerzos del piso, los largueros y la pared: revisá que no se abra ni se deforme antes de seguir.',
     ],
   });
 
@@ -762,9 +759,9 @@ function cama(data, plan, cfg, e3, cortes) {
     titulo: 'Puertas de los costados',
     intro: 'Cada ventana la cierra una puerta que baja con bisagras en el borde de abajo (como en las fotos de referencia): dos puertas hacia el pasillo y una en el frente del pie, hacia la puerta trasera. Las tres cuelgan de piezas FIJAS de la caja (los costados fijos, sus listones y el refuerzo de piso) y nunca quedan en el aire: la cama se extiende y las puertas se quedan donde están. Atrás queda el hueco de guardado: no hay cajones ni correderas.',
     hacer: [
-      `Listón de las bisagras (${ids(por(/^Listón de las bisagras/))}): va fijo en la caja, contra la cara de adentro del costado fijo, entre los dos refuerzos de piso de su módulo. Apoyalo de testa contra cada refuerzo, pegalo y atornillalo desde el refuerzo. Su cara de arriba queda a ${r0(cfg.cama.ventana.zocalo)} mm del piso, a ras del borde de abajo del calado del costado.`,
+      `Listón de las bisagras (${ids(por(/^Listón de las bisagras/))}): va fijo en la caja, contra la cara de adentro del costado fijo, entre los dos refuerzos de piso de su módulo. Apoyalo de testa contra cada refuerzo, pegalo y atornillalo desde el refuerzo. Su cara de arriba queda a ${r0(cfg.cama.ventana.zocalo)} mm del piso, a ras del borde de abajo de la ventana del costado.`,
       'Cazoletas: broca Forstner de 35 mm, 12 mm de profundidad (con tope), con el centro a 22,5 mm del canto de la bisagra. Probá antes en un recorte. Son 3 bisagras en la puerta de la cabecera, 2 en la del pie y 2 en la del frente del pie.',
-      'Poné cada puerta de costado en el calado del costado fijo, con 3 mm de luz a cada lado, con las bisagras en el borde de abajo y atornilladas al listón. Cerrada, el portal queda delante: la puerta sale por su calado de abajo.',
+      'Poné cada puerta de costado en la ventana del costado fijo, con 3 mm de luz a cada lado, con las bisagras en el borde de abajo y atornilladas al listón. Cerrada, el portal queda delante: la puerta sale por su calado de abajo.',
       `Puerta del frente del pie (${ids(por(/^Puerta del frente del pie/))}): entra en la ventana del frente con 3 mm de luz. Sus bisagras se atornillan al refuerzo de piso que tiene detrás (${ids(por(/^Refuerzo de piso del módulo del pie \(frente\)/))}), que llega justo hasta su borde de abajo. Baja hacia la puerta trasera de la van.`,
       'Agarradera: el calado de la puerta es la escotadura para el dedo, a 18 mm del borde de arriba. El botón push va debajo y traba la puerta cerrada.',
       'Probá abrir y cerrar con la cama cerrada (la puerta pasa por el calado del portal) y con la cama extendida (el portal ya no está: la puerta queda libre bajo la extensión). Baja hasta quedar horizontal y apoya o se frena con una cinta o un tope.',
@@ -811,7 +808,7 @@ function cama(data, plan, cfg, e3, cortes) {
     titulo: 'Cama',
     resumen: [
       `Cama de ${cm.largo / 10} cm de largo y ${cm.ancho / 10} cm de ancho, a ${cm.plataforma / 10} cm del piso, que se agranda a ${(cm.ancho + cm.extension) / 10} cm con las varillas.`,
-      `Son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada placa es un peine y sus varillas salen de las ranuras. Cada módulo tiene una puerta que baja en el calado del costado fijo.`,
+      `Son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada placa es un peine y sus varillas salen de las ranuras. Cada módulo tiene una puerta que baja en la ventana del costado fijo.`,
       'Los costados del pasillo con sus puertas son fijos. Los portales (una U invertida por módulo) salen junto con las varillas y los listones de las correderas y son la base de la extensión.',
       'Se apoya en el piso (refuerzos), en la pared izquierda (listones) y en el frente del mueble trasero.',
     ],
