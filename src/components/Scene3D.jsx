@@ -159,6 +159,15 @@ function Deco({ d, onOver, onOut }) {
   return <Caja x={d.x} y={d.y} z={d.z} sx={d.sx} sy={d.sy} sz={d.sz} color={d.color} bordes={null} />;
 }
 
+// Una puerta que baja sobre su bisagra de abajo (eje horizontal paralelo a z que pasa por pivote = [x, y] en mm)
+function GiroTapa({ pivote, giro, children }) {
+  return (
+    <group position={[m(pivote[0]), m(pivote[1]), 0]} rotation={[0, 0, giro]}>
+      <group position={[-m(pivote[0]), -m(pivote[1]), 0]}>{children}</group>
+    </group>
+  );
+}
+
 // Una puerta que gira sobre su bisagra (eje vertical que pasa por pivote = [x, z] en mm)
 function Giro({ pivote, giro, children }) {
   return (
@@ -434,6 +443,14 @@ function Escena(props) {
             onOut: () => setHover(''),
           };
           const mov = abrir.porParte[p.id];
+          if (mov && mov.tipo === 'tapa') {
+            const pivote = [mov.pivote[0] + (q.x - p.x), mov.pivote[1] + (q.y - p.y)];
+            return (
+              <GiroTapa key={p.id} pivote={pivote} giro={mov.giro * abierto}>
+                {tieneContorno(p) ? <PlacaCortada p={q} {...comun} /> : <Caja {...comun} />}
+              </GiroTapa>
+            );
+          }
           if (mov && mov.tipo === 'puerta') {
             const pivote = [mov.pivote[0] + (q.x - p.x), mov.pivote[1] + (q.z - p.z)];
             return (
@@ -448,11 +465,20 @@ function Escena(props) {
       {data.decos
         .filter((d) => visibles[d.grupo])
         .map((d) => {
-          const q = d.forma && d.forma !== 'boton' ? d : desplazar(d, d.grupo);
+          const q0 = d.forma && d.forma !== 'boton' ? d : desplazar(d, d.grupo);
+          const q = d.ext ? { ...q0, x: q0.x + (data.layout.cama?.extension || 0) * camaAbierta } : q0;
           // Los botones acompañan a su mueble en la vista explotada y a su cajón o puerta al abrir
           const mov = abrir.porDeco[d.id];
           const deco = (qq) => <Deco key={d.id} d={qq} onOver={d.forma === 'boton' ? sobre(d.nombre) : undefined} onOut={() => setHover('')} />;
           if (mov && mov.tipo === 'cajon') return deco({ ...q, x: q.x + mov.v[0] * abierto, z: q.z + mov.v[2] * abierto });
+          if (mov && mov.tipo === 'tapa') {
+            const pivote = [mov.pivote[0] + (q.x - d.x), mov.pivote[1] + (q.y - d.y)];
+            return (
+              <GiroTapa key={d.id} pivote={pivote} giro={mov.giro * abierto}>
+                {deco(q)}
+              </GiroTapa>
+            );
+          }
           if (mov && mov.tipo === 'puerta') {
             const pivote = [mov.pivote[0] + (q.x - d.x), mov.pivote[1] + (q.z - d.z)];
             return (

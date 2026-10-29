@@ -248,6 +248,11 @@ export function describirPieza(p, cfg) {
           tipo: 'arco',
           texto: `${g.n} ranuras iguales de ${fmt(largo)} x ${fmt(ancho)} mm, con esquinas R${fmt(h.r)}, a lo ancho de la pieza${g.costilla ? ` y ${fmt(g.costilla)} mm de madera entre una y otra` : ''}${g.cortos ? `; las ${g.cortos} que quedan junto al recorte son más cortas` : ''} (taladro en cada esquina, caladora y fresadora o lija para pulirlas)`,
         });
+      } else if (h.tipo === 'agarradera') {
+        lineas.push({
+          tipo: 'arco',
+          texto: `Agarradera calada de ${fmt(largo)} x ${fmt(ancho)} mm con esquinas R${fmt(h.r)}, a ${fmt(c.h - h.a1)} mm del borde de arriba y centrada a lo ancho: es donde se mete el dedo para abrir la puerta (taladro, caladora y lija)`,
+        });
       } else if (h.tipo === 'asiento') {
         lineas.push({
           tipo: 'arco',
@@ -476,7 +481,7 @@ export function anotarPieza(p, cam) {
       const h = g.primero;
       const am = (h.a0 + h.a1) / 2;
       const bm = (h.b0 + h.b1) / 2;
-      const nom = { ranura: 'Ranura', puerta: 'Puerta', asiento: 'Asiento' }[h.tipo] || 'Ventana';
+      const nom = { ranura: 'Ranura', puerta: 'Puerta', asiento: 'Asiento', agarradera: 'Agarradera' }[h.tipo] || 'Ventana';
       const aEn = (f) => h.a0 + f * (h.a1 - h.a0);
       // La etiqueta puede ir en otro lugar de la línea para que las de una misma ranura no se pisen
       const cota = (ini, fin, valor, nombre, etiquetaPos) => cotas.push({ ini, fin, ext: [], valor, nombre, tipo: 'arco', ...(etiquetaPos ? { etiquetaPos } : {}) });

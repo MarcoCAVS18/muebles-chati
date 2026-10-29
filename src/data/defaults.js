@@ -83,9 +83,9 @@ export const CONFIG_INICIAL = {
     luzVarilla: 2, // luz de cada varilla dentro de su ranura, a cada lado
     alturaCorredera: 30, // alto máximo de las correderas: van al listón de 30 x 30 de las varillas
     // Ventanas de los costados (hueco de cada cajón): zócalo y cabezal son la madera que queda abajo y arriba
-    ventana: { radio: 40, zocalo: 40, cabezal: 40, apoyoCajon: 45 },
-    cajonCabecera: { fondo: 500 }, // el alto lo da la ventana; 500 mm es lo que deja el pasarruedas (185 mm)
-    cajonPie: { fondo: 500 },
+    // Ventanas de los costados, cerradas por una puerta que baja hasta el piso (bisagras de cazoleta abajo). margen = lo que
+    // deja la ventana a cada lado; apoyoCajon = sección del listón de los refuerzos de piso
+    ventana: { radio: 40, zocalo: 40, cabezal: 40, margen: 58, apoyoCajon: 45 },
   },
 
   // Mueble derecho: módulo de cajones (atrás), módulo con puerta bajo la mesa y alacena

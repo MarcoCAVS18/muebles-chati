@@ -1,14 +1,14 @@
 // Cama extensible de 71 a 120 cm, armada como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera)
 // y otro de 60 cm (pie), que juntos hacen 180 cm de pared a pared del mueble trasero. Cada módulo es una caja abierta de
-// plywood con un costado del lado del pasillo que lleva una ventana grande de esquinas redondeadas; esa ventana es el
-// hueco del cajón. Las dos tapas de los extremos (frente del pie y guía de la cabecera) llegan hasta la cara de arriba de
+// plywood con un costado del lado del pasillo que lleva una ventana grande de esquinas redondeadas; esa ventana la cierra
+// una puerta que baja hasta el piso (bisagras de cazoleta abajo, como la Standard Sliding Bed B120) y deja ver el hueco
+// de guardado del módulo, sin cajones ni correderas. Las dos tapas de los extremos (frente del pie y guía de la cabecera) llegan hasta la cara de arriba de
 // la cama; el panel central de apoyo llega hasta abajo de las placas.
 //
 // La plataforma son dos placas en peine (CAM-01 y CAM-02): cada una se corta con ranuras abiertas hacia el pasillo. Los
 // pedazos que salen de las ranuras son las varillas móviles; unidas por un lomo, se tiran hacia el pasillo sobre
 // correderas y la cama pasa de 71 a 120 cm. Cerrada parece una sola placa plana; abierta, queda una varilla móvil
 // intercalada entre cada dedo de la placa fija.
-import { cajon } from './cajon.js';
 import { peineFijo, peineMovil, repartoPeine } from './peine.js';
 
 export function cama(ctx, G) {
@@ -32,7 +32,8 @@ export function cama(ctx, G) {
   const R = ca.radio;
   const c = 13; // luz que ocupa una corredera a cada lado
   const hol = 1.5; // mitad de la luz entre las dos placas
-  const sh = ve.apoyoCajon; // listón en el que se atornilla la corredera de cada cajón
+  const sh = ve.apoyoCajon; // sección del listón de los refuerzos de piso
+  const margenV = ve.margen ?? 58; // lo que deja la ventana a cada lado, contra el frente, el panel central y la guía
 
   // Peine: lomo fijo contra la pared, lomo móvil del lado del pasillo y las varillas entre los dos
   const lomo = ca.lomo ?? 60;
@@ -101,9 +102,9 @@ export function cama(ctx, G) {
   // ---- Módulo del pie (60): tapa del extremo con ventana y costado del pasillo con ventana ----
   const altoVentana = yPan - ve.cabezal - ve.zocalo;
   const rV = Math.min(ve.radio, altoVentana / 2 - 1);
-  const anchoCajon = (b) => b.z1 - b.z0 - 2 * (sh + c); // caja del cajón: entre los listones de las correderas
+  const anchoPuerta = (b) => b.z1 - b.z0 - 2 * margenV; // ancho de la puerta que cierra la ventana (sin luz)
   const ventanaDe = (b, zPieza) => {
-    const ancho = anchoCajon(b) + 10;
+    const ancho = anchoPuerta(b) + 10;
     const zc = (b.z0 + b.z1) / 2;
     return { tipo: 'ventana', a0: ve.zocalo - luzPiso, a1: ve.zocalo - luzPiso + altoVentana, b0: zc - ancho / 2 - zPieza, b1: zc + ancho / 2 - zPieza, r: rV };
   };
@@ -117,14 +118,14 @@ export function cama(ctx, G) {
     ext: true,
   });
 
-  // ---- Módulo de la cabecera (120): costado del pasillo con ventana sobre el cajón, hasta el mueble trasero ----
+  // ---- Módulo de la cabecera (120): costado del pasillo con ventana y su puerta, hasta el mueble trasero ----
   P('Costado del pasillo - módulo de la cabecera, 120 (ventana)', x1 - t, luzPiso, zCentro, t, yPan - luzPiso, zCab - zCentro, {
     huecos: [ventanaDe(bahiaCab, zCentro)],
     lado: 1,
     ext: true,
   });
 
-  // Panel central: separa los módulos y es guía de las varillas y de los cajones de los dos lados
+  // Panel central: separa los módulos y es guía de las varillas de los dos lados
   const xPanel = sobreArco(zPanel, zPanel + t) ? xArco : x0;
   P('Panel central de apoyo (guía)', xPanel, 0, zPanel, x1 - t - xPanel, yB, t);
   // Guía de la cabecera: tapa del otro extremo, contra el frente del mueble trasero; llega al plano de la cama
@@ -150,26 +151,30 @@ export function cama(ctx, G) {
   movil('de la cabecera', placaCab, repCab, idPlacaCab);
   movil('del pie', placaPie, repPie, idPlacaPie);
 
-  // ---- Cajones en los huecos de los costados: el frente llena la ventana ----
+  // ---- Puertas en las ventanas de los costados: bajan hasta el piso con bisagras de cazoleta en el borde de abajo ----
+  // Cada puerta cierra su ventana con 3 mm de luz y sale con el costado, del que cuelga. Las bisagras se atornillan a un
+  // listón de 30 x 30 pegado a la cara de adentro del costado, a ras del borde de abajo de la ventana.
   const yFrente = ve.zocalo + 3;
   const altoFrente = altoVentana - 6;
-  const yCaj = yFrente + 5;
-  const altoCaj = altoFrente - 10;
-  const cajonEnVentana = (nombre, b, fondo) => {
-    const ancho = anchoCajon(b);
-    const z0 = b.z0 + sh + c;
-    cajon(ctx, { grupo: G, nombre, x: x1 - t - fondo, y: yCaj, z: z0, ancho, alto: altoCaj, fondo, dir: 'x+', pisoGrueso: true });
-    P(`Frente ${nombre.toLowerCase()}`, x1 - t, yFrente, z0 - 2, t, altoFrente, ancho + 4, { redondeo: rV - 3, lado: 1, color: '#d3b27c' });
-    // Listones donde se atornillan las correderas, uno a cada lado
-    const yL = yCaj + altoCaj / 2 - sh / 2;
-    LST45(`Listón de las correderas ${nombre.toLowerCase()} (lado trasero)`, x1 - t - fondo, yL, b.z0, fondo, sh, sh);
-    LST45(`Listón de las correderas ${nombre.toLowerCase()} (lado delantero)`, x1 - t - fondo, yL, b.z1 - sh, fondo, sh, sh);
-    // Botón push al centro del frente, hacia el pasillo
-    ctx.boton({ grupo: G, nombre: `Frente ${nombre.toLowerCase()}`, eje: 'x+', x: x1, y: yFrente + altoFrente / 2, z: z0 + ancho / 2 });
+  const puertaEnVentana = (nombre, b) => {
+    const ancho = anchoPuerta(b);
+    const z0 = b.z0 + margenV;
+    const aAg = altoFrente - 18; // la agarradera queda a 18 mm del borde de arriba
+    P(`Puerta del módulo ${nombre} (bisagras abajo)`, x1 - t, yFrente, z0 - 2, t, altoFrente, ancho + 4, {
+      redondeo: rV - 3,
+      lado: 1,
+      color: '#d3b27c',
+      ext: true,
+      bisagraAbajo: true,
+      huecos: [{ tipo: 'agarradera', a0: aAg - 24, a1: aAg, b0: (ancho + 4) / 2 - 50, b1: (ancho + 4) / 2 + 50, r: 11 }],
+    });
+    LST(`Listón de las bisagras (${nombre})`, x1 - t - 30, ve.zocalo - 30, z0 - 2, 30, 30, ancho + 4, { ext: true });
+    // Botón push abajo de la agarradera, hacia el pasillo
+    ctx.boton({ grupo: G, nombre: `Puerta del módulo ${nombre} (bisagras abajo)`, eje: 'x+', x: x1, y: yFrente + altoFrente / 2, z: z0 + ancho / 2, ext: true });
     return ancho;
   };
-  const anchoCajCab = cajonEnVentana('Cajón de la cabecera', bahiaCab, ca.cajonCabecera.fondo);
-  const anchoCajPie = cajonEnVentana('Cajón del pie', bahiaPie, ca.cajonPie.fondo);
+  const anchoCajCab = puertaEnVentana('de la cabecera', bahiaCab);
+  const anchoCajPie = puertaEnVentana('del pie', bahiaPie);
 
   // ---- Apoyos de las placas fijas: largueros y listones de pared (esquivan el pasarruedas) ----
   // Los largueros llegan hasta las correderas de las varillas: pasan entre los listones que cuelgan de las puntas
@@ -188,7 +193,7 @@ export function cama(ctx, G) {
   lw('Listón de pared (cabecera, después del arco)', arcoFin + 10, bahiaCab.z1 - 5);
 
   // ---- Refuerzos al piso: como en el instructivo, 4 tornillos de 25 mm por módulo (2 refuerzos con 2 tornillos) ----
-  // Quedan al piso, bajo los cajones (que empiezan 3 mm más arriba) y esquivan el pasarruedas
+  // Quedan al piso, bajo las puertas, y esquivan el pasarruedas
   const refuerzo = (nombre, zA, xDesde) => LST45(nombre, xDesde, 0, zA, x1 - t - 2 - xDesde, sh, sh);
   const desde = (zA, xMin = x0) => (sobreArco(zA, zA + sh) ? Math.max(xArco, xMin) : xMin);
   refuerzo('Refuerzo de piso del módulo del pie (frente)', bahiaPie.z0, desde(bahiaPie.z0));
@@ -256,7 +261,8 @@ export function cama(ctx, G) {
     `Una por módulo: una corredera a cada lado de las varillas. Van al listón de 30 x 30 de las varillas: no pueden medir más de ${hCorr} mm de alto, y el costado del pasillo sale con ellas`
   );
   ctx.herraje(G, 'Retén o traba para las varillas', 2, 'Para que no salgan solas al frenar');
-  ctx.herrajeBotones(G); // un botón push en cada frente de cajón
+  ctx.herrajeBotones(G); // un botón push en cada puerta
+  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas de los módulos)', 5, 'Tres en la puerta de la cabecera y dos en la del pie, sobre el borde de abajo: la puerta baja hasta el piso al abrir. Se atornillan al listón de las bisagras');
   ctx.herraje(G, 'Tirador embutido para las varillas', 2, 'Una agarradera al borde del lomo móvil: el borde de 15 mm es muy fino para un botón push');
   ctx.herraje(G, 'Cinta adhesiva de teflón (PTFE) 25 mm', 1, 'Sobre los largueros y el borde del pasarruedas, donde deslizan las varillas');
   ctx.herraje(G, 'Fresadora con fresa de radio o plantilla y lijadora', 1, `Para las esquinas R${R} de las placas y las varillas y para pulir las ranuras`);
@@ -279,7 +285,7 @@ export function cama(ctx, G) {
   const cruce = xs - (xr + ca.extension);
   if (cruce < 50) ctx.aviso(`Con la cama abierta las varillas apenas entran ${Math.round(cruce)} mm entre los dedos de la placa: tienen que quedar al menos 50 mm intercaladas.`);
   if (largoDedo < ca.extension + 50) ctx.aviso('Los dedos de la placa son más cortos que la extensión: revisar el lomo fijo y el lomo móvil.');
-  if (anchoCajCab < 250 || anchoCajPie < 250) ctx.aviso('Un cajón de la cama quedó muy angosto: revisar el largo de las placas o los listones de las correderas.');
+  if (anchoCajCab < 250 || anchoCajPie < 250) ctx.aviso('La puerta de un módulo de la cama quedó muy angosta: revisar el largo de las placas o el margen de la ventana.');
   if (altoVentana < 150) ctx.aviso('Las ventanas de los costados quedaron muy bajas: revisar la altura de la plataforma o el alto de las correderas.');
   if (repPie.fw < 35 || repCab.fw < 35) ctx.aviso('Los dedos de la placa quedaron muy finos (menos de 35 mm): revisar la cantidad de varillas.');
   if (repPie.ancho > 120 || repCab.ancho > 120) ctx.aviso('Las varillas quedaron muy anchas (más de 120 mm): revisar la cantidad de varillas.');

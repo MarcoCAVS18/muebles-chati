@@ -51,7 +51,7 @@ export function crearContexto(cfg) {
   // Botón push redondo (cierre de gabinete para autocaravana): x, y, z es el centro del botón sobre la cara del
   // frente; eje es hacia dónde sale: 'x-', 'x+', 'z-' o 'z+'. El botón mide unos 28 mm y sobresale 12 mm (ESTIMADO,
   // confirmar con la ficha del producto). Sirve para trabar el frente y para tirar de él.
-  function boton({ grupo, nombre, eje, x, y, z }) {
+  function boton({ grupo, nombre, eje, x, y, z, ext = false }) {
     const r = BOTON.radio;
     const h = BOTON.alto;
     const sig = eje[1] === '+' ? 1 : -1;
@@ -60,7 +60,7 @@ export function crearContexto(cfg) {
         ? { x: sig > 0 ? x : x - h, sx: h, y: y - r, sy: 2 * r, z: z - r, sz: 2 * r }
         : { z: sig > 0 ? z : z - h, sz: h, x: x - r, sx: 2 * r, y: y - r, sy: 2 * r };
     botones.push({ grupo, nombre, eje, cx: x, cy: y, cz: z });
-    decos.push({ ...caja, forma: 'boton', eje, grupo, nombre: `Botón push: ${nombre}`, color: '#1b1b1b', id: `DEC-${String(decos.length + 1).padStart(3, '0')}` });
+    decos.push({ ...caja, forma: 'boton', eje, grupo, ext, nombre: `Botón push: ${nombre}`, color: '#1b1b1b', id: `DEC-${String(decos.length + 1).padStart(3, '0')}` });
   }
 
   // Suma al herraje los botones push puestos en un mueble (uno por frente)

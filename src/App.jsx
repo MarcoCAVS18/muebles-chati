@@ -110,8 +110,6 @@ export default function App() {
               // Un guardado con la cama de 90 cm (bandejas de 500 mm, plataforma a 44 cm) pasa a la de 71 cm
               if (cm && cm.ancho === 900 && cm.extension === 300 && cm.bandejaAncho === 500) {
                 for (const k of ['ancho', 'extension', 'plataforma']) cm[k] = CONFIG_INICIAL.cama[k];
-                cm.cajonCabecera = { ...CONFIG_INICIAL.cama.cajonCabecera };
-                cm.cajonPie = { ...CONFIG_INICIAL.cama.cajonPie };
               }
               // La cama de bandejas pasa a la de varillas en peine: la superficie queda a 400 mm (con 5 mm de fieltro) y el cabezal de las ventanas a 40 mm
               if (cm) {
@@ -120,6 +118,8 @@ export default function App() {
                 if (cm.ranura && (cm.ranura.ancho !== undefined || cm.ranura.margen !== undefined)) cm.ranura = { ...CONFIG_INICIAL.cama.ranura };
                 delete cm.bandejaAncho;
                 delete cm.huecoMueble;
+                delete cm.cajonCabecera;
+                delete cm.cajonPie;
               }
               // Un guardado con el mueble de 1720 mm (secciones de 617 y 1087) pasa al de 1560 mm, con la heladera de la G22 y el anafe angosto
               const mt = d.cfg.trasero;

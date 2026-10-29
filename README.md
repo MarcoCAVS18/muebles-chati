@@ -5,7 +5,7 @@ con la distribución de la foto de referencia: mueble trasero cruzado de pared a
 (de izquierda a derecha: eléctrico al piso con la batería, inversor, DC-DC y fusibles, y sobre la cama el
 panel y los enchufes con dos cajones de cocina arriba; cocina con anafe, gas y heladera al piso, al centro; y agua con
 fregadero y bidones al piso, a la derecha), cama extensible de 71 a 120 cm de 180 cm de largo (placas de plywood con
-esquinas redondeadas y ranuras en peine, varillas sobre correderas, costados con ventana y cajones), y mueble
+esquinas redondeadas y ranuras en peine, varillas sobre correderas y costados con ventana cerrada por una puerta que baja), y mueble
 derecho con cajones, alacena y mesa plegable.
 
 ## Uso
@@ -126,11 +126,11 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   fregadero 340 de ancho x 400 de fondo, bidones de 20 L de 215 x 400 x 290 mm.
 - Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El compartimento de la garrafa necesita una rejilla de
   ventilación hacia el exterior por el piso, detector de gas y detector de monóxido de carbono.
-- Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
+- La cama no lleva cajones: cada ventana de los costados la cierra una puerta con bisagras de cazoleta en el borde de abajo que baja hasta el piso, como en las fotos de referencia (Standard Sliding Bed B120). Detrás queda el hueco de guardado del módulo.
 - La cama es como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera) y otro de 60 cm (pie), unidos con dos
   tornillos de 25 mm y fijados al piso con refuerzos de 4 tornillos de 25 mm por módulo. Cada módulo es una caja abierta con un
   costado del lado del pasillo (que sale con la extensión de la cama) con una ventana grande de esquinas redondeadas (R40, 305 mm de alto); el frente del pie tiene otra.
-  En cada ventana de los costados va un cajón con el frente a ras (el frente toma el radio de la ventana menos la luz de 3 mm).
+  En cada ventana va una puerta a ras (toma el radio de la ventana menos la luz de 3 mm), con una agarradera calada arriba, un botón push al centro y bisagras de cazoleta sobre un listón de 30 x 30 pegado al costado (3 en la de la cabecera y 2 en la del pie). La puerta cuelga del costado y sale con él.
   El lado de la pared no lleva costado: lo hace la pared de la van, y el pasarruedas pasa por ahí.
 - La plataforma es un peine ("varillas intercaladas"): cada placa (cabecera de 120 cm y pie de 60 cm) se corta con ranuras abiertas hacia el
   pasillo. Los pedazos que salen de las ranuras, unidos por un lomo de 80 mm del lado del pasillo, son las varillas móviles: salen 490 mm
@@ -150,8 +150,8 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   Los dos cajones de cocina de la L usan correderas de 500 mm.
 - Cama extensible: las varillas van a la misma altura que la placa fija. Los costados del pasillo (CAM-04 y CAM-05) acompañan a los listones de las
   correderas y salen con la extensión: van atornillados al lomo móvil y a las puntas de los listones, llegan hasta la cara de abajo de la placa
-  (385 mm) y quedan 5 mm sobre el piso. Por eso las ventanas de los cajones miden 305 mm de alto y las correderas de bajo perfil solo tienen
-  que entrar en el listón de 30 x 30. Con la cama abierta el costado queda en x 1195 y cada cajón sale como máximo unos 475 mm antes de tocarlo.
+  (385 mm) y quedan 5 mm sobre el piso. Por eso las ventanas miden 305 mm de alto y las correderas de bajo perfil solo tienen
+  que entrar en el listón de 30 x 30. Con la cama abierta el costado, con su puerta, queda en x 1195.
   Las varillas se deslizan sobre los largueros y el borde del pasarruedas con cinta de teflón. Abiertas quedan en voladizo: hay que probar
   la flexión con peso real. Con la cama abierta quedan 110 mm de pasillo.
 - Correderas de las varillas: de carga, 500 mm, extensión total, 100 kg el par, de bajo perfil. Tienen que recorrer 490 mm: confirmar con la ficha de las que compres.

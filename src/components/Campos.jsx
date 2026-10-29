@@ -105,6 +105,7 @@ export const SECCIONES_CFG = [
       { ruta: 'cama.ventana.radio', etiqueta: 'Ventanas: radio de esquinas' },
       { ruta: 'cama.ventana.zocalo', etiqueta: 'Ventanas: madera abajo' },
       { ruta: 'cama.ventana.cabezal', etiqueta: 'Ventanas: madera arriba' },
+      { ruta: 'cama.ventana.margen', etiqueta: 'Ventanas: margen a los lados' },
     ],
   },
   {

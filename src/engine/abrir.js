@@ -4,6 +4,7 @@
 
 const EJE = { x: 0, y: 1, z: 2 };
 const GIRO_PUERTA = (100 * Math.PI) / 180;
+const GIRO_TAPA = Math.PI / 2; // la puerta con bisagras abajo queda horizontal
 const RECORRIDO_MAX = 240;
 
 // Une el frente con las maderas de su caja: "Frente cajón de cocina 1" y "Cajón de cocina 1 - lateral" son el mismo cajón
@@ -16,7 +17,8 @@ export function llaveCajon(nombre) {
 }
 
 // Devuelve { porParte, porDeco }: para cada id, un cajón { tipo, v } (desplazamiento total en mm)
-// o una puerta { tipo, pivote: [x, z], giro } (giro en radianes alrededor del eje vertical).
+// o una puerta { tipo, pivote: [x, z], giro } (giro en radianes alrededor del eje vertical) o una tapa que baja
+// { tipo: 'tapa', pivote: [x, y], giro } (giro alrededor de un eje horizontal paralelo a z).
 export function planAbrir(data) {
   const porParte = {};
   const porDeco = {};
@@ -37,6 +39,16 @@ export function planAbrir(data) {
       v[eje] = signo * Math.min(fondo / 2, RECORRIDO_MAX);
       const mov = { tipo: 'cajon', v };
       for (const p of miembros) porParte[p.id] = mov;
+      porDeco[d.id] = mov;
+      continue;
+    }
+
+    // Puerta con las bisagras abajo (cama): gira sobre el borde de abajo, por la cara de adentro, y baja hacia afuera.
+    // pivote = [x, y] de un eje horizontal paralelo a z
+    if (frente.bisagraAbajo && eje === 0) {
+      const xp = signo > 0 ? frente.x : frente.x + frente.sx;
+      const mov = { tipo: 'tapa', pivote: [xp, frente.y], giro: -signo * GIRO_TAPA };
+      porParte[frente.id] = mov;
       porDeco[d.id] = mov;
       continue;
     }
