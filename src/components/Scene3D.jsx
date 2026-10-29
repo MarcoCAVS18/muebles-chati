@@ -185,7 +185,7 @@ function Escena(props) {
   const foco = enfoque;
   const activo = !!foco;
 
-  // Explotar, abrir los cajones y sacar las bandejas se animan: los valores de la escena siguen a los de los controles
+  // Explotar, abrir los cajones y sacar las varillas se animan: los valores de la escena siguen a los de los controles
   const act = useRef({ ex: props.explosion, ab: props.abierto, ca: props.camaAbierta });
   const [, latir] = useState(0);
   useFrame((_, dt) => {
@@ -251,7 +251,7 @@ function Escena(props) {
     };
   };
 
-  // Posición actual de una pieza: con la vista explotada y con las bandejas de la cama abiertas
+  // Posición actual de una pieza: con la vista explotada y con las varillas de la cama abiertas
   const colocada = (p) => {
     const q = { ...desplazar(p, p.grupo) };
     if (p.ext) q.x += (data.layout.cama?.extension || 0) * camaAbierta;

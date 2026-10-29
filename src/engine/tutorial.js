@@ -195,7 +195,7 @@ export function caladosDe(data, e3) {
 }
 
 // ---------- Cajones: medidas de la caja, correderas y frente ----------
-const FRENTE_ESPECIAL = { 'Cajón de la garrafa': 'Frente cajón del gas' };
+const FRENTE_ESPECIAL = {};
 
 export function cajonesDe(data, grupo) {
   const del = (re) => data.partes.filter((p) => p.grupo === grupo && re.test(p.nombre));
@@ -377,6 +377,13 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     hacer: [
       `Con la base boca abajo, pegá y atornillá los apoyos: adelante, al medio y atrás, a ras de los bordes (tornillos 3,5x30 desde arriba, uno cada 150 mm). La base queda ${L.yBase} mm sobre el piso y sin esto se pandea con la batería.`,
       'Apoyá el costado izquierdo acostado. Marcá en su cara de adentro la línea de abajo de la base y la del zócalo.',
+      (() => {
+        const c = por(/^Costado izquierdo$/)[0];
+        const h = c && (c.huecos || []).find((q) => q.tipo === 'puerta');
+        return h
+          ? `El costado izquierdo lleva un calado de ${r0(h.b1 - h.b0)} x ${r0(h.a1 - h.a0)} mm (largo x alto, esquinas R${h.r}) para la puerta lateral: calalo ahora, con el costado acostado, antes de armar. Es por donde se entra a la batería y los equipos desde la puerta corrediza de la van.`
+          : 'El costado izquierdo lleva el calado de la puerta lateral: calalo antes de armar.';
+      })(),
       'Pegá y atornillá la base al costado (4x40 desde la cara de afuera del costado, a ras del borde de atrás y del frente).',
       'Parate el divisor 1 sobre la base, a ras del borde derecho, y atornillalo desde abajo, entre los apoyos. Escuadralo con la escuadra grande.',
       'Pegá el zócalo al frente de la base, entre el costado y el divisor.',
@@ -397,6 +404,13 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       'Pegá y atornillá los tres apoyos debajo de la base, igual que en el módulo eléctrico.',
       'Apoyá el costado derecho acostado y fijale la base (4x40 desde afuera). Parate el divisor 2 sobre la base y atornillalo desde abajo, entre los apoyos.',
       'Pegá el zócalo al frente y el fondo de 9 mm atrás, con puntas o tornillos 3x20.',
+      (() => {
+        const b = por(/^Base \(cocina y agua\)/)[0];
+        const h = b && (b.huecos || []).find((q) => q.tipo === 'asiento');
+        return h
+          ? `La base lleva un círculo de ${r0(h.a1 - h.a0)} mm de diámetro: es el asiento de la garrafa, que queda fija en el compartimento de la derecha. Calalo antes de armar la caja, con caladora y plantilla, y abajo del círculo va la rejilla de ventilación del gas.`
+          : 'La base lleva el círculo del asiento de la garrafa: calalo antes de armar.';
+      })(),
       'Como falta la pared izquierda, la caja tiende a abrirse en V: atravesale un listón provisorio arriba (atornillado en los dos extremos) hasta que esté apoyada contra el divisor 1.',
     ],
     piezas: [...f(/^(Base|Zócalo frontal) \(cocina y agua\)|^Apoyo bajo la base.*\(cocina y agua\)/), ...f(/^Costado derecho$/), ...f(/^Divisor cocina y agua/), ...f(/^Fondo cocina y agua/)],
@@ -446,8 +460,8 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     ojo: ['La altura es desde el piso de la van, no desde la base del mueble (la base queda a 35 mm del piso con su apoyo).'],
   });
 
-  const marcoE = por(/^Frente eléctrico - montante|^Tablero del panel|^Frente de la heladera - travesaño/);
-  const marcoK = por(/^Frente cocina - /);
+  const marcoE = por(/^Frente eléctrico - montante|^Tablero del panel|^Frente de la heladera - travesaño|^Frente fijo del eléctrico/);
+  const marcoK = por(/^Frente cocina( \(garrafa\))? - /);
   const marcoW = por(/^Frente agua - /);
   pasos.push({
     id: 'tra-7',
@@ -458,6 +472,7 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       'Llevalo al mueble: cola en los cantos de la base y de los divisores, y 4x25 desde adentro del costado o del divisor hacia el montante.',
       'Medí cada hueco con una regla antes de cortar o colocar una puerta: tiene que dar el ancho de la puerta más 4 mm.',
       'El frente fijo de la heladera (TRA-21) se saca para llegar al compresor: sujetalo con 4 tornillos a tacos de 15x15 pegados detrás del marco.',
+      `El frente fijo del eléctrico (${por(/^Frente fijo del eléctrico/)[0]?.id || 'TRA'}) tapa los equipos desde adelante y queda atornillado: al compartimento se entra por la puerta lateral del costado izquierdo, no por debajo de la cama.`,
     ],
     piezas: [...filas(marcoE, cortes), ...filas(marcoK, cortes), ...filas(marcoW, cortes)],
     ojo: ['Los montantes miden solo 15 mm de ancho. Con ese ancho entra un tornillo, pero la unión depende de la cola: apretá bien con sargentos y dejá secar una noche.'],
@@ -466,7 +481,7 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
   pasos.push({
     id: 'tra-8',
     titulo: 'Cajones y correderas',
-    intro: 'Cinco cajones se tiran hacia el pasillo. Cada caja lleva dos laterales, una trasera, un piso y una delantera de 15 mm; el frente se atornilla a la delantera desde adentro.',
+    intro: 'Cuatro cajones se tiran hacia el pasillo. Cada caja lleva dos laterales, una trasera, un piso y una delantera de 15 mm; el frente se atornilla a la delantera desde adentro.',
     hacer: [
       'Armá cada caja: laterales contra los cantos de la trasera y de la delantera (4x40 desde afuera, pretaladrando el canto) y escuadrala con la diagonal.',
       'El piso va entre los laterales, al ras de abajo: cola y puntas, o tornillos 3,5x20 desde afuera por los laterales al canto del piso. El de bidones es de 15 mm.',
@@ -483,21 +498,28 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     ],
   });
 
+  const puertaG = por(/^Puerta de la garrafa/)[0];
+  const puertaL = por(/^Puerta lateral/)[0];
   pasos.push({
     id: 'tra-9',
     titulo: 'Puertas, frentes y botones push',
-    intro: 'La puerta de la batería y los equipos es ancha y lleva tres bisagras de cazoleta. Los demás frentes abren con botones push redondos: no hay tiradores.',
+    intro: 'Hay dos puertas con bisagras de cazoleta: la de la garrafa (bisagra a la derecha) y la lateral del compartimento eléctrico, en el costado izquierdo. Los cajones abren con botones push redondos: no hay tiradores.',
     hacer: [
       'Cazoletas: broca Forstner de 35 mm, 12 mm de profundidad (con tope), con el centro a 22,5 mm del canto de la bisagra. Probá antes en un recorte.',
-      `Posiciones de las tres bisagras de la puerta TRA-19, medidas desde los extremos del canto de ${r0(dimsDe(data.partes.find((p) => p.nombre === 'Puerta de la batería y los equipos'))[1])} mm: a 60 mm de cada punta y una al medio.`,
+      puertaG
+        ? `Puerta de la garrafa (${puertaG.id}): dos bisagras sobre el canto de la derecha, que mide ${r0(puertaG.sy)} mm. Ponelas a 60 mm de cada punta. El hueco de la puerta empieza después del borde de la cama, así que al abrirse no pasa por debajo de ella.`
+        : 'Puerta de la garrafa: dos bisagras sobre el canto de la derecha.',
+      puertaL
+        ? `Puerta lateral (${puertaL.id}): dos bisagras sobre el canto del lado del mamparo, que mide ${r0(puertaL.sy)} mm; el botón queda del lado de la puerta trasera. Se ve al abrir la puerta corrediza izquierda de la van.`
+        : 'Puerta lateral del compartimento eléctrico: dos bisagras.',
       'Botones push: taladrá del diámetro que diga la ficha del botón que compres (el modelo supone 28 mm) y fijalos con su pestillo. Medidas en la tabla.',
-      'Dos rejillas de 100 mm en la puerta de la batería para el inversor y el DC-DC, y dos en el frente fijo de la heladera (una arriba y una abajo).',
+      'Dos rejillas de 100 mm en la puerta lateral para el inversor y el DC-DC, y dos en el frente fijo de la heladera (una arriba y una abajo).',
     ],
-    piezas: [...filas(por(/^Puerta de la batería/), cortes), ...filas(por(/^Frente fijo de la heladera/), cortes)],
+    piezas: [...filas(por(/^Puerta de la garrafa/), cortes), ...filas(por(/^Puerta lateral/), cortes), ...filas(por(/^Frente fijo de la heladera/), cortes)],
     tablas: [tablaBotones(data, G)],
     ojo: [
       'Los montantes de 15 mm son muy angostos para la placa de la bisagra. Comprá la bisagra recién cuando tengas el contrachapado en la mano y probá una: puede hacer falta una placa con distanciador o un listón detrás del montante.',
-      'Con las bisagras a la izquierda de cada puerta, el botón queda a la derecha. Si cambiás de lado, cambiá también los botones.',
+      'La garrafa entra con muy poca luz en la puerta (unos 5 mm): medí la garrafa real antes de cortar la puerta.',
     ],
   });
 
@@ -531,8 +553,8 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       'Eléctrica: la hace o la revisa el técnico. Los cables ya van en la pestaña Eléctrica, con calibres, fusibles y largos. La batería se conecta al final.',
       'Agua: bidón de agua limpia atrás, bomba a la derecha del mueble, manguera de grado alimenticio con abrazaderas hasta la canilla. El bidón de aguas grises va adelante.',
       'Fregadero: sifón con la salida hacia el bidón de aguas grises. Probalo con agua antes de tapar.',
-      'Gas: caño del regulador a la llave de corte y de ahí al anafe. Lo conecta y lo prueba el instalador. Dejá el cajón de la garrafa sin nada encima.',
-      'Ventilación del gas: rejilla de 100 cm² al exterior por el piso, bajo el cajón de la garrafa. Se define con el instalador antes de cortar la chapa.',
+      'Gas: caño del regulador a la llave de corte y de ahí al anafe. Lo conecta y lo prueba el instalador. Dejá la garrafa y el regulador libres: la puerta tiene que abrir entera.',
+      'Ventilación del gas: rejilla de 100 cm² al exterior por el piso, justo bajo el círculo del asiento de la garrafa. Se define con el instalador antes de cortar la chapa.',
       'Detector de monóxido y extintor: el detector junto a la cocina, el extintor cerca de la puerta, lejos de la hornalla.',
     ],
     piezas: [],
@@ -580,26 +602,34 @@ function cama(data, plan, cfg, e3, cortes) {
   const t = cfg.materiales.estructura.t;
   const por = (re) => data.partes.filter((p) => p.grupo === G && re.test(p.nombre));
   const f = (re) => filas(por(re), cortes);
+  // Las varillas salen de las ranuras de su placa: no tienen hoja propia
+  const filasVarillas = (ps) => filas(ps, cortes).map((r) => ({ ...r, corte: 'sale de las ranuras de su placa' }));
   const cajones = cajonesDe(data, G);
   const placas = por(/^Placa de/);
-  const bandejas = por(/^Bandeja extensible/);
+  const varillas = por(/^Varillas móviles/);
   const costados = por(/^Costado del pasillo/);
   const frentePie = por(/^Frente del pie/);
   const lay = data.layout.cama;
-  const sh = cfg.cama.ventana.apoyoCajon;
-  const ranuras = (p) => (p.huecos || []).filter((h) => h.tipo === 'ranura');
-  const tablaRanuras = {
-    titulo: 'Ranuras de las placas y bandejas (todas de 70 mm de ancho con esquinas R20)',
-    cabecera: ['Pieza', 'Cantidad', 'Largo de cada ranura (a lo ancho de la placa)', 'Posición de cada ranura, desde el borde que mira a la puerta trasera'],
-    filas: [...placas, ...bandejas].map((p) => {
-      const rs = ranuras(p);
-      return [
+  const cm = cfg.cama;
+  const sh = cm.ventana.apoyoCajon;
+  const ids = (ps) => (ps.length > 1 ? `${ps[0].id} a ${ps[ps.length - 1].id}` : ps.map((p) => p.id).join(''));
+  const placaCab = placas.find((p) => /cabecera/.test(p.nombre));
+  const placaPie = placas.find((p) => /pie/.test(p.nombre));
+  const pfCab = placaCab && placaCab.perfil;
+  const pfPie = placaPie && placaPie.perfil;
+  const tablaPeine = {
+    titulo: 'Peine de cada placa (todo en mm)',
+    cabecera: ['Pieza', 'Ranuras', 'Ancho de cada ranura', 'Dedo fijo entre ranuras', 'Ancho de cada varilla', 'Largo de los dedos'],
+    filas: [placaCab, placaPie]
+      .filter((p) => p && p.perfil)
+      .map((p) => [
         `${p.id} ${p.nombre.replace(/\(.*$/, '').trim()}`,
-        String(rs.length),
-        rs.length ? `${rangoMm(rs.map((h) => h.a1 - h.a0))}, empezando a ${r0(rs[0].a0)} mm del borde de la pared` : '',
-        rs.map((h) => `${r0(h.b0)}-${r0(h.b1)}`).join(', '),
-      ];
-    }),
+        String(p.perfil.n),
+        fmt(p.perfil.ancho),
+        fmt(p.perfil.costilla),
+        fmt(p.perfil.anchoVarilla),
+        fmt(p.perfil.largoDedo),
+      ]),
   };
   const ventanas = [...frentePie, ...costados].map((p) => {
     const h = (p.huecos || []).find((q) => q.tipo === 'ventana');
@@ -609,12 +639,10 @@ function cama(data, plan, cfg, e3, cortes) {
       `${p.id} ${p.nombre.replace(/\(.*$/, '').trim()}`,
       normalZ ? `${r0(h.a1 - h.a0)} x ${r0(h.b1 - h.b0)} mm (ancho x alto)` : `${r0(h.b1 - h.b0)} x ${r0(h.a1 - h.a0)} mm (largo x alto)`,
       normalZ
-        ? `esquinas R${cfg.cama.ventana.radio}; deja ${r0(h.a0)} mm a cada lado y ${r0(h.b0)} mm abajo`
-        : `esquinas R${cfg.cama.ventana.radio}; empieza a ${r0(h.b0)} mm del borde que mira a la puerta trasera y a ${r0(h.a0)} mm del borde de abajo`,
+        ? `esquinas R${cm.ventana.radio}; deja ${r0(h.a0)} mm a cada lado y ${r0(h.b0)} mm abajo`
+        : `esquinas R${cm.ventana.radio}; empieza a ${r0(h.b0)} mm del borde que mira a la puerta trasera y a ${r0(h.a0)} mm del borde de abajo`,
     ];
   });
-  const cab = placas.find((p) => /cabecera/.test(p.nombre));
-  const rec = cab && cab.recorte;
   const pasos = [];
 
   pasos.push({
@@ -622,8 +650,8 @@ function cama(data, plan, cfg, e3, cortes) {
     titulo: 'Cortar y rotular',
     intro: `La cama sale de contrachapado de ${t} mm y de listones de 45x45 y 30x30. Seguí el plano de «Placas y cortes».`,
     hacer: [
-      'Cortá las piezas rectas; las curvas se hacen después (paso siguiente).',
-      `Cada placa sale de una lámina de ${cfg.materiales.estructura.hojaA} mm de ancho: cortala a ${cfg.cama.ancho} mm y el sobrante de ${cfg.cama.bandejaAncho} mm es la bandeja de esa placa (${cfg.cama.ancho} + ${cfg.cama.bandejaAncho} = ${cfg.cama.ancho + cfg.cama.bandejaAncho} mm; el resto es el corte de la sierra).`,
+      'Cortá las piezas rectas; las curvas y las ranuras se hacen después (paso siguiente).',
+      `Las dos placas miden ${cm.ancho} mm de ancho. Las varillas que se extienden no se cortan aparte: son los pedazos que salen de las ranuras de su placa, y por eso no figuran en la tabla de hojas.`,
       'Rotulá cada pieza con su id (CAM-xx) en la cara que va por dentro.',
       'Los listones se cortan a la medida de la tabla de barras. El largo dice cuánto, la sección ya viene de la barra.',
     ],
@@ -633,28 +661,32 @@ function cama(data, plan, cfg, e3, cortes) {
 
   pasos.push({
     id: 'cam-2',
-    titulo: 'Calar ranuras, ventanas y esquinas redondas',
-    intro: 'Las placas de la cama llevan ranuras (el dibujo de la plataforma) y los costados llevan ventanas donde van los cajones. Se hacen antes de armar, con plantilla.',
+    titulo: 'Calar el peine, las ventanas y las esquinas',
+    intro: 'Cada placa es un peine: dedos fijos y ranuras abiertas hacia el pasillo. Los pedazos que salen de las ranuras son las varillas que se extienden. Las ventanas de los costados se hacen igual, con plantilla.',
     hacer: [
-      'Hacé una plantilla de cartón o MDF de una ranura (70 mm de ancho, esquinas R20) y de una ventana (esquinas R40). Marcá todas con la misma.',
-      'Taladrá un agujero de 10 mm en una esquina de cada ranura o ventana, para meter la hoja de la caladora.',
-      'Calá por dentro de la línea, dejando 1 a 2 mm, y terminá con fresadora y plantilla o con lija. Las esquinas exteriores de las placas y bandejas llevan R50.',
-      'Las bandejas llevan las mismas ranuras que la placa de arriba y quedan en línea: marcalas con la misma plantilla y la misma posición a lo largo.',
-      rec
-        ? `La placa de la cabecera lleva un recorte rectangular de ${r0(rec.x1 - rec.x0)} x ${r0(rec.z1 - rec.z0)} mm en la esquina del pasillo, del lado del mueble trasero: es por donde sale el cajón de la garrafa.`
-        : 'La placa de la cabecera no lleva recorte.',
+      `Hacé una plantilla de cartón o MDF de una ranura (esquinas del fondo R${cm.ranura.radio}) y de una ventana (esquinas R${cm.ventana.radio}). Marcá todas con la misma.`,
+      pfCab && pfPie
+        ? `La placa de la cabecera lleva ${pfCab.n} ranuras y la del pie ${pfPie.n}. Las ranuras empiezan a ${r0(pfCab.xl - lay.x0)} mm de la pared y las puntas de los dedos quedan a ${r0(pfCab.xs - lay.x0)} mm.`
+        : 'Las ranuras salen del plano de la pieza.',
+      'Taladrá un agujero de 10 mm en el fondo de cada ranura para meter la hoja de la caladora. Calá por dentro de la línea, dejando 1 a 2 mm, y terminá con fresadora y plantilla o con lija.',
+      `No tires lo que sale: cada pedazo es una varilla. Recortale ${cm.luzVarilla} mm por cada lado para que corra con luz y redondeá la punta del fondo. Las varillas de una placa salen unidas por el lomo del lado del pasillo (${cm.lomoMovil} mm): es una sola pieza.`,
+      `Las esquinas del lado del pasillo de las placas y del lomo llevan R${cm.radio}: son un solo círculo, así que la placa cerrada se ve como una pieza entera.`,
     ],
-    piezas: [...filas(placas, cortes), ...filas(bandejas, cortes), ...filas([...frentePie, ...costados], cortes)],
-    tablas: [tablaRanuras, { titulo: 'Ventanas', cabecera: ['Pieza', 'Medida', 'Radio y margen'], filas: ventanas }],
-    ojo: ['La medida de las ranuras se pierde fácil con la caladora. Calá primero una en un recorte y probala antes de cortar la placa.'],
+    piezas: [...filas(placas, cortes), ...filasVarillas(varillas), ...filas([...frentePie, ...costados], cortes)],
+    tablas: [tablaPeine, { titulo: 'Ventanas', cabecera: ['Pieza', 'Medida', 'Radio y margen'], filas: ventanas }],
+    ojo: [
+      'La medida de las ranuras se pierde fácil con la caladora. Calá primero una en un recorte y probala antes de cortar la placa.',
+      'Los dedos fijos son angostos y se parten si la caladora se desvía: usá hoja fina y avanzá despacio.',
+    ],
   });
 
+  const refuerzos = por(/^Refuerzo de piso/);
   pasos.push({
     id: 'cam-3',
     titulo: 'Refuerzos al piso de la van',
-    intro: 'Son cuatro listones de 45x45 pegados al piso: dos por módulo. Sostienen las paredes de la caja y no se ven.',
+    intro: `Son ${refuerzos.length} listones de 45x45 pegados al piso: dos por módulo. Sostienen las paredes de la caja y no se ven.`,
     hacer: [
-      'Marcá en el piso la posición de cada refuerzo (en el 3D, CAM-30 a CAM-33). Esquivan el pasarruedas.',
+      `Marcá en el piso la posición de cada refuerzo (en el 3D, ${ids(refuerzos)}). Esquivan el pasarruedas.`,
       'Pegá con adhesivo de montaje y atornillá a un listón del piso. Sellá cada agujero con butilo.',
       `Cuidado con el largo del tornillo: el listón mide ${sh} mm de alto, y un 25 mm no llega al piso. Con un listón de piso de 30 mm de alto, el tornillo tiene que medir al menos ${sh + 25} mm (5x70).`,
     ],
@@ -665,12 +697,13 @@ function cama(data, plan, cfg, e3, cortes) {
   pasos.push({
     id: 'cam-4',
     titulo: 'Cajas de los dos módulos',
-    intro: 'La cama son dos módulos: el del pie (60 cm) y el de la cabecera (120 cm). Cada uno es una caja abierta con un costado hacia el pasillo.',
+    intro: `La cama son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada uno es una caja abierta con un costado hacia el pasillo, y entre los dos llenan los ${cm.largo / 10} cm de la cama.`,
     hacer: [
       'Módulo del pie: frente (con ventana), costado del pasillo (con ventana) y panel central. Cola y 4x40 contra los refuerzos del piso.',
-      'Módulo de la cabecera: costado del pasillo (con ventana), panel central y guía al fondo del hueco libre.',
+      'Módulo de la cabecera: costado del pasillo (con ventana), panel central y la guía, que cierra el extremo contra el frente del mueble trasero.',
+      `Alturas: el frente del pie y la guía llegan a ${lay.yT} mm, a ras de la superficie donde dormís; el panel central llega a ${lay.yB} mm, justo bajo las placas.`,
+      `El costado del pasillo es más bajo a propósito (${lay.yPan} mm): por encima pasan las correderas de las varillas cuando se extienden.`,
       'Todo parado y a escuadra. Pegá cada pieza contra su refuerzo y atornillá a través del refuerzo, no al piso.',
-      'Unión de los dos módulos: dos tornillos de 25 mm por el panel central.',
       'Pegá y atornillá los listones de las correderas de los cajones (45x45) en el panel central, el frente y la guía, a la altura que dice la tabla de cajones.',
     ],
     piezas: [...filas([...frentePie, ...costados], cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...f(/^Listón de las correderas/)],
@@ -680,13 +713,13 @@ function cama(data, plan, cfg, e3, cortes) {
   pasos.push({
     id: 'cam-5',
     titulo: 'Largueros y listones de pared',
-    intro: 'Sobre las cajas van los listones de 30x30 donde apoyan las placas de la plataforma.',
+    intro: 'Sobre las cajas van los listones de 30x30 donde apoyan las placas y las varillas.',
     hacer: [
-      `Largueros (a ${r0(por(/^Larguero de apoyo \(pie\)/)[0].x)} mm de la pared izquierda de la van): entre el frente, el panel central y la guía, a ras de la cara de abajo de la placa. Cola y 4x40 por los cantos.`,
-      'Listones de pared (a la izquierda): contra la pared, a la misma altura. Sobre el pasarruedas no hay listón: la placa apoya ahí, con fieltro de 5 mm.',
-      'Listón de unión: a lo largo del frente del mueble trasero, en el travesaño que queda entre los frentes bajos y los altos.',
+      `Largueros de apoyo (a ${r0(por(/^Larguero de apoyo \(pie\)/)[0].x)} mm de la pared izquierda de la van) y largueros de las puntas (a ${r0(por(/^Larguero de las puntas \(pie\)/)[0].x)} mm): entre el frente, el panel central y la guía, a ras de la cara de abajo de la placa. Cola y 4x40 por los cantos.`,
+      'Listones de pared (a la izquierda): contra la pared, a la misma altura. Sobre el pasarruedas no hay listón: la placa apoya ahí, con fieltro.',
+      'Las varillas se deslizan por encima de los largueros y del borde del pasarruedas: pegales cinta de teflón (PTFE) en la cara de arriba.',
     ],
-    piezas: [...f(/^Larguero/), ...f(/^Listón de pared/), ...f(/^Listón de unión/)],
+    piezas: [...f(/^Larguero/), ...f(/^Listón de pared/)],
   });
 
   pasos.push({
@@ -706,19 +739,20 @@ function cama(data, plan, cfg, e3, cortes) {
 
   pasos.push({
     id: 'cam-7',
-    titulo: 'Bandejas extensibles',
-    intro: `Debajo de cada placa hay una bandeja con las mismas ranuras: es el sobrante de cortar la placa. Se tira hacia el pasillo y agranda la cama de ${cfg.cama.ancho / 10} a ${(cfg.cama.ancho + cfg.cama.extension) / 10} cm.`,
+    titulo: 'Varillas extensibles',
+    intro: `Las varillas de cada placa salen hacia el pasillo y agrandan la cama de ${cm.ancho / 10} a ${(cm.ancho + cm.extension) / 10} cm. Quedan intercaladas con los dedos fijos de la placa.`,
     hacer: [
-      'Correderas de carga de 500 mm (100 kg): una a cada lado de la bandeja. Bandeja del pie: entre el frente y el panel central. Bandeja de la cabecera: entre el panel central y la guía.',
-      'La bandeja mide 15 mm de espesor y la corredera es más alta. Fijala a la cara lateral y asegurate de que no roce la placa de arriba.',
-      'Cada bandeja lleva un retén para que no salga sola al frenar y una agarradera embutida en el borde.',
-      `Probala con el peso: tiene que correr entera y quedar firme abierta (${cfg.cama.extension} mm de extensión).`,
+      `Cada juego de varillas sale de la placa unido por su lomo. Pegá el listón de unión (${ids(por(/^Listón de unión de las varillas/))}) por debajo, a ${r0(por(/^Listón de unión de las varillas \(pie\)/)[0].x)} mm de la pared, y atornillá cada varilla desde arriba con dos tornillos avellanados.`,
+      `Correderas de carga de 500 mm (100 kg) de bajo perfil, de no más de ${cm.alturaCorredera} mm de alto: una a cada lado de cada juego de varillas, la parte que se mueve va al listón de la corredera (${ids(por(/^Listón de la corredera/))}), que acompaña a las varillas, y la parte fija a la caja.`,
+      'Las varillas no se atornillan a la placa: solo cuelgan de las correderas y apoyan sobre los largueros.',
+      'Cada juego lleva un retén para que no salga solo al frenar y una agarradera embutida en el borde del lomo.',
+      `Probalas con peso: tienen que correr enteras y quedar firmes abiertas (${cm.extension} mm de extensión).`,
     ],
-    piezas: filas(bandejas, cortes),
+    piezas: [...filasVarillas(varillas), ...f(/^Listón de la corredera/), ...f(/^Listón de unión de las varillas/)],
     ojo: [
-      'Esto depende de la corredera que compres: comprá las correderas antes de cortar las bandejas y verificá la altura real.',
-      `Las correderas de 500 mm tienen que recorrer ${cfg.cama.extension} mm: si recorren menos, la cama abierta queda más angosta que 120 cm.`,
-      'Abierta, la bandeja queda toda afuera de la placa y se sostiene solo con las correderas: probala con el peso de dos personas sentadas en el borde. Si flexiona, sumá una pata plegable o una traba en el borde del pasillo.',
+      `Esto depende de la corredera que compres: comprala antes de cortar y verificá la altura real. Si pasa de ${cm.alturaCorredera} mm, roza el costado del pasillo (que queda a ${lay.yPan} mm).`,
+      `Las correderas de 500 mm tienen que recorrer ${cm.extension} mm: si recorren menos, la cama abierta queda más angosta que ${(cm.ancho + cm.extension) / 10} cm.`,
+      'Abiertas, las varillas quedan en voladizo (solo las sostienen las correderas): probalas con el peso de dos personas sentadas en el borde. Si flexionan, sumá una pata plegable o una traba en el borde del pasillo.',
     ],
   });
 
@@ -727,11 +761,11 @@ function cama(data, plan, cfg, e3, cortes) {
     titulo: 'Placas de la plataforma',
     intro: 'Las dos placas se atornillan desde arriba a los largueros y listones, y se pueden levantar para llegar al piso.',
     hacer: [
-      'Pegá fieltro o goma de 5 mm sobre los pasarruedas (0,8 m cada uno).',
-      `El pasarruedas izquierdo, con su tapa, llega a ${(cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10} cm y la placa apoya encima: la cama queda a ${cfg.cama.plataforma / 10} cm. La placa lleva un corte en esa zona para que pase el arco; todavía no está dibujado en la app.`,
+      `Pegá fieltro o goma de ${cm.fieltro} mm sobre los pasarruedas (0,8 m cada uno).`,
+      `El pasarruedas izquierdo, con su tapa, llega a ${(cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10} cm; con ${cm.fieltro} mm de fieltro y la placa de ${t} mm, la cama queda a ${cm.plataforma / 10} cm. La placa lleva un corte en esa zona para que pase el arco real; todavía no está dibujado en la app.`,
       'Apoyá la placa del pie y la de la cabecera: dejan 3 mm de luz entre ellas.',
-      'Atornillá con tornillos avellanados 4x40, 24 en total, y avellaná la cabeza para que no moleste el colchón.',
-      'El colchón lleva el mismo recorte que la placa de la cabecera.',
+      'Atornillá desde arriba solo los dedos y el borde fijo, con tornillos avellanados 4x40 a los largueros y listones. Avellaná la cabeza para que no moleste el colchón.',
+      'Metí las varillas en las ranuras con la luz de cada lado y probá que corran antes de poner el colchón.',
     ],
     piezas: filas(placas, cortes),
   });
@@ -739,12 +773,12 @@ function cama(data, plan, cfg, e3, cortes) {
   pasos.push({
     id: 'cam-9',
     titulo: 'Unir al mueble trasero y revisar',
-    intro: 'La cama se apoya en el frente del módulo eléctrico del mueble trasero.',
+    intro: 'La cama termina contra el frente del módulo eléctrico del mueble trasero.',
     hacer: [
-      'Atornillá el listón de unión al travesaño del frente del mueble trasero con 10 tornillos 4x50, en el travesaño, no en las puertas.',
+      'Atornillá la guía de la cabecera al montante y al travesaño del frente del mueble trasero con tornillos 4x50, no a las puertas ni al frente fijo.',
       'Escuadras L en el listón de pared del pie, a la pared izquierda (2 tornillos autoperforantes o remaches).',
-      'Probá los dos cajones y las dos bandejas abiertos y cerrados. Revisá que las bandejas abiertas no choquen con el mueble derecho.',
-      'Sentate y acostate con peso: nada tiene que crujir.',
+      'Probá los dos cajones y las dos extensiones abiertos y cerrados. Revisá que las varillas abiertas no choquen con el mueble derecho.',
+      'Sentate y acostate con peso, con la cama cerrada y abierta: nada tiene que crujir.',
     ],
     piezas: [],
   });
@@ -753,15 +787,16 @@ function cama(data, plan, cfg, e3, cortes) {
     grupo: G,
     titulo: 'Cama',
     resumen: [
-      `Cama de ${cfg.cama.largo / 10} cm de largo, ${cfg.cama.ancho / 10} cm de ancho, que se agranda a ${(cfg.cama.ancho + cfg.cama.extension) / 10} cm con las bandejas.`,
-      'Son dos módulos: el del pie (60 cm) y el de la cabecera (120 cm). Cada uno tiene un cajón por la ventana del costado.',
+      `Cama de ${cm.largo / 10} cm de largo y ${cm.ancho / 10} cm de ancho, a ${cm.plataforma / 10} cm del piso, que se agranda a ${(cm.ancho + cm.extension) / 10} cm con las varillas.`,
+      `Son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada placa es un peine y sus varillas salen de las ranuras. Cada módulo tiene un cajón por la ventana del costado.`,
       'Se apoya en el piso (refuerzos), en la pared izquierda (listones) y en el frente del mueble trasero.',
     ],
     lista: listaDe(data, G),
     pasos,
     esperar: [
       'Altura del listón del piso (largo de los tornillos de los refuerzos).',
-      `Correderas de carga de 500 mm comprobadas contra el espesor de la bandeja y contra el recorrido (${cfg.cama.extension} mm).`,
+      `Correderas de carga de 500 mm de bajo perfil (máximo ${cm.alturaCorredera} mm de alto) y comprobadas contra el recorrido (${cm.extension} mm).`,
+      'Prueba de flexión de las varillas abiertas con peso real, antes de cortar las placas definitivas.',
       'Fresadora o plantilla para las curvas, y una prueba con un recorte antes de cortar las placas.',
     ],
   };

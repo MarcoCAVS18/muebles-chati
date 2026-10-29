@@ -580,8 +580,8 @@ export function electrico3d(cfg) {
   const bl = W.bidones[0]; // bidón de agua limpia, atrás y cerca de la bomba
   const cuello = [bl.x + bl.sx - 30, bl.y + bl.sy, bl.z + bl.sz / 2]; // boca del bidón, del lado de la pared derecha
   const reg = eq.regulador;
-  const yRegulador = K.yCajonGas + L.tb + eq.garrafa.y; // base del regulador, sobre la garrafa
-  const zRegulador = L.zIn + 15 + 10 + 80 + reg.z / 2; // centro del regulador en z
+  const yRegulador = K.yAsiento + eq.garrafa.y; // base del regulador, sobre la garrafa
+  const zRegulador = K.zGar + 80 + reg.z / 2; // centro del regulador en z
   const xBombaC = W.xBomba + W.bomba.sx / 2; // centro de la bomba
   const xCanillaC = W.xCanilla + 15; // centro de la canilla
   const xValvula = sec.K.x1 - 100 + eq.valvulaGas.x / 2; // centro de la llave de corte (ver trasero.js)
@@ -630,12 +630,12 @@ export function electrico3d(cfg) {
       hasta: 'valvulaGas',
       video: 'gas',
       puntos: [
-        [K.xCentro, yRegulador + reg.y + 1, zRegulador],
+        [K.xGar, yRegulador + reg.y + 1, zRegulador],
         [xValvula, yRegulador + reg.y + 1, zRegulador],
         [xValvula, yRegulador + reg.y + 1, zValvula],
         [xValvula, yValvula - 1, zValvula],
       ],
-      nota: 'Manguera flexible certificada para gas con abrazaderas. Corre bajo el estante hasta el fondo y sube por atrás de los cajones de cocina; con bucle suficiente para que el cajón de la garrafa se abra sin tirar.',
+      nota: 'Manguera flexible certificada para gas con abrazaderas. Corre bajo el estante hasta el fondo y sube por atrás de los cajones de cocina; con bucle suficiente para que la puerta de la garrafa se abra sin tirar.',
     },
     {
       id: 'm_gas_anafe',

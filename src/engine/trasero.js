@@ -1,7 +1,9 @@
 // Mueble cruzado detrás de los asientos, de pared a pared, con frentes planos y puertas a ras.
 // Origen: x = 0 es la pared izquierda, el fondo apoya contra el mamparo (z = largo).
 // Las secciones (ver disposicion.js), de izquierda a derecha: E eléctrico (la L, más profunda, con la
-// heladera arriba), K cocina (angosta) y W agua.
+// heladera arriba), K cocina (angosta, con la garrafa fija detrás de una puerta) y W agua.
+// Los equipos eléctricos se alcanzan por una puerta en el costado izquierdo (la que se ve al abrir la puerta lateral
+// de la van), no por debajo de la cama: el frente de la sección eléctrica queda cerrado, contra la tapa de la cama.
 import { cajon } from './cajon.js';
 import { frenteZ } from './frentes.js';
 import { disposicionTrasero } from './disposicion.js';
@@ -21,18 +23,50 @@ export function trasero(ctx, G) {
   // Los bornes de la batería necesitan lugar para el cable entre ella y el estante que cierra el compartimento
   const aireBornes = E.yEstante - (E.bateria.y + E.bateria.sy);
   if (aireBornes < 55) {
-    ctx.aviso(`La batería queda a ${Math.round(aireBornes)} mm del estante del compartimento eléctrico: faltan ${Math.round(55 - aireBornes)} mm para los cables de los bornes. La altura del compartimento sale de la altura de la cama.`);
+    ctx.aviso(`La batería queda a ${Math.round(aireBornes)} mm del estante del compartimento eléctrico: faltan ${Math.round(55 - aireBornes)} mm para los cables de los bornes.`);
+  }
+  // La garrafa entra por el hueco de su puerta, sin rozar los montantes
+  if (eq.garrafa.x + 6 > K.puerta.x1 - K.puerta.x0) {
+    ctx.aviso(`La garrafa (${eq.garrafa.x} mm) no pasa por el hueco de su puerta (${Math.round(K.puerta.x1 - K.puerta.x0)} mm): la puerta arranca después del borde de la cama.`);
   }
 
   const P = (nombre, x, y, z, sx, sy, sz, mat = 'estructura') => ctx.parte({ grupo: G, nombre, mat, x, y, z, sx, sy, sz });
 
   // Costados, fondo, base y zócalo
-  P('Costado izquierdo', 0, 0, zFL, t, tr.alto - t, profL - tb);
+  // El costado izquierdo lleva calada la puerta del compartimento eléctrico (la puerta es la pieza que sale del calado)
+  const pl = E.puertaLateral;
+  ctx.parte({
+    grupo: G,
+    nombre: 'Costado izquierdo',
+    mat: 'estructura',
+    x: 0,
+    y: 0,
+    z: zFL,
+    sx: t,
+    sy: tr.alto - t,
+    sz: profL - tb,
+    huecos: [{ tipo: 'puerta', a0: pl.y0, a1: pl.y1, b0: pl.z0 - zFL, b1: pl.z1 - zFL, r: 6 }],
+  });
   P('Costado derecho', x1 - t, 0, zF, t, tr.alto - t, prof - tb);
   // El fondo va en dos mitades, una por módulo (el mueble se arma en dos módulos que se unen adentro de la van)
   P('Fondo eléctrico (contra el mamparo)', t, yBase, zB - tb, d1, tr.alto - t - yBase, tb, 'fondo');
   P('Base (eléctrico)', t, yBase, L.E.zIn, d1 + t - t, t, largoIntE);
-  P('Base (cocina y agua)', d1 + t, yBase, zIn, x1 - t - (d1 + t), t, largoInt);
+  // La base de la cocina lleva calado el asiento circular de la garrafa: apoya en el piso a través del círculo
+  {
+    const xb = d1 + t;
+    ctx.parte({
+      grupo: G,
+      nombre: 'Base (cocina y agua)',
+      mat: 'estructura',
+      x: xb,
+      y: yBase,
+      z: zIn,
+      sx: x1 - t - xb,
+      sy: t,
+      sz: largoInt,
+      huecos: [{ tipo: 'asiento', a0: K.asiento.cx - K.asiento.r - xb, a1: K.asiento.cx + K.asiento.r - xb, b0: K.asiento.cz - K.asiento.r - zIn, b1: K.asiento.cz + K.asiento.r - zIn, r: K.asiento.r }],
+    });
+  }
   P('Zócalo frontal (eléctrico)', t, 0, zFL, d1 + t - t, yBase, t);
   P('Zócalo frontal (cocina y agua)', d1 + t, 0, zF, x1 - t - (d1 + t), yBase, t);
 
@@ -68,24 +102,34 @@ export function trasero(ctx, G) {
     marco: 'Frente eléctrico',
     tope: 'Frente de la heladera - travesaño superior',
     huecos: [
-      { nombre: 'Puerta de la batería y los equipos', y0: yBase, y1: yTopeE, color: '#ffe082', abre: 'bateria', marcoBajo: 'Frente eléctrico - travesaño' },
+      // Frente fijo: los equipos se alcanzan por la puerta del costado izquierdo
+      { nombre: 'Frente fijo del eléctrico (tapa de los equipos)', y0: yBase, y1: yTopeE, marcoBajo: 'Frente eléctrico - travesaño' },
       // Frente fijo de la heladera, con rejillas: la heladera se abre por arriba. Se saca con tornillos para llegar al compresor.
       { nombre: 'Frente fijo de la heladera (con rejillas)', y0: E.yTableroFin, y1: yTapa - 25, color: '#cfd8dc', abre: 'nevera', marcoBajo: 'Tablero del panel y los enchufes' },
     ],
   });
   const f = { grupo: G, zf: zF, ya: yBase, yb: yTapa };
+  // Puerta de la garrafa: sube hasta el estante y arranca después del borde de la cama, con la bisagra a la derecha
   frenteZ(ctx, {
     ...f,
+    yb: K.yCajIni,
+    xa: d1 + t,
+    xb: d2,
+    hx0: K.puerta.x0,
+    hx1: K.puerta.x1,
+    marco: 'Frente cocina (garrafa)',
+    tope: 'Frente cocina (garrafa) - travesaño',
+    huecos: [{ nombre: 'Puerta de la garrafa (bisagra a la derecha)', y0: yBase, y1: K.yEstante - 3, color: '#ffcc80', abre: 'garrafa' }],
+  });
+  frenteZ(ctx, {
+    ...f,
+    ya: K.yCajIni,
     xa: d1 + t,
     xb: d2,
     hx0: hueco.K.x0,
     hx1: hueco.K.x1,
     marco: 'Frente cocina',
-    huecos: [
-      // El frente del cajón de la garrafa sube hasta el estante: viaja con el cajón y pasa por el recorte de la cama
-      { nombre: 'Frente cajón del gas', y0: yBase, y1: K.yEstante - 3, color: '#ffcc80', abre: 'garrafa' },
-      ...K.cajones.map((c) => ({ nombre: `Frente ${c.nombre.toLowerCase()}`, y0: c.y0, y1: c.y1 })),
-    ],
+    huecos: K.cajones.map((c) => ({ nombre: `Frente ${c.nombre.toLowerCase()}`, y0: c.y0, y1: c.y1 })),
   });
   frenteZ(ctx, {
     ...f,
@@ -138,17 +182,6 @@ export function trasero(ctx, G) {
     fondo: W.fondoCajonFregadero,
     dir: 'z-',
   });
-  cajon(ctx, {
-    grupo: G,
-    nombre: 'Cajón de la garrafa',
-    x: K.xCajon,
-    y: K.yCajonGas,
-    z: zIn + 15,
-    ancho: K.anchoCajon,
-    alto: K.altoCajonGas,
-    fondo: K.fondoCajonGas,
-    dir: 'z-',
-  });
 
   // Lo que sigue se agrega al final para no mover los ids de las demás piezas.
   // Segunda mitad del fondo (cocina y agua), contra el mamparo
@@ -178,14 +211,33 @@ export function trasero(ctx, G) {
   for (const c of K.cajones) delantera(c.nombre, K.xCajon, c.y0 + 5, K.anchoCajon, c.y1 - c.y0 - 25);
   delantera('Cajón de bidones', W.xCajon, W.yCajonBidones, W.anchoCajon, W.altoCajonBidones);
   delantera('Cajón bajo el fregadero', W.xCajon, W.yCajonFregadero, W.anchoCajon, W.altoCajonFregadero);
-  delantera('Cajón de la garrafa', K.xCajon, K.yCajonGas, K.anchoCajon, K.altoCajonGas);
+  // Puerta del costado izquierdo: es la pieza que sale del calado del costado, con 2 mm de luz. Se ve al abrir la puerta lateral
+  // de la van y deja a la vista la batería y todos los equipos. Abre hacia afuera, con la bisagra del lado del mamparo.
+  {
+    const luz = 2;
+    ctx.parte({
+      grupo: G,
+      nombre: 'Puerta lateral del compartimento eléctrico',
+      mat: 'estructura',
+      x: 0,
+      y: pl.y0 + luz,
+      z: pl.z0 + luz,
+      sx: t,
+      sy: pl.y1 - pl.y0 - 2 * luz,
+      sz: pl.z1 - pl.z0 - 2 * luz,
+      color: '#ffe082',
+      abre: 'bateria',
+      lado: -1,
+    });
+    ctx.boton({ grupo: G, nombre: 'Puerta lateral del compartimento eléctrico', eje: 'x-', x: 0, y: (pl.y0 + pl.y1) / 2, z: pl.z0 + luz + 45 });
+  }
   ctx.unir(G, 'directo', 0, 'Delanteras de los cajones atornilladas a los laterales (por la cara de adelante, que queda tapada por el frente)', {
     herraje: 'Tornillo aglomerado 4x40 mm',
-    cantidad: 5 * 4,
+    cantidad: 4 * 4,
   });
   ctx.unir(G, 'directo', 0, 'Frentes de los cajones atornillados a su delantera, desde adentro de la caja', {
     herraje: 'Tornillo 4x25 mm (cara contra cara de 15 mm)',
-    cantidad: 5 * 4,
+    cantidad: 4 * 4,
   });
 
   // Los dos módulos se arman afuera y se unen adentro de la van, contra la cara derecha del divisor 1.
@@ -203,12 +255,12 @@ export function trasero(ctx, G) {
     cantidad: 8,
   });
 
-  // Botones push en cada frente. Las puertas llevan el botón cerca del borde libre (se supone que las bisagras
-  // quedan a la izquierda de cada puerta), los cajones lo llevan al centro.
+  // Botones push en cada frente. Las puertas llevan el botón cerca del borde libre (la bisagra queda del lado contrario),
+  // los cajones lo llevan al centro.
   const bt = (nombre, x, y, z) => ctx.boton({ grupo: G, nombre, eje: 'z-', x, y, z });
   const centro = (h) => (h.x0 + h.x1) / 2;
-  bt('Puerta de la batería y los equipos', hueco.E.x1 - 2 - 45, yTopeE - 2 - 70, zFL);
-  bt('Frente cajón del gas', centro(hueco.K), K.yEstante - 3 - 60, zF);
+  // La puerta de la garrafa tiene la bisagra a la derecha: el botón va cerca del borde izquierdo
+  bt('Puerta de la garrafa (bisagra a la derecha)', K.puerta.x0 + 2 + 45, K.yEstante - 3 - 60, zF);
   for (const c of K.cajones) bt(`Frente ${c.nombre.toLowerCase()}`, centro(hueco.K), (c.y0 + c.y1) / 2, zF);
   bt('Frente cajón de bidones', centro(hueco.W), W.yEstante - 3 - 60, zF);
   bt('Frente cajón bajo el fregadero', centro(hueco.W), (W.yCajonFregadero + 760) / 2, zF);
@@ -235,15 +287,15 @@ export function trasero(ctx, G) {
   ctx.anclaje(G, 'Mamparo', 'Escuadras L al fondo, arriba y abajo', 6, 'Dejar el pasacables del eléctrico sin tapar');
 
   // Herrajes
-  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 3, 'Puerta de la batería y los equipos, que es ancha');
+  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 4, 'Dos en la puerta de la garrafa (bisagra a la derecha) y dos en la puerta lateral del compartimento eléctrico');
   ctx.herrajeBotones(G); // un botón push por frente: reemplaza al tirador y al imán
   ctx.herraje(G, 'Soporte regulable de estante', 16, 'Estantes del eléctrico (2), la cocina y el agua');
   ctx.herraje(G, 'Sifón y desagüe para fregadero', 1, 'Con la salida hacia un bidón de aguas grises o al piso');
-  ctx.herraje(G, 'Rejilla de ventilación 100 cm2 para el gas', 1, 'Al exterior por el piso, bajo el cajón de la garrafa: el gas pesa más que el aire');
+  ctx.herraje(G, 'Rejilla de ventilación 100 cm2 para el gas', 1, 'Al exterior por el piso, justo bajo el círculo del asiento de la garrafa: el gas pesa más que el aire');
   ctx.herraje(G, 'Detector de monóxido de carbono', 1, 'Con la cocina a gas en un espacio cerrado es obligatorio en la práctica');
   ctx.herraje(G, 'Extintor de polvo ABC de 1 kg', 1, 'Cerca de la puerta, lejos de la cocina');
   ctx.herraje(G, 'Rejilla de ventilación de la heladera', 2, 'Una abajo y una arriba del frente fijo, para el aire del compresor');
-  ctx.herraje(G, 'Rejilla de ventilación para el inversor y el DC-DC', 2, 'En la puerta de la batería y los equipos: se calientan con carga');
+  ctx.herraje(G, 'Rejilla de ventilación para el inversor y el DC-DC', 2, 'En la puerta lateral del compartimento eléctrico: se calientan con carga');
 
   // ---- Equipos que no son eléctricos ----
   const E_ = (e) => ctx.equipo({ grupo: G, ...e });
@@ -335,7 +387,7 @@ export function trasero(ctx, G) {
     nota: 'Sección eléctrica, arriba, apoyada en su estante; se abre por un corte de la tapa 1',
   });
 
-  // Cocina (centro): anafe arriba, dos cajones de cocina y cajón de la garrafa al piso
+  // Cocina (centro): anafe arriba, dos cajones de cocina y la garrafa fija al piso, detrás de una puerta
   const zAna = zF + (prof - ana.z) / 2; // el anafe queda centrado en el fondo del mueble
   E_({
     id: 'anafe',
@@ -366,22 +418,22 @@ export function trasero(ctx, G) {
   E_({
     id: 'garrafa',
     nombre: 'Garrafa de gas chica (recargable)',
-    x: K.xCentro - gar.x / 2,
-    y: K.yCajonGas + tb,
-    z: zIn + 15 + 10,
+    x: K.xGar - gar.x / 2,
+    y: K.yAsiento,
+    z: K.zGar,
     sx: gar.x,
     sy: gar.y,
     sz: gar.z,
     color: '#ef6c00',
     estado: 'A comprar',
-    nota: 'Parada dentro del cajón de la cocina, con correa',
+    nota: 'Parada y fija dentro del armario, apoyada en el piso a través del círculo de la base, con correa',
   });
   E_({
     id: 'regulador',
     nombre: 'Regulador de gas',
-    x: K.xCentro - reg.x / 2,
-    y: K.yCajonGas + tb + gar.y,
-    z: zIn + 15 + 10 + 80,
+    x: K.xGar - reg.x / 2,
+    y: K.yAsiento + gar.y,
+    z: K.zGar + 80,
     sx: reg.x,
     sy: reg.y,
     sz: reg.z,

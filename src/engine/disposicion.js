@@ -6,11 +6,11 @@
 //   E  eléctrico (la L, 570 mm de fondo): al piso la batería acostada, el inversor, el DC-DC y los
 //      fusibles, bajo el plano de la cama; sobre la cama, el tablero con interruptores y enchufes
 //      y la heladera de tapa arriba, con la tapa a ras de la mesada
-//   K  cocina (500 mm, angosta): anafe arriba, dos cajones de cocina y el cajón de la garrafa al piso
+//   K  cocina (500 mm, angosta): anafe arriba, dos cajones de cocina y la garrafa fija al piso, detrás de una puerta
 //   W  agua (500 mm): fregadero arriba, cajón bajo el fregadero y cajón de bidones al piso
 //
-// La cama (plataforma a 440 mm, 1800 mm de largo) termina contra el frente de la sección E. Lo que está bajo la cama sale
-// hacia un hueco libre; lo que está sobre la cama queda a la vista.
+// La cama (superficie a 400 mm, 1800 mm de largo) termina contra el frente de la sección E. Al compartimento eléctrico se
+// entra por una puerta en el costado izquierdo; lo que está sobre la cama queda a la vista.
 
 export function disposicionTrasero(cfg) {
   const { van, trasero: tr, equipos: eq, cama: ca } = cfg;
@@ -76,7 +76,6 @@ export function disposicionTrasero(cfg) {
   E.yEstanteNevera = E.yNevera - t; // estante que la sostiene
   E.zNevera = zInE + 80;
   E.xNevera = t + (d1 - t - fri.x) / 2;
-  E.huecoCables = E.yEstanteNevera - (E.yEstante + t); // hueco entre los dos estantes: por ahí corren los cables del tablero
   // Inversor y DC-DC contra el borde derecho; los fusibles a su izquierda.
   // Si la L es profunda el inversor va de largo sobre z (como los demás equipos). Si es angosta (570 mm), el inversor,
   // el paso del cable largo y la batería no entran uno detrás de otro: el inversor va atravesado, con el largo sobre x.
@@ -121,26 +120,35 @@ export function disposicionTrasero(cfg) {
   E.anl = { x: E.bateria.x + bat.x + 12, y: yE, z: E.bateria.z + 20, sx: anl.x, sy: anl.y, sz: anl.z };
   // Borne positivo en el extremo derecho de la batería, en la cara de arriba
   E.borne = { x: E.bateria.x + bat.x - 55, y: E.yTopeBateria, z: E.bateria.z + 40 };
+  // Los equipos se alcanzan por la puerta del costado izquierdo, no por abajo de la cama: el estante que cierra el compartimento
+  // sube lo que haga falta para dejar lugar a los cables de los bornes (55 mm como mínimo)
+  E.yEstante = Math.max(E.yEstante, Math.ceil((E.yTopeBateria + 60) / 5) * 5);
+  E.huecoCables = E.yEstanteNevera - (E.yEstante + t); // hueco entre los dos estantes: por ahí corren los cables del tablero
+  // Puerta del costado izquierdo (se ve al abrir la puerta lateral de la van): deja a la vista la batería y los equipos
+  E.puertaLateral = { y0: yPiso + 5, y1: E.yEstante - 5, z0: zInE + 20, z1: zFondo - 20 };
 
   // --- Sección K: cocina ---
   const gar = eq.garrafa;
   const reg = eq.regulador;
   const K = {};
-  K.yCajonGas = yPiso + 1; // el cajón de la garrafa va al piso
-  K.altoCajonGas = 150;
-  K.fondoCajonGas = 340;
-  K.yEstante = K.yCajonGas + tb + gar.y + reg.y + 15; // estante sobre la garrafa con su regulador
+  // La garrafa va fija, parada, detrás de una puerta con la bisagra a la derecha. Apoya en el piso a través de un círculo
+  // calado en la base, que la traba y la deja 15 mm más abajo. La puerta arranca después del borde de la cama: al abrirse,
+  // el borde libre gira hacia la derecha y nunca pasa bajo la cama.
+  const xBordeCama = ca.x0 + ca.ancho;
+  K.yAsiento = yBase; // base de la garrafa
+  K.yEstante = K.yAsiento + gar.y + reg.y + 15; // estante sobre la garrafa con su regulador
+  K.puerta = { x0: Math.max(hueco.K.x0, xBordeCama + 4), x1: hueco.K.x1 };
   K.anchoCajon = hueco.K.x1 - hueco.K.x0 - 26;
   K.xCajon = hueco.K.x0 + 13;
-  // Al sacar la garrafa el cajón se tira entero hasta que la garrafa queda fuera del mueble. El frente alto
-  // (hasta el anafe) viaja con él y barre este volumen: la cama tiene que dejarle lugar.
-  K.recorridoGas = Math.floor(K.fondoCajonGas / 50) * 50; // largo de las correderas
-  K.barridoGas = { x0: hueco.K.x0 + 2, x1: hueco.K.x1 - 2, z0: zF - K.recorridoGas - 20, z1: zF, y0: K.yCajonGas, y1: K.yEstante };
   K.xCentro = (sec.K.x0 + sec.K.x1) / 2;
+  K.xGar = (K.puerta.x0 + K.puerta.x1) / 2; // centro de la garrafa en x, frente al centro de la puerta
+  K.zGar = zIn + 20; // frente de la garrafa
+  K.asiento = { cx: K.xGar, cz: K.zGar + gar.z / 2, r: Math.max(gar.x, gar.z) / 2 + 5 }; // círculo de la base
   K.yAnafe = tr.alto - eq.anafe.y; // cara inferior del anafe
   // Dos cajones de cocina entre el estante de la garrafa y el anafe. Son cortos para dejar libre el fondo
   // (llave de corte y caño del gas)
   const yCajIni = K.yEstante + t + 12;
+  K.yCajIni = yCajIni;
   const yCajFin = K.yAnafe - 25;
   const altoCaj = (yCajFin - yCajIni - 15) / 2;
   K.cajones = [

@@ -5,7 +5,7 @@ con la distribución de la foto de referencia: mueble trasero cruzado de pared a
 (de izquierda a derecha: eléctrico al piso con la batería, inversor, DC-DC y fusibles, y sobre la cama el
 panel y los enchufes con dos cajones de cocina arriba; cocina con anafe, gas y heladera al piso, al centro; y agua con
 fregadero y bidones al piso, a la derecha), cama extensible de 71 a 120 cm de 180 cm de largo (placas de plywood con
-esquinas redondeadas y ranuras, bandejas sobre correderas, costados con ventana y cajones), y mueble
+esquinas redondeadas y ranuras en peine, varillas sobre correderas, costados con ventana y cajones), y mueble
 derecho con cajones, alacena y mesa plegable.
 
 ## Uso
@@ -36,7 +36,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   Las tipografías (Bricolage Grotesque, Instrument Sans y Permanent Marker) se instalan con npm y salen del propio sitio,
   sin pedirlas a Google.
 - Visor 3D con barra de píldoras (al estilo de madera.app, en violeta): tres modos (Armado, Abierto con los cajones y las
-  puertas abiertos y las bandejas de la cama afuera, y Explotado), cotas del ancho, alto y fondo de cada mueble, y colores por
+  puertas abiertos y las varillas de la cama afuera, y Explotado), cotas del ancho, alto y fondo de cada mueble, y colores por
   rol (amarillo frentes y puertas, celeste costados, verde bases y estantes, lila fondos y cajones por dentro, madera listones).
   La bisagra de cada puerta se ubica del lado contrario a su botón push. El piso es una grilla de puntos con sombra suave.
 - Dónde se fija cada mueble (piso, pared, entre muebles) y cuántos tornillos y escuadras.
@@ -54,8 +54,8 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   22 cm), bomba y mangueras de agua y de gas. El extractor del techo (310 x 310 mm con el marco) se abre a mano: está en el 3D
   pero sin conexión eléctrica.
 - Botones push: cada puerta y cada cajón de los tres muebles lleva un botón negro redondo en el 3D, para ver dónde va.
-  Las bandejas de la cama conservan un tirador embutido porque el canto de 15 mm es muy fino para el botón.
-- Sistema de gas en 3D: garrafa chica recargable en un cajón bajo el anafe, regulador, manguera, llave de corte y
+  Las varillas de la cama conservan un tirador embutido porque el canto de 15 mm es muy fino para el botón.
+- Sistema de gas en 3D: garrafa chica recargable fija en un compartimento con puerta bajo el anafe, regulador, manguera, llave de corte y
   detector de gas, con la ventilación al exterior por el piso.
 - Al hacer clic en cualquier equipo, cable o manguera (en el 3D o en la pestaña Eléctrica) se abre un panel con qué
   es, dónde va, cómo se conecta y un video de YouTube recomendado.
@@ -102,9 +102,12 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Mueble trasero de pared a pared (1720 mm) y de 500 mm de profundidad, con una L de 570 mm solo en la sección eléctrica
   (a la izquierda), que llega hasta el pie de la cama de 180 cm. Si tapa la puerta corrediza, achicar el ancho en la barra
   lateral. Secciones (x): eléctrico 15-617, cocina 632-1087 y agua 1102-1705.
-- La cama queda a 39,5 cm, apoyada sobre el pasarruedas izquierdo, que con su tapa mide 38 cm (el derecho queda como está, en 42,5 cm). El arco real mide 42,5 cm: la placa lleva un corte ahí, que todavía no se dibuja. Bajo la cama, frente a la L, queda un hueco libre de
-  430 mm para abrir la puerta de la batería. Todo lo eléctrico queda al piso, debajo del plano de la cama; el panel y los
-  enchufes van sobre la cama, en el tablero de arriba, y los cajones de cocina de la L van sobre el tablero.
+- La cama queda a 40 cm: el pasarruedas izquierdo, con su tapa, mide 38 cm; con 5 mm de fieltro y la placa de 15 mm la superficie llega a
+  400 mm (el frente del pie y la guía de la cabecera miden 400 mm, el panel central 385 mm). El arco real mide 42,5 cm: la placa lleva un
+  corte ahí, que todavía no se dibuja. Las dos placas y los dos módulos llenan los 180 cm, hasta el frente de la L. Al compartimento
+  eléctrico se entra por una puerta en el costado izquierdo (la que se ve al abrir la puerta corrediza de la van), no por debajo de la cama.
+  Todo lo eléctrico queda al piso, debajo del plano de la cama; el panel y los enchufes van sobre la cama, en el tablero de arriba, y los
+  cajones de cocina de la L van sobre el tablero. El estante de los equipos queda a 395 mm para dejar 55 mm o más sobre los bornes.
 - Mueble trasero: se arma en dos módulos que pasan por las puertas y se unen adentro de la van: el eléctrico (izquierda, con el
   divisor 1 como pared derecha) y el de cocina y agua (sin pared izquierda: apoya contra ese divisor). Por eso el fondo es de
   dos piezas. La base queda 20 mm sobre el piso y apoya en 6 tiras de canto (adelante, al medio y atrás de cada base). Cada
@@ -112,16 +115,16 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   delanteras se unen cara contra cara de 15 mm, por eso llevan tornillos 4x25 y no 4x40.
 - Mueble derecho: se apoya sobre el pasarruedas derecho. Bajo 43 cm solo queda libre la franja del frente (cerrada con un
   frente ciego) y los dos cajones se acomodan arriba, a partir de los 45 cm.
-- El frente de la cocina y del agua está en z = 1910, 70 mm detrás del frente de la L (z = 1840), donde termina la placa de la
-  cabecera. La garrafa se carga una vez por semana: el cajón del gas (correderas de 300 mm, frente alto) se tira entero y la
-  garrafa queda fuera del mueble para levantarla, con el regulador y la manguera quedando en el cajón. Para que el frente alto
-  no choque con la cama, la placa de la cabecera lleva un recorte de 243 x 250 mm en la esquina del lado de la cocina (el
-  colchón lleva el mismo recorte). `npm run check` verifica que el cajón no choque al sacarlo.
+- El frente de la cocina y del agua está en z = 1910, 70 mm detrás del frente de la L (z = 1840), donde termina la cama. La garrafa
+  va fija y parada en su compartimento, detrás de una puerta con la bisagra a la derecha que arranca después del borde de la cama
+  (x 724 a 965), así que al abrirse nunca pasa por debajo de ella. Apoya a través de un círculo calado en la base (240 mm de
+  diámetro) que la traba; el regulador queda arriba, bajo el estante. `npm run check` verifica que la garrafa entre en el círculo y
+  que la puerta quede fuera de la cama. La garrafa entra con unos 5 mm de luz en el hueco de la puerta: medirla antes de cortar.
   La sección de agua tapa parte de la puerta lateral derecha (z 1340 a 2320).
-- Gas: la rejilla de ventilación al piso hoy cae bajo la heladera, no bajo la garrafa. Falta definir cómo ventila el cajón del gas.
+- Gas: la rejilla de ventilación al piso va justo bajo el círculo del asiento de la garrafa (el gas pesa más que el aire). Falta definir el corte en el piso con el instalador.
 - Medidas estimadas de la cocina: anafe 420 x 300 mm, garrafa de 230 mm de diámetro y 330 mm de alto, heladera 420 x 300 x 340 mm,
   fregadero 340 de ancho x 400 de fondo, bidones de 20 L de 215 x 400 x 290 mm.
-- Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El cajón de la garrafa necesita una rejilla de
+- Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El compartimento de la garrafa necesita una rejilla de
   ventilación hacia el exterior por el piso, detector de gas y detector de monóxido de carbono.
 - Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
 - La cama es como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera) y otro de 60 cm (pie), unidos con dos
@@ -129,26 +132,27 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   costado del lado del pasillo con una ventana grande de esquinas redondeadas (R40, 270 mm de alto); el frente del pie tiene otra.
   En cada ventana de los costados va un cajón con el frente a ras (el frente toma el radio de la ventana menos la luz de 3 mm).
   El lado de la pared no lleva costado: lo hace la pared de la van, y el pasarruedas pasa por ahí.
-- La plataforma son las mismas placas con ranuras de esquinas redondeadas cortadas en la madera (no hay varillas): 70 mm de ancho,
-  50 mm de madera entre una y otra y R20, a lo ancho de la cama. La placa de la cabecera lleva 9 (las 2 junto al recorte del gas
-  son más cortas) y la del pie 4. Las bandejas extensibles llevan las mismas ranuras en las mismas posiciones, y como se
-  mueven en el sentido de las ranuras quedan siempre en línea con las de la placa fija: la cama abierta tiene el mismo dibujo.
-  Se cambian en `cama.ranura` y `cama.ventana` (defaults.js).
-- Placas de la cama: cabecera de 1200 mm y pie de 600 mm de largo (710 mm de ancho, 3 mm de luz entre las dos), las dos con su
-  bandeja extensible. La bandeja (490 mm de ancho) es el sobrante de cortar la placa de una lámina de 1200 mm (710 + 490). La de la cabecera mide 736,5 mm y la del pie 551,5 mm. Se cambia en "Largo placa cabecera". Un guardado con
-  la cama de 170 cm y la L de 670 mm pasa solo a 180 cm y 570 mm.
+- La plataforma es un peine ("varillas intercaladas"): cada placa (cabecera de 120 cm y pie de 60 cm) se corta con ranuras abiertas hacia el
+  pasillo. Los pedazos que salen de las ranuras, unidos por un lomo de 80 mm del lado del pasillo, son las varillas móviles: salen 490 mm
+  hacia el pasillo y quedan intercaladas con los dedos fijos. Cerrada se ve como una placa lisa de 71 cm; abierta mide 120 cm. La cabecera
+  lleva 8 varillas y el pie 4 (`cama.varillasCabecera` y `cama.varillasPie`); el dedo fijo mide lo mismo que la ranura y cada varilla entra con
+  2 mm de luz por lado. Las esquinas del pasillo son R50 (un solo círculo para la placa y el lomo) y el fondo de las ranuras R20.
+  Las varillas no figuran en la tabla de cortes: salen de la placa. Se cambian en `cama.ranura`, `cama.lomo`, `cama.lomoMovil` y `cama.ventana` (defaults.js).
+- Placas de la cama: la de la cabecera mide 1183,5 mm y la del pie 583,5 mm de largo (710 mm de ancho, 3 mm de luz entre las dos y 15 mm
+  de pared en cada extremo dentro de los 180 cm). Las dos tienen el mismo ancho y no llevan recortes. Se cambia en "Largo placa cabecera".
+  Un guardado con la cama de 170 cm y la L de 670 mm pasa solo a 180 cm y 570 mm, y uno con la plataforma a 395 mm pasa a 400 mm.
 - Equipos eléctricos con las medidas que tomó Marco (ancho x alto x profundidad, en cm): batería 29,5 x 28 x 20, inversor
   25,5 x 19 x 9,5, DC-DC 18,5 x 12,3 x 6,7, caja de fusibles 9 x 14, panel de interruptores 16,5 x 4, enchufes 5 x 5 y bomba de
-  agua 16,4 x 9. Inversor y DC-DC van de frente a la puerta de los equipos (la profundidad es la que entra hacia el fondo) y la
+  agua 16,4 x 9. Inversor y DC-DC van de frente a la puerta lateral (la profundidad es la que entra hacia el fondo) y la
   batería contra el fondo con los bornes arriba. Todo lo demás de la lista de equipos sigue ESTIMADO (alto de la caja de
   fusibles y profundidad de interruptores y enchufes también). Con la L de 570 mm entran uno detrás de otro los equipos del frente,
   el paso del cable largo y la batería; si algún día la L se achica tanto que no entren, el inversor se pone atravesado solo.
   Los dos cajones de cocina de la L usan correderas de 500 mm.
-- Cama extensible: al abrir, la bandeja queda 16 mm más baja que la placa fija (la cubre el colchón o un relleno de 15 mm).
-  Los costados del pasillo llegan 4 mm por debajo de las bandejas para que salgan por encima (por eso entre el costado y la placa
-  queda una luz de unos 20 mm, que cubre la bandeja cuando está cerrada). Las bandejas no llevan listones: la ranura deja 30 mm o más de
-  madera junto a las correderas. Con la cama abierta quedan 110 mm de pasillo.
-- Correderas de las bandejas: de carga, 500 mm, extensión total, 100 kg el par. Tienen que recorrer 490 mm y sostener la bandeja toda afuera: confirmar con la ficha de las que compres.
+- Cama extensible: las varillas van a la misma altura que la placa fija. El costado del pasillo baja a 354 mm (31 mm bajo la cara de abajo
+  de la placa) para que las correderas de bajo perfil (30 mm de alto como máximo) pasen por encima; por eso las ventanas miden 274 mm de alto.
+  Las varillas se deslizan sobre los largueros y el borde del pasarruedas con cinta de teflón. Abiertas quedan en voladizo: hay que probar
+  la flexión con peso real. Con la cama abierta quedan 110 mm de pasillo.
+- Correderas de las varillas: de carga, 500 mm, extensión total, 100 kg el par, de bajo perfil. Tienen que recorrer 490 mm: confirmar con la ficha de las que compres.
 - Mesa plegable reducida a 400 mm de ancho para que no pase sobre la cama (con la de 71 cm cerrada quedan 600 mm de pasillo).
 - Consumos de cada aparato.
 - Tamaño de hoja que vende Derome (se usó 2440 x 1220).

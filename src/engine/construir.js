@@ -50,7 +50,7 @@ export function construir(cfg) {
       avisos.push(`${p.id} (${p.nombre}) se sale del interior de la van.`);
     }
   }
-  // Con la cama extendida las bandejas salen hacia el pasillo: controlar que no choquen
+  // Con la cama extendida las varillas salen hacia el pasillo: controlar que no choquen
   for (const p of partes) {
     if (!p.ext) continue;
     const abierta = { ...p, x: p.x + cfg.cama.extension };

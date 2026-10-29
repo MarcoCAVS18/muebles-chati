@@ -6,13 +6,13 @@ const EJE = { x: 0, y: 1, z: 2 };
 const GIRO_PUERTA = (100 * Math.PI) / 180;
 const RECORRIDO_MAX = 240;
 
-// Une el frente con las maderas de su caja: "Frente cajón del gas" y "Cajón de la garrafa" son el mismo cajón
+// Une el frente con las maderas de su caja: "Frente cajón de cocina 1" y "Cajón de cocina 1 - lateral" son el mismo cajón
 export function llaveCajon(nombre) {
   const n = nombre.toLowerCase();
   const frente = n.match(/^frente (cajón .+)$/);
   const caja = n.match(/^(cajón .+?) - (lateral|trasera|piso del cajón|delantera)/);
   const k = frente ? frente[1] : caja ? caja[1] : null;
-  return k ? k.replace('cajón del gas', 'cajón de la garrafa') : null;
+  return k;
 }
 
 // Devuelve { porParte, porDeco }: para cada id, un cajón { tipo, v } (desplazamiento total en mm)

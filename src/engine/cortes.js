@@ -11,6 +11,7 @@ export function listaDeCortes(partes, cfg) {
   const avisos = [];
 
   for (const p of partes) {
+    if (p.salidaDe) continue; // sale de otra placa (las varillas móviles salen de las ranuras de la placa fija)
     if (p.tipo === 'liston') {
       const dims = [p.sx, p.sy, p.sz].sort((a, b) => b - a);
       (listones[p.mat] = listones[p.mat] || []).push({
@@ -55,6 +56,7 @@ export function planificar(partes, cfg) {
 export function pesoEstimado(partes, cfg) {
   let kg = 0;
   for (const p of partes) {
+    if (p.salidaDe) continue; // ya está dentro del volumen de la placa de la que sale
     const vol = (p.sx * p.sy * p.sz) / 1e9; // m3
     const dens = p.tipo === 'liston' ? cfg.listones[p.mat].densidad : cfg.materiales[p.mat].densidad;
     kg += vol * dens;

@@ -70,7 +70,7 @@ function huecosDe(p, plano) {
 }
 
 // Hay que dibujarla con contorno propio (no como caja)
-export const tieneContorno = (p) => !!(p.radio || p.calado || (p.huecos && p.huecos.length) || p.redondeo);
+export const tieneContorno = (p) => !!(p.perfil || p.radio || p.calado || (p.huecos && p.huecos.length) || p.redondeo);
 
 export function contorno(p) {
   if (p.calado && p.calado.tipo === 'arco') {
@@ -95,6 +95,23 @@ export function contorno(p) {
       recorte: null,
       arco: { a: w / 2, b: 0, r: R },
       huecos: [],
+    };
+  }
+  if (p.perfil) {
+    // Placa en peine: el contorno viene armado de la cama (ranuras abiertas al pasillo, varillas con su lomo)
+    const pf = p.perfil;
+    return {
+      plano: 'xz',
+      w: p.sx,
+      h: p.sz,
+      cmds: pf.cmds,
+      escuadras: [],
+      esquinas: pf.esquinas,
+      radio: pf.radio,
+      recorte: null,
+      arco: null,
+      huecos: [],
+      peine: pf,
     };
   }
   if (p.radio) {
@@ -185,8 +202,36 @@ export function describirPieza(p, cfg) {
     if (c.esquinas) {
       lineas.push({
         tipo: 'redondo',
-        texto: `${c.esquinas} esquinas redondeadas de radio R${fmt(c.radio)} mm (fresadora con fresa de radio o plantilla)`,
+        texto: c.peine
+          ? `${c.esquinas} esquinas exteriores redondeadas de radio R${fmt(c.radio)} mm (fresadora con fresa de radio o plantilla)${c.peine.tipo === 'movil' ? '; las del lomo siguen el mismo círculo que las de la placa, para que cerrada parezca una sola pieza' : ''}`
+          : `${c.esquinas} esquinas redondeadas de radio R${fmt(c.radio)} mm (fresadora con fresa de radio o plantilla)`,
       });
+    }
+    if (c.peine) {
+      const pf = c.peine;
+      if (pf.tipo === 'fijo') {
+        lineas.push({
+          tipo: 'arco',
+          texto: `${pf.n} ranuras de ${fmt(pf.ancho)} mm de ancho, abiertas hacia el pasillo, de ${fmt(pf.largoDedo)} mm de fondo; el fondo lleva esquinas R${fmt(c.peine.radioRanura ?? 0)} (taladro en cada esquina, caladora y fresadora o lija para pulirlas)`,
+        });
+        lineas.push({
+          tipo: 'recto',
+          texto: `Quedan ${pf.n - 1} dedos fijos de ${fmt(pf.costilla)} mm de ancho entre las ranuras, ${fmt(pf.lomo)} mm de lomo contra la pared y un hueco de ${fmt(pf.lomoM)} mm en el borde del pasillo donde va el lomo móvil`,
+        });
+        lineas.push({
+          tipo: 'recto',
+          texto: 'Los pedazos que salen de las ranuras no se tiran: son las varillas móviles. Cortá con cuidado y guardalos en orden',
+        });
+      } else {
+        lineas.push({
+          tipo: 'arco',
+          texto: `${pf.n} varillas de ${fmt(pf.anchoVarilla)} mm de ancho y ${fmt(pf.largoDedo - pf.luz)} mm de largo, con las puntas de atrás R${fmt(pf.radioRanura ?? 0)}; entran en las ranuras de la placa con ${fmt(pf.luz)} mm de luz a cada lado`,
+        });
+        lineas.push({
+          tipo: 'recto',
+          texto: `El lomo de ${fmt(pf.lomoM)} mm del lado del pasillo es parte de esta misma pieza (sale del borde de la placa): las varillas ya vienen unidas. Se atornilla desde arriba al listón de unión`,
+        });
+      }
     }
     if (c.recorte) {
       lineas.push({
@@ -202,6 +247,17 @@ export function describirPieza(p, cfg) {
         lineas.push({
           tipo: 'arco',
           texto: `${g.n} ranuras iguales de ${fmt(largo)} x ${fmt(ancho)} mm, con esquinas R${fmt(h.r)}, a lo ancho de la pieza${g.costilla ? ` y ${fmt(g.costilla)} mm de madera entre una y otra` : ''}${g.cortos ? `; las ${g.cortos} que quedan junto al recorte son más cortas` : ''} (taladro en cada esquina, caladora y fresadora o lija para pulirlas)`,
+        });
+      } else if (h.tipo === 'asiento') {
+        lineas.push({
+          tipo: 'arco',
+          texto: `Calado circular de ${fmt(2 * h.r)} mm de diámetro, el asiento de la garrafa: su centro queda a ${fmt((h.a0 + h.a1) / 2)} mm del borde izquierdo y a ${fmt((h.b0 + h.b1) / 2)} mm del borde del frente (taladro y caladora; la pieza que sale sirve para otra parte)`,
+        });
+      } else if (h.tipo === 'puerta') {
+        // En el costado (plano zy) la coordenada a es la altura y la b la distancia al frente
+        lineas.push({
+          tipo: 'arco',
+          texto: `Calado de la puerta de ${fmt(largo)} x ${fmt(ancho)} mm con esquinas R${fmt(h.r)}: queda a ${fmt(g.bordeA)} mm del borde de abajo y a ${fmt(g.bordeB)} mm del borde del frente (taladro en las esquinas y caladora). La pieza que sale es la puerta: lijala 2 mm por lado para dejar la luz`,
         });
       } else {
         // En los costados (plano zy) la coordenada a es la altura; en los frentes (plano xy) es el costado
@@ -384,6 +440,8 @@ export function anotarPieza(p, cam) {
       if (k.tag === 'esquina') {
         const [a, b] = aMarco(c.plano, k.cu + (k.r + 22) * Math.cos(mitad), k.cv + (k.r + 22) * Math.sin(mitad));
         arcos.push({ pts, tipo: 'redondo', etiqueta: `R${fmt(k.r)}`, pos: V(a, b) });
+      } else if (k.tag === 'esquinaSin') {
+        arcos.push({ pts, tipo: 'redondo', etiqueta: '', pos: pts[Math.floor(n / 2)] });
       } else {
         const [a, b] = aMarco(c.plano, k.cu, k.cv);
         arcos.push({ pts, tipo: 'arco', etiqueta: '', pos: V(a, b) });
@@ -418,7 +476,7 @@ export function anotarPieza(p, cam) {
       const h = g.primero;
       const am = (h.a0 + h.a1) / 2;
       const bm = (h.b0 + h.b1) / 2;
-      const nom = h.tipo === 'ranura' ? 'Ranura' : 'Ventana';
+      const nom = { ranura: 'Ranura', puerta: 'Puerta', asiento: 'Asiento' }[h.tipo] || 'Ventana';
       const aEn = (f) => h.a0 + f * (h.a1 - h.a0);
       // La etiqueta puede ir en otro lugar de la línea para que las de una misma ranura no se pisen
       const cota = (ini, fin, valor, nombre, etiquetaPos) => cotas.push({ ini, fin, ext: [], valor, nombre, tipo: 'arco', ...(etiquetaPos ? { etiquetaPos } : {}) });
@@ -428,12 +486,30 @@ export function anotarPieza(p, cam) {
         if (g.siguiente && g.costilla > 12) cota(V(aEn(0.78), h.b1), V(aEn(0.78), g.siguiente.b0), g.costilla, 'Entre ranuras');
       } else {
         const nomA = c.plano === 'zy' ? 'Del borde de abajo' : 'Del borde lateral';
-        const nomB = c.plano === 'zy' ? 'Del borde lateral' : 'Del borde de abajo';
+        const nomB = c.plano === 'zy' ? (h.tipo === 'puerta' ? 'Del borde del frente' : 'Del borde lateral') : c.plano === 'xz' ? 'Del borde del frente' : 'Del borde de abajo';
         cota(V(h.a0, bm), V(h.a1, bm), h.a1 - h.a0, nom);
         cota(V(aEn(0.12), h.b0), V(aEn(0.12), h.b1), h.b1 - h.b0, nom);
         if (h.b0 > 12) cota(V(aEn(0.85), 0), V(aEn(0.85), h.b0), h.b0, nomB);
         if (h.a0 > 12) cota(V(0, bm), V(h.a0, bm), h.a0, nomA);
       }
+    }
+    if (c.peine) {
+      // Placa en peine: ancho de la ranura (o de la varilla), madera entre una y otra, largo y lomos
+      const pf = c.peine;
+      const k = Math.floor((pf.n - 1) / 2);
+      const movil = pf.tipo === 'movil';
+      const zi = pf.ranuras[k] + (movil ? pf.luz : 0) - p.z; // borde de z menor de la ranura o varilla del medio
+      const w = movil ? pf.anchoVarilla : pf.ancho;
+      const sep = movil ? pf.costilla + 2 * pf.luz : pf.costilla;
+      const a0 = (movil ? pf.xl + pf.luz : pf.xl) - p.x; // punta de atrás
+      const a1 = pf.xs - p.x;
+      const zc = zi + w / 2;
+      const cota = (ini, fin, valor, nombre, etiquetaPos) => cotas.push({ ini, fin, ext: [], valor, nombre, tipo: 'arco', ...(etiquetaPos ? { etiquetaPos } : {}) });
+      cota(V(a0 + 0.25 * (a1 - a0), zi), V(a0 + 0.25 * (a1 - a0), zi + w), w, movil ? 'Varilla' : 'Ranura');
+      if (k < pf.n - 1) cota(V(a0 + 0.75 * (a1 - a0), zi + w), V(a0 + 0.75 * (a1 - a0), zi + w + sep), sep, movil ? 'Entre varillas' : 'Dedo fijo');
+      cota(V(a0, zc), V(a1, zc), a1 - a0, movil ? 'Largo de las varillas' : 'Fondo de las ranuras', V((a0 + a1) / 2 + 40, zc));
+      if (movil) cota(V(a1, zc), V(p.sx, zc), p.sx - a1, 'Lomo');
+      else cota(V(0, zc), V(a0, zc), a0, 'Lomo');
     }
     if (c.arco) {
       const [a0, b0] = aMarco(c.plano, c.arco.a, c.arco.b);

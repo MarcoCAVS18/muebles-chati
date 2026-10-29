@@ -227,7 +227,7 @@ export const ELEMENTOS = {
   },
   bidon1: {
     descripcion: 'Bidón plano de agua limpia de 20 L (416 x 203 x 408 mm, con canilla). Va parado y girado en el cajón que llega hasta el piso, abajo del fregadero.',
-    ubicacion: 'Sección del agua, cajón de abajo: atrás, cerca de la bomba. El cajón se tira hacia el hueco libre frente al mueble.',
+    ubicacion: 'Sección del agua, cajón de abajo: atrás, cerca de la bomba. El cajón se tira hacia el pasillo, frente al mueble.',
     consejos: [
       'Dos bidones de 20 L llenos pesan unos 40 kg: correderas de carga de 45 kg o más y piso de 15 mm.',
       'Sujetar los bidones con correa dentro del cajón.',
@@ -250,7 +250,7 @@ export const ELEMENTOS = {
   },
   anafe: {
     descripcion: 'Anafe de 2 hornallas empotrado en la tapa 2, en la sección del medio. Con válvula de seguridad (termocupla) que corta el gas si se apaga la llama.',
-    ubicacion: 'Sección de la cocina, arriba. Abajo tiene dos cajones de cocina y, al piso, el cajón de la garrafa.',
+    ubicacion: 'Sección de la cocina, arriba. Abajo tiene dos cajones de cocina y, al piso, el compartimento de la garrafa con su puerta.',
     consejos: [
       'La cocina mide 330 mm de ancho y 500 de fondo: buscar uno de hasta 300 de ancho y 440 de fondo (el corte tiene que dejar unos 25 mm de tapa por lado). Las de 30 cm tipo domino suelen medir 510 de fondo: no entran sin profundizar la cocina.',
       'El 3D usa 300 x 440 x 70 mm como medida a elegir: confirmar con el anafe real y con la plantilla de corte.',
@@ -262,14 +262,14 @@ export const ELEMENTOS = {
   },
   garrafa: {
     descripcion:
-      'Garrafa chica recargable, parada dentro del cajón de la cocina, al piso del mueble y debajo de los dos cajones de cocina. Se saca una vez por semana, se carga afuera y se vuelve a colocar.',
-    ubicacion: 'Cajón de la garrafa, al piso de la sección del medio (debajo de los cajones de cocina y del anafe).',
+      'Garrafa chica recargable, parada y fija en su compartimento, al piso del mueble y debajo de los dos cajones de cocina. Se saca una vez por semana por la puerta, se carga afuera y se vuelve a colocar.',
+    ubicacion: 'Compartimento de la garrafa, al piso de la sección del medio (debajo de los cajones de cocina y del anafe), detrás de una puerta con la bisagra a la derecha.',
     consejos: [
-      'Para sacarla: cerrar la llave de corte y la válvula de la garrafa, tirar el cajón entero (30 cm, hasta que la garrafa quede fuera del mueble), desenroscar el regulador y levantarla. El regulador y la manguera quedan en el cajón.',
-      'Para que el cajón salga entero, la placa de la cabecera de la cama y el colchón llevan un recorte en la esquina del lado de la cocina (ver el 3D). Sin ese recorte el frente del cajón y el regulador chocan con la panza de la cama.',
-      'La manguera tiene que ser lo bastante larga para acompañar al cajón en todo su recorrido, con un bucle holgado.',
+      'Para sacarla: cerrar la llave de corte y la válvula de la garrafa, abrir la puerta, desenroscar el regulador y levantarla recta. La garrafa queda parada en un círculo calado en la base, que la traba, y el regulador y la manguera quedan en el compartimento.',
+      'La puerta empieza después del borde de la cama, así que al abrirse no pasa por debajo de ella ni toca la cama. La garrafa entra con muy poca luz: medila antes de cortar la puerta.',
+      'La manguera tiene que tener un bucle holgado para que la puerta se abra sin tirar de ella.',
       'Siempre parada y con correa. Nunca acostada.',
-      'El cajón del gas tiene que ser un compartimento aparte del resto del mueble, con una rejilla de ventilación de unos 100 cm2 hacia el exterior por el piso: el gas pesa más que el aire y tiene que poder salir sin entrar a la van.',
+      'El compartimento de la garrafa tiene que ser aparte del resto del mueble, con una rejilla de ventilación de unos 100 cm2 hacia el exterior por el piso, justo bajo el círculo del asiento: el gas pesa más que el aire y tiene que poder salir sin entrar a la van.',
       'Cerrar la válvula de la garrafa al manejar, al dormir y al irse.',
       'Cargar solo en lugares habilitados y respetar el vencimiento de la garrafa.',
       'Que un instalador de gas matriculado revise la instalación completa: es la parte más riesgosa de la obra.',
@@ -278,7 +278,7 @@ export const ELEMENTOS = {
   },
   regulador: {
     descripcion: 'Regulador de presión de gas (GLP). Va enroscado en la válvula de la garrafa y baja la presión al valor que pide el anafe.',
-    ubicacion: 'Arriba de la garrafa, dentro del cajón del gas.',
+    ubicacion: 'Arriba de la garrafa, dentro de su compartimento, bajo el estante.',
     consejos: [
       'La rosca y la presión tienen que coincidir con la garrafa y con el anafe (cambia según el país).',
       'Manguera certificada, con abrazaderas y dentro de su fecha de vencimiento.',
@@ -294,7 +294,7 @@ export const ELEMENTOS = {
   },
   detectorGas: {
     descripcion: 'Detector de gas GLP con alarma. El gas es más pesado que el aire y se junta cerca del piso.',
-    ubicacion: 'En el montante entre el eléctrico y la cocina, cerca del piso, al lado del frente del cajón del gas.',
+    ubicacion: 'En el montante entre el eléctrico y la cocina, cerca del piso, al lado de la puerta de la garrafa.',
     consejos: [
       'Instalarlo a unos 30 cm del piso y lejos del anafe y de las rejillas de ventilación.',
       'Sumar un detector de monóxido de carbono a la altura de la cama.',

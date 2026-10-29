@@ -36,13 +36,13 @@ export function Caja({ x, y, z, sx, sy, sz, color, opacidad = 1, bordes = '#6b4f
 // Placa con esquinas redondeadas, recorte o arco calado. El contorno sale de enfoque.js (el mismo que usan las cotas).
 // p es la pieza original (da el contorno) y x, y, z su posición actual (puede estar desplazada por la vista explotada).
 export function PlacaCortada({ p, x, y, z, color, opacidad = 1, bordes, onClick, onDoubleClick, onOver, onOut, brillo, matRef }) {
-  const c = useMemo(() => contorno(p), [p.x, p.z, p.sx, p.sy, p.sz, p.radio, p.recorte, p.calado, p.huecos, p.redondeo]);
+  const c = useMemo(() => contorno(p), [p.x, p.z, p.sx, p.sy, p.sz, p.radio, p.recorte, p.calado, p.huecos, p.redondeo, p.perfil]);
   const geometria = useMemo(() => {
     const trazo = (cmds, destino) => {
       for (const k of cmds) {
         if (k.t === 'M') destino.moveTo(m(k.u), m(k.v));
         else if (k.t === 'L') destino.lineTo(m(k.u), m(k.v));
-        else destino.absarc(m(k.cu), m(k.cv), m(k.r), k.a0, k.a1, true);
+        else destino.absarc(m(k.cu), m(k.cv), m(k.r), k.a0, k.a1, k.a1 < k.a0);
       }
     };
     const forma = new THREE.Shape();

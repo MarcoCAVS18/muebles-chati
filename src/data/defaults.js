@@ -9,9 +9,9 @@
 //     Vista desde la puerta trasera, de izquierda a derecha:
 //       izquierda: electricidad al piso (batería, inversor, DC-DC, fusibles) y arriba interruptores,
 //                  enchufes y la heladera, con la tapa a ras de la mesada; esta sección es la L: llega a 570 mm de profundidad
-//       centro:    anafe angosto, dos cajones de cocina y el cajón de la garrafa de gas al piso
+//       centro:    anafe angosto, dos cajones de cocina y la garrafa de gas fija al piso, detrás de una puerta
 //       derecha:   grifo y fregadero, con dos bidones al piso (uno de agua limpia y uno de aguas grises)
-//   - Cama extensible (90 a 120 cm) de plywood, como la del instructivo: dos módulos (120 y 60) con ventanas y placas con ranuras
+//   - Cama extensible (71 a 120 cm) de plywood: dos módulos (120 y 60) con ventanas y dos placas en peine cuyas varillas salen al pasillo
 //   - Mueble derecho con cajones, puerta bajo la mesa plegable y alacena alta
 
 export const CONFIG_INICIAL = {
@@ -61,22 +61,29 @@ export const CONFIG_INICIAL = {
     divisor2: 980, // fin de la cocina
   },
 
-  // Cama extensible de 71 a 120 cm: cada placa se corta a 71 cm de una lámina de 120 y el sobrante de 49 cm, con las mismas
-  // ranuras, es la bandeja que se tira al pasillo
+  // Cama extensible de 71 a 120 cm, hecha con dos placas en peine: cada una se corta con ranuras abiertas hacia el pasillo y
+  // los pedazos que salen de las ranuras son las varillas móviles. Cerrada parece una placa plana; abierta, las varillas
+  // salen 49 cm y quedan intercaladas con los dedos de la placa
   cama: {
     x0: 10,
     ancho: 710, // cama cerrada
     extension: 490, // se agranda hasta 1200
-    bandejaAncho: 490, // el sobrante de la placa (710 + 490 = 1200): al abrir queda toda afuera, sostenida por las correderas
     radio: 50, // radio de las esquinas
-    largo: 1800, // largo de la cama (antes 1700): la L del mueble trasero se achicó 100 mm para dejarle lugar
-    plataforma: 395, // altura de la cara superior: la placa (15 mm) apoya justo sobre el pasarruedas izquierdo (380)
-    largoCabecera: 1200, // largo de la placa de la cabecera (la otra placa, de 600 mm, va al pie)
-    huecoMueble: 430, // espacio libre bajo la cama, frente al mueble trasero (bidones y puertas bajas)
-    // Calados de las placas y bandejas (ranuras de esquinas redondeadas que cruzan la cama a lo ancho)
-    ranura: { ancho: 70, costilla: 50, margen: 50, radio: 20 },
+    largo: 1800, // largo de la cama, de pared a pared del mueble trasero: las dos tapas de los extremos están adentro
+    plataforma: 400, // altura de la cara superior: pasarruedas izquierdo (380) + fieltro (5) + placa (15)
+    fieltro: 5, // entre las placas y el pasarruedas izquierdo
+    largoCabecera: 1200, // largo del módulo de la cabecera (el otro, de 600 mm, va al pie)
+    // Peine: ranuras abiertas hacia el pasillo (el fondo lleva esquinas redondeadas). El ancho de cada ranura sale de la
+    // cantidad de varillas; el dedo fijo que queda entre dos ranuras mide lo mismo (dedo: 1 = igual que la ranura)
+    varillasPie: 4,
+    varillasCabecera: 8,
+    ranura: { dedo: 1, radio: 20 },
+    lomo: 60, // lomo fijo contra la pared, de donde salen los dedos de la placa
+    lomoMovil: 80, // lomo de las varillas, del lado del pasillo
+    luzVarilla: 2, // luz de cada varilla dentro de su ranura, a cada lado
+    alturaCorredera: 30, // alto máximo de las correderas: el costado del pasillo termina debajo de ellas
     // Ventanas de los costados (hueco de cada cajón): zócalo y cabezal son la madera que queda abajo y arriba
-    ventana: { radio: 40, zocalo: 40, cabezal: 50, apoyoCajon: 45 },
+    ventana: { radio: 40, zocalo: 40, cabezal: 40, apoyoCajon: 45 },
     cajonCabecera: { fondo: 500 }, // el alto lo da la ventana; 500 mm es lo que deja el pasarruedas (185 mm)
     cajonPie: { fondo: 500 },
   },
