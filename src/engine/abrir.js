@@ -18,7 +18,7 @@ export function llaveCajon(nombre) {
 
 // Devuelve { porParte, porDeco }: para cada id, un cajón { tipo, v } (desplazamiento total en mm)
 // o una puerta { tipo, pivote: [x, z], giro } (giro en radianes alrededor del eje vertical) o una tapa que baja
-// { tipo: 'tapa', pivote: [x, y], giro } (giro alrededor de un eje horizontal paralelo a z).
+// { tipo: 'tapa', pivote: [x, y], giro } (eje horizontal paralelo a z) o { tipo: 'tapaX', pivote: [y, z], giro } (eje paralelo a x).
 export function planAbrir(data) {
   const porParte = {};
   const porDeco = {};
@@ -48,6 +48,14 @@ export function planAbrir(data) {
     if (frente.bisagraAbajo && eje === 0) {
       const xp = signo > 0 ? frente.x : frente.x + frente.sx;
       const mov = { tipo: 'tapa', pivote: [xp, frente.y], giro: -signo * GIRO_TAPA };
+      porParte[frente.id] = mov;
+      porDeco[d.id] = mov;
+      continue;
+    }
+    // Lo mismo en el frente del pie, que baja hacia la puerta trasera: eje horizontal paralelo a x, pivote = [y, z]
+    if (frente.bisagraAbajo && eje === 2) {
+      const zp = signo > 0 ? frente.z : frente.z + frente.sz;
+      const mov = { tipo: 'tapaX', pivote: [frente.y, zp], giro: signo * GIRO_TAPA };
       porParte[frente.id] = mov;
       porDeco[d.id] = mov;
       continue;

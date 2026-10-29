@@ -168,6 +168,15 @@ function GiroTapa({ pivote, giro, children }) {
   );
 }
 
+// Lo mismo con el eje paralelo a x: pivote = [y, z] en mm (la puerta del frente del pie, que baja hacia la puerta trasera)
+function GiroTapaX({ pivote, giro, children }) {
+  return (
+    <group position={[0, m(pivote[0]), m(pivote[1])]} rotation={[giro, 0, 0]}>
+      <group position={[0, -m(pivote[0]), -m(pivote[1])]}>{children}</group>
+    </group>
+  );
+}
+
 // Una puerta que gira sobre su bisagra (eje vertical que pasa por pivote = [x, z] en mm)
 function Giro({ pivote, giro, children }) {
   return (
@@ -443,12 +452,21 @@ function Escena(props) {
             onOut: () => setHover(''),
           };
           const mov = abrir.porParte[p.id];
+          // Las puertas con las bisagras abajo (cama) solo se abren con la cama cerrada
           if (mov && mov.tipo === 'tapa') {
             const pivote = [mov.pivote[0] + (q.x - p.x), mov.pivote[1] + (q.y - p.y)];
             return (
-              <GiroTapa key={p.id} pivote={pivote} giro={mov.giro * abierto}>
+              <GiroTapa key={p.id} pivote={pivote} giro={mov.giro * abierto * (1 - camaAbierta)}>
                 {tieneContorno(p) ? <PlacaCortada p={q} {...comun} /> : <Caja {...comun} />}
               </GiroTapa>
+            );
+          }
+          if (mov && mov.tipo === 'tapaX') {
+            const pivote = [mov.pivote[0] + (q.y - p.y), mov.pivote[1] + (q.z - p.z)];
+            return (
+              <GiroTapaX key={p.id} pivote={pivote} giro={mov.giro * abierto * (1 - camaAbierta)}>
+                {tieneContorno(p) ? <PlacaCortada p={q} {...comun} /> : <Caja {...comun} />}
+              </GiroTapaX>
             );
           }
           if (mov && mov.tipo === 'puerta') {
@@ -474,9 +492,17 @@ function Escena(props) {
           if (mov && mov.tipo === 'tapa') {
             const pivote = [mov.pivote[0] + (q.x - d.x), mov.pivote[1] + (q.y - d.y)];
             return (
-              <GiroTapa key={d.id} pivote={pivote} giro={mov.giro * abierto}>
+              <GiroTapa key={d.id} pivote={pivote} giro={mov.giro * abierto * (1 - camaAbierta)}>
                 {deco(q)}
               </GiroTapa>
+            );
+          }
+          if (mov && mov.tipo === 'tapaX') {
+            const pivote = [mov.pivote[0] + (q.y - d.y), mov.pivote[1] + (q.z - d.z)];
+            return (
+              <GiroTapaX key={d.id} pivote={pivote} giro={mov.giro * abierto * (1 - camaAbierta)}>
+                {deco(q)}
+              </GiroTapaX>
             );
           }
           if (mov && mov.tipo === 'puerta') {

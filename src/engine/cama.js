@@ -109,8 +109,14 @@ export function cama(ctx, G) {
     return { tipo: 'ventana', a0: ve.zocalo - luzPiso, a1: ve.zocalo - luzPiso + altoVentana, b0: zc - ancho / 2 - zPieza, b1: zc + ancho / 2 - zPieza, r: rV };
   };
   const anchoFrente = x1 - t - x0;
+  // La ventana del frente del pie empieza sobre el refuerzo de piso de 45 mm que tiene detrás: ahí se atornillan las bisagras
+  const yVentanaF = sh - 3;
+  const altoVentanaF = ve.zocalo + altoVentana - yVentanaF;
+  const rVF = Math.min(ve.radio, altoVentanaF / 2 - 1);
+  const margenF = 70;
+  const anchoVentanaF = anchoFrente - 2 * margenF;
   P('Frente del pie (ventana de esquinas redondeadas)', x0, 0, zPie, anchoFrente, yT, t, {
-    huecos: [{ tipo: 'ventana', a0: 70, a1: anchoFrente - 70, b0: ve.zocalo, b1: ve.zocalo + altoVentana, r: rV }],
+    huecos: [{ tipo: 'ventana', a0: margenF, a1: anchoFrente - margenF, b0: yVentanaF, b1: yVentanaF + altoVentanaF, r: rVF }],
   });
   P('Costado del pasillo - módulo del pie, 60 (ventana)', x1 - t, luzPiso, zPie, t, yPan - luzPiso, zCentro - zPie, {
     huecos: [ventanaDe(bahiaPie, zPie)],
@@ -151,9 +157,11 @@ export function cama(ctx, G) {
   movil('de la cabecera', placaCab, repCab, idPlacaCab);
   movil('del pie', placaPie, repPie, idPlacaPie);
 
-  // ---- Puertas en las ventanas de los costados: bajan hasta el piso con bisagras de cazoleta en el borde de abajo ----
-  // Cada puerta cierra su ventana con 3 mm de luz y sale con el costado, del que cuelga. Las bisagras se atornillan a un
-  // listón de 30 x 30 pegado a la cara de adentro del costado, a ras del borde de abajo de la ventana.
+  // ---- Puertas en las ventanas: bajan hasta el piso con bisagras de cazoleta en el borde de abajo ----
+  // Cada puerta cierra su ventana con 3 mm de luz y queda FIJA en la caja (no sale con la cama): el costado se corre y la
+  // deja en su lugar. Las puertas de los costados llevan las bisagras en un listón de 30 x 30 pegado a la caja, a ras del
+  // borde de abajo de la ventana; la del frente del pie las lleva sobre el refuerzo de piso que tiene detrás. Se abren solo
+  // con la cama cerrada.
   const yFrente = ve.zocalo + 3;
   const altoFrente = altoVentana - 6;
   const puertaEnVentana = (nombre, b) => {
@@ -164,17 +172,31 @@ export function cama(ctx, G) {
       redondeo: rV - 3,
       lado: 1,
       color: '#d3b27c',
-      ext: true,
       bisagraAbajo: true,
       huecos: [{ tipo: 'agarradera', a0: aAg - 24, a1: aAg, b0: (ancho + 4) / 2 - 50, b1: (ancho + 4) / 2 + 50, r: 11 }],
     });
-    LST(`Listón de las bisagras (${nombre})`, x1 - t - 30, ve.zocalo - 30, z0 - 2, 30, 30, ancho + 4, { ext: true });
-    // Botón push abajo de la agarradera, hacia el pasillo
-    ctx.boton({ grupo: G, nombre: `Puerta del módulo ${nombre} (bisagras abajo)`, eje: 'x+', x: x1, y: yFrente + altoFrente / 2, z: z0 + ancho / 2, ext: true });
+    // El listón queda fijo entre los dos refuerzos de piso de su módulo (tope contra cada uno, 10 mm sobre el piso)
+    LST(`Listón de las bisagras (${nombre})`, x1 - t - 30, ve.zocalo - 30, b.z0 + sh, 30, 30, b.z1 - b.z0 - 2 * sh);
+    // Botón push al centro de la puerta, hacia el pasillo
+    ctx.boton({ grupo: G, nombre: `Puerta del módulo ${nombre} (bisagras abajo)`, eje: 'x+', x: x1, y: yFrente + altoFrente / 2, z: z0 + ancho / 2 });
     return ancho;
   };
   const anchoCajCab = puertaEnVentana('de la cabecera', bahiaCab);
   const anchoCajPie = puertaEnVentana('del pie', bahiaPie);
+  // Puerta del frente del pie (hacia la puerta trasera de la van): baja hacia atrás
+  {
+    const yP = yVentanaF + 3;
+    const altoP = altoVentanaF - 6;
+    const anchoP = anchoVentanaF - 6;
+    const aAg = altoP - 18;
+    P('Puerta del frente del pie (bisagras abajo)', x0 + margenF + 3, yP, zPie, anchoP, altoP, t, {
+      redondeo: rVF - 3,
+      color: '#d3b27c',
+      bisagraAbajo: true,
+      huecos: [{ tipo: 'agarradera', a0: anchoP / 2 - 50, a1: anchoP / 2 + 50, b0: aAg - 24, b1: aAg, r: 11 }],
+    });
+    ctx.boton({ grupo: G, nombre: 'Puerta del frente del pie (bisagras abajo)', eje: 'z-', x: x0 + margenF + 3 + anchoP / 2, y: yP + altoP / 2, z: zPie });
+  }
 
   // ---- Apoyos de las placas fijas: largueros y listones de pared (esquivan el pasarruedas) ----
   // Los largueros llegan hasta las correderas de las varillas: pasan entre los listones que cuelgan de las puntas
@@ -227,6 +249,7 @@ export function cama(ctx, G) {
     cantidad: Math.ceil((zonaPie.z1 - zonaPie.z0) / 150) + 1 + Math.ceil((zonaCab.z1 - zonaCab.z0) / 150) + 1 + 8,
   });
   ctx.unir(G, 'cola_tornillo', 2 * (yB + 560), 'Guías con refuerzos de piso y largueros');
+  ctx.unir(G, 'cola_tornillo', 4 * sh, 'Listones de las bisagras de las puertas, de testa contra los refuerzos de piso de sus puntas');
   ctx.unir(G, 'cola_tornillo', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Varillas con el listón de unión');
   ctx.unir(G, 'directo', 0, 'Cada varilla, atornillada al listón de unión desde arriba (2 tornillos avellanados por varilla)', {
     herraje: 'Tornillo avellanado 4x30 mm (varillas al listón de unión)',
@@ -262,7 +285,7 @@ export function cama(ctx, G) {
   );
   ctx.herraje(G, 'Retén o traba para las varillas', 2, 'Para que no salgan solas al frenar');
   ctx.herrajeBotones(G); // un botón push en cada puerta
-  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas de los módulos)', 5, 'Tres en la puerta de la cabecera y dos en la del pie, sobre el borde de abajo: la puerta baja hasta el piso al abrir. Se atornillan al listón de las bisagras');
+  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas de la cama)', 7, 'Tres en la puerta de la cabecera, dos en la del pie y dos en la del frente del pie, sobre el borde de abajo: la puerta baja hasta el piso al abrir. Se atornillan al listón de las bisagras (o al refuerzo de piso en el frente del pie)');
   ctx.herraje(G, 'Tirador embutido para las varillas', 2, 'Una agarradera al borde del lomo móvil: el borde de 15 mm es muy fino para un botón push');
   ctx.herraje(G, 'Cinta adhesiva de teflón (PTFE) 25 mm', 1, 'Sobre los largueros y el borde del pasarruedas, donde deslizan las varillas');
   ctx.herraje(G, 'Fresadora con fresa de radio o plantilla y lijadora', 1, `Para las esquinas R${R} de las placas y las varillas y para pulir las ranuras`);

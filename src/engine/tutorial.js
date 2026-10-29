@@ -701,7 +701,7 @@ function cama(data, plan, cfg, e3, cortes) {
       'Módulo del pie: frente (con ventana) y panel central. Cola y 4x40 contra los refuerzos del piso.',
       'Módulo de la cabecera: panel central y la guía, que cierra el extremo contra el frente del mueble trasero.',
       `Alturas: el frente del pie y la guía llegan a ${lay.yT} mm, a ras de la superficie donde dormís; el panel central llega a ${lay.yB} mm, justo bajo las placas.`,
-      `Los costados del pasillo NO van fijos a la caja: salen con la cama. Por ahora dejalos sueltos; se atornillan al lomo de las varillas en el paso 6 (miden ${r0(lay.yPan - 5)} mm de alto y quedan 5 mm sobre el piso).`,
+      `Los costados del pasillo NO van fijos a la caja: salen con la cama. Por ahora dejalos sueltos; se atornillan al lomo de las varillas en el paso 6 (miden ${r0(lay.yPan - 5)} mm de alto y quedan 5 mm sobre el piso). Las puertas de sus ventanas, en cambio, quedan fijas en la caja (paso 7).`,
       'Todo parado y a escuadra. Pegá cada pieza contra su refuerzo y atornillá a través del refuerzo, no al piso.',
     ],
     piezas: [...filas(frentePie, cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/)],
@@ -747,19 +747,22 @@ function cama(data, plan, cfg, e3, cortes) {
   pasos.push({
     id: 'cam-7',
     titulo: 'Puertas de los costados',
-    intro: 'Cada ventana de un costado la cierra una puerta que baja hasta el piso, con bisagras de cazoleta en el borde de abajo (como en las fotos de referencia). Atrás queda el hueco de guardado del módulo: no hay cajones ni correderas.',
+    intro: 'Cada ventana la cierra una puerta que baja con bisagras de cazoleta en el borde de abajo (como en las fotos de referencia): dos puertas hacia el pasillo y una en el frente del pie, hacia la puerta trasera. Las tres quedan FIJAS en la caja: cuando la cama se extiende, los costados se corren y las puertas se quedan. Se usan con la cama cerrada. Atrás queda el hueco de guardado: no hay cajones ni correderas.',
     hacer: [
-      `Listón de las bisagras (${ids(por(/^Listón de las bisagras/))}): pegalo y atornillalo a la cara de adentro del costado, a ras del borde de abajo de la ventana, con la cara de arriba a ${r0(cfg.cama.ventana.zocalo)} mm del piso.`,
-      'Cazoletas: broca Forstner de 35 mm, 12 mm de profundidad (con tope), con el centro a 22,5 mm del canto de la bisagra. Probá antes en un recorte. Son 3 bisagras en la puerta de la cabecera y 2 en la del pie.',
-      `Poné la puerta en la ventana con 3 mm de luz a cada lado, con las bisagras en el borde de abajo y atornilladas al listón. La puerta cuelga del costado: al sacar la cama sale con ella.`,
+      `Listón de las bisagras (${ids(por(/^Listón de las bisagras/))}): va fijo en la caja, contra la cara de adentro del costado cerrado, entre los dos refuerzos de piso de su módulo. Apoyalo de testa contra cada refuerzo, pegalo y atornillalo desde el refuerzo. Su cara de arriba queda a ${r0(cfg.cama.ventana.zocalo)} mm del piso, a ras del borde de abajo de la ventana.`,
+      'Cazoletas: broca Forstner de 35 mm, 12 mm de profundidad (con tope), con el centro a 22,5 mm del canto de la bisagra. Probá antes en un recorte. Son 3 bisagras en la puerta de la cabecera, 2 en la del pie y 2 en la del frente del pie.',
+      'Poné cada puerta de costado en su ventana con 3 mm de luz a cada lado, con las bisagras en el borde de abajo y atornilladas al listón. La puerta NO se une al costado: el costado pasa por delante y se lleva solo la ventana.',
+      `Puerta del frente del pie (${ids(por(/^Puerta del frente del pie/))}): entra en la ventana del frente con 3 mm de luz. Sus bisagras se atornillan al refuerzo de piso que tiene detrás (${ids(por(/^Refuerzo de piso del módulo del pie \(frente\)/))}), que llega justo hasta su borde de abajo. Baja hacia la puerta trasera de la van.`,
       'Agarradera: el calado de la puerta es la escotadura para el dedo, a 18 mm del borde de arriba. El botón push va debajo y traba la puerta cerrada.',
-      'Probá abrir y cerrar con la cama cerrada y con la cama abierta: la puerta baja hasta quedar horizontal y apoya o se frena con una cinta o un tope.',
+      'Probá abrir y cerrar con la cama cerrada: la puerta baja hasta quedar horizontal y apoya o se frena con una cinta o un tope. Con la cama extendida no se usan: las puertas de los costados quedarían a un costado de los listones y el costado se corrió.',
     ],
-    piezas: [...filas(por(/^Puerta del módulo/), cortes), ...f(/^Listón de las bisagras/)],
+    piezas: [...filas(por(/^Puerta del (módulo|frente)/), cortes), ...f(/^Listón de las bisagras/)],
     tablas: [tablaBotones(data, G)],
     ojo: [
       'Las bisagras de cazoleta traen una placa de unos 35 a 40 mm: el listón es de 30 x 30. Comprá una bisagra y probala; si no entra, usá un listón de 45 x 45 y subí el zócalo de la ventana.',
       `Abierta, la puerta llega a ${r0(por(/^Puerta del módulo de la cabecera/)[0]?.sy || 0)} mm hacia el pasillo y queda unos ${r0(cfg.cama.ventana.zocalo)} mm sobre el piso: sostenela con una cinta, un tope o un calce para que no cuelgue.`,
+      `Con la cama extendida las puertas de los costados no tienen nada delante: no hay traba mecánica que las bloquee. Que se abran solo con la cama cerrada es una regla de uso (la app lo muestra así). Si querés evitarlo, sumá un tope o un pestillo que se suelte solo al cerrar la cama.`,
+      `La puerta del frente del pie abierta se extiende unos ${r0(por(/^Puerta del frente del pie/)[0]?.sy || 0)} mm hacia atrás: se usa con la puerta trasera de la van abierta.`,
     ],
   });
 

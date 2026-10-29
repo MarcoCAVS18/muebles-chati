@@ -263,7 +263,7 @@ exigir(ele.caminos.some((c) => /lámpara/.test(c.nombre)) && ele.caminos.some((c
 // Botones push: uno por frente, sobre la cara del frente, sin pisar otras piezas
 const cuentaB = {};
 for (const b of data.botones) cuentaB[b.grupo] = (cuentaB[b.grupo] || 0) + 1;
-exigir(cuentaB['Mueble trasero'] === 6 && cuentaB.Cama === 2 && cuentaB['Mueble derecho'] === 4, `cantidad de botones push inesperada: ${JSON.stringify(cuentaB)}`);
+exigir(cuentaB['Mueble trasero'] === 6 && cuentaB.Cama === 3 && cuentaB['Mueble derecho'] === 4, `cantidad de botones push inesperada: ${JSON.stringify(cuentaB)}`);
 const botonesDeco = data.decos.filter((d) => d.forma === 'boton');
 exigir(botonesDeco.length === data.botones.length, 'cada botón debería dibujarse en el 3D');
 for (const b of data.botones) {
@@ -311,7 +311,7 @@ exigir(e3.cables.some((c) => c.hasta === 'bomba') && CARGAS_INICIALES.some((c) =
 
 // ---- Modo pieza: contorno, descripción de cortes, cámara y cotas ----
 const conContorno = data.partes.filter((p) => contorno(p));
-exigir(conContorno.length === 11, `deberían tener contorno propio 11 piezas (2 placas, 2 juegos de varillas, el frente del pie, 2 costados, 2 frentes de cajón, el costado izquierdo con su puerta y la base de la cocina con su asiento), hay ${conContorno.length}`);
+exigir(conContorno.length === 12, `deberían tener contorno propio 12 piezas (2 placas, 2 juegos de varillas, el frente del pie con su puerta, 2 costados, 2 puertas de los módulos, el costado izquierdo con su puerta y la base de la cocina con su asiento), hay ${conContorno.length}`);
 const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
 const pie = data.partes.find((p) => /^Placa del pie/.test(p.nombre));
 exigir(contorno(cab).esquinas === 4 && contorno(cab).peine && !contorno(cab).recorte, 'la placa de la cabecera debería ser un peine de 4 esquinas redondeadas, sin recorte');
@@ -359,20 +359,20 @@ exigir(data.layout.cama.yPan === data.layout.cama.yB, 'el costado del pasillo de
 const frentesCajon = data.partes.filter((p) => p.grupo === 'Cama' && /^Puerta del módulo/.test(p.nombre));
 exigir(frentesCajon.length === 2, 'faltan las puertas de los módulos de la cama');
 exigir(!data.partes.some((p) => p.grupo === 'Cama' && /cajón|Cajón/.test(p.nombre)), 'la cama ya no lleva cajones');
-// Las puertas cuelgan del costado (salen con la cama), bajan sobre su borde de abajo y las bisagras van a un listón pegado al costado
-exigir(frentesCajon.every((p) => p.ext && p.bisagraAbajo), 'las puertas de la cama deberían salir con el costado y bajar sobre su borde de abajo');
+// Las puertas quedan fijas en la caja (no salen con la extensión), bajan sobre su borde de abajo y las bisagras van a un listón fijo pegado al costado cerrado
+exigir(frentesCajon.every((p) => !p.ext && p.bisagraAbajo), 'las puertas de la cama deberían quedar fijas en la caja y bajar sobre su borde de abajo');
 {
   const lb = data.partes.filter((p) => /^Listón de las bisagras/.test(p.nombre));
-  exigir(lb.length === 2 && lb.every((p) => p.ext && Math.abs(p.x + p.sx - costados[0].x) < 0.01), 'los listones de las bisagras deberían quedar contra la cara de adentro del costado');
+  exigir(lb.length === 2 && lb.every((p) => !p.ext && Math.abs(p.x + p.sx - costados[0].x) < 0.01), 'los listones de las bisagras deberían quedar fijos contra la cara de adentro del costado cerrado');
   for (const f of frentesCajon) {
-    const l = lb.find((q) => q.z >= f.z - 3 && q.z + q.sz <= f.z + f.sz + 3);
+    const l = lb.find((q) => q.z <= f.z + 3 && q.z + q.sz >= f.z + f.sz - 3);
     exigir(l && l.y + l.sy <= f.y && f.y - (l.y + l.sy) <= 5, `${f.id} debería tener su listón de bisagras justo bajo el borde de abajo`);
     exigir((f.huecos || []).length === 1 && f.huecos[0].tipo === 'agarradera', `${f.id} debería llevar su agarradera`);
   }
   const bisag = data.herrajes.find((h) => h.grupo === 'Cama' && /Bisagra de cazoleta/.test(h.nombre));
-  exigir(bisag && bisag.cantidad === 5, 'la cama debería llevar 5 bisagras de cazoleta (3 en la cabecera y 2 en el pie)');
+  exigir(bisag && bisag.cantidad === 7, 'la cama debería llevar 7 bisagras de cazoleta (3 en la cabecera, 2 en el pie y 2 en la puerta del frente del pie)');
   exigir(!data.herrajes.some((h) => h.grupo === 'Cama' && /corredera/i.test(h.nombre) && /cajón|Cajón/.test(h.nota || '')), 'no deberían quedar correderas de cajón en la cama');
-  exigir(data.botones.filter((b) => b.grupo === 'Cama').length === 2 && data.decos.filter((d) => d.forma === 'boton' && d.grupo === 'Cama').every((d) => d.ext), 'los botones de las puertas de la cama deberían salir con ellas');
+  exigir(data.botones.filter((b) => b.grupo === 'Cama').length === 3 && data.decos.filter((d) => d.forma === 'boton' && d.grupo === 'Cama').every((d) => !d.ext), 'los 3 botones de las puertas de la cama deberían quedar fijos en la caja');
 }
 for (const f of frentesCajon) {
   const cos = costados.find((p) => f.z >= p.z && f.z + f.sz <= p.z + p.sz);
@@ -380,7 +380,18 @@ for (const f of frentesCajon) {
   exigir(v && f.y >= cos.y + v.a0 + 2.5 && f.y + f.sy <= cos.y + v.a1 - 2.5 && f.z >= cos.z + v.b0 + 2.5 && f.z + f.sz <= cos.z + v.b1 - 2.5, `${f.id} debería entrar en la ventana de su costado con 3 mm de luz`);
   exigir(Math.abs(contorno(f).radio - (v.r - 3)) < 0.01, `${f.id} debería llevar las esquinas del radio de la ventana menos la luz`);
 }
-exigir(data.partes.some((p) => /^Frente del pie/.test(p.nombre) && p.huecos && p.huecos.length === 1), 'el frente del pie debería llevar su ventana');
+const frentePie = data.partes.find((p) => /^Frente del pie/.test(p.nombre));
+exigir(frentePie && frentePie.huecos && frentePie.huecos.length === 1, 'el frente del pie debería llevar su ventana');
+// La puerta del frente del pie entra en su ventana con 3 mm de luz y apoya sobre el refuerzo de piso (sus bisagras van ahí)
+{
+  const pf = data.partes.find((p) => /^Puerta del frente del pie/.test(p.nombre));
+  const v = frentePie.huecos[0];
+  exigir(pf && pf.bisagraAbajo && !pf.ext, 'la puerta del frente del pie debería ser fija y bajar sobre su borde de abajo');
+  exigir(pf && pf.x >= frentePie.x + v.a0 + 2.5 && pf.x + pf.sx <= frentePie.x + v.a1 - 2.5 && pf.y >= frentePie.y + v.b0 + 2.5 && pf.y + pf.sy <= frentePie.y + v.b1 - 2.5, 'la puerta del frente del pie debería entrar en su ventana con 3 mm de luz');
+  const refF = data.partes.find((p) => /^Refuerzo de piso del módulo del pie \(frente\)/.test(p.nombre));
+  exigir(refF && Math.abs(refF.y + refF.sy - pf.y) < 0.01 && pf.x >= refF.x && pf.x + pf.sx <= refF.x + refF.sx, 'la puerta del frente del pie debería apoyar su borde de abajo sobre el refuerzo de piso');
+  exigir((pf.huecos || []).length === 1 && pf.huecos[0].tipo === 'agarradera', 'la puerta del frente del pie debería llevar su agarradera');
+}
 const refPiso = data.partes.filter((p) => /^Refuerzo de piso/.test(p.nombre));
 exigir(refPiso.length === 4 && refPiso.every((p) => p.y === 0), 'deberían quedar 4 refuerzos de piso (2 por módulo)');
 for (const p of data.partes) {
@@ -481,7 +492,7 @@ function L_E() {
   const rol = (id) => rolDe(data.partes.find((p) => p.id === id));
   const esperado = {
     'TRA-01': 'lateral', 'TRA-19': 'frente', 'TRA-25': 'frente', 'TRA-66': 'frente', 'TRA-39': 'interior', 'TRA-40': 'interior', 'TRA-57': 'liston', 'TRA-14': 'horizontal',
-    'TRA-61': 'liston', 'CAM-01': 'horizontal', 'CAM-08': 'horizontal', 'CAM-10': 'frente', 'CAM-11': 'liston', 'CAM-24': 'liston', 'CAM-28': 'liston', 'DER-25': 'frente',
+    'TRA-61': 'liston', 'CAM-01': 'horizontal', 'CAM-08': 'horizontal', 'CAM-10': 'frente', 'CAM-11': 'liston', 'CAM-25': 'liston', 'CAM-29': 'liston', 'DER-25': 'frente',
     'DER-02': 'lateral', 'DER-01': 'interior', 'DER-34': 'interior', 'DER-38': 'horizontal', 'DER-40': 'frente',
   };
   for (const [id, r] of Object.entries(esperado)) exigir(rol(id) === r, `${id} debería ser ${r} y es ${rol(id)}`);
@@ -493,8 +504,11 @@ function L_E() {
   const puertas = Object.entries(ab.porParte).filter(([, m]) => m.tipo === 'puerta');
   exigir(cajones.size === 6, `deberían abrirse 6 cajones y se abren ${cajones.size}`);
   exigir(puertas.length === 4, `deberían abrirse 4 puertas y se abren ${puertas.length}`);
-  const tapas = Object.entries(ab.porParte).filter(([, m]) => m.tipo === 'tapa');
-  exigir(tapas.length === 2 && tapas.every(([, m]) => Math.abs(Math.abs(m.giro) - Math.PI / 2) < 1e-6), 'las dos puertas de la cama deberían bajar 90 grados sobre su borde de abajo');
+  const tapas = Object.entries(ab.porParte).filter(([, m]) => m.tipo === 'tapa' || m.tipo === 'tapaX');
+  exigir(tapas.length === 3 && tapas.every(([, m]) => Math.abs(Math.abs(m.giro) - Math.PI / 2) < 1e-6), 'las tres puertas de la cama deberían bajar 90 grados sobre su borde de abajo');
+  exigir(tapas.filter(([, m]) => m.tipo === 'tapa').length === 2 && tapas.filter(([, m]) => m.tipo === 'tapaX').length === 1, 'dos puertas bajan hacia el pasillo (eje en z) y la del frente del pie hacia la puerta trasera (eje en x)');
+  const tapaPie = ab.porParte['CAM-14'];
+  exigir(tapaPie && tapaPie.tipo === 'tapaX' && Math.abs(tapaPie.pivote[0] - 45) < 0.01, 'la puerta del frente del pie debería girar sobre su borde de abajo (a 45 mm del piso)');
   // Todos los cajones llevan su frente y su caja: el frente y los laterales de cada cajón son el mismo cajón
   exigir(llaveCajon('Frente cajón de cocina 1') === llaveCajon('Cajón de cocina 1 - lateral'), 'el frente de un cajón y su caja deberían ser el mismo cajón');
   for (const m of cajones) exigir(Math.abs(m.v[0]) + Math.abs(m.v[2]) > 0 && m.v[1] === 0, 'un cajón debería deslizar en horizontal');

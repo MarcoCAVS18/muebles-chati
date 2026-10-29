@@ -130,7 +130,8 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - La cama es como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera) y otro de 60 cm (pie), unidos con dos
   tornillos de 25 mm y fijados al piso con refuerzos de 4 tornillos de 25 mm por módulo. Cada módulo es una caja abierta con un
   costado del lado del pasillo (que sale con la extensión de la cama) con una ventana grande de esquinas redondeadas (R40, 305 mm de alto); el frente del pie tiene otra.
-  En cada ventana va una puerta a ras (toma el radio de la ventana menos la luz de 3 mm), con una agarradera calada arriba, un botón push al centro y bisagras de cazoleta sobre un listón de 30 x 30 pegado al costado (3 en la de la cabecera y 2 en la del pie). La puerta cuelga del costado y sale con él.
+  En cada ventana va una puerta a ras (toma el radio de la ventana menos la luz de 3 mm), con una agarradera calada arriba, un botón push al centro y bisagras de cazoleta (3 en la de la cabecera, 2 en la del pie y 2 en la del frente del pie).
+  Las puertas de los costados llevan las bisagras en un listón de 30 x 30 fijo en la caja, entre los refuerzos de piso; la del frente del pie las lleva sobre el refuerzo de piso que tiene detrás y baja hacia la puerta trasera. Las tres puertas quedan FIJAS en la caja (no salen con la extensión) y se usan con la cama cerrada: en el modo Abierto del 3D no giran si la cama está extendida. Es una regla de uso: mecánicamente nada traba una puerta si el costado ya se corrió.
   El lado de la pared no lleva costado: lo hace la pared de la van, y el pasarruedas pasa por ahí.
 - La plataforma es un peine ("varillas intercaladas"): cada placa (cabecera de 120 cm y pie de 60 cm) se corta con ranuras abiertas hacia el
   pasillo. Los pedazos que salen de las ranuras, unidos por un lomo de 80 mm del lado del pasillo, son las varillas móviles: salen 490 mm
@@ -151,7 +152,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Cama extensible: las varillas van a la misma altura que la placa fija. Los costados del pasillo (CAM-04 y CAM-05) acompañan a los listones de las
   correderas y salen con la extensión: van atornillados al lomo móvil y a las puntas de los listones, llegan hasta la cara de abajo de la placa
   (385 mm) y quedan 5 mm sobre el piso. Por eso las ventanas miden 305 mm de alto y las correderas de bajo perfil solo tienen
-  que entrar en el listón de 30 x 30. Con la cama abierta el costado, con su puerta, queda en x 1195.
+  que entrar en el listón de 30 x 30. Con la cama abierta el costado queda en x 1195 y las puertas se quedan en su lugar, fijas en la caja.
   Las varillas se deslizan sobre los largueros y el borde del pasarruedas con cinta de teflón. Abiertas quedan en voladizo: hay que probar
   la flexión con peso real. Con la cama abierta quedan 110 mm de pasillo.
 - Correderas de las varillas: de carga, 500 mm, extensión total, 100 kg el par, de bajo perfil. Tienen que recorrer 490 mm: confirmar con la ficha de las que compres.

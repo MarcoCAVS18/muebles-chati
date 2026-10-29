@@ -251,7 +251,7 @@ export function describirPieza(p, cfg) {
       } else if (h.tipo === 'agarradera') {
         lineas.push({
           tipo: 'arco',
-          texto: `Agarradera calada de ${fmt(largo)} x ${fmt(ancho)} mm con esquinas R${fmt(h.r)}, a ${fmt(c.h - h.a1)} mm del borde de arriba y centrada a lo ancho: es donde se mete el dedo para abrir la puerta (taladro, caladora y lija)`,
+          texto: `Agarradera calada de ${fmt(largo)} x ${fmt(ancho)} mm con esquinas R${fmt(h.r)}, a ${fmt(c.plano === 'zy' ? c.h - h.a1 : c.h - h.b1)} mm del borde de arriba y centrada a lo ancho: es donde se mete el dedo para abrir la puerta (taladro, caladora y lija)`,
         });
       } else if (h.tipo === 'asiento') {
         lineas.push({
