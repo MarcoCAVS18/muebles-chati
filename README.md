@@ -126,7 +126,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
 - La cama es como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera) y otro de 60 cm (pie), unidos con dos
   tornillos de 25 mm y fijados al piso con refuerzos de 4 tornillos de 25 mm por módulo. Cada módulo es una caja abierta con un
-  costado del lado del pasillo con una ventana grande de esquinas redondeadas (R40, 315 mm de alto); el frente del pie tiene otra.
+  costado del lado del pasillo con una ventana grande de esquinas redondeadas (R40, 270 mm de alto); el frente del pie tiene otra.
   En cada ventana de los costados va un cajón con el frente a ras (el frente toma el radio de la ventana menos la luz de 3 mm).
   El lado de la pared no lleva costado: lo hace la pared de la van, y el pasarruedas pasa por ahí.
 - La plataforma son las mismas placas con ranuras de esquinas redondeadas cortadas en la madera (no hay varillas): 70 mm de ancho,
