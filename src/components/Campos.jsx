@@ -54,7 +54,8 @@ export const SECCIONES_CFG = [
       { ruta: 'van.archInicio', etiqueta: 'Pasarruedas: inicio desde atrás' },
       { ruta: 'van.archLargo', etiqueta: 'Pasarruedas: largo' },
       { ruta: 'van.archIntrusion', etiqueta: 'Pasarruedas: entra' },
-      { ruta: 'van.archAlto', etiqueta: 'Pasarruedas: alto' },
+      { ruta: 'van.archAlto', etiqueta: 'Pasarruedas derecho: alto' },
+      { ruta: 'van.archAltoIzq', etiqueta: 'Pasarruedas izquierdo: alto (con su tapa)' },
       { ruta: 'van.puertaLateral.largo', etiqueta: 'Puerta lateral: largo' },
       { ruta: 'van.puertaLateral.vigas', etiqueta: 'Vigas sin aislar (antes de la puerta)' },
       { ruta: 'van.puertaLateral.desdeMamparo', etiqueta: 'Puerta lateral: distancia a la mampara' },
@@ -89,7 +90,7 @@ export const SECCIONES_CFG = [
     campos: [
       { ruta: 'cama.ancho', etiqueta: 'Ancho cerrada' },
       { ruta: 'cama.extension', etiqueta: 'Cuánto se agranda' },
-      { ruta: 'cama.bandejaAncho', etiqueta: 'Ancho de cada bandeja' },
+      { ruta: 'cama.bandejaAncho', etiqueta: 'Ancho de cada bandeja (el sobrante de la placa)' },
       { ruta: 'cama.radio', etiqueta: 'Radio de esquinas' },
       { ruta: 'cama.largo', etiqueta: 'Largo (180 cm: la L del mueble trasero llega hasta él)' },
       { ruta: 'cama.huecoMueble', etiqueta: 'Hueco libre bajo la cama frente al mueble' },

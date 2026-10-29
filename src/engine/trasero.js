@@ -18,6 +18,12 @@ export function trasero(ctx, G) {
 
   ctx.layout.trasero = L;
 
+  // Los bornes de la batería necesitan lugar para el cable entre ella y el estante que cierra el compartimento
+  const aireBornes = E.yEstante - (E.bateria.y + E.bateria.sy);
+  if (aireBornes < 55) {
+    ctx.aviso(`La batería queda a ${Math.round(aireBornes)} mm del estante del compartimento eléctrico: faltan ${Math.round(55 - aireBornes)} mm para los cables de los bornes. La altura del compartimento sale de la altura de la cama.`);
+  }
+
   const P = (nombre, x, y, z, sx, sy, sz, mat = 'estructura') => ctx.parte({ grupo: G, nombre, mat, x, y, z, sx, sy, sz });
 
   // Costados, fondo, base y zócalo

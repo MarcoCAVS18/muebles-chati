@@ -27,6 +27,9 @@ export const CONFIG_INICIAL = {
     archLargo: 800,
     archIntrusion: 185,
     archAlto: 425,
+    // El izquierdo, con su tapa, queda a 38 cm para que se pueda estar sentado sobre el colchón. El real mide 425 mm:
+    // la placa de la cama lleva un corte para que pase el arco (todavía no se dibuja).
+    archAltoIzq: 380,
     // Puerta lateral derecha (corrediza): 980 mm de largo, empieza a 90 mm del mamparo
     puertaLateral: { desdeMamparo: 90, largo: 980, vigas: 220 },
     espacioMampara: 100, // la curva de la mampara (ya retirada) deja 100 mm libres abajo para pasar cables
@@ -58,23 +61,24 @@ export const CONFIG_INICIAL = {
     divisor2: 980, // fin de la cocina
   },
 
-  // Cama extensible de 90 a 120 cm: placas de plywood con esquinas redondeadas y bandejas que se tiran al pasillo
+  // Cama extensible de 71 a 120 cm: cada placa se corta a 71 cm de una lámina de 120 y el sobrante de 49 cm, con las mismas
+  // ranuras, es la bandeja que se tira al pasillo
   cama: {
     x0: 10,
-    ancho: 900, // cama cerrada
-    extension: 300, // se agranda hasta 1200
-    bandejaAncho: 500, // 200 mm quedan debajo de la placa fija al abrir
+    ancho: 710, // cama cerrada
+    extension: 490, // se agranda hasta 1200
+    bandejaAncho: 490, // el sobrante de la placa (710 + 490 = 1200): al abrir queda toda afuera, sostenida por las correderas
     radio: 50, // radio de las esquinas
     largo: 1800, // largo de la cama (antes 1700): la L del mueble trasero se achicó 100 mm para dejarle lugar
-    plataforma: 440, // altura de la cara superior: la placa (15 mm) apoya justo sobre el pasarruedas (425)
+    plataforma: 395, // altura de la cara superior: la placa (15 mm) apoya justo sobre el pasarruedas izquierdo (380)
     largoCabecera: 1200, // largo de la placa de la cabecera (la otra placa, de 600 mm, va al pie)
     huecoMueble: 430, // espacio libre bajo la cama, frente al mueble trasero (bidones y puertas bajas)
     // Calados de las placas y bandejas (ranuras de esquinas redondeadas que cruzan la cama a lo ancho)
     ranura: { ancho: 70, costilla: 50, margen: 50, radio: 20 },
     // Ventanas de los costados (hueco de cada cajón): zócalo y cabezal son la madera que queda abajo y arriba
     ventana: { radio: 40, zocalo: 40, cabezal: 50, apoyoCajon: 45 },
-    cajonCabecera: { fondo: 560 }, // el alto lo da la ventana
-    cajonPie: { fondo: 600 },
+    cajonCabecera: { fondo: 500 }, // el alto lo da la ventana; 500 mm es lo que deja el pasarruedas (185 mm)
+    cajonPie: { fondo: 500 },
   },
 
   // Mueble derecho: módulo de cajones (atrás), módulo con puerta bajo la mesa y alacena
@@ -88,7 +92,7 @@ export const CONFIG_INICIAL = {
     alacena: { profundidad: 300, base: 870, alto: 380 },
   },
 
-  mesa: { ancho: 400 }, // con la cama de 90 cm cerrada quedan 410 mm de pasillo
+  mesa: { ancho: 400 }, // con la cama de 71 cm cerrada quedan 600 mm de pasillo
 
   // Datos del vehículo (ESTIMADOS)
   vehiculo: {
@@ -134,7 +138,7 @@ export const CONFIG_INICIAL = {
 
   // Lámpara flexible de lectura, en la pared izquierda sobre la viga sin aislar (la de 22 cm entre el pasarruedas y la
   // puerta). z es el centro de la lámpara desde la puerta trasera e y la altura de la base: más o menos el pecho de
-  // quien está acostado (cama a 44 cm, colchón y unos 20 cm más). El cable llega por el techo y baja por la viga.
+  // quien está acostado (cama a 39,5 cm, colchón y unos 20 cm más). El cable llega por el techo y baja por la viga.
   lampara: { z: 1230, y: 680 },
 
   // Ventilación de techo: se abre a mano, no tiene conexión eléctrica ni ventilador

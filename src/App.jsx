@@ -107,6 +107,12 @@ export default function App() {
                 cm.largoCabecera = CONFIG_INICIAL.cama.largoCabecera;
                 tr.profundidadL = CONFIG_INICIAL.trasero.profundidadL;
               }
+              // Un guardado con la cama de 90 cm (bandejas de 500 mm, plataforma a 44 cm) pasa a la de 71 cm: la bandeja es el sobrante de la placa
+              if (cm && cm.ancho === 900 && cm.extension === 300 && cm.bandejaAncho === 500) {
+                for (const k of ['ancho', 'extension', 'bandejaAncho', 'plataforma']) cm[k] = CONFIG_INICIAL.cama[k];
+                cm.cajonCabecera = { ...CONFIG_INICIAL.cama.cajonCabecera };
+                cm.cajonPie = { ...CONFIG_INICIAL.cama.cajonPie };
+              }
               // Un guardado con el mueble de 1720 mm (secciones de 617 y 1087) pasa al de 1560 mm, con la heladera de la G22 y el anafe angosto
               const mt = d.cfg.trasero;
               if (mt && mt.ancho === 1720 && mt.divisor1 === 617 && mt.divisor2 === 1087) {

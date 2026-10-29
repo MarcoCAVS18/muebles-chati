@@ -1,8 +1,9 @@
-// Cama extensible de 90 a 120 cm, armada como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera)
+// Cama extensible de 71 a 120 cm, armada como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera)
 // y otro de 60 cm (pie), que juntos hacen 180 cm. Cada módulo es una caja abierta de plywood con un costado del lado
 // del pasillo que lleva una ventana grande de esquinas redondeadas; esa ventana es el hueco del cajón. El frente del
 // pie tiene otra ventana. La plataforma son las mismas placas, con ranuras de esquinas redondeadas cortadas en la
-// madera (no hay varillas). Debajo de cada placa hay una bandeja con las mismas ranuras, que se tira hacia el pasillo
+// madera (no hay varillas). Cada placa se corta de una lámina de 120 cm: 71 cm quedan de placa y el sobrante de 49 cm es
+// su bandeja. Debajo de cada placa hay una bandeja con las mismas ranuras, que se tira hacia el pasillo
 // sobre correderas y agranda la cama: las ranuras de la bandeja quedan en línea con las de la placa y el dibujo sigue.
 // Frente al mueble trasero queda un hueco libre bajo la cama (cama.huecoMueble) para sacar el cajón de bidones.
 import { cajon } from './cajon.js';
@@ -15,7 +16,7 @@ export function cama(ctx, G) {
   const ve = ca.ventana;
 
   const x0 = ca.x0;
-  const x1 = ca.x0 + ca.ancho; // borde del pasillo con la cama cerrada (90 cm)
+  const x1 = ca.x0 + ca.ancho; // borde del pasillo con la cama cerrada (71 cm)
   const zCab = van.largo - (tr.profundidadL ?? tr.profundidad); // frente de la sección izquierda del mueble trasero (la L)
   const arcoIni = van.archInicio;
   const arcoFin = van.archInicio + van.archLargo;
@@ -29,7 +30,7 @@ export function cama(ctx, G) {
   const R = ca.radio;
   const c = 13; // luz que ocupa una corredera a cada lado
   const hol = 1.5; // mitad de la luz entre las dos placas
-  const bw = ca.bandejaAncho; // ancho de cada bandeja (se queda 200 mm debajo de la placa al abrir)
+  const bw = ca.bandejaAncho; // ancho de cada bandeja: el sobrante de la placa (al abrir queda toda afuera, sostenida por las correderas)
   const xb0 = x1 - bw;
   const yPl = yB - 1 - t; // cara de abajo de las bandejas: 1 mm debajo de la placa fija
   const yPan = yPl - 4; // los costados del pasillo llegan hasta justo debajo de las bandejas, que salen por encima
@@ -219,6 +220,9 @@ export function cama(ctx, G) {
   ctx.herraje(G, 'Caladora, taladro con broca de 10 mm y plantilla de las ranuras y de las ventanas', 1, `Ranuras ${ra.ancho} mm de ancho con esquinas R${ra.radio}; ventanas con esquinas R${ve.radio}`);
   ctx.herraje(G, 'Fieltro o goma antivibración 5 mm', 2, `Entre las placas y los pasarruedas (${(van.archLargo / 1000).toFixed(1)} m cada uno)`);
 
+  // La placa y su bandeja salen de la misma lámina
+  const hojaA = cfg.materiales.estructura.hojaA;
+  if (L + bw > hojaA) ctx.aviso(`La placa (${L} mm) y su bandeja (${bw} mm) no salen de una misma lámina de ${hojaA} mm.`);
   // Control de que las bandejas entren en la van al abrir
   if (x1 + ca.extension > van.ancho) ctx.aviso('La cama extendida no entra: la extensión supera el ancho de la van.');
   if (largoBandCab < 300 || largoBandPie < 300) ctx.aviso('Una bandeja quedó muy corta: revisar el largo de las placas.');

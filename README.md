@@ -4,7 +4,7 @@ Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy y su 
 con la distribución de la foto de referencia: mueble trasero cruzado de pared a pared detrás de los asientos
 (de izquierda a derecha: eléctrico al piso con la batería, inversor, DC-DC y fusibles, y sobre la cama el
 panel y los enchufes con dos cajones de cocina arriba; cocina con anafe, gas y heladera al piso, al centro; y agua con
-fregadero y bidones al piso, a la derecha), cama extensible de 90 a 120 cm de 180 cm de largo (placas de plywood con
+fregadero y bidones al piso, a la derecha), cama extensible de 71 a 120 cm de 180 cm de largo (placas de plywood con
 esquinas redondeadas y ranuras, bandejas sobre correderas, costados con ventana y cajones), y mueble
 derecho con cajones, alacena y mesa plegable.
 
@@ -102,7 +102,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Mueble trasero de pared a pared (1720 mm) y de 500 mm de profundidad, con una L de 570 mm solo en la sección eléctrica
   (a la izquierda), que llega hasta el pie de la cama de 180 cm. Si tapa la puerta corrediza, achicar el ancho en la barra
   lateral. Secciones (x): eléctrico 15-617, cocina 632-1087 y agua 1102-1705.
-- La cama queda a 44 cm, apenas sobre el pasarruedas, y apoya sobre él. Bajo la cama, frente a la L, queda un hueco libre de
+- La cama queda a 39,5 cm, apoyada sobre el pasarruedas izquierdo, que con su tapa mide 38 cm (el derecho queda como está, en 42,5 cm). El arco real mide 42,5 cm: la placa lleva un corte ahí, que todavía no se dibuja. Bajo la cama, frente a la L, queda un hueco libre de
   430 mm para abrir la puerta de la batería. Todo lo eléctrico queda al piso, debajo del plano de la cama; el panel y los
   enchufes van sobre la cama, en el tablero de arriba, y los cajones de cocina de la L van sobre el tablero.
 - Mueble trasero: se arma en dos módulos que pasan por las puertas y se unen adentro de la van: el eléctrico (izquierda, con el
@@ -134,8 +134,8 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   son más cortas) y la del pie 4. Las bandejas extensibles llevan las mismas ranuras en las mismas posiciones, y como se
   mueven en el sentido de las ranuras quedan siempre en línea con las de la placa fija: la cama abierta tiene el mismo dibujo.
   Se cambian en `cama.ranura` y `cama.ventana` (defaults.js).
-- Placas de la cama: cabecera de 1200 mm y pie de 600 mm de largo (900 mm de ancho, 3 mm de luz entre las dos), las dos con su
-  bandeja extensible. La de la cabecera mide 736,5 mm y la del pie 551,5 mm. Se cambia en "Largo placa cabecera". Un guardado con
+- Placas de la cama: cabecera de 1200 mm y pie de 600 mm de largo (710 mm de ancho, 3 mm de luz entre las dos), las dos con su
+  bandeja extensible. La bandeja (490 mm de ancho) es el sobrante de cortar la placa de una lámina de 1200 mm (710 + 490). La de la cabecera mide 736,5 mm y la del pie 551,5 mm. Se cambia en "Largo placa cabecera". Un guardado con
   la cama de 170 cm y la L de 670 mm pasa solo a 180 cm y 570 mm.
 - Equipos eléctricos con las medidas que tomó Marco (ancho x alto x profundidad, en cm): batería 29,5 x 28 x 20, inversor
   25,5 x 19 x 9,5, DC-DC 18,5 x 12,3 x 6,7, caja de fusibles 9 x 14, panel de interruptores 16,5 x 4, enchufes 5 x 5 y bomba de
@@ -148,8 +148,8 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   Los costados del pasillo llegan 4 mm por debajo de las bandejas para que salgan por encima (por eso entre el costado y la placa
   queda una luz de unos 20 mm, que cubre la bandeja cuando está cerrada). Las bandejas no llevan listones: la ranura deja 30 mm o más de
   madera junto a las correderas. Con la cama abierta quedan 110 mm de pasillo.
-- Correderas de las bandejas: de carga, 500 mm, extensión total, 100 kg el par. Confirmar con la ficha de las que compres.
-- Mesa plegable reducida a 400 mm de ancho para que no pase sobre la cama de 90 cm.
+- Correderas de las bandejas: de carga, 500 mm, extensión total, 100 kg el par. Tienen que recorrer 490 mm y sostener la bandeja toda afuera: confirmar con la ficha de las que compres.
+- Mesa plegable reducida a 400 mm de ancho para que no pase sobre la cama (con la de 71 cm cerrada quedan 600 mm de pasillo).
 - Consumos de cada aparato.
 - Tamaño de hoja que vende Derome (se usó 2440 x 1220).
 - Ejes del modelo: x = 0 en la pared izquierda mirando desde la puerta trasera hacia los asientos, z = 0 en la

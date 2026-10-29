@@ -623,6 +623,7 @@ function cama(data, plan, cfg, e3, cortes) {
     intro: `La cama sale de contrachapado de ${t} mm y de listones de 45x45 y 30x30. Seguí el plano de «Placas y cortes».`,
     hacer: [
       'Cortá las piezas rectas; las curvas se hacen después (paso siguiente).',
+      `Cada placa sale de una lámina de ${cfg.materiales.estructura.hojaA} mm de ancho: cortala a ${cfg.cama.ancho} mm y el sobrante de ${cfg.cama.bandejaAncho} mm es la bandeja de esa placa (${cfg.cama.ancho} + ${cfg.cama.bandejaAncho} = ${cfg.cama.ancho + cfg.cama.bandejaAncho} mm; el resto es el corte de la sierra).`,
       'Rotulá cada pieza con su id (CAM-xx) en la cara que va por dentro.',
       'Los listones se cortan a la medida de la tabla de barras. El largo dice cuánto, la sección ya viene de la barra.',
     ],
@@ -706,15 +707,19 @@ function cama(data, plan, cfg, e3, cortes) {
   pasos.push({
     id: 'cam-7',
     titulo: 'Bandejas extensibles',
-    intro: 'Debajo de cada placa hay una bandeja con las mismas ranuras. Se tira hacia el pasillo y agranda la cama de 90 a 120 cm.',
+    intro: `Debajo de cada placa hay una bandeja con las mismas ranuras: es el sobrante de cortar la placa. Se tira hacia el pasillo y agranda la cama de ${cfg.cama.ancho / 10} a ${(cfg.cama.ancho + cfg.cama.extension) / 10} cm.`,
     hacer: [
       'Correderas de carga de 500 mm (100 kg): una a cada lado de la bandeja. Bandeja del pie: entre el frente y el panel central. Bandeja de la cabecera: entre el panel central y la guía.',
       'La bandeja mide 15 mm de espesor y la corredera es más alta. Fijala a la cara lateral y asegurate de que no roce la placa de arriba.',
       'Cada bandeja lleva un retén para que no salga sola al frenar y una agarradera embutida en el borde.',
-      'Probala con el peso: tiene que correr entera y quedar firme abierta (300 mm de extensión).',
+      `Probala con el peso: tiene que correr entera y quedar firme abierta (${cfg.cama.extension} mm de extensión).`,
     ],
     piezas: filas(bandejas, cortes),
-    ojo: ['Esto depende de la corredera que compres: comprá las correderas antes de cortar las bandejas y verificá la altura real.'],
+    ojo: [
+      'Esto depende de la corredera que compres: comprá las correderas antes de cortar las bandejas y verificá la altura real.',
+      `Las correderas de 500 mm tienen que recorrer ${cfg.cama.extension} mm: si recorren menos, la cama abierta queda más angosta que 120 cm.`,
+      'Abierta, la bandeja queda toda afuera de la placa y se sostiene solo con las correderas: probala con el peso de dos personas sentadas en el borde. Si flexiona, sumá una pata plegable o una traba en el borde del pasillo.',
+    ],
   });
 
   pasos.push({
@@ -723,6 +728,7 @@ function cama(data, plan, cfg, e3, cortes) {
     intro: 'Las dos placas se atornillan desde arriba a los largueros y listones, y se pueden levantar para llegar al piso.',
     hacer: [
       'Pegá fieltro o goma de 5 mm sobre los pasarruedas (0,8 m cada uno).',
+      `El pasarruedas izquierdo, con su tapa, llega a ${(cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10} cm y la placa apoya encima: la cama queda a ${cfg.cama.plataforma / 10} cm. La placa lleva un corte en esa zona para que pase el arco; todavía no está dibujado en la app.`,
       'Apoyá la placa del pie y la de la cabecera: dejan 3 mm de luz entre ellas.',
       'Atornillá con tornillos avellanados 4x40, 24 en total, y avellaná la cabeza para que no moleste el colchón.',
       'El colchón lleva el mismo recorte que la placa de la cabecera.',
@@ -755,7 +761,7 @@ function cama(data, plan, cfg, e3, cortes) {
     pasos,
     esperar: [
       'Altura del listón del piso (largo de los tornillos de los refuerzos).',
-      'Correderas de carga de 500 mm comprobadas contra el espesor de la bandeja.',
+      `Correderas de carga de 500 mm comprobadas contra el espesor de la bandeja y contra el recorrido (${cfg.cama.extension} mm).`,
       'Fresadora o plantilla para las curvas, y una prueba con un recorte antes de cortar las placas.',
     ],
   };

@@ -99,7 +99,10 @@ exigir(vn.puertaLateral.largo === 980 && vn.puertaLateral.vigas === 220, 'la pue
 exigir(vn.archLargo === 800 && vn.archAlto === 425 && vn.archIntrusion === 185, 'el pasarruedas debería medir 800 x 425 x 185 mm');
 exigir(vn.archInicio + vn.archLargo + vn.puertaLateral.vigas + vn.puertaLateral.largo + vn.puertaLateral.desdeMamparo === vn.largo, 'el pasarruedas, las vigas y la puerta no suman el largo útil de la van');
 exigir(cfgI.cama.largo === 1800, 'la cama debería medir 180 cm de largo');
-exigir(cfgI.cama.plataforma >= 430 && cfgI.cama.plataforma <= 440, 'la cama debería quedar apenas sobre el pasarruedas (43 a 44 cm)');
+exigir(vn.archAltoIzq === 380, 'el pasarruedas izquierdo, con su tapa, debería medir 380 mm de alto');
+exigir(cfgI.cama.plataforma === vn.archAltoIzq + 15, 'la placa de la cama (15 mm) debería apoyar sobre el pasarruedas izquierdo: cama a 39,5 cm');
+exigir(cfgI.cama.ancho === 710 && cfgI.cama.ancho + cfgI.cama.extension === 1200, 'la cama debería medir 71 cm cerrada y 120 cm abierta');
+exigir(cfgI.cama.bandejaAncho === cfgI.cama.extension && cfgI.cama.ancho + cfgI.cama.bandejaAncho <= cfgI.materiales.estructura.hojaA, 'la bandeja debería ser el sobrante de la placa y salir de la misma lámina');
 exigir(Math.abs(vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL) >= 0 && vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL < vn.archInicio, 'la cama más la L deberían terminar antes del pasarruedas');
 exigir(cfgI.trasero.ancho === 1560 && cfgI.trasero.ancho <= cfgI.van.ancho, 'el mueble trasero debería medir 1560 mm de ancho y caber en la van');
 exigir(tra.every((p) => p.z + p.sz <= cfgI.van.largo + 0.5), 'el mueble trasero se sale del mamparo');
@@ -269,7 +272,9 @@ const conContorno = data.partes.filter((p) => contorno(p));
 exigir(conContorno.length === 9, `deberían tener contorno propio 9 piezas (2 placas, 2 bandejas, el frente del pie, 2 costados y 2 frentes de cajón), hay ${conContorno.length}`);
 const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
 exigir(contorno(cab).esquinas === 5 && contorno(cab).recorte, 'la placa de la cabecera debería tener 5 esquinas redondeadas y un recorte');
-exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /243 x 250/.test(l.texto)), 'la descripción de la cabecera debería decir el recorte de 243 x 250');
+const rcCab = data.layout.cama.recorte;
+const medidaRecorte = `${Math.round(rcCab.x1 - rcCab.x0)} x ${Math.round(rcCab.z1 - rcCab.z0)}`;
+exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => l.texto.includes(medidaRecorte)), `la descripción de la cabecera debería decir el recorte de ${medidaRecorte}`);
 
 // Cama como la del instructivo: placas con ranuras de esquinas redondeadas y costados con ventana (hueco del cajón)
 const pie = data.partes.find((p) => /^Placa del pie/.test(p.nombre));

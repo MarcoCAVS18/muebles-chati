@@ -29,7 +29,7 @@ export function construir(cfg) {
 
   // Pasarruedas como obstáculos
   const arcos = [
-    { nombre: 'Pasarruedas izquierdo', x: 0, y: 0, z: van.archInicio, sx: van.archIntrusion, sy: van.archAlto, sz: van.archLargo },
+    { nombre: 'Pasarruedas izquierdo', x: 0, y: 0, z: van.archInicio, sx: van.archIntrusion, sy: van.archAltoIzq ?? van.archAlto, sz: van.archLargo },
     {
       nombre: 'Pasarruedas derecho',
       x: van.ancho - van.archIntrusion,
