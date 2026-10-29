@@ -43,10 +43,10 @@ export function planAbrir(data) {
       continue;
     }
 
-    // Puerta con las bisagras abajo (cama): gira sobre el borde de abajo, por la cara de adentro, y baja hacia afuera.
-    // pivote = [x, y] de un eje horizontal paralelo a z
+    // Puerta con las bisagras abajo (cama): gira sobre el borde de abajo, por la cara de afuera, y baja hacia afuera. Así su
+    // esquina de abajo no baja al abrir y no roza el zócalo del costado. pivote = [x, y] de un eje horizontal paralelo a z
     if (frente.bisagraAbajo && eje === 0) {
-      const xp = signo > 0 ? frente.x : frente.x + frente.sx;
+      const xp = signo > 0 ? frente.x + frente.sx : frente.x;
       const mov = { tipo: 'tapa', pivote: [xp, frente.y], giro: -signo * GIRO_TAPA };
       porParte[frente.id] = mov;
       porDeco[d.id] = mov;
@@ -54,7 +54,7 @@ export function planAbrir(data) {
     }
     // Lo mismo en el frente del pie, que baja hacia la puerta trasera: eje horizontal paralelo a x, pivote = [y, z]
     if (frente.bisagraAbajo && eje === 2) {
-      const zp = signo > 0 ? frente.z : frente.z + frente.sz;
+      const zp = signo > 0 ? frente.z + frente.sz : frente.z;
       const mov = { tipo: 'tapaX', pivote: [frente.y, zp], giro: signo * GIRO_TAPA };
       porParte[frente.id] = mov;
       porDeco[d.id] = mov;

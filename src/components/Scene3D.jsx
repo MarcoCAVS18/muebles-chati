@@ -452,11 +452,11 @@ function Escena(props) {
             onOut: () => setHover(''),
           };
           const mov = abrir.porParte[p.id];
-          // Las puertas con las bisagras abajo (cama) solo se abren con la cama cerrada
+          // Puertas con las bisagras abajo (cama): quedan fijas en la caja y giran sobre su borde de abajo
           if (mov && mov.tipo === 'tapa') {
             const pivote = [mov.pivote[0] + (q.x - p.x), mov.pivote[1] + (q.y - p.y)];
             return (
-              <GiroTapa key={p.id} pivote={pivote} giro={mov.giro * abierto * (1 - camaAbierta)}>
+              <GiroTapa key={p.id} pivote={pivote} giro={mov.giro * abierto}>
                 {tieneContorno(p) ? <PlacaCortada p={q} {...comun} /> : <Caja {...comun} />}
               </GiroTapa>
             );
@@ -464,7 +464,7 @@ function Escena(props) {
           if (mov && mov.tipo === 'tapaX') {
             const pivote = [mov.pivote[0] + (q.y - p.y), mov.pivote[1] + (q.z - p.z)];
             return (
-              <GiroTapaX key={p.id} pivote={pivote} giro={mov.giro * abierto * (1 - camaAbierta)}>
+              <GiroTapaX key={p.id} pivote={pivote} giro={mov.giro * abierto}>
                 {tieneContorno(p) ? <PlacaCortada p={q} {...comun} /> : <Caja {...comun} />}
               </GiroTapaX>
             );
@@ -492,7 +492,7 @@ function Escena(props) {
           if (mov && mov.tipo === 'tapa') {
             const pivote = [mov.pivote[0] + (q.x - d.x), mov.pivote[1] + (q.y - d.y)];
             return (
-              <GiroTapa key={d.id} pivote={pivote} giro={mov.giro * abierto * (1 - camaAbierta)}>
+              <GiroTapa key={d.id} pivote={pivote} giro={mov.giro * abierto}>
                 {deco(q)}
               </GiroTapa>
             );
@@ -500,7 +500,7 @@ function Escena(props) {
           if (mov && mov.tipo === 'tapaX') {
             const pivote = [mov.pivote[0] + (q.y - d.y), mov.pivote[1] + (q.z - d.z)];
             return (
-              <GiroTapaX key={d.id} pivote={pivote} giro={mov.giro * abierto * (1 - camaAbierta)}>
+              <GiroTapaX key={d.id} pivote={pivote} giro={mov.giro * abierto}>
                 {deco(q)}
               </GiroTapaX>
             );

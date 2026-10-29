@@ -70,7 +70,7 @@ function huecosDe(p, plano) {
 }
 
 // Hay que dibujarla con contorno propio (no como caja)
-export const tieneContorno = (p) => !!(p.perfil || p.radio || p.calado || (p.huecos && p.huecos.length) || p.redondeo);
+export const tieneContorno = (p) => !!(p.silueta || p.perfil || p.radio || p.calado || (p.huecos && p.huecos.length) || p.redondeo);
 
 export function contorno(p) {
   if (p.calado && p.calado.tipo === 'arco') {
@@ -95,6 +95,23 @@ export function contorno(p) {
       recorte: null,
       arco: { a: w / 2, b: 0, r: R },
       huecos: [],
+    };
+  }
+  if (p.silueta) {
+    // Pieza en U de la cama (costado fijo abierto arriba o portal abierto abajo): el contorno viene armado de la cama
+    const s = p.silueta;
+    return {
+      plano: s.plano,
+      w: p.sz,
+      h: p.sy,
+      cmds: s.cmds,
+      escuadras: [],
+      esquinas: s.esquinas,
+      radio: s.radio,
+      recorte: null,
+      arco: null,
+      huecos: [],
+      silueta: s,
     };
   }
   if (p.perfil) {
@@ -205,6 +222,17 @@ export function describirPieza(p, cfg) {
         texto: c.peine
           ? `${c.esquinas} esquinas exteriores redondeadas de radio R${fmt(c.radio)} mm (fresadora con fresa de radio o plantilla)${c.peine.tipo === 'movil' ? '; las del lomo siguen el mismo círculo que las de la placa, para que cerrada parezca una sola pieza' : ''}`
           : `${c.esquinas} esquinas redondeadas de radio R${fmt(c.radio)} mm (fresadora con fresa de radio o plantilla)`,
+      });
+    }
+    if (c.silueta) {
+      const s = c.silueta;
+      const anchoCalado = s.n1 - s.n0;
+      lineas.push({
+        tipo: 'arco',
+        texto:
+          s.tipo === 'portal'
+            ? `Calado abierto hacia abajo de ${fmt(anchoCalado)} mm de ancho y ${fmt(s.a1)} mm de alto, que empieza a ${fmt(s.n0)} mm del borde del frente: quedan dos patas de ${fmt(s.n0)} y ${fmt(s.w - s.n1)} mm de ancho y un travesaño de ${fmt(s.h - s.a1)} mm arriba (taladro en las esquinas, caladora y lija)`
+            : `Calado abierto hacia arriba de ${fmt(anchoCalado)} mm de ancho, que empieza a ${fmt(s.n0)} mm del borde del frente y baja hasta ${fmt(s.a0)} mm del borde de abajo: quedan dos patas de ${fmt(s.n0)} y ${fmt(s.w - s.n1)} mm de ancho y un zócalo de ${fmt(s.a0)} mm abajo, sin travesaño arriba (taladro en las esquinas, caladora y lija)`,
       });
     }
     if (c.peine) {
@@ -476,6 +504,20 @@ export function anotarPieza(p, cam) {
         }
         arcos.push({ pts, tipo: 'redondo', etiqueta, pos });
       }
+    }
+    if (c.silueta) {
+      // Ancho del calado, lo que lo separa del borde del frente y su altura
+      const s = c.silueta;
+      const alto = s.tipo === 'portal' ? s.a1 : s.h - s.a0;
+      const vAncho = s.tipo === 'portal' ? s.a1 - 40 : s.a0 + 40;
+      const cotaS = (ini, fin, valor, nom) => cotas.push({ ini, fin, ext: [], valor, nombre: nom, tipo: 'arco' });
+      const U = (u, v) => {
+        const [a, b] = aMarco(s.plano, u, v);
+        return V(a, b);
+      };
+      cotaS(U(s.n0, vAncho), U(s.n1, vAncho), s.n1 - s.n0, 'Calado');
+      if (s.n0 > 12) cotaS(U(0, vAncho), U(s.n0, vAncho), s.n0, 'Del borde del frente');
+      cotaS(U(s.n1 + 30, s.tipo === 'portal' ? 0 : s.a0), U(s.n1 + 30, s.tipo === 'portal' ? s.a1 : s.h), alto, 'Alto del calado');
     }
     for (const g of gruposDeHuecos(c)) {
       const h = g.primero;

@@ -82,9 +82,10 @@ export const CONFIG_INICIAL = {
     lomoMovil: 80, // lomo de las varillas, del lado del pasillo
     luzVarilla: 2, // luz de cada varilla dentro de su ranura, a cada lado
     alturaCorredera: 30, // alto máximo de las correderas: van al listón de 30 x 30 de las varillas
-    // Ventanas de los costados (hueco de cada cajón): zócalo y cabezal son la madera que queda abajo y arriba
-    // Ventanas de los costados, cerradas por una puerta que baja hasta el piso (bisagras de cazoleta abajo). margen = lo que
-    // deja la ventana a cada lado; apoyoCajon = sección del listón de los refuerzos de piso
+    // Ventanas de los costados fijos, cerradas por una puerta que baja hasta el piso (bisagras abajo). zocalo = madera que queda
+    // abajo; cabezal = espacio libre entre el borde de arriba de la ventana y la placa (el costado fijo no lo cubre: por ahí
+    // pasan los listones de las correderas); margen = lo que deja la ventana a cada lado; apoyoCajon = sección del listón de
+    // los refuerzos de piso
     ventana: { radio: 40, zocalo: 40, cabezal: 40, margen: 58, apoyoCajon: 45 },
   },
 

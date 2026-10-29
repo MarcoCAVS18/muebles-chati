@@ -5,7 +5,7 @@ con la distribución de la foto de referencia: mueble trasero cruzado de pared a
 (de izquierda a derecha: eléctrico al piso con la batería, inversor, DC-DC y fusibles, y sobre la cama el
 panel y los enchufes con dos cajones de cocina arriba; cocina con anafe, gas y heladera al piso, al centro; y agua con
 fregadero y bidones al piso, a la derecha), cama extensible de 71 a 120 cm de 180 cm de largo (placas de plywood con
-esquinas redondeadas y ranuras en peine, varillas sobre correderas y costados con ventana cerrada por una puerta que baja), y mueble
+esquinas redondeadas y ranuras en peine, varillas sobre correderas, costados fijos con una puerta que baja y portales en U que salen con la extensión), y mueble
 derecho con cajones, alacena y mesa plegable.
 
 ## Uso
@@ -129,9 +129,10 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - La cama no lleva cajones: cada ventana de los costados la cierra una puerta con bisagras de cazoleta en el borde de abajo que baja hasta el piso, como en las fotos de referencia (Standard Sliding Bed B120). Detrás queda el hueco de guardado del módulo.
 - La cama es como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera) y otro de 60 cm (pie), unidos con dos
   tornillos de 25 mm y fijados al piso con refuerzos de 4 tornillos de 25 mm por módulo. Cada módulo es una caja abierta con un
-  costado del lado del pasillo (que sale con la extensión de la cama) con una ventana grande de esquinas redondeadas (R40, 305 mm de alto); el frente del pie tiene otra.
+  costado FIJO del lado del pasillo (CAM-04 y CAM-05): una pieza abierta hacia arriba, con dos patas y un zócalo, cuyo calado de esquinas redondeadas (R40, 305 mm de alto) aloja la puerta del módulo; el frente del pie tiene una ventana igual. Como el costado no llega hasta arriba, los listones de las correderas pasan por encima con 10 mm de luz.
+  Por afuera de cada costado va un PORTAL (CAM-31 y CAM-32): una U invertida de 395 mm de alto, a ras de la cama, con dos patas y un travesaño de 55 mm. Sale con las varillas (va atornillado al lomo móvil y a las puntas de los listones de las correderas), sus patas son la base de la extensión y suma 15 mm al ancho de la cama cerrada (725 mm). Cerrada, el calado de abajo del portal deja salir la puerta.
   En cada ventana va una puerta a ras (toma el radio de la ventana menos la luz de 3 mm), con una agarradera calada arriba, un botón push al centro y bisagras de cazoleta (3 en la de la cabecera, 2 en la del pie y 2 en la del frente del pie).
-  Las puertas de los costados llevan las bisagras en un listón de 30 x 30 fijo en la caja, entre los refuerzos de piso; la del frente del pie las lleva sobre el refuerzo de piso que tiene detrás y baja hacia la puerta trasera. Las tres puertas quedan FIJAS en la caja (no salen con la extensión) y se usan con la cama cerrada: en el modo Abierto del 3D no giran si la cama está extendida. Es una regla de uso: mecánicamente nada traba una puerta si el costado ya se corrió.
+  Las puertas de los costados llevan las bisagras en un listón de 30 x 30 fijo en la caja, entre los refuerzos de piso; la del frente del pie las lleva sobre el refuerzo de piso que tiene detrás y baja hacia la puerta trasera. Las tres puertas quedan FIJAS en la caja (no salen con la extensión) y giran sobre su borde de abajo, por la cara de afuera, para que su esquina no roce el zócalo. Se pueden abrir con la cama cerrada (salen por el calado del portal) y con la cama extendida (quedan libres bajo la extensión).
   El lado de la pared no lleva costado: lo hace la pared de la van, y el pasarruedas pasa por ahí.
 - La plataforma es un peine ("varillas intercaladas"): cada placa (cabecera de 120 cm y pie de 60 cm) se corta con ranuras abiertas hacia el
   pasillo. Los pedazos que salen de las ranuras, unidos por un lomo de 80 mm del lado del pasillo, son las varillas móviles: salen 490 mm
@@ -149,10 +150,11 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   fusibles y profundidad de interruptores y enchufes también). Con la L de 570 mm entran uno detrás de otro los equipos del frente,
   el paso del cable largo y la batería; si algún día la L se achica tanto que no entren, el inversor se pone atravesado solo.
   Los dos cajones de cocina de la L usan correderas de 500 mm.
-- Cama extensible: las varillas van a la misma altura que la placa fija. Los costados del pasillo (CAM-04 y CAM-05) acompañan a los listones de las
-  correderas y salen con la extensión: van atornillados al lomo móvil y a las puntas de los listones, llegan hasta la cara de abajo de la placa
-  (385 mm) y quedan 5 mm sobre el piso. Por eso las ventanas miden 305 mm de alto y las correderas de bajo perfil solo tienen
-  que entrar en el listón de 30 x 30. Con la cama abierta el costado queda en x 1195 y las puertas se quedan en su lugar, fijas en la caja.
+- Cama extensible: las varillas van a la misma altura que la placa fija. Los costados del pasillo (CAM-04 y CAM-05) son fijos y llegan a 345 mm;
+  los portales (CAM-31 y CAM-32) acompañan a los listones de las correderas y salen con la extensión: van atornillados al lomo móvil y a las
+  puntas de los listones, llegan a la cara de arriba de la cama (400 mm) y quedan 5 mm sobre el piso. Las correderas de bajo perfil solo tienen
+  que entrar en el listón de 30 x 30. Con la cama abierta los portales quedan en x 1210 a 1225 (el mueble derecho arranca en 1320); los costados y las
+  puertas se quedan en su lugar, fijas en la caja. Los portales se agregaron al final de la lista para no mover los ids de las demás piezas.
   Las varillas se deslizan sobre los largueros y el borde del pasarruedas con cinta de teflón. Abiertas quedan en voladizo: hay que probar
   la flexión con peso real. Con la cama abierta quedan 110 mm de pasillo.
 - Correderas de las varillas: de carga, 500 mm, extensión total, 100 kg el par, de bajo perfil. Tienen que recorrer 490 mm: confirmar con la ficha de las que compres.

@@ -15,7 +15,7 @@ export function rolDe(p) {
   if (/^Cajón .+ - (lateral|trasera|piso del cajón|delantera)/.test(p.nombre)) return 'interior';
   if (p.mat === 'fondo' || /^(Fondo|Panel trasero|Panel central|Guía)/.test(p.nombre)) return 'interior';
   if (/^(Frente|Puerta|Zócalo|Tablero)/.test(p.nombre) || / - puerta$/.test(p.nombre)) return 'frente';
-  if (/^(Costado|Divisor|División|Alacena - lateral)/.test(p.nombre)) return 'lateral';
+  if (/^(Costado|Portal|Divisor|División|Alacena - lateral)/.test(p.nombre)) return 'lateral';
   const fino = p.sx <= p.sy && p.sx <= p.sz ? 'x' : p.sy <= p.sz ? 'y' : 'z';
   if (fino === 'y') return 'horizontal';
   if (fino === 'x') return 'lateral';

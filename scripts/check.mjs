@@ -282,6 +282,13 @@ for (const b of data.botones) {
 for (const d of botonesDeco) {
   for (const p of data.partes) {
     if (p.nombre === d.nombre.replace('Botón push: ', '') && p.grupo === d.grupo) continue;
+    if (p.silueta && p.silueta.tipo === 'portal') {
+      // El botón de la puerta de la cama queda dentro del calado del portal que tiene delante, sin tocar sus patas ni su travesaño
+      if (!solapan(d, p)) continue;
+      const s = p.silueta;
+      exigir(d.z >= p.z + s.n0 && d.z + d.sz <= p.z + s.n1 && d.y >= p.y && d.y + d.sy <= p.y + s.a1, `el botón "${d.nombre}" debería entrar en el calado del portal ${p.id}`);
+      continue;
+    }
     exigir(!solapan(d, p), `el botón "${d.nombre}" pisa la pieza ${p.id} (${p.nombre})`);
   }
 }
@@ -311,7 +318,7 @@ exigir(e3.cables.some((c) => c.hasta === 'bomba') && CARGAS_INICIALES.some((c) =
 
 // ---- Modo pieza: contorno, descripción de cortes, cámara y cotas ----
 const conContorno = data.partes.filter((p) => contorno(p));
-exigir(conContorno.length === 12, `deberían tener contorno propio 12 piezas (2 placas, 2 juegos de varillas, el frente del pie con su puerta, 2 costados, 2 puertas de los módulos, el costado izquierdo con su puerta y la base de la cocina con su asiento), hay ${conContorno.length}`);
+exigir(conContorno.length === 14, `deberían tener contorno propio 14 piezas (2 placas, 2 juegos de varillas, el frente del pie con su puerta, 2 costados fijos, 2 portales, 2 puertas de los módulos, el costado izquierdo con su puerta y la base de la cocina con su asiento), hay ${conContorno.length}`);
 const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
 const pie = data.partes.find((p) => /^Placa del pie/.test(p.nombre));
 exigir(contorno(cab).esquinas === 4 && contorno(cab).peine && !contorno(cab).recorte, 'la placa de la cabecera debería ser un peine de 4 esquinas redondeadas, sin recorte');
@@ -348,14 +355,30 @@ exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /ranuras/.test(l.t
   }
 }
 const costados = data.partes.filter((p) => /^Costado del pasillo/.test(p.nombre));
-exigir(costados.length === 2 && costados.every((p) => p.huecos.length === 1 && p.huecos[0].tipo === 'ventana'), 'cada módulo debería llevar un costado del pasillo con una ventana');
-// Los costados del pasillo salen con las varillas y los listones: llegan hasta la cara de abajo de la placa, quedan un poco sobre el piso
-// para no rozar y los listones de las correderas terminan contra su cara de adentro
-const yVarilla = Math.min(...data.partes.filter((p) => p.ext && p.salidaDe).map((p) => p.y));
-exigir(costados.every((p) => p.ext && Math.abs(p.y + p.sy - yVarilla) < 0.01 && p.y > 0 && p.y <= 10), 'los costados del pasillo deberían moverse con las varillas, llegar a la placa y no tocar el piso');
+exigir(costados.length === 2 && costados.every((p) => p.silueta && p.silueta.tipo === 'costado' && !(p.huecos && p.huecos.length)), 'cada módulo debería llevar un costado fijo del pasillo, abierto hacia arriba');
+// Los costados del pasillo son FIJOS (CAM-04 y CAM-05): quedan un poco sobre el piso y llegan hasta debajo de los listones de las correderas,
+// que pasan por encima con luz. El portal que sale con las varillas va por afuera de cada uno
+const lay = data.layout.cama;
+exigir(costados.every((p) => !p.ext && p.y > 0 && p.y <= 10 && Math.abs(p.y + p.sy - lay.yCostado) < 0.01 && Math.abs(p.x - (lay.x1 - p.sx)) < 0.01), 'los costados del pasillo deberían quedar fijos, sobre el piso y bajo los listones de las correderas');
 const listonesCorr = data.partes.filter((p) => /^Listón de la corredera/.test(p.nombre));
-exigir(listonesCorr.length === 4 && listonesCorr.every((p) => p.ext && Math.abs(p.x + p.sx - costados[0].x) < 0.01), 'los listones de las correderas deberían terminar contra el costado del pasillo');
-exigir(data.layout.cama.yPan === data.layout.cama.yB, 'el costado del pasillo debería llegar a 385 mm');
+const portales = data.partes.filter((p) => /^Portal del pasillo/.test(p.nombre));
+exigir(portales.length === 2 && portales.every((p) => p.ext && p.silueta && p.silueta.tipo === 'portal'), 'cada módulo debería llevar un portal en U invertida que sale con las varillas');
+for (const po of portales) {
+  const cos = costados.find((q) => Math.abs(q.z - po.z) < 0.01 && Math.abs(q.sz - po.sz) < 0.01);
+  exigir(cos && Math.abs(po.x - (cos.x + cos.sx)) < 0.01, `el portal ${po.id} debería ir pegado por afuera del costado fijo`);
+  exigir(Math.abs(po.y + po.sy - lay.yT) < 0.01 && po.y > 0 && po.y <= 10, `el portal ${po.id} debería llegar a la cara de arriba de la cama (a ras de las varillas) y no tocar el piso`);
+  exigir(cos && Math.abs(po.silueta.n0 - cos.silueta.n0) < 0.01 && Math.abs(po.silueta.n1 - cos.silueta.n1) < 0.01, `el calado del portal ${po.id} debería coincidir con el del costado fijo`);
+  exigir(cos && Math.abs(po.y + po.silueta.a1 - (cos.y + cos.sy)) < 0.01, `el travesaño del portal ${po.id} debería arrancar donde termina el costado fijo`);
+  // Los listones de las correderas terminan contra una pata del portal (por dentro) y pasan sobre el costado fijo
+  for (const l of listonesCorr.filter((q) => q.z >= po.z && q.z + q.sz <= po.z + po.sz)) {
+    const enPata = (l.z >= po.z && l.z + l.sz <= po.z + po.silueta.n0) || (l.z >= po.z + po.silueta.n1 && l.z + l.sz <= po.z + po.sz);
+    exigir(enPata && Math.abs(l.x + l.sx - po.x) < 0.01, `el listón ${l.id} debería terminar contra una pata del portal ${po.id}`);
+    exigir(l.y - (cos.y + cos.sy) >= 5, `el listón ${l.id} debería pasar al menos 5 mm por encima del costado fijo`);
+  }
+}
+exigir(Math.abs(Math.max(...portales.map((q) => q.x + q.sx)) - (lay.x1 + portales[0].sx)) < 0.01, 'el portal debería sumar su espesor al ancho de la cama cerrada');
+exigir(listonesCorr.length === 4 && listonesCorr.every((p) => p.ext), 'los 4 listones de las correderas deberían salir con las varillas');
+exigir(lay.yPan === lay.yB, 'la cara de abajo de la placa debería quedar a 385 mm');
 const frentesCajon = data.partes.filter((p) => p.grupo === 'Cama' && /^Puerta del módulo/.test(p.nombre));
 exigir(frentesCajon.length === 2, 'faltan las puertas de los módulos de la cama');
 exigir(!data.partes.some((p) => p.grupo === 'Cama' && /cajón|Cajón/.test(p.nombre)), 'la cama ya no lleva cajones');
@@ -376,9 +399,12 @@ exigir(frentesCajon.every((p) => !p.ext && p.bisagraAbajo), 'las puertas de la c
 }
 for (const f of frentesCajon) {
   const cos = costados.find((p) => f.z >= p.z && f.z + f.sz <= p.z + p.sz);
-  const v = cos && cos.huecos[0];
-  exigir(v && f.y >= cos.y + v.a0 + 2.5 && f.y + f.sy <= cos.y + v.a1 - 2.5 && f.z >= cos.z + v.b0 + 2.5 && f.z + f.sz <= cos.z + v.b1 - 2.5, `${f.id} debería entrar en la ventana de su costado con 3 mm de luz`);
-  exigir(Math.abs(contorno(f).radio - (v.r - 3)) < 0.01, `${f.id} debería llevar las esquinas del radio de la ventana menos la luz`);
+  const s = cos && cos.silueta;
+  exigir(s && Math.abs(f.x - cos.x) < 0.01 && f.y >= cos.y + s.a0 + 2.5 && f.y + f.sy <= cos.y + s.h - 2.5 && f.z >= cos.z + s.n0 + 2.5 && f.z + f.sz <= cos.z + s.n1 - 2.5, `${f.id} debería entrar en el calado de su costado con 3 mm de luz`);
+  exigir(Math.abs(contorno(f).radio - (s.radio - 3)) < 0.01, `${f.id} debería llevar las esquinas del radio del calado menos la luz`);
+  // Cerrada, la puerta sale por el calado del portal que tiene delante
+  const po = portales.find((q) => Math.abs(q.z - cos.z) < 0.01);
+  exigir(po && f.z >= po.z + po.silueta.n0 && f.z + f.sz <= po.z + po.silueta.n1 && f.y >= po.y && f.y + f.sy <= po.y + po.silueta.a1, `${f.id} debería pasar por el calado del portal al abrir`);
 }
 const frentePie = data.partes.find((p) => /^Frente del pie/.test(p.nombre));
 exigir(frentePie && frentePie.huecos && frentePie.huecos.length === 1, 'el frente del pie debería llevar su ventana');
@@ -507,6 +533,9 @@ function L_E() {
   const tapas = Object.entries(ab.porParte).filter(([, m]) => m.tipo === 'tapa' || m.tipo === 'tapaX');
   exigir(tapas.length === 3 && tapas.every(([, m]) => Math.abs(Math.abs(m.giro) - Math.PI / 2) < 1e-6), 'las tres puertas de la cama deberían bajar 90 grados sobre su borde de abajo');
   exigir(tapas.filter(([, m]) => m.tipo === 'tapa').length === 2 && tapas.filter(([, m]) => m.tipo === 'tapaX').length === 1, 'dos puertas bajan hacia el pasillo (eje en z) y la del frente del pie hacia la puerta trasera (eje en x)');
+  // Las puertas de los costados giran sobre su borde de abajo, por la cara de afuera: la esquina de abajo no baja y no roza el zócalo
+  const pCab = data.partes.find((q) => q.id === 'CAM-10');
+  exigir(Math.abs(ab.porParte['CAM-10'].pivote[0] - (pCab.x + pCab.sx)) < 0.01 && Math.abs(ab.porParte['CAM-10'].pivote[1] - pCab.y) < 0.01, 'la puerta del costado debería girar sobre su borde de abajo, por la cara de afuera');
   const tapaPie = ab.porParte['CAM-14'];
   exigir(tapaPie && tapaPie.tipo === 'tapaX' && Math.abs(tapaPie.pivote[0] - 45) < 0.01, 'la puerta del frente del pie debería girar sobre su borde de abajo (a 45 mm del piso)');
   // Todos los cajones llevan su frente y su caja: el frente y los laterales de cada cajón son el mismo cajón

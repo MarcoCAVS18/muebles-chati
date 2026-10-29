@@ -1,15 +1,22 @@
 // Cama extensible de 71 a 120 cm, armada como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera)
 // y otro de 60 cm (pie), que juntos hacen 180 cm de pared a pared del mueble trasero. Cada módulo es una caja abierta de
-// plywood con un costado del lado del pasillo que lleva una ventana grande de esquinas redondeadas; esa ventana la cierra
-// una puerta que baja hasta el piso (bisagras de cazoleta abajo, como la Standard Sliding Bed B120) y deja ver el hueco
-// de guardado del módulo, sin cajones ni correderas. Las dos tapas de los extremos (frente del pie y guía de la cabecera) llegan hasta la cara de arriba de
-// la cama; el panel central de apoyo llega hasta abajo de las placas.
+// plywood con un costado FIJO del lado del pasillo (CAM-04 y CAM-05): una pieza abierta hacia arriba, con dos patas y un
+// zócalo, que lleva la puerta del módulo. La puerta baja hasta el piso (bisagras abajo, como la Standard Sliding Bed B120)
+// y deja ver el hueco de guardado, sin cajones ni correderas. Las dos tapas de los extremos (frente del pie y guía de la
+// cabecera) llegan hasta la cara de arriba de la cama; el panel central de apoyo llega hasta abajo de las placas.
+//
+// Por afuera de cada costado fijo va un PORTAL (una U invertida de la altura de la cama: dos patas y un travesaño) que
+// sale con las varillas: se atornilla al lomo móvil y a las puntas de los listones de las correderas, y sus patas son la
+// base de la extensión. Cerrada, el portal queda delante de la puerta (que sale por el calado de abajo) y suma 15 mm al
+// ancho de la cama; abierta, el costado y la puerta se quedan en su lugar. Los listones de las correderas pasan por
+// encima del costado fijo, que por eso no llega arriba.
 //
 // La plataforma son dos placas en peine (CAM-01 y CAM-02): cada una se corta con ranuras abiertas hacia el pasillo. Los
 // pedazos que salen de las ranuras son las varillas móviles; unidas por un lomo, se tiran hacia el pasillo sobre
 // correderas y la cama pasa de 71 a 120 cm. Cerrada parece una sola placa plana; abierta, queda una varilla móvil
 // intercalada entre cada dedo de la placa fija.
 import { peineFijo, peineMovil, repartoPeine } from './peine.js';
+import { costadoAbierto, portalU } from './siluetas.js';
 
 export function cama(ctx, G) {
   const { cfg, t } = ctx;
@@ -44,10 +51,11 @@ export function cama(ctx, G) {
   const xr = xl + luz; // punta de atrás de las varillas
   // Las correderas van al listón de 30 x 30 de las varillas: no pueden medir más de 30 mm de alto
   const hCorr = Math.max(30, ca.alturaCorredera ?? 30);
-  // El costado del pasillo sale con las varillas (va atornillado al lomo móvil y a las puntas de los listones de las
-  // correderas): llega hasta la cara de abajo de la placa y queda 5 mm sobre el piso para no rozar al moverse
+  // El costado fijo del pasillo llega hasta debajo de los listones de las correderas (que pasan por encima, con luz) y
+  // el portal que sale con las varillas llega hasta la cara de arriba de la cama; los dos quedan 5 mm sobre el piso
   const yPan = yB;
   const luzPiso = 5;
+  const yCostado = yPan - ve.cabezal; // borde de arriba del costado fijo y de la ventana de la puerta
 
   // Tapas de los extremos, panel central y bahías de los módulos
   const zPanel = zCentro - t / 2;
@@ -58,7 +66,7 @@ export function cama(ctx, G) {
   const zonaPie = { z0: bahiaPie.z0 + c, z1: bahiaPie.z1 - c }; // lo que ocupan las varillas móviles
   const zonaCab = { z0: bahiaCab.z0 + c, z1: bahiaCab.z1 - c };
 
-  ctx.layout.cama = { x0, x1, zPie, zCab, yT, yB, yPan, zCentro, extension: ca.extension, recorte: null };
+  ctx.layout.cama = { x0, x1, zPie, zCab, yT, yB, yPan, yCostado, zCentro, extension: ca.extension, recorte: null };
 
   const P = (nombre, x, y, z, sx, sy, sz, extra = {}) => ctx.parte({ grupo: G, nombre, x, y, z, sx, sy, sz, ...extra });
   const LST = (nombre, x, y, z, sx, sy, sz, extra = {}) =>
@@ -118,18 +126,17 @@ export function cama(ctx, G) {
   P('Frente del pie (ventana de esquinas redondeadas)', x0, 0, zPie, anchoFrente, yT, t, {
     huecos: [{ tipo: 'ventana', a0: margenF, a1: anchoFrente - margenF, b0: yVentanaF, b1: yVentanaF + altoVentanaF, r: rVF }],
   });
-  P('Costado del pasillo - módulo del pie, 60 (ventana)', x1 - t, luzPiso, zPie, t, yPan - luzPiso, zCentro - zPie, {
-    huecos: [ventanaDe(bahiaPie, zPie)],
-    lado: 1,
-    ext: true,
-  });
+  // Costado fijo: abierto hacia arriba (dos patas y un zócalo); por el calado se ve la puerta del módulo
+  const costadoFijo = (nombre, bahia, z0, z1) => {
+    const v = ventanaDe(bahia, z0);
+    return P(`Costado del pasillo - módulo ${nombre} (fijo, abierto arriba)`, x1 - t, luzPiso, z0, t, yCostado - luzPiso, z1 - z0, {
+      silueta: costadoAbierto({ w: z1 - z0, h: yCostado - luzPiso, n0: v.b0, n1: v.b1, a0: v.a0, r: v.r }),
+    });
+  };
+  costadoFijo('del pie, 60', bahiaPie, zPie, zCentro);
 
   // ---- Módulo de la cabecera (120): costado del pasillo con ventana y su puerta, hasta el mueble trasero ----
-  P('Costado del pasillo - módulo de la cabecera, 120 (ventana)', x1 - t, luzPiso, zCentro, t, yPan - luzPiso, zCab - zCentro, {
-    huecos: [ventanaDe(bahiaCab, zCentro)],
-    lado: 1,
-    ext: true,
-  });
+  costadoFijo('de la cabecera, 120', bahiaCab, zCentro, zCab);
 
   // Panel central: separa los módulos y es guía de las varillas de los dos lados
   const xPanel = sobreArco(zPanel, zPanel + t) ? xArco : x0;
@@ -158,10 +165,10 @@ export function cama(ctx, G) {
   movil('del pie', placaPie, repPie, idPlacaPie);
 
   // ---- Puertas en las ventanas: bajan hasta el piso con bisagras de cazoleta en el borde de abajo ----
-  // Cada puerta cierra su ventana con 3 mm de luz y queda FIJA en la caja (no sale con la cama): el costado se corre y la
-  // deja en su lugar. Las puertas de los costados llevan las bisagras en un listón de 30 x 30 pegado a la caja, a ras del
-  // borde de abajo de la ventana; la del frente del pie las lleva sobre el refuerzo de piso que tiene detrás. Se abren solo
-  // con la cama cerrada.
+  // Cada puerta cierra su ventana con 3 mm de luz y queda FIJA en la caja, en el costado fijo (que no se mueve): la cama se
+  // extiende y la puerta sigue colgada de su listón. Las puertas de los costados llevan las bisagras en un listón de 30 x 30
+  // fijo en la caja, a ras del borde de abajo de la ventana; la del frente del pie las lleva sobre el refuerzo de piso que
+  // tiene detrás. Con la cama cerrada salen por el calado del portal; con la cama abierta quedan al aire, bajo la extensión.
   const yFrente = ve.zocalo + 3;
   const altoFrente = altoVentana - 6;
   const puertaEnVentana = (nombre, b) => {
@@ -216,7 +223,7 @@ export function cama(ctx, G) {
 
   // ---- Refuerzos al piso: como en el instructivo, 4 tornillos de 25 mm por módulo (2 refuerzos con 2 tornillos) ----
   // Quedan al piso, bajo las puertas, y esquivan el pasarruedas
-  const refuerzo = (nombre, zA, xDesde) => LST45(nombre, xDesde, 0, zA, x1 - t - 2 - xDesde, sh, sh);
+  const refuerzo = (nombre, zA, xDesde) => LST45(nombre, xDesde, 0, zA, x1 - t - xDesde, sh, sh);
   const desde = (zA, xMin = x0) => (sobreArco(zA, zA + sh) ? Math.max(xArco, xMin) : xMin);
   refuerzo('Refuerzo de piso del módulo del pie (frente)', bahiaPie.z0, desde(bahiaPie.z0));
   refuerzo('Refuerzo de piso del módulo del pie (unión)', bahiaPie.z1 - sh, desde(bahiaPie.z1 - sh));
@@ -226,9 +233,9 @@ export function cama(ctx, G) {
   // Lo que sigue se agrega al final para no mover los ids de las demás piezas.
   larguero('Larguero de las puntas (cabecera)', xL2, zonaCab);
   // Lo que cuelga de las varillas y se mueve con ellas: dos listones con las correderas (uno en cada punta) y un listón de
-  // unión bajo el empalme de las varillas con el lomo. Los listones de las correderas terminan contra la cara de adentro
-  // del costado del pasillo, que sale con ellos.
-  const xCorr0 = x1 - t - 500; // la corredera mide 500 mm y termina contra el costado
+  // unión bajo el empalme de las varillas con el lomo. Los listones de las correderas pasan por encima del costado fijo y
+  // terminan contra la cara de adentro de las patas del portal, que sale con ellos.
+  const xCorr0 = x1 - 500; // la corredera mide 500 mm y termina contra el portal
   const movibles = (nombreMod, zona) => {
     LST(`Listón de la corredera (${nombreMod}, lado del frente)`, xCorr0, yB - 30, zona.z0, 500, 30, 30, { ext: true });
     LST(`Listón de la corredera (${nombreMod}, lado del fondo)`, xCorr0, yB - 30, zona.z1 - 30, 500, 30, 30, { ext: true });
@@ -239,13 +246,26 @@ export function cama(ctx, G) {
     LST(`Listón de unión de las varillas (${nombreMod})`, xs - 15, yB - 30, zona.z0 + margenL, 30, 30, zona.z1 - zona.z0 - 2 * margenL, { ext: true });
   union('pie', zonaPie);
   union('cabecera', zonaCab);
+  // Portal que sale con las varillas: va por afuera del costado fijo (suma 15 mm al ancho), de la altura de la cama
+  // (a ras de las varillas) y 5 mm sobre el piso. Sus dos patas son la base de la extensión y su calado de abajo deja
+  // salir la puerta del módulo.
+  const portal = (nombre, bahia, z0, z1) => {
+    const v = ventanaDe(bahia, z0);
+    return P(`Portal del pasillo - módulo ${nombre} (U invertida, sale con la cama)`, x1, luzPiso, z0, t, yT - luzPiso, z1 - z0, {
+      silueta: portalU({ w: z1 - z0, h: yT - luzPiso, n0: v.b0, n1: v.b1, a1: yCostado - luzPiso, r: v.r }),
+      ext: true,
+    });
+  };
+  portal('del pie, 60', bahiaPie, zPie, zCentro);
+  portal('de la cabecera, 120', bahiaCab, zCentro, zCab);
 
   // ---- Uniones ----
   ctx.unir(G, 'cola_tornillo', 2 * L, 'Placas con panel central, largueros y listones');
   ctx.unir(G, 'cola_tornillo', 2 * (yT + L), 'Frente del pie con sus costados y el panel central');
-  ctx.unir(G, 'cola_tornillo', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Costados del pasillo con el lomo móvil y con las puntas de los listones de las correderas');
-  ctx.unir(G, 'directo', 0, 'Cada costado del pasillo, atornillado al lomo móvil desde arriba (uno cada 150 mm) y a las puntas de los dos listones de las correderas', {
-    herraje: 'Tornillo avellanado 4x40 mm (costados al lomo y a los listones)',
+  ctx.unir(G, 'cola_tornillo', 4 * (yCostado - luzPiso), 'Costados fijos del pasillo con las tapas del módulo (frente del pie, panel central y guía) y con los refuerzos de piso');
+  ctx.unir(G, 'cola_tornillo', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Portales con el lomo móvil y con las puntas de los listones de las correderas');
+  ctx.unir(G, 'directo', 0, 'Cada portal, atornillado al canto del lomo móvil (uno cada 150 mm) y a las puntas de los dos listones de las correderas', {
+    herraje: 'Tornillo avellanado 4x40 mm (portales al lomo y a los listones)',
     cantidad: Math.ceil((zonaPie.z1 - zonaPie.z0) / 150) + 1 + Math.ceil((zonaCab.z1 - zonaCab.z0) / 150) + 1 + 8,
   });
   ctx.unir(G, 'cola_tornillo', 2 * (yB + 560), 'Guías con refuerzos de piso y largueros');
@@ -281,7 +301,7 @@ export function cama(ctx, G) {
     G,
     'Par de correderas de carga 500 mm (100 kg, extensión total)',
     2,
-    `Una por módulo: una corredera a cada lado de las varillas. Van al listón de 30 x 30 de las varillas: no pueden medir más de ${hCorr} mm de alto, y el costado del pasillo sale con ellas`
+    `Una por módulo: una corredera a cada lado de las varillas. Van al listón de 30 x 30 de las varillas: no pueden medir más de ${hCorr} mm de alto, y los portales del pasillo salen con ellas`
   );
   ctx.herraje(G, 'Retén o traba para las varillas', 2, 'Para que no salgan solas al frenar');
   ctx.herrajeBotones(G); // un botón push en cada puerta
@@ -303,7 +323,8 @@ export function cama(ctx, G) {
   );
 
   // ---- Controles ----
-  if (x1 + ca.extension > van.ancho) ctx.aviso('La cama extendida no entra: la extensión supera el ancho de la van.');
+  if (x1 + t + ca.extension > van.ancho) ctx.aviso('La cama extendida no entra: la extensión, con el portal, supera el ancho de la van.');
+  if (ve.cabezal - 30 < 3) ctx.aviso('El costado fijo quedó a menos de 3 mm de los listones de las correderas: aumentar el espacio de arriba de la ventana (cabezal) o achicar el listón.');
   if (ca.extension > 500) ctx.aviso(`La extensión (${ca.extension} mm) es más que el recorrido de una corredera de 500 mm.`);
   const cruce = xs - (xr + ca.extension);
   if (cruce < 50) ctx.aviso(`Con la cama abierta las varillas apenas entran ${Math.round(cruce)} mm entre los dedos de la placa: tienen que quedar al menos 50 mm intercaladas.`);
