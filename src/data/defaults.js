@@ -81,7 +81,7 @@ export const CONFIG_INICIAL = {
     lomo: 60, // lomo fijo contra la pared, de donde salen los dedos de la placa
     lomoMovil: 80, // lomo de las varillas, del lado del pasillo
     luzVarilla: 2, // luz de cada varilla dentro de su ranura, a cada lado
-    alturaCorredera: 30, // alto máximo de las correderas: el costado del pasillo termina debajo de ellas
+    alturaCorredera: 30, // alto máximo de las correderas: van al listón de 30 x 30 de las varillas
     // Ventanas de los costados (hueco de cada cajón): zócalo y cabezal son la madera que queda abajo y arriba
     ventana: { radio: 40, zocalo: 40, cabezal: 40, apoyoCajon: 45 },
     cajonCabecera: { fondo: 500 }, // el alto lo da la ventana; 500 mm es lo que deja el pasarruedas (185 mm)

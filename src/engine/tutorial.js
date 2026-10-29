@@ -699,15 +699,18 @@ function cama(data, plan, cfg, e3, cortes) {
     titulo: 'Cajas de los dos módulos',
     intro: `La cama son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada uno es una caja abierta con un costado hacia el pasillo, y entre los dos llenan los ${cm.largo / 10} cm de la cama.`,
     hacer: [
-      'Módulo del pie: frente (con ventana), costado del pasillo (con ventana) y panel central. Cola y 4x40 contra los refuerzos del piso.',
-      'Módulo de la cabecera: costado del pasillo (con ventana), panel central y la guía, que cierra el extremo contra el frente del mueble trasero.',
+      'Módulo del pie: frente (con ventana) y panel central. Cola y 4x40 contra los refuerzos del piso.',
+      'Módulo de la cabecera: panel central y la guía, que cierra el extremo contra el frente del mueble trasero.',
       `Alturas: el frente del pie y la guía llegan a ${lay.yT} mm, a ras de la superficie donde dormís; el panel central llega a ${lay.yB} mm, justo bajo las placas.`,
-      `El costado del pasillo es más bajo a propósito (${lay.yPan} mm): por encima pasan las correderas de las varillas cuando se extienden.`,
+      `Los costados del pasillo NO van fijos a la caja: salen con la cama. Por ahora dejalos sueltos; se atornillan al lomo de las varillas en el paso de las varillas extensibles (miden ${r0(lay.yPan - 5)} mm de alto y quedan 5 mm sobre el piso).`,
       'Todo parado y a escuadra. Pegá cada pieza contra su refuerzo y atornillá a través del refuerzo, no al piso.',
       'Pegá y atornillá los listones de las correderas de los cajones (45x45) en el panel central, el frente y la guía, a la altura que dice la tabla de cajones.',
     ],
-    piezas: [...filas([...frentePie, ...costados], cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...f(/^Listón de las correderas/)],
-    ojo: ['El panel central se acorta para esquivar el pasarruedas: probalo en seco contra el arco antes de pegar.'],
+    piezas: [...filas(frentePie, cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...f(/^Listón de las correderas/)],
+    ojo: [
+      'El panel central se acorta para esquivar el pasarruedas: probalo en seco contra el arco antes de pegar.',
+      'Sin el costado fijo, cada caja se sostiene con el frente, el panel central, la guía, los refuerzos del piso, los largueros y la pared: revisá que no se abra ni se deforme antes de seguir.',
+    ],
   });
 
   pasos.push({
@@ -730,7 +733,7 @@ function cama(data, plan, cfg, e3, cortes) {
       'Caja con laterales, trasera y un piso de 15 mm. El frente va aparte, con las esquinas redondeadas.',
       'Corredera telescópica del largo de la tabla, atornillada al listón de 45x45 del módulo y al lateral del cajón, a la misma altura. Las dos partes de cada lado van a ras del frente.',
       'Probá la caja sin frente: tiene que correr sin rozar los listones.',
-      'Frente: ponelo en la ventana con 3 mm de luz y atornillalo a los cantos de los laterales con dos tornillos por lado, avellanados. El botón push tapa el centro.',
+      'Frente: se coloca al final, cuando el costado del paso 7 ya esté atornillado. Ponelo en la ventana con 3 mm de luz y atornillalo a los cantos de los laterales con dos tornillos por lado, avellanados. El botón push tapa el centro.',
     ],
     piezas: cajones.flatMap((c) => filas(c.piezas, cortes)),
     tablas: [tablaCajones(cajones), tablaBotones(data, G)],
@@ -745,12 +748,14 @@ function cama(data, plan, cfg, e3, cortes) {
       `Cada juego de varillas sale de la placa unido por su lomo. Pegá el listón de unión (${ids(por(/^Listón de unión de las varillas/))}) por debajo, a ${r0(por(/^Listón de unión de las varillas \(pie\)/)[0].x)} mm de la pared, y atornillá cada varilla desde arriba con dos tornillos avellanados.`,
       `Correderas de carga de 500 mm (100 kg) de bajo perfil, de no más de ${cm.alturaCorredera} mm de alto: una a cada lado de cada juego de varillas, la parte que se mueve va al listón de la corredera (${ids(por(/^Listón de la corredera/))}), que acompaña a las varillas, y la parte fija a la caja.`,
       'Las varillas no se atornillan a la placa: solo cuelgan de las correderas y apoyan sobre los largueros.',
+      `Costados del pasillo (${ids(costados)}): acompañan a los listones y salen con la cama. Apoyá cada costado contra las puntas de los dos listones de las correderas de su módulo y atornillalo a ellas y al lomo desde arriba, uno cada 150 mm. Tiene que llegar justo a la cara de abajo del lomo y quedar 5 mm sobre el piso.`,
       'Cada juego lleva un retén para que no salga solo al frenar y una agarradera embutida en el borde del lomo.',
       `Probalas con peso: tienen que correr enteras y quedar firmes abiertas (${cm.extension} mm de extensión).`,
     ],
-    piezas: [...filasVarillas(varillas), ...f(/^Listón de la corredera/), ...f(/^Listón de unión de las varillas/)],
+    piezas: [...filasVarillas(varillas), ...f(/^Listón de la corredera/), ...f(/^Listón de unión de las varillas/), ...filas(costados, cortes)],
     ojo: [
-      `Esto depende de la corredera que compres: comprala antes de cortar y verificá la altura real. Si pasa de ${cm.alturaCorredera} mm, roza el costado del pasillo (que queda a ${lay.yPan} mm).`,
+      `Esto depende de la corredera que compres: comprala antes de cortar y verificá la altura real. Tiene que entrar en el listón de 30 x 30 (${cm.alturaCorredera} mm de alto como máximo).`,
+      `Los costados pesan unos kilos y cuelgan solo del lomo y de los listones: con la cama abierta sumá carga en la punta. Abierta, el cajón de cada módulo puede salir como máximo unos ${r0(cm.extension - 15)} mm antes de tocar el costado.`,
       `Las correderas de 500 mm tienen que recorrer ${cm.extension} mm: si recorren menos, la cama abierta queda más angosta que ${(cm.ancho + cm.extension) / 10} cm.`,
       'Abiertas, las varillas quedan en voladizo (solo las sostienen las correderas): probalas con el peso de dos personas sentadas en el borde. Si flexionan, sumá una pata plegable o una traba en el borde del pasillo.',
     ],
@@ -789,6 +794,7 @@ function cama(data, plan, cfg, e3, cortes) {
     resumen: [
       `Cama de ${cm.largo / 10} cm de largo y ${cm.ancho / 10} cm de ancho, a ${cm.plataforma / 10} cm del piso, que se agranda a ${(cm.ancho + cm.extension) / 10} cm con las varillas.`,
       `Son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada placa es un peine y sus varillas salen de las ranuras. Cada módulo tiene un cajón por la ventana del costado.`,
+      'Los costados del pasillo, con las ventanas de los cajones, salen junto con las varillas y los listones de las correderas.',
       'Se apoya en el piso (refuerzos), en la pared izquierda (listones) y en el frente del mueble trasero.',
     ],
     lista: listaDe(data, G),

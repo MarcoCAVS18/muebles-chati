@@ -129,7 +129,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Los cajones de la cama se tiran hacia el pasillo (en la foto se ven del otro lado, contra la pared).
 - La cama es como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera) y otro de 60 cm (pie), unidos con dos
   tornillos de 25 mm y fijados al piso con refuerzos de 4 tornillos de 25 mm por módulo. Cada módulo es una caja abierta con un
-  costado del lado del pasillo con una ventana grande de esquinas redondeadas (R40, 270 mm de alto); el frente del pie tiene otra.
+  costado del lado del pasillo (que sale con la extensión de la cama) con una ventana grande de esquinas redondeadas (R40, 305 mm de alto); el frente del pie tiene otra.
   En cada ventana de los costados va un cajón con el frente a ras (el frente toma el radio de la ventana menos la luz de 3 mm).
   El lado de la pared no lleva costado: lo hace la pared de la van, y el pasarruedas pasa por ahí.
 - La plataforma es un peine ("varillas intercaladas"): cada placa (cabecera de 120 cm y pie de 60 cm) se corta con ranuras abiertas hacia el
@@ -148,8 +148,10 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   fusibles y profundidad de interruptores y enchufes también). Con la L de 570 mm entran uno detrás de otro los equipos del frente,
   el paso del cable largo y la batería; si algún día la L se achica tanto que no entren, el inversor se pone atravesado solo.
   Los dos cajones de cocina de la L usan correderas de 500 mm.
-- Cama extensible: las varillas van a la misma altura que la placa fija. El costado del pasillo baja a 354 mm (31 mm bajo la cara de abajo
-  de la placa) para que las correderas de bajo perfil (30 mm de alto como máximo) pasen por encima; por eso las ventanas miden 274 mm de alto.
+- Cama extensible: las varillas van a la misma altura que la placa fija. Los costados del pasillo (CAM-04 y CAM-05) acompañan a los listones de las
+  correderas y salen con la extensión: van atornillados al lomo móvil y a las puntas de los listones, llegan hasta la cara de abajo de la placa
+  (385 mm) y quedan 5 mm sobre el piso. Por eso las ventanas de los cajones miden 305 mm de alto y las correderas de bajo perfil solo tienen
+  que entrar en el listón de 30 x 30. Con la cama abierta el costado queda en x 1195 y cada cajón sale como máximo unos 475 mm antes de tocarlo.
   Las varillas se deslizan sobre los largueros y el borde del pasarruedas con cinta de teflón. Abiertas quedan en voladizo: hay que probar
   la flexión con peso real. Con la cama abierta quedan 110 mm de pasillo.
 - Correderas de las varillas: de carga, 500 mm, extensión total, 100 kg el par, de bajo perfil. Tienen que recorrer 490 mm: confirmar con la ficha de las que compres.

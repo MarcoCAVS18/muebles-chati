@@ -41,9 +41,12 @@ export function cama(ctx, G) {
   const xl = x0 + lomo; // fondo de las ranuras
   const xs = x1 - lomoM; // punta de los dedos fijos y cara interior del lomo móvil
   const xr = xl + luz; // punta de atrás de las varillas
-  // Las correderas pasan por encima del costado del pasillo: el costado termina debajo de ellas
+  // Las correderas van al listón de 30 x 30 de las varillas: no pueden medir más de 30 mm de alto
   const hCorr = Math.max(30, ca.alturaCorredera ?? 30);
-  const yPan = yB - hCorr - 1;
+  // El costado del pasillo sale con las varillas (va atornillado al lomo móvil y a las puntas de los listones de las
+  // correderas): llega hasta la cara de abajo de la placa y queda 5 mm sobre el piso para no rozar al moverse
+  const yPan = yB;
+  const luzPiso = 5;
 
   // Tapas de los extremos, panel central y bahías de los módulos
   const zPanel = zCentro - t / 2;
@@ -102,21 +105,23 @@ export function cama(ctx, G) {
   const ventanaDe = (b, zPieza) => {
     const ancho = anchoCajon(b) + 10;
     const zc = (b.z0 + b.z1) / 2;
-    return { tipo: 'ventana', a0: ve.zocalo, a1: ve.zocalo + altoVentana, b0: zc - ancho / 2 - zPieza, b1: zc + ancho / 2 - zPieza, r: rV };
+    return { tipo: 'ventana', a0: ve.zocalo - luzPiso, a1: ve.zocalo - luzPiso + altoVentana, b0: zc - ancho / 2 - zPieza, b1: zc + ancho / 2 - zPieza, r: rV };
   };
   const anchoFrente = x1 - t - x0;
   P('Frente del pie (ventana de esquinas redondeadas)', x0, 0, zPie, anchoFrente, yT, t, {
     huecos: [{ tipo: 'ventana', a0: 70, a1: anchoFrente - 70, b0: ve.zocalo, b1: ve.zocalo + altoVentana, r: rV }],
   });
-  P('Costado del pasillo - módulo del pie, 60 (ventana)', x1 - t, 0, zPie, t, yPan, zCentro - zPie, {
+  P('Costado del pasillo - módulo del pie, 60 (ventana)', x1 - t, luzPiso, zPie, t, yPan - luzPiso, zCentro - zPie, {
     huecos: [ventanaDe(bahiaPie, zPie)],
     lado: 1,
+    ext: true,
   });
 
   // ---- Módulo de la cabecera (120): costado del pasillo con ventana sobre el cajón, hasta el mueble trasero ----
-  P('Costado del pasillo - módulo de la cabecera, 120 (ventana)', x1 - t, 0, zCentro, t, yPan, zCab - zCentro, {
+  P('Costado del pasillo - módulo de la cabecera, 120 (ventana)', x1 - t, luzPiso, zCentro, t, yPan - luzPiso, zCab - zCentro, {
     huecos: [ventanaDe(bahiaCab, zCentro)],
     lado: 1,
+    ext: true,
   });
 
   // Panel central: separa los módulos y es guía de las varillas y de los cajones de los dos lados
@@ -194,8 +199,9 @@ export function cama(ctx, G) {
   // Lo que sigue se agrega al final para no mover los ids de las demás piezas.
   larguero('Larguero de las puntas (cabecera)', xL2, zonaCab);
   // Lo que cuelga de las varillas y se mueve con ellas: dos listones con las correderas (uno en cada punta) y un listón de
-  // unión bajo el empalme de las varillas con el lomo. Todos quedan 1 mm sobre el borde del costado del pasillo.
-  const xCorr0 = x1 - 5 - 500; // la corredera mide 500 mm y termina 5 mm antes del borde
+  // unión bajo el empalme de las varillas con el lomo. Los listones de las correderas terminan contra la cara de adentro
+  // del costado del pasillo, que sale con ellos.
+  const xCorr0 = x1 - t - 500; // la corredera mide 500 mm y termina contra el costado
   const movibles = (nombreMod, zona) => {
     LST(`Listón de la corredera (${nombreMod}, lado del frente)`, xCorr0, yB - 30, zona.z0, 500, 30, 30, { ext: true });
     LST(`Listón de la corredera (${nombreMod}, lado del fondo)`, xCorr0, yB - 30, zona.z1 - 30, 500, 30, 30, { ext: true });
@@ -210,7 +216,11 @@ export function cama(ctx, G) {
   // ---- Uniones ----
   ctx.unir(G, 'cola_tornillo', 2 * L, 'Placas con panel central, largueros y listones');
   ctx.unir(G, 'cola_tornillo', 2 * (yT + L), 'Frente del pie con sus costados y el panel central');
-  ctx.unir(G, 'cola_tornillo', 4 * yPan, 'Costados del pasillo con el frente, el panel central y la guía');
+  ctx.unir(G, 'cola_tornillo', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Costados del pasillo con el lomo móvil y con las puntas de los listones de las correderas');
+  ctx.unir(G, 'directo', 0, 'Cada costado del pasillo, atornillado al lomo móvil desde arriba (uno cada 150 mm) y a las puntas de los dos listones de las correderas', {
+    herraje: 'Tornillo avellanado 4x40 mm (costados al lomo y a los listones)',
+    cantidad: Math.ceil((zonaPie.z1 - zonaPie.z0) / 150) + 1 + Math.ceil((zonaCab.z1 - zonaCab.z0) / 150) + 1 + 8,
+  });
   ctx.unir(G, 'cola_tornillo', 2 * (yB + 560), 'Guías con refuerzos de piso y largueros');
   ctx.unir(G, 'cola_tornillo', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Varillas con el listón de unión');
   ctx.unir(G, 'directo', 0, 'Cada varilla, atornillada al listón de unión desde arriba (2 tornillos avellanados por varilla)', {
@@ -243,7 +253,7 @@ export function cama(ctx, G) {
     G,
     'Par de correderas de carga 500 mm (100 kg, extensión total)',
     2,
-    `Una por módulo: una corredera a cada lado de las varillas. Tienen que ser de bajo perfil: pasan por encima del costado y no pueden medir más de ${hCorr} mm de alto`
+    `Una por módulo: una corredera a cada lado de las varillas. Van al listón de 30 x 30 de las varillas: no pueden medir más de ${hCorr} mm de alto, y el costado del pasillo sale con ellas`
   );
   ctx.herraje(G, 'Retén o traba para las varillas', 2, 'Para que no salgan solas al frenar');
   ctx.herrajeBotones(G); // un botón push en cada frente de cajón

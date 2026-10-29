@@ -349,9 +349,13 @@ exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /ranuras/.test(l.t
 }
 const costados = data.partes.filter((p) => /^Costado del pasillo/.test(p.nombre));
 exigir(costados.length === 2 && costados.every((p) => p.huecos.length === 1 && p.huecos[0].tipo === 'ventana'), 'cada módulo debería llevar un costado del pasillo con una ventana');
-// Los costados del pasillo quedan bajo las varillas y las correderas de bajo perfil que pasan por encima de ellos
+// Los costados del pasillo salen con las varillas y los listones: llegan hasta la cara de abajo de la placa, quedan un poco sobre el piso
+// para no rozar y los listones de las correderas terminan contra su cara de adentro
 const yVarilla = Math.min(...data.partes.filter((p) => p.ext && p.salidaDe).map((p) => p.y));
-exigir(costados.every((p) => p.y + p.sy <= yVarilla - CONFIG_INICIAL.cama.alturaCorredera - 1 + 0.01), 'los costados del pasillo no pueden tapar la salida de las varillas ni de sus correderas');
+exigir(costados.every((p) => p.ext && Math.abs(p.y + p.sy - yVarilla) < 0.01 && p.y > 0 && p.y <= 10), 'los costados del pasillo deberían moverse con las varillas, llegar a la placa y no tocar el piso');
+const listonesCorr = data.partes.filter((p) => /^Listón de la corredera/.test(p.nombre));
+exigir(listonesCorr.length === 4 && listonesCorr.every((p) => p.ext && Math.abs(p.x + p.sx - costados[0].x) < 0.01), 'los listones de las correderas deberían terminar contra el costado del pasillo');
+exigir(data.layout.cama.yPan === data.layout.cama.yB, 'el costado del pasillo debería llegar a 385 mm');
 const frentesCajon = data.partes.filter((p) => /^Frente cajón de la cabecera|^Frente cajón del pie/.test(p.nombre));
 exigir(frentesCajon.length === 2, 'faltan los frentes de los cajones de la cama');
 for (const f of frentesCajon) {
