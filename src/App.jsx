@@ -9,7 +9,7 @@ import { calcularElectrica } from './engine/electrica.js';
 import { electrico3d } from './engine/electrico3d.js';
 import { VERSION } from './almacen.js';
 import Scene3D, { VISTAS } from './components/Scene3D.jsx';
-import Barra3D, { Leyenda } from './components/Barra3D.jsx';
+import Barra3D, { Leyenda, LeyendaEstado } from './components/Barra3D.jsx';
 import PanelElemento from './components/PanelElemento.jsx';
 import PanelPieza from './components/PanelPieza.jsx';
 import { Seccion, SECCIONES_CFG, escribir } from './components/Campos.jsx';
@@ -18,6 +18,8 @@ import { Armado } from './components/Armado.jsx';
 import { armarTutorial } from './engine/tutorial.js';
 import { useEsMovil, TACTIL } from './util/pantalla.js';
 import { Icono } from './components/Icono.jsx';
+import { TENEMOS_INICIAL } from './data/stock.js';
+import { estadoDe } from './engine/colores.js';
 
 const TABS = ['Despiece', 'Placas y cortes', 'Herrajes', 'Eléctrica', 'Armado', 'Compras'];
 const ICONO_TAB = { Despiece: 'lista', 'Placas y cortes': 'hoja', Herrajes: 'llave', Eléctrica: 'rayo', Armado: 'libro', Compras: 'carrito' };
@@ -72,6 +74,8 @@ export default function App() {
   const [abierto, setAbierto] = useState(0); // cajones y puertas: 0 cerrados, 1 abiertos
   const [cotas, setCotas] = useState(false);
   const [colores, setColores] = useState(true); // colores por rol de la madera
+  const [estado, setEstado] = useState(false); // dos colores: la madera que ya tenemos y la que falta
+  const [tenemos, setTenemos] = useState(TENEMOS_INICIAL); // ids de las maderas que ya están
   // El modo sale de los controles, así que los controles finos y los tres botones siempre coinciden
   const modo = explosion > 0.02 ? 'explotado' : abierto > 0.02 || camaAbierta > 0.02 ? 'abierto' : 'armado';
   const elegirModo = (m) => {
@@ -140,6 +144,7 @@ export default function App() {
             // Un guardado viejo no trae los consumos nuevos: se suman los que falten
             if (Array.isArray(d.cargas)) setCargas([...d.cargas, ...CARGAS_INICIALES.filter((c) => !d.cargas.some((g) => g.id === c.id))]);
             if (d.elec) setElec(mezclar(ELECTRICA_INICIAL, d.elec));
+            if (Array.isArray(d.tenemos)) setTenemos(d.tenemos.filter((x) => typeof x === 'string'));
           }
         }
         listo.current = true;
@@ -156,14 +161,21 @@ export default function App() {
     if (!firebaseActivo || !listo.current) return undefined;
     setNube('guardando');
     const id = setTimeout(() => {
-      guardarProyecto({ cfg, cargas, elec })
+      guardarProyecto({ cfg, cargas, elec, tenemos })
         .then(() => setNube('guardado'))
         .catch(() => setNube('error'));
     }, 1500);
     return () => clearTimeout(id);
-  }, [cfg, cargas, elec]);
+  }, [cfg, cargas, elec, tenemos]);
 
   const data = useMemo(() => construir(cfg), [cfg]);
+  const conjuntoTenemos = useMemo(() => new Set(tenemos), [tenemos]);
+  const alternarTenemos = (id) => setTenemos((t) => (t.includes(id) ? t.filter((x) => x !== id) : [...t, id]));
+  const cuentasEstado = useMemo(() => {
+    const c = { tenemos: 0, falta: 0 };
+    for (const p of data.partes) c[estadoDe(p, conjuntoTenemos)] += 1;
+    return c;
+  }, [data, conjuntoTenemos]);
   const plan = useMemo(() => planificar(data.partes, cfg), [data, cfg]);
   const fijaciones = useMemo(() => resumenFijaciones(data.uniones, data.anclajes), [data]);
   const peso = useMemo(() => pesoEstimado(data.partes, cfg), [data, cfg]);
@@ -318,6 +330,8 @@ export default function App() {
             abierto={abierto}
             cotas={cotas}
             colores={colores}
+            estadoMadera={estado}
+            tenemos={conjuntoTenemos}
             enfoque={enfoque}
             setEnfoque={enfocar}
             invertir={invertir}
@@ -340,6 +354,9 @@ export default function App() {
               setCotas={setCotas}
               colores={colores}
               setColores={setColores}
+              estado={estado}
+              setEstado={setEstado}
+              cuentasEstado={cuentasEstado}
               grupos={data.grupos}
               visibles={visibles}
               setVisibles={setVisibles}
@@ -373,7 +390,7 @@ export default function App() {
             />
             {!enfoque && (
               <div className="hud-abajo">
-                {colores && !resaltadas && <Leyenda />}
+                {estado && !resaltadas ? <LeyendaEstado cuentas={cuentasEstado} /> : colores && !resaltadas && <Leyenda />}
                 <div className="info">
                 {hover ||
                   (parteSel
@@ -396,6 +413,8 @@ export default function App() {
               setInvertir={setInvertir}
               verContexto={verContexto}
               setVerContexto={setVerContexto}
+              tenemos={conjuntoTenemos}
+              alternarTenemos={alternarTenemos}
               ir={ir}
               salir={salir}
             />

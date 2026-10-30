@@ -13,11 +13,11 @@ export async function cargarProyecto() {
   return snap.exists() ? snap.data() : null;
 }
 
-export async function guardarProyecto({ cfg, cargas, elec }) {
+export async function guardarProyecto({ cfg, cargas, elec, tenemos }) {
   if (!firebaseActivo) return;
   // Se guarda como texto JSON para evitar problemas con estructuras anidadas
   await setDoc(referencia(), {
-    datos: JSON.stringify({ version: VERSION, cfg, cargas, elec }),
+    datos: JSON.stringify({ version: VERSION, cfg, cargas, elec, tenemos }),
     actualizado: new Date().toISOString(),
   });
 }

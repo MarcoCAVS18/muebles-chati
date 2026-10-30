@@ -1,7 +1,7 @@
 // Barra del visor 3D: vista actual, herramientas en píldora oscura (modos, cotas, colores, opciones) y la acción principal.
 import React, { useEffect, useRef, useState } from 'react';
 import { Icono } from './Icono.jsx';
-import { ROLES } from '../engine/colores.js';
+import { ROLES, ESTADOS } from '../engine/colores.js';
 
 const MODOS = [
   { clave: 'armado', icono: 'cubo', nombre: 'Armado' },
@@ -39,8 +39,23 @@ export function Leyenda() {
   );
 }
 
+// Leyenda de los dos colores de la madera: la que ya tenemos y la que falta (con cuántas piezas son)
+export function LeyendaEstado({ cuentas }) {
+  return (
+    <ul className="leyenda" aria-label="Qué significa cada color">
+      {Object.entries(ESTADOS).map(([k, e]) => (
+        <li key={k}>
+          <i style={{ background: e.color }} />
+          {e.nombre}
+          {cuentas ? ` (${cuentas[k]})` : ''}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function Barra3D({
-  vistas, vista, cambiarVista, modo, elegirModo, cotas, setCotas, colores, setColores,
+  vistas, vista, cambiarVista, modo, elegirModo, cotas, setCotas, colores, setColores, estado, setEstado, cuentasEstado,
   capas, grupos, visibles, setVisibles, camaTexto, camaAbierta, setCamaAbierta, abierto, setAbierto, explosion, setExplosion,
   derecha,
 }) {
@@ -77,7 +92,8 @@ export default function Barra3D({
         ))}
         <span className="sep" aria-hidden="true" />
         <Boton icono="cotas" nombre="Cotas" activo={cotas} onClick={() => setCotas(!cotas)} />
-        <Boton icono="paleta" nombre="Colores por rol" activo={colores} onClick={() => setColores(!colores)} />
+        <Boton icono="paleta" nombre="Colores por rol" activo={colores && !estado} onClick={() => { setEstado(false); setColores(!colores || estado); }} />
+        <Boton icono="check" nombre="Lo que tenemos y lo que falta" activo={estado} onClick={() => setEstado(!estado)} />
         <span className="sep" aria-hidden="true" />
         <Boton icono="ajustes" nombre="Opciones" activo={abiertaOp} expandido={abiertaOp} onClick={() => setAbiertaOp(!abiertaOp)} />
       </div>
@@ -112,10 +128,10 @@ export default function Barra3D({
             <span>Vista explotada</span>
             <input type="range" min="0" max="1" step="0.05" value={explosion} onChange={(e) => setExplosion(parseFloat(e.target.value))} />
           </label>
-          {colores && (
+          {(colores || estado) && (
             <>
               <h4>Colores</h4>
-              <Leyenda />
+              {estado ? <LeyendaEstado cuentas={cuentasEstado} /> : <Leyenda />}
             </>
           )}
         </div>

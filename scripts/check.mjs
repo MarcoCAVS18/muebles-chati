@@ -10,7 +10,8 @@ import { ELEMENTOS } from '../src/data/elementos.js';
 import { disposicionTrasero } from '../src/engine/disposicion.js';
 import { contorno, describirPieza, posarCamara, anotarPieza } from '../src/engine/enfoque.js';
 import { armarTutorial, agujerosDe, caladosDe } from '../src/engine/tutorial.js';
-import { rolDe, ROLES, oscurecer } from '../src/engine/colores.js';
+import { rolDe, ROLES, ESTADOS, estadoDe, oscurecer } from '../src/engine/colores.js';
+import { TENEMOS_INICIAL } from '../src/data/stock.js';
 import { planAbrir, llaveCajon } from '../src/engine/abrir.js';
 
 const data = construir(CONFIG_INICIAL);
@@ -525,6 +526,22 @@ function L_E() {
   for (const [id, r] of Object.entries(esperado)) exigir(rol(id) === r, `${id} debería ser ${r} y es ${rol(id)}`);
   exigir(data.partes.every((p) => ROLES[rolDe(p)]), 'alguna pieza quedó sin rol de color');
   exigir(oscurecer('#ffffff', 0) === '#ffffff' && oscurecer('#ffffff', 1) === '#1d1259', 'oscurecer debería mezclar con el violeta de noche');
+  // Dos colores: la madera que ya tenemos y la que falta
+  const ids = new Set(data.partes.map((p) => p.id));
+  exigir(TENEMOS_INICIAL.every((id) => ids.has(id)), `la lista de lo que ya tenemos nombra piezas que no existen: ${TENEMOS_INICIAL.filter((id) => !ids.has(id))}`);
+  exigir(new Set(TENEMOS_INICIAL).size === TENEMOS_INICIAL.length, 'la lista de lo que ya tenemos repite ids');
+  exigir(ESTADOS.tenemos.color !== ESTADOS.falta.color, 'los dos colores de la madera deberían ser distintos');
+  exigir(!Object.values(ROLES).some((r) => r.color === ESTADOS.tenemos.color || r.color === ESTADOS.falta.color), 'los colores de tenemos y falta no deberían repetir los de los roles');
+  const set = new Set(TENEMOS_INICIAL);
+  exigir(data.partes.filter((p) => p.grupo === 'Cama' && /^CAM-(0[1-7]|2[0-3]|3[12])$/.test(p.id)).every((p) => estadoDe(p, set) === 'tenemos'), 'las maderas de la lista deberían figurar como que ya las tenemos');
+  exigir(data.partes.filter((p) => p.grupo !== 'Cama').every((p) => estadoDe(p, set) === 'falta'), 'las maderas de los otros muebles deberían figurar como que faltan');
+  for (const id of ['CAM-10', 'CAM-12', 'CAM-14', 'CAM-11', 'CAM-13', 'CAM-15', 'CAM-25', 'CAM-29']) exigir(estadoDe(data.partes.find((p) => p.id === id), set) === 'falta', `${id} debería figurar como que falta`);
+  // Las varillas móviles salen de las placas CAM-01 y CAM-02: cuentan como que ya están
+  const varillasE = data.partes.filter((p) => p.salidaDe);
+  exigir(varillasE.length === 2 && varillasE.every((p) => estadoDe(p, set) === 'tenemos'), 'las varillas que salen de las placas que ya tenemos deberían figurar como que ya están');
+  exigir(estadoDe(varillasE[0], new Set()) === 'falta', 'si no tenemos la placa, las varillas que salen de ella faltan');
+  const nTenemos = data.partes.filter((p) => estadoDe(p, set) === 'tenemos').length;
+  exigir(nTenemos === TENEMOS_INICIAL.length + 2, `deberían figurar ${TENEMOS_INICIAL.length + 2} piezas como que ya las tenemos y figuran ${nTenemos}`);
 
   const ab = planAbrir(data);
   const cajones = new Set(Object.values(ab.porParte).filter((m) => m.tipo === 'cajon'));

@@ -9,6 +9,15 @@ export const ROLES = {
   liston: { color: '#e3b678', nombre: 'Listones y apoyos' },
 };
 
+// Dos colores para saber qué madera ya está comprada y cuál falta
+export const ESTADOS = {
+  tenemos: { color: '#3ddc84', nombre: 'Ya la tenemos' },
+  falta: { color: '#ffb020', nombre: 'Falta' },
+};
+
+// tenemos es un Set con los ids de las maderas que ya están. Una pieza que sale de otra cuenta como que está si la otra está.
+export const estadoDe = (p, tenemos) => (tenemos.has(p.salidaDe || p.id) ? 'tenemos' : 'falta');
+
 // Primero manda el nombre (lo que la pieza es de verdad) y recién después la dirección en la que es más fina.
 export function rolDe(p) {
   if (p.tipo === 'liston' || /^Apoyo bajo la base/.test(p.nombre)) return 'liston';

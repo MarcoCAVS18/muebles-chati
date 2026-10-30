@@ -7,7 +7,7 @@ import { PiezaEnfoque, AnotacionesDe, aMundo } from './Enfoque.jsx';
 import { Piso } from './Piso3D.jsx';
 import { CotasGlobales } from './Cotas3D.jsx';
 import { posarCamara } from '../engine/enfoque.js';
-import { rolDe, ROLES, oscurecer } from '../engine/colores.js';
+import { rolDe, ROLES, ESTADOS, estadoDe, oscurecer } from '../engine/colores.js';
 import { planAbrir } from '../engine/abrir.js';
 import { useDobleToque, TACTIL } from '../util/pantalla.js';
 
@@ -190,7 +190,7 @@ function Escena(props) {
   const {
     data, elec3d, tramos, van, visibles, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
     seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar,
-    enfoque, setEnfoque, invertir, verContexto, reserva, resaltadas, colores, cotas,
+    enfoque, setEnfoque, invertir, verContexto, reserva, resaltadas, colores, cotas, estadoMadera, tenemos,
   } = props;
   const esDoble = useDobleToque();
   const controles = useRef();
@@ -224,8 +224,17 @@ function Escena(props) {
   // Rol de color de cada madera y cómo se mueve cada una al abrir
   const roles = useMemo(() => Object.fromEntries(data.partes.map((p) => [p.id, rolDe(p)])), [data]);
   const abrir = useMemo(() => planAbrir(data), [data]);
-  const colorDe = (p) => (colores ? ROLES[roles[p.id]].color : p.tipo === 'liston' ? '#c49a5e' : p.color || COLORES[p.grupo]);
-  const bordeDe = (p) => (colores ? oscurecer(ROLES[roles[p.id]].color, 0.5) : '#6b4f2a');
+  // Con «lo que tenemos y lo que falta» prendido manda ese color; si no, el rol de la madera o su color propio
+  const colorDe = (p) =>
+    estadoMadera
+      ? ESTADOS[estadoDe(p, tenemos)].color
+      : colores
+        ? ROLES[roles[p.id]].color
+        : p.tipo === 'liston'
+          ? '#c49a5e'
+          : p.color || COLORES[p.grupo];
+  const bordeDe = (p) =>
+    estadoMadera ? oscurecer(ESTADOS[estadoDe(p, tenemos)].color, 0.5) : colores ? oscurecer(ROLES[roles[p.id]].color, 0.5) : '#6b4f2a';
 
   // Centro de cada grupo para separar las piezas al "explotar" la vista
   const centros = useMemo(() => {

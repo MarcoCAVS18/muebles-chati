@@ -10,7 +10,7 @@ const LEYENDA = [
   ['arco', 'Arco, recorte o calado'],
 ];
 
-export default function PanelPieza({ partes, id, cfg, invertir, setInvertir, verContexto, setVerContexto, ir, salir }) {
+export default function PanelPieza({ partes, id, cfg, invertir, setInvertir, verContexto, setVerContexto, tenemos, alternarTenemos, ir, salir }) {
   const i = partes.findIndex((p) => p.id === id);
   if (i < 0) return null;
   const p = partes[i];
@@ -75,6 +75,10 @@ export default function PanelPieza({ partes, id, cfg, invertir, setInvertir, ver
         <label className="enfoque-contexto">
           <input type="checkbox" checked={verContexto} onChange={(e) => setVerContexto(e.target.checked)} />
           Ver el mueble de fondo
+        </label>
+        <label className="enfoque-contexto" title={p.salidaDe ? `Sale de ${p.salidaDe}: cuenta como que la tenemos si tenemos esa` : 'Marcar si esta madera ya está comprada y cortada'}>
+          <input type="checkbox" checked={tenemos.has(p.salidaDe || p.id)} disabled={!!p.salidaDe} onChange={() => alternarTenemos(p.id)} />
+          Ya la tenemos
         </label>
       </div>
 

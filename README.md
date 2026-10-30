@@ -54,6 +54,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   22 cm), bomba y mangueras de agua y de gas. El extractor del techo (310 x 310 mm con el marco) se abre a mano: está en el 3D
   pero sin conexión eléctrica.
 - Botones push: cada puerta y cada cajón de los tres muebles lleva un botón negro redondo en el 3D, para ver dónde va.
+- Lo que tenemos y lo que falta: el botón de la tilde en la barra del 3D pinta la madera de dos colores (verde, ya la tenemos; ámbar, falta) y cuenta las piezas de cada una. La lista inicial está en `src/data/stock.js` (CAM-01 a 07, 20 a 23, 31 y 32) y se cambia con la casilla «Ya la tenemos» de la tarjeta de cada pieza (doble clic en la madera); se guarda en la nube. Las varillas móviles cuentan como que están si la placa de la que salen está.
   Las varillas de la cama conservan un tirador embutido porque el canto de 15 mm es muy fino para el botón.
 - Sistema de gas en 3D: garrafa chica recargable fija en un compartimento con puerta bajo el anafe, regulador, manguera, llave de corte y
   detector de gas, con la ventilación al exterior por el piso.
