@@ -97,6 +97,7 @@ export const SECCIONES_CFG = [
       { ruta: 'cama.largoCabecera', etiqueta: 'Largo del módulo de la cabecera' },
       { ruta: 'cama.varillasPie', etiqueta: 'Varillas del módulo del pie' },
       { ruta: 'cama.varillasCabecera', etiqueta: 'Varillas del módulo de la cabecera' },
+      { ruta: 'cama.ranura.ancho', etiqueta: 'Ancho de cada ranura (0 = repartir en la bahía)' },
       { ruta: 'cama.ranura.dedo', etiqueta: 'Dedo fijo respecto de la ranura (1 = igual)' },
       { ruta: 'cama.ranura.radio', etiqueta: 'Ranuras: radio del fondo' },
       { ruta: 'cama.lomo', etiqueta: 'Lomo fijo (contra la pared)' },

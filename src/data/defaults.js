@@ -73,11 +73,12 @@ export const CONFIG_INICIAL = {
     plataforma: 400, // altura de la cara superior: pasarruedas izquierdo (380) + fieltro (5) + placa (15)
     fieltro: 5, // entre las placas y el pasarruedas izquierdo
     largoCabecera: 1200, // largo del módulo de la cabecera (el otro, de 600 mm, va al pie)
-    // Peine: ranuras abiertas hacia el pasillo (el fondo lleva esquinas redondeadas). El ancho de cada ranura sale de la
-    // cantidad de varillas; el dedo fijo que queda entre dos ranuras mide lo mismo (dedo: 1 = igual que la ranura)
-    varillasPie: 4,
-    varillasCabecera: 8,
-    ranura: { dedo: 1, radio: 20 },
+    // Peine: ranuras abiertas hacia el pasillo (el fondo lleva esquinas redondeadas). Todas las ranuras miden ranura.ancho en las
+    // dos placas y el peine queda centrado en cada placa (misma madera en los dos extremos); con ranura.ancho en 0, el ancho sale
+    // de repartir las varillas en la bahía. El dedo fijo que queda entre dos ranuras mide lo mismo (dedo: 1 = igual que la ranura)
+    varillasPie: 3,
+    varillasCabecera: 6,
+    ranura: { ancho: 100, dedo: 1, radio: 20 },
     lomo: 60, // lomo fijo contra la pared, de donde salen los dedos de la placa
     lomoMovil: 80, // lomo de las varillas, del lado del pasillo
     luzVarilla: 2, // luz de cada varilla dentro de su ranura, a cada lado

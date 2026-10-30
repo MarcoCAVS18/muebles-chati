@@ -138,8 +138,9 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - La plataforma es un peine ("varillas intercaladas"): cada placa (cabecera de 120 cm y pie de 60 cm) se corta con ranuras abiertas hacia el
   pasillo. Los pedazos que salen de las ranuras, unidos por un lomo de 80 mm del lado del pasillo, son las varillas móviles: salen 490 mm
   hacia el pasillo y quedan intercaladas con los dedos fijos. Cerrada se ve como una placa lisa de 71 cm; abierta mide 120 cm. La cabecera
-  lleva 8 varillas y el pie 4 (`cama.varillasCabecera` y `cama.varillasPie`); el dedo fijo mide lo mismo que la ranura y cada varilla entra con
-  2 mm de luz por lado. Las esquinas del pasillo son R50 (un solo círculo para la placa y el lomo) y el fondo de las ranuras R20.
+  lleva 6 varillas y el pie 3 (`cama.varillasCabecera` y `cama.varillasPie`). Todas las ranuras y todos los dedos fijos miden 100 mm
+  (`cama.ranura.ancho`; con 0 se reparten en la bahía) y el peine queda centrado en cada placa: quedan 41,75 mm de madera en los dos
+  extremos de las dos placas. Cada varilla (96 mm) entra con 2 mm de luz por lado. Las esquinas del pasillo son R50 (un solo círculo para la placa y el lomo) y el fondo de las ranuras R20.
   Las varillas no figuran en la tabla de cortes: salen de la placa. Se cambian en `cama.ranura`, `cama.lomo`, `cama.lomoMovil` y `cama.ventana` (defaults.js).
 - Placas de la cama: la de la cabecera mide 1183,5 mm y la del pie 583,5 mm de largo (710 mm de ancho, 3 mm de luz entre las dos y 15 mm
   de pared en cada extremo dentro de los 180 cm). Las dos tienen el mismo ancho y no llevan recortes. Se cambia en "Largo placa cabecera".

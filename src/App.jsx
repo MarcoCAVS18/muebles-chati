@@ -119,11 +119,21 @@ export default function App() {
               if (cm) {
                 if (cm.plataforma === 395) cm.plataforma = CONFIG_INICIAL.cama.plataforma;
                 if (cm.ventana && cm.ventana.cabezal === 50) cm.ventana.cabezal = CONFIG_INICIAL.cama.ventana.cabezal;
-                if (cm.ranura && (cm.ranura.ancho !== undefined || cm.ranura.margen !== undefined)) cm.ranura = { ...CONFIG_INICIAL.cama.ranura };
+                if (cm.ranura && cm.ranura.dedo === undefined && (cm.ranura.ancho !== undefined || cm.ranura.margen !== undefined)) cm.ranura = { ...CONFIG_INICIAL.cama.ranura };
                 delete cm.bandejaAncho;
                 delete cm.huecoMueble;
                 delete cm.cajonCabecera;
                 delete cm.cajonPie;
+                // El peine de 8 y 4 ranuras repartidas en la bahía pasa al de ranuras de 100 mm (6 en la cabecera y 3 en el pie); con otra
+                // cantidad se conserva el reparto de antes (ancho 0)
+                if (cm.ranura && cm.ranura.ancho === undefined) {
+                  if (cm.varillasCabecera === 8 && cm.varillasPie === 4) {
+                    cm.varillasCabecera = CONFIG_INICIAL.cama.varillasCabecera;
+                    cm.varillasPie = CONFIG_INICIAL.cama.varillasPie;
+                  } else {
+                    cm.ranura.ancho = 0;
+                  }
+                }
               }
               // Un guardado con el mueble de 1720 mm (secciones de 617 y 1087) pasa al de 1560 mm, con la heladera de la G22 y el anafe angosto
               const mt = d.cfg.trasero;

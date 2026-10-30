@@ -64,8 +64,26 @@ export function cama(ctx, G) {
   const bahiaCab = { z0: zPanel + t, z1: zCab - t };
   const placaPie = { z0: zPie + t, z1: zCentro - hol };
   const placaCab = { z0: zCentro + hol, z1: zCab - t };
-  const zonaPie = { z0: bahiaPie.z0 + c, z1: bahiaPie.z1 - c }; // lo que ocupan las varillas móviles
-  const zonaCab = { z0: bahiaCab.z0 + c, z1: bahiaCab.z1 - c };
+  // Zona de las varillas móviles de cada módulo (de la primera a la última, sin contar la luz). Con ranura.ancho, ranuras y dedos
+  // miden eso y la zona sale de la cantidad de ranuras, centrada en la placa: los dos extremos de la placa dejan la misma madera.
+  // Con ranura.ancho en 0 ocupa la bahía menos lo que ocupa una corredera a cada lado y el ancho sale del reparto
+  const nPie = ca.varillasPie ?? 3;
+  const nCab = ca.varillasCabecera ?? 6;
+  const zonaDe = (nombre, bahia, placa, n) => {
+    const reparto = { z0: bahia.z0 + c, z1: bahia.z1 - c };
+    if (!(ra.ancho > 0)) return reparto;
+    const total = ra.ancho * (n + (n - 1) * (ra.dedo ?? 1)); // de la pared de la primera ranura a la de la última
+    const lateral = (placa.z1 - placa.z0 - total) / 2; // madera que queda a cada lado de la placa
+    if (lateral < 0) {
+      ctx.aviso(`Las ${n} ranuras de ${ra.ancho} mm no entran en la placa del ${nombre}: bajar el ancho de la ranura o la cantidad de varillas.`);
+      return reparto;
+    }
+    if (lateral < 25) ctx.aviso(`Las ranuras del ${nombre} dejan solo ${Math.round(lateral * 10) / 10} mm de madera a cada lado de la placa: usar ranuras más angostas o menos varillas.`);
+    const centro = (placa.z0 + placa.z1) / 2;
+    return { z0: centro - total / 2 + luz, z1: centro + total / 2 - luz };
+  };
+  const zonaPie = zonaDe('pie', bahiaPie, placaPie, nPie);
+  const zonaCab = zonaDe('de la cabecera', bahiaCab, placaCab, nCab);
 
   ctx.layout.cama = { x0, x1, zPie, zCab, yT, yB, yPan, yCostado, zCentro, extension: ca.extension, recorte: null };
 
@@ -76,9 +94,9 @@ export function cama(ctx, G) {
     ctx.parte({ grupo: G, nombre, tipo: 'liston', mat: 'l45x45', x, y, z, sx, sy, sz, ...extra });
 
   // ---- Placas en peine y varillas móviles ----
-  // Cantidad de varillas por módulo (y de ranuras): 4 en el de 60 y 8 en el de 120. El dedo fijo mide lo mismo que la ranura
-  const repPie = repartoPeine({ z0: zonaPie.z0, z1: zonaPie.z1, n: ca.varillasPie ?? 4, proporcion: ra.dedo ?? 1, luz });
-  const repCab = repartoPeine({ z0: zonaCab.z0, z1: zonaCab.z1, n: ca.varillasCabecera ?? 8, proporcion: ra.dedo ?? 1, luz });
+  // Cantidad de varillas por módulo (y de ranuras): 3 en el de 60 y 6 en el de 120, todas de 100 mm. El dedo fijo mide lo mismo que la ranura
+  const repPie = repartoPeine({ z0: zonaPie.z0, z1: zonaPie.z1, n: nPie, proporcion: ra.dedo ?? 1, luz });
+  const repCab = repartoPeine({ z0: zonaCab.z0, z1: zonaCab.z1, n: nCab, proporcion: ra.dedo ?? 1, luz });
   if (!repPie || !repCab) {
     ctx.aviso('No se pudo repartir las varillas de la cama: cada módulo necesita al menos 2.');
     return;
@@ -233,7 +251,7 @@ export function cama(ctx, G) {
   larguero('Larguero de las puntas (cabecera)', xL2, zonaCab);
   // Lo que cuelga de las varillas y se mueve con ellas: dos listones con las correderas (uno en cada punta) y un listón de
   // unión bajo el empalme de las varillas con el lomo. Los listones de las correderas pasan por encima del costado fijo y
-  // terminan contra la cara de adentro de las patas del portal, que sale con ellos.
+  // terminan contra la cara de adentro del portal (el travesaño, que queda a la altura de los listones), que sale con ellos.
   const xCorr0 = x1 - 500; // la corredera mide 500 mm y termina contra el portal
   const movibles = (nombreMod, zona) => {
     LST(`Listón de la corredera (${nombreMod}, lado del frente)`, xCorr0, yB - 30, zona.z0, 500, 30, 30, { ext: true });

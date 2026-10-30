@@ -104,7 +104,7 @@ exigir(vn.archAltoIzq === 380, 'el pasarruedas izquierdo, con su tapa, debería 
 exigir(cfgI.cama.plataforma === vn.archAltoIzq + cfgI.cama.fieltro + 15, 'la placa de la cama (15 mm) debería apoyar sobre el pasarruedas izquierdo con su fieltro de 5 mm: cama a 40 cm');
 exigir(cfgI.cama.plataforma === 400 && data.layout.cama.yB === 385 && data.layout.cama.yT === 400, 'la superficie de la cama debería estar a 400 mm y el panel central a 385 mm');
 exigir(cfgI.cama.ancho === 710 && cfgI.cama.ancho + cfgI.cama.extension === 1200, 'la cama debería medir 71 cm cerrada y 120 cm abierta');
-exigir(cfgI.cama.varillasPie === 4 && cfgI.cama.varillasCabecera === 8, 'la cama debería llevar 4 varillas en el módulo del pie y 8 en el de la cabecera');
+exigir(cfgI.cama.varillasPie === 3 && cfgI.cama.varillasCabecera === 6 && cfgI.cama.ranura.ancho === 100, 'la cama debería llevar 3 varillas en el módulo del pie y 6 en el de la cabecera, con ranuras de 100 mm');
 {
   // Las dos placas y sus dos módulos llenan los 180 cm, del mamparo de la cama a la L del mueble trasero
   const camaP = data.partes.filter((q) => q.grupo === 'Cama');
@@ -119,10 +119,10 @@ exigir(cfgI.cama.varillasPie === 4 && cfgI.cama.varillasCabecera === 8, 'la cama
   exigir(guia && frP && guia.sy === 400 && frP.sy === 400 && pan && pan.sy === 385, 'el frente del pie y la guía deberían medir 400 mm y el panel central 385 mm');
   const luzPlacas = pl.map((q) => q.z).sort((a, b) => a - b);
   exigir(Math.abs(luzPlacas[1] - (luzPlacas[0] + pl.find((q) => q.z === luzPlacas[0]).sz) - 3) < 0.01, 'las dos placas deberían dejar 3 mm de luz entre sí');
-  // Las varillas salen de las ranuras de su placa (4 y 8) con 2 mm de luz y no se cuentan como hoja aparte
+  // Las varillas salen de las ranuras de su placa (3 y 6) con 2 mm de luz y no se cuentan como hoja aparte
   for (const v of varillasM) {
     const placa = data.partes.find((q) => q.id === v.salidaDe);
-    exigir(placa && placa.perfil.n === v.perfil.n && v.perfil.n === (/cabecera/.test(placa.nombre) ? 8 : 4), `las varillas ${v.id} deberían tener tantas varillas como ranuras tiene su placa`);
+    exigir(placa && placa.perfil.n === v.perfil.n && v.perfil.n === (/cabecera/.test(placa.nombre) ? 6 : 3), `las varillas ${v.id} deberían tener tantas varillas como ranuras tiene su placa`);
     exigir(Math.abs(v.perfil.anchoVarilla - (v.perfil.ancho - 2 * cfgI.cama.luzVarilla)) < 1e-6, `las varillas ${v.id} deberían entrar con la luz pedida`);
   }
 }
@@ -342,6 +342,16 @@ exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /ranuras/.test(l.t
   exigir(contorno(cab).radio === cm.radio, 'las esquinas del pasillo de la placa deberían ser R50');
   // Ancho de dedo igual al de la ranura (proporción 1) y varilla = ranura menos las dos luces
   exigir(Math.abs(cab.perfil.costilla - cab.perfil.ancho * cm.ranura.dedo) < 1e-6, 'el dedo fijo debería medir lo que la ranura por la proporción pedida');
+  // Ranuras de 100 mm en las dos placas (varillas de 96) y la misma madera en los dos extremos de las dos placas
+  for (const pl of [cab, pie]) {
+    const pf = pl.perfil;
+    exigir(Math.abs(pf.ancho - cm.ranura.ancho) < 1e-6 && Math.abs(pf.costilla - cm.ranura.ancho) < 1e-6, `las ranuras y los dedos de ${pl.id} deberían medir ${cm.ranura.ancho} mm`);
+    exigir(Math.abs(pf.anchoVarilla - (cm.ranura.ancho - 2 * cm.luzVarilla)) < 1e-6, `las varillas de ${pl.id} deberían medir ${cm.ranura.ancho - 2 * cm.luzVarilla} mm`);
+    const latIni = pf.ranuras[0] - pl.z;
+    const latFin = pl.z + pl.sz - (pf.ranuras[pf.n - 1] + pf.ancho);
+    exigir(Math.abs(latIni - latFin) < 0.01 && latIni >= 40, `${pl.id} debería dejar la misma madera (al menos 40 mm) en sus dos extremos, deja ${latIni.toFixed(2)} y ${latFin.toFixed(2)}`);
+  }
+  exigir(Math.abs((cab.perfil.ranuras[0] - cab.z) - (pie.perfil.ranuras[0] - pie.z)) < 0.01, 'las dos placas deberían dejar la misma madera en los extremos');
   // Las varillas, abiertas, quedan intercaladas con los dedos: ninguna varilla pisa un dedo
   for (const v of varillasM) {
     const placa = data.partes.find((q) => q.id === v.salidaDe);
@@ -373,8 +383,10 @@ for (const po of portales) {
   exigir(po.y + po.sy - (cos.y + cos.sy) >= 40, `el travesaño del portal ${po.id} debería tapar la franja entre el costado fijo y la placa`);
   // Los listones de las correderas terminan contra una pata del portal (por dentro) y pasan sobre el costado fijo
   for (const l of listonesCorr.filter((q) => q.z >= po.z && q.z + q.sz <= po.z + po.sz)) {
+    // El listón queda a la altura del travesaño (sobre el calado) o dentro de una pata: en los dos casos termina contra madera del portal
     const enPata = (l.z >= po.z && l.z + l.sz <= po.z + po.silueta.n0) || (l.z >= po.z + po.silueta.n1 && l.z + l.sz <= po.z + po.sz);
-    exigir(enPata && Math.abs(l.x + l.sx - po.x) < 0.01, `el listón ${l.id} debería terminar contra una pata del portal ${po.id}`);
+    const enTravesano = l.y >= po.y + po.silueta.a1 - 0.01 && l.y + l.sy <= po.y + po.sy + 0.01;
+    exigir((enPata || enTravesano) && Math.abs(l.x + l.sx - po.x) < 0.01, `el listón ${l.id} debería terminar contra la cara de adentro del portal ${po.id}`);
     exigir(l.y - (cos.y + cos.sy) >= 5 - 1e-6, `el listón ${l.id} debería pasar al menos 5 mm por encima del costado fijo`);
   }
 }
