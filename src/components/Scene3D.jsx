@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Caja, PlacaCortada, COLORES, aplicarFade, m, tieneContorno } from './Piezas3D.jsx';
-import { PiezaEnfoque, AnotacionesDe, aMundo } from './Enfoque.jsx';
+import { PiezaEnfoque, AnotacionesDe, UnionesPieza, aMundo } from './Enfoque.jsx';
+import Tornillos3D from './Tornillos3D.jsx';
 import { Piso } from './Piso3D.jsx';
 import { CotasGlobales } from './Cotas3D.jsx';
 import { posarCamara } from '../engine/enfoque.js';
@@ -190,7 +191,7 @@ function Escena(props) {
   const {
     data, elec3d, tramos, van, visibles, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
     seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar,
-    enfoque, setEnfoque, invertir, verContexto, reserva, resaltadas, colores, cotas, estadoMadera, tenemos,
+    enfoque, setEnfoque, invertir, verContexto, reserva, resaltadas, colores, cotas, estadoMadera, tenemos, verTornillos,
   } = props;
   const esDoble = useDobleToque();
   const controles = useRef();
@@ -278,6 +279,7 @@ function Escena(props) {
     };
   };
 
+  const grupoDePieza = useMemo(() => new Map(data.partes.map((p) => [p.id, p.grupo])), [data]);
   // Posición actual de una pieza: con la vista explotada y con las varillas de la cama abiertas
   const colocada = (p) => {
     const q = { ...desplazar(p, p.grupo) };
@@ -440,7 +442,7 @@ function Escena(props) {
             sy: p.sy,
             sz: p.sz,
             color,
-            opacidad: transparentar ? 0.12 : apagar ? 0.16 : 1,
+            opacidad: transparentar ? 0.12 : apagar ? 0.16 : verTornillos && !activo ? 0.3 : 1,
             bordes: elegida ? '#bf360c' : enPaso ? '#8a1b45' : bordeDe(p),
             brillo: enPaso && !elegida ? '#ff4f8b' : undefined,
             onClick: (e) => {
@@ -488,6 +490,10 @@ function Escena(props) {
           }
           return tieneContorno(p) ? <PlacaCortada key={p.id} p={q} {...comun} /> : <Caja key={p.id} {...comun} />;
         })}
+
+      {verTornillos && !activo && explosion < 0.02 && abierto < 0.02 && camaAbierta < 0.02 && (
+        <Tornillos3D tornillos={data.tornillos} grupoDe={grupoDePieza} visibles={visibles} seleccion={seleccion} />
+      )}
 
       {data.decos
         .filter((d) => visibles[d.grupo])
@@ -610,6 +616,7 @@ function Escena(props) {
               <PiezaEnfoque q={q} color={color} bordes={bordeDe(p)} activa={id === foco} {...ent} onFin={() => quitar(id)} />
             </group>
             <AnotacionesDe key={`${id}:${invertir}`} q={q} invertir={invertir} xMedio={van.ancho / 2} fov={camera.fov} visible={id === foco && anotId === id} />
+            <UnionesPieza uniones={data.juntasPorPieza[id]} desp={[q.x - p.x, q.y - p.y, q.z - p.z]} visible={id === foco && anotId === id} />
           </React.Fragment>
         );
       })}

@@ -16,7 +16,7 @@ import { planAbrir, llaveCajon } from '../src/engine/abrir.js';
 
 const data = construir(CONFIG_INICIAL);
 const plan = planificar(data.partes, CONFIG_INICIAL);
-const fij = resumenFijaciones(data.uniones, data.anclajes);
+const fij = resumenFijaciones(data.uniones, data.anclajes, data.juntas);
 const e3 = electrico3d(CONFIG_INICIAL);
 const ele = calcularElectrica(CARGAS_INICIALES, ELECTRICA_INICIAL, e3.cables);
 const compras = listaDeCompras(data, plan, CONFIG_INICIAL, ele, e3);
@@ -578,5 +578,64 @@ function L_E() {
   const lateralP = ab.porParte['TRA-66'];
   const lat = data.partes.find((q) => q.id === 'TRA-66');
   exigir(lateralP && Math.abs(lateralP.pivote[1] - (lat.z + lat.sz)) < 3, 'la puerta lateral debería girar sobre su borde del lado del mamparo');
+}
+
+// Uniones entre piezas: cada tornillo sale de la geometría (cola, tornillo, largo, posición y cara por donde se atornilla)
+{
+  const porId = new Map(data.partes.map((q) => [q.id, q]));
+  const tam = (q, e) => (e === 'x' ? q.sx : e === 'y' ? q.sy : q.sz);
+  exigir(data.juntas.length > 120 && data.tornillos.length > 450, `deberían calcularse más de 120 uniones y 450 tornillos, hay ${data.juntas.length} y ${data.tornillos.length}`);
+  exigir(data.uniones.every((u) => !['cola_tornillo', 'cajon'].includes(u.tipo)), 'las uniones por metro (cola_tornillo y cajon) ya no deberían usarse: las calcula uniones.js');
+  let sumaCantidad = 0;
+  for (const j of data.juntas) {
+    const cara = porId.get(j.cara);
+    const canto = porId.get(j.canto);
+    exigir(cara && canto && cara !== canto, `la unión ${j.id} une piezas que no existen`);
+    // Las piezas que se mueven o cuelgan de bisagras no se atornillan entre sí
+    exigir(!cara.salidaDe && !canto.salidaDe && !!cara.ext === !!canto.ext && !cara.bisagraAbajo && !canto.bisagraAbajo, `la unión ${j.id} (${j.cara} con ${j.canto}) no debería existir: una de las dos se mueve o cuelga de bisagras`);
+    exigir(cara.grupo === canto.grupo, `la unión ${j.id} no debería cruzar de un mueble a otro`);
+    // El tornillo entra por la cara externa de la pieza que se atraviesa y su punta queda dentro del canto
+    const e = j.eje;
+    const entrada = j.sentido === 1 ? cara[e] : cara[e] + tam(cara, e);
+    for (const pt of j.puntos) {
+      exigir(Math.abs(pt[e] - entrada) < 0.01, `un tornillo de ${j.id} no arranca en la cara externa de ${j.cara}`);
+      const punta = pt[e] + j.sentido * j.tornillo.largo;
+      const finCanto = canto[e] + tam(canto, e);
+      exigir(punta >= canto[e] - 0.01 && punta <= finCanto + 0.01, `la punta de un tornillo de ${j.id} se sale de ${j.canto}`);
+      for (const k of ['x', 'y', 'z']) {
+        if (k === e) continue;
+        exigir(pt[k] >= cara[k] - 0.01 && pt[k] <= cara[k] + tam(cara, k) + 0.01 && pt[k] >= canto[k] - 0.01 && pt[k] <= canto[k] + tam(canto, k) + 0.01, `un tornillo de ${j.id} cae fuera de las piezas que une`);
+      }
+    }
+    exigir(j.tornillo.largo - (j.tornillo.largo - j.entran) === j.entran && j.entran >= (j.corto ? 0 : 10), `el tornillo de ${j.id} entra muy poco en ${j.canto}`);
+    exigir(j.cantidad === j.puntos.length, `la unión ${j.id} no cuenta bien sus tornillos`);
+    sumaCantidad += j.cantidad;
+  }
+  exigir(sumaCantidad === data.tornillos.length, 'la cantidad de tornillos del 3D debería coincidir con la de las uniones');
+  // Las placas de la cama se atornillan desde arriba, sin cola, a sus apoyos
+  const juntasPlaca = data.juntas.filter((j) => /^Placa (de la|del)/.test(porId.get(j.cara).nombre) || /^Placa (de la|del)/.test(porId.get(j.canto).nombre));
+  exigir(juntasPlaca.length === 6 && juntasPlaca.reduce((t, j) => t + j.cantidad, 0) >= 20 && juntasPlaca.every((j) => j.eje === 'y' && j.sentido === -1 && !j.cola && /^Placa (de la|del)/.test(porId.get(j.cara).nombre)), 'las placas de la cama deberían atornillarse solo desde arriba y sin cola');
+  // El piso de 9 mm de un cajón lleva tornillos de 3,5x30, el resto de las maderas de 15 mm lleva 4x40 en canto y 4x25 cara contra cara
+  const pisosCajon = data.juntas.filter((j) => /piso del cajón$/.test(porId.get(j.canto).nombre));
+  exigir(pisosCajon.length > 0 && pisosCajon.every((j) => j.tornillo.d === 3.5 && j.tornillo.largo === 30), 'el piso de 9 mm de los cajones debería llevar tornillos de 3,5x30');
+  exigir(data.juntas.filter((j) => j.clase === 'cara-cara').every((j) => j.tornillo.largo <= 30), 'cara contra cara de 15 mm lleva tornillos cortos (hasta 30 mm)');
+  exigir(data.juntas.filter((j) => j.clase === 'cara-canto' && j.tornillo.d === 4 && j.cantidad > 0).every((j) => j.entran >= 18), 'cara contra canto debería entrar al menos 18 mm en el canto');
+  // Compras: los tornillos calculados figuran con el 10 % de margen y las uniones por pieza no se duplican con las viejas
+  const cuenta4x40 = data.tornillos.filter((t) => t.d === 4 && t.largo === 40).length;
+  const fila4x40 = compras.find((f) => f.item === 'Tornillo aglomerado 4x40 mm');
+  exigir(fila4x40 && fila4x40.cantidad === Math.ceil(cuenta4x40 * 1.1), 'la lista de compras debería traer los tornillos 4x40 calculados con 10 % de margen');
+  // Toda pieza tiene su ficha de uniones y lo que une una pieza aparece en las dos
+  exigir(data.partes.every((q) => data.juntasPorPieza[q.id]), 'cada pieza debería tener su ficha de uniones');
+  for (const j of data.juntas) {
+    exigir(data.juntasPorPieza[j.cara].juntas.some((x) => x.junta === j && x.papel === 'cara') && data.juntasPorPieza[j.canto].juntas.some((x) => x.junta === j && x.papel === 'canto'), `la unión ${j.id} debería figurar en las dos piezas`);
+  }
+  // Los portales, las varillas y las puertas con bisagras no tienen uniones de pieza contra pieza
+  for (const id of ['CAM-08', 'CAM-09', 'CAM-10', 'CAM-12', 'CAM-14', 'CAM-31', 'CAM-32']) {
+    exigir(data.juntasPorPieza[id].juntas.length === 0 && data.juntasPorPieza[id].nota, `${id} no debería llevar uniones de pieza contra pieza y sí una nota que diga por qué`);
+  }
+  // Las uniones del instructivo (primer tornillo a 30 mm, no más de 150 mm entre tornillos en la madera de 15 mm)
+  for (const j of data.juntas.filter((x) => x.cantidad > 1 && x.tornillo.largo >= 25 && !x.desmontable)) {
+    exigir(j.paso <= 160, `la unión ${j.id} separa los tornillos ${j.paso} mm: el máximo es 150 mm`);
+  }
 }
 process.exit(fallos ? 1 : 0);

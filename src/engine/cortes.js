@@ -95,7 +95,7 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
     const nota = item === NOMBRE_BOTON ? `Se vende en packs de 10 con sus pestillos y tornillos: ${Math.ceil(cantidad / 10)} pack(s)` : '';
     filas.push({ categoria: 'Herrajes', item, cantidad, nota });
   }
-  const fij = resumenFijaciones(data.uniones, data.anclajes);
+  const fij = resumenFijaciones(data.uniones, data.anclajes, data.juntas);
   for (const f of fij.totales) {
     filas.push({ categoria: 'Fijaciones', item: f.nombre, cantidad: f.cantidad, nota: f.nota });
   }

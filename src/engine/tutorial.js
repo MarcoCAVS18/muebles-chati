@@ -3,6 +3,7 @@
 // "esperar", y lo que el modelo deja sin resolver queda marcado como "ojo".
 import { GRUPOS } from './construir.js';
 import { resumenFijaciones } from './fijaciones.js';
+import { describirUnion } from './uniones.js';
 
 const r0 = (n) => Math.round(n);
 const fmt = (n) => String(Math.round(n * 10) / 10).replace('.', ',');
@@ -274,9 +275,9 @@ function tablaBotones(data, grupo) {
 
 // ---------- Lista de compras de un mueble ----------
 function listaDe(data, grupo) {
-  const fij = resumenFijaciones(data.uniones, data.anclajes);
+  const fij = resumenFijaciones(data.uniones, data.anclajes, data.juntas);
   const mapa = new Map();
-  for (const u of fij.porGrupo[grupo] || []) mapa.set(u.herrajeNombre, (mapa.get(u.herrajeNombre) || 0) + u.cantidad);
+  for (const u of fij.porGrupo[grupo] || []) if (u.herrajeNombre) mapa.set(u.herrajeNombre, (mapa.get(u.herrajeNombre) || 0) + u.cantidad);
   return {
     herrajes: data.herrajes.filter((h) => h.grupo === grupo).map((h) => ({ nombre: h.nombre, cantidad: h.cantidad, nota: h.nota })),
     fijaciones: [...mapa].map(([nombre, cantidad]) => ({ nombre, cantidad })),
@@ -295,7 +296,9 @@ function generales(cfg) {
     ],
     reglas: [
       `Todas las uniones llevan cola PVA D3 más tornillos. Sin cola, el tornillo solo se afloja con las vibraciones de la van.`,
-      `Tornillo 4x40 para unir una cara contra un canto: entran ${40 - t} mm dentro del canto. Si la cara contra cara es de ${t} mm y ${t} mm (marcos, delanteras de cajón), el 4x40 atraviesa todo: ahí va el 4x25.`,
+      `Tornillo 4x40 para unir una cara contra un canto: atraviesa la pieza de ${t} mm y entra ${40 - t} mm en el canto. Si la cara contra cara es de ${t} mm y ${t} mm (marcos, frentes de cajón), el 4x40 atraviesa todo: ahí va el 4x25. El piso de 9 mm de los cajones lleva 3,5x30.`,
+      'Cada pieza dice con qué se une: doble clic en el 3D (o «Ver sola») y mirá «Cómo se une». Ahí figuran la cola, la cantidad y el largo de los tornillos, desde qué cara se atornilla, y las marcas naranjas (agujero pasante) y azules (pretaladro en el canto) sobre la pieza. El botón «Ver tornillos» de las opciones del 3D dibuja todos en su lugar.',
+      'Las placas de la cama van sin cola: se atornillan desde arriba a los largueros y al listón de pared para poder levantarlas.',
       'Pretaladrá siempre: 4 mm pasante y avellanado en la pieza de cara; 2,5 a 3 mm en el canto de la otra, a unos 30 mm de profundidad. Sin pretaladrar el contrachapado se abre.',
       'Primer tornillo a 30 mm del extremo, después uno cada 150 mm (120 mm en cajones). Nunca a menos de 10 mm de un borde.',
       'Cola en las dos superficies, apretá con sargentos, escuadrá con la diagonal (las dos diagonales tienen que dar lo mismo) y sacá la cola que rebalsa con trapo húmedo antes de que seque.',
@@ -959,9 +962,43 @@ function derecho(data, plan, cfg, e3, cortes) {
   };
 }
 
+// ---------- Tornillos y cola de cada paso ----------
+// Cada unión entre dos maderas se hace en el paso donde llega la segunda: ahí figura qué lleva y desde dónde se atornilla
+function tornillosPorPaso(pasos, data, grupo) {
+  const primero = new Map();
+  pasos.forEach((p, i) => {
+    for (const r of p.piezas || []) if (!primero.has(r.id)) primero.set(r.id, i);
+  });
+  const porPaso = new Map();
+  for (const j of data.juntas) {
+    if (j.grupo !== grupo) continue;
+    const a = primero.get(j.cara);
+    const b = primero.get(j.canto);
+    if (a === undefined || b === undefined) continue;
+    const i = Math.max(a, b);
+    if (!porPaso.has(i)) porPaso.set(i, []);
+    porPaso.get(i).push(j);
+  }
+  const nombre = new Map(data.partes.map((q) => [q.id, q.nombre.replace(/\s*\(.*$/, '')]));
+  const corto = (id) => `${id} ${nombre.get(id)}`.slice(0, 44);
+  for (const [i, js] of porPaso) {
+    const filasT = js.map((j) => {
+      const d = describirUnion(j);
+      const pret = j.cantidad ? `Ø${String(j.pretaladro.pasante).replace('.', ',')} pasante y avellanado en ${j.cara}; guía Ø${String(j.pretaladro.guia).replace('.', ',')} x ${j.pretaladro.prof} mm en ${j.canto}` : 'Sin pretaladro';
+      const desde = j.cantidad ? `${j.cara}, por ${d.lado}${j.tapadaPor ? ` (antes de poner ${j.tapadaPor})` : ''}` : '';
+      return [`${corto(j.cara)} con ${corto(j.canto)}`, d.texto + (j.desmontable ? ' (sin cola: se puede levantar)' : ''), desde, pret];
+    });
+    pasos[i].tablas = [
+      ...(pasos[i].tablas || []),
+      { titulo: 'Cola y tornillos de este paso (cada tornillo en su lugar: botón «Ver tornillos» en el 3D)', cabecera: ['Unión', 'Qué lleva', 'Se atornilla desde', 'Pretaladro'], filas: filasT },
+    ];
+  }
+}
+
 export function armarTutorial(data, plan, cfg, e3) {
   const cortes = indiceCortes(plan, cfg);
   const muebles = [trasero(data, plan, cfg, e3, cortes), cama(data, plan, cfg, e3, cortes), derecho(data, plan, cfg, e3, cortes)];
+  for (const m of muebles) tornillosPorPaso(m.pasos, data, m.grupo);
   // Datos para la portada de cada mueble: cuántas maderas lleva y cuántos herrajes hay que comprar
   for (const m of muebles) {
     m.cantidadPiezas = data.partes.filter((x) => x.grupo === m.grupo).length;

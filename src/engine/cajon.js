@@ -34,7 +34,6 @@ export function cajon(ctx, { grupo, nombre, x, y, z, ancho, alto, fondo, dir, pi
   if (pisoGrueso) caja('piso del cajón (15 mm)', t, fondo - t, t, ancho - 2 * t, 0, t);
   else caja('piso del cajón', t, fondo - t, t, ancho - 2 * t, 0, tb, 'fondo');
 
-  ctx.unir(grupo, 'cajon', 2 * alto + 2 * (ancho + fondo), `Caja ${nombre}`);
   const largoCorredera = Math.floor(fondo / 50) * 50;
   ctx.herraje(grupo, carga ? `Par de correderas de carga ${largoCorredera} mm (${carga})` : `Par de correderas telescópicas ${largoCorredera} mm`, 1, nombre);
 }

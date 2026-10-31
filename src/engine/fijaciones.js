@@ -1,6 +1,13 @@
-// Convierte las uniones del modelo en cantidades de tornillos, escuadras y cola.
+// Convierte las uniones del modelo en cantidades de tornillos, escuadras y cola. Las uniones entre piezas salen de
+// uniones.js (cada tornillo con su largo); acá quedan las que no son de pieza contra pieza (piso, pared, herrajes sueltos).
+import { describirUnion } from './uniones.js';
 
 const REGLAS = {
+  cola: {
+    espaciado: 0,
+    herraje: null,
+    nota: '',
+  },
   cola_tornillo: {
     espaciado: 150,
     herraje: 'Tornillo aglomerado 4x40 mm',
@@ -23,7 +30,7 @@ const REGLAS = {
   },
 };
 
-export function resumenFijaciones(uniones, anclajes) {
+export function resumenFijaciones(uniones, anclajes, juntas = []) {
   const totales = new Map();
   const sumar = (nombre, cantidad, nota) => {
     const prev = totales.get(nombre) || { nombre, cantidad: 0, nota };
@@ -32,10 +39,24 @@ export function resumenFijaciones(uniones, anclajes) {
   };
 
   const porGrupo = {};
+  // Uniones de pieza contra pieza: un renglón por tornillo distinto, con la nota del pretaladro
+  for (const j of juntas) {
+    if (!j.cantidad) continue;
+    const nota = j.cola
+      ? 'Con cola PVA D3 en cada unión. Pretaladrar: pasante y avellanado en la pieza de cara, guía fina en el canto.'
+      : 'Sin cola, para poder levantar la placa. Pretaladrar y avellanar.';
+    sumar(j.tornillo.nombre, j.cantidad, nota);
+    (porGrupo[j.grupo] = porGrupo[j.grupo] || []).push({ grupo: j.grupo, tipo: 'calculada', largo: j.largoCola, detalle: describirUnion(j).texto, cantidad: j.cantidad, herrajeNombre: j.tornillo.nombre });
+  }
   for (const u of uniones) {
     let cantidad;
     let nombre;
     let nota;
+    if (u.tipo === 'cola') {
+      // Solo cola: no suma tornillos (los lleva otra unión)
+      (porGrupo[u.grupo] = porGrupo[u.grupo] || []).push({ ...u, cantidad: 0, herrajeNombre: null });
+      continue;
+    }
     if (u.tipo === 'directo') {
       cantidad = u.cantidad;
       nombre = u.herraje;
@@ -55,7 +76,10 @@ export function resumenFijaciones(uniones, anclajes) {
 
   // Margen del 10 % por tornillos que se pasan o se rompen
   const lista = [...totales.values()].map((f) => ({ ...f, cantidad: Math.ceil(f.cantidad * 1.1) }));
-  const metrosDeCola = uniones.reduce((s, u) => (u.tipo === 'cola_tornillo' || u.tipo === 'cajon' ? s + u.largo : s), 0) / 1000;
+  const metrosDeCola =
+    (uniones.reduce((s, u) => (['cola', 'cola_tornillo', 'cajon'].includes(u.tipo) ? s + u.largo : s), 0) +
+      juntas.reduce((s, j) => (j.cola ? s + j.largoCola : s), 0)) /
+    1000;
   lista.push({
     nombre: 'Cola PVA D3 (botella de 750 g)',
     cantidad: Math.max(1, Math.ceil(metrosDeCola / 25)),

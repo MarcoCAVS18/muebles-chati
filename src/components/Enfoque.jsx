@@ -142,3 +142,56 @@ export function AnotacionesDe({ q, invertir, xMedio, fov, visible }) {
   }, [clave]);
   return <Anotaciones datos={datos} visible={visible} />;
 }
+
+// Marcas de taladrado de una pieza: dónde entra cada tornillo. Naranja = la pieza se atraviesa (agujero pasante y
+// avellanado por la cara); azul = la pieza recibe el tornillo por el canto (pretaladro fino y profundo).
+export const COLOR_ATRAVIESA = '#ff7043';
+export const COLOR_RECIBE = '#1e88e5';
+
+export function UnionesPieza({ uniones, desp, visible }) {
+  const items = uniones ? uniones.juntas.filter((x) => x.junta.cantidad > 0) : [];
+  if (!visible || !items.length) return null;
+  const ajustes = { depthTest: false, transparent: true, renderOrder: 12 };
+  const mover = (p) => [p[0] + desp[0], p[1] + desp[1], p[2] + desp[2]];
+  return (
+    <group>
+      {items.map(({ junta: j, papel }) => {
+        const color = papel === 'cara' ? COLOR_ATRAVIESA : COLOR_RECIBE;
+        const idx = { x: 0, y: 1, z: 2 }[j.eje];
+        const fino = j.tornillo.largo - j.entran; // espesor de la pieza que se atraviesa
+        const tramo = papel === 'cara' ? fino : j.entran;
+        const inicios = j.puntos.map((p) => {
+          const v = [p.x, p.y, p.z];
+          if (papel === 'canto') v[idx] = j.plano;
+          return mover(v);
+        });
+        const finales = inicios.map((v) => {
+          const w = [...v];
+          w[idx] += j.sentido * tramo;
+          return w;
+        });
+        const centro = inicios.reduce((s, v) => [s[0] + v[0] / inicios.length, s[1] + v[1] / inicios.length, s[2] + v[2] / inicios.length], [0, 0, 0]);
+        const texto =
+          papel === 'cara'
+            ? `${j.cantidad} × ${String(j.tornillo.d).replace('.', ',')}x${j.tornillo.largo} · Ø${String(j.pretaladro.pasante).replace('.', ',')} pasante y avellanado`
+            : `${j.cantidad} × guía Ø${String(j.pretaladro.guia).replace('.', ',')} · ${fmt(j.pretaladro.prof)} mm de profundidad`;
+        return (
+          <group key={`${j.id}${papel}`}>
+            {inicios.map((v, k) => (
+              <group key={k}>
+                <Line points={[aMundo(v), aMundo(finales[k])]} color={color} lineWidth={3} {...ajustes} />
+                <mesh position={aMundo(v)} renderOrder={13}>
+                  <sphereGeometry args={[0.0042, 12, 10]} />
+                  <meshBasicMaterial color={color} depthTest={false} transparent />
+                </mesh>
+              </group>
+            ))}
+            <Etiqueta pos={centro} tipo={papel === 'cara' ? 'medida' : 'arco'} visible>
+              {texto}
+            </Etiqueta>
+          </group>
+        );
+      })}
+    </group>
+  );
+}

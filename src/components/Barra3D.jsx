@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Icono } from './Icono.jsx';
 import { ROLES, ESTADOS } from '../engine/colores.js';
+import { colorTornillo, nombreCortoTornillo } from '../engine/uniones.js';
 
 const MODOS = [
   { clave: 'armado', icono: 'cubo', nombre: 'Armado' },
@@ -48,6 +49,20 @@ export function LeyendaEstado({ cuentas }) {
           <i style={{ background: e.color }} />
           {e.nombre}
           {cuentas ? ` (${cuentas[k]})` : ''}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// Leyenda de los tornillos del 3D: un color por tipo, con cuántos hay
+export function LeyendaTornillos({ cuentas }) {
+  return (
+    <ul className="leyenda" aria-label="Tipos de tornillo">
+      {cuentas.map((c) => (
+        <li key={`${c.d}|${c.largo}`}>
+          <i style={{ background: colorTornillo(c.largo) }} />
+          {nombreCortoTornillo(c.d, c.largo)} ({c.cantidad})
         </li>
       ))}
     </ul>

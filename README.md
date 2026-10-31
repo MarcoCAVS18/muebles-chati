@@ -40,6 +40,16 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   rol (amarillo frentes y puertas, celeste costados, verde bases y estantes, lila fondos y cajones por dentro, madera listones).
   La bisagra de cada puerta se ubica del lado contrario a su botón push. El piso es una grilla de puntos con sombra suave.
 - Dónde se fija cada mueble (piso, pared, entre muebles) y cuántos tornillos y escuadras.
+- Uniones entre maderas (`src/engine/uniones.js`): la app detecta dónde se tocan las piezas (unas 190 uniones y unos 660 tornillos) y para
+  cada una define cola, diámetro y largo del tornillo, separación, desde qué cara se atornilla y el pretaladro. Cara contra canto: se
+  atraviesa la pieza fina y el tornillo entra 25 mm en el canto (4x40 en madera de 15 mm; 3,5x30 en el piso de 9 mm de los cajones);
+  cara contra cara: 4x25 o 4x30. Primer tornillo a 30 mm del extremo y uno cada 150 mm (120 mm en cajones y tapas finas, 200 mm en las
+  placas de la cama, que van sin cola y solo desde arriba para poder levantarlas). Un contacto de menos de 30 mm o un canto de menos de
+  12 mm va solo con cola. No se atornillan entre sí las piezas que se mueven (varillas, portales, cajones), las que cuelgan de bisagras ni
+  los muebles entre sí: eso sigue en Herrajes y "Dónde van enganchados". Se ve en tres lugares: la ficha de cada pieza (doble clic) trae
+  «Cómo se une», con marcas naranjas (agujero pasante) y azules (pretaladro en el canto) sobre la madera; la opción «Ver tornillos» del
+  3D dibuja cada tornillo con su largo (la madera se vuelve transparente y, si elegís una pieza, se marcan los suyos); y cada paso del
+  armado trae la tabla de las uniones que se hacen ahí. La lista de compras y la pestaña Herrajes usan estas cantidades, con 10 % de margen.
 - Herrajes: correderas, bisagras, pistones, bisagras de piano y cierres a botón (push) redondos, uno por frente.
 - Eléctrica: consumo diario, autonomía, horas de manejo para recargar, cables y fusibles. Los largos de cable
   salen del recorrido dibujado en 3D. Las corrientes se calculan a 12 V, la entrada del DC-DC se calcula aparte de su

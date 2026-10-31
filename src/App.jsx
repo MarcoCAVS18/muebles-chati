@@ -9,7 +9,7 @@ import { calcularElectrica } from './engine/electrica.js';
 import { electrico3d } from './engine/electrico3d.js';
 import { VERSION } from './almacen.js';
 import Scene3D, { VISTAS } from './components/Scene3D.jsx';
-import Barra3D, { Leyenda, LeyendaEstado } from './components/Barra3D.jsx';
+import Barra3D, { Leyenda, LeyendaEstado, LeyendaTornillos } from './components/Barra3D.jsx';
 import PanelElemento from './components/PanelElemento.jsx';
 import PanelPieza from './components/PanelPieza.jsx';
 import { Seccion, SECCIONES_CFG, escribir } from './components/Campos.jsx';
@@ -20,6 +20,7 @@ import { useEsMovil, TACTIL } from './util/pantalla.js';
 import { Icono } from './components/Icono.jsx';
 import { TENEMOS_INICIAL } from './data/stock.js';
 import { estadoDe } from './engine/colores.js';
+import { cuentaTornillos } from './engine/uniones.js';
 
 const TABS = ['Despiece', 'Placas y cortes', 'Herrajes', 'Eléctrica', 'Armado', 'Compras'];
 const ICONO_TAB = { Despiece: 'lista', 'Placas y cortes': 'hoja', Herrajes: 'llave', Eléctrica: 'rayo', Armado: 'libro', Compras: 'carrito' };
@@ -62,6 +63,7 @@ export default function App() {
   const [mostrarElectrico, setMostrarElectrico] = useState(true);
   const [mostrarAsientos, setMostrarAsientos] = useState(true);
   const [transparentar, setTransparentar] = useState(false);
+  const [verTornillos, setVerTornillos] = useState(false); // dibuja cada tornillo de las uniones en su lugar
   const [camaAbierta, setCamaAbierta] = useState(0);
   const [elemento, setElemento] = useState('');
   const [enfoque, setEnfoque] = useState(''); // id de la madera que se mira sola (doble clic)
@@ -186,8 +188,9 @@ export default function App() {
     for (const p of data.partes) c[estadoDe(p, conjuntoTenemos)] += 1;
     return c;
   }, [data, conjuntoTenemos]);
+  const cuentasTornillos = useMemo(() => cuentaTornillos(data.tornillos), [data]);
   const plan = useMemo(() => planificar(data.partes, cfg), [data, cfg]);
-  const fijaciones = useMemo(() => resumenFijaciones(data.uniones, data.anclajes), [data]);
+  const fijaciones = useMemo(() => resumenFijaciones(data.uniones, data.anclajes, data.juntas), [data]);
   const peso = useMemo(() => pesoEstimado(data.partes, cfg), [data, cfg]);
   const elec3d = useMemo(() => electrico3d(cfg), [cfg]);
   const resElec = useMemo(() => calcularElectrica(cargas, elec, elec3d.cables), [cargas, elec, elec3d]);
@@ -340,6 +343,7 @@ export default function App() {
             abierto={abierto}
             cotas={cotas}
             colores={colores}
+            verTornillos={verTornillos}
             estadoMadera={estado}
             tenemos={conjuntoTenemos}
             enfoque={enfoque}
@@ -376,6 +380,7 @@ export default function App() {
                 { etiqueta: 'Asientos', valor: mostrarAsientos, poner: setMostrarAsientos },
                 { etiqueta: 'Pasarruedas', valor: mostrarArcos, poner: setMostrarArcos },
                 { etiqueta: 'Ver interior', valor: transparentar, poner: setTransparentar },
+                { etiqueta: 'Ver tornillos', valor: verTornillos, poner: setVerTornillos },
               ]}
               camaTexto={`Cama: ${Math.round((cfg.cama.ancho + cfg.cama.extension * camaAbierta) / 10)} cm`}
               camaAbierta={camaAbierta}
@@ -400,7 +405,7 @@ export default function App() {
             />
             {!enfoque && (
               <div className="hud-abajo">
-                {estado && !resaltadas ? <LeyendaEstado cuentas={cuentasEstado} /> : colores && !resaltadas && <Leyenda />}
+                {verTornillos && !resaltadas ? <LeyendaTornillos cuentas={cuentasTornillos} /> : estado && !resaltadas ? <LeyendaEstado cuentas={cuentasEstado} /> : colores && !resaltadas && <Leyenda />}
                 <div className="info">
                 {hover ||
                   (parteSel
@@ -417,6 +422,7 @@ export default function App() {
           {enfoque && (
             <PanelPieza
               partes={data.partes}
+              uniones={data.juntasPorPieza}
               id={enfoque}
               cfg={cfg}
               invertir={invertir}

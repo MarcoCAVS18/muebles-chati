@@ -3,6 +3,7 @@ import { crearContexto } from './contexto.js';
 import { trasero } from './trasero.js';
 import { cama } from './cama.js';
 import { derecho } from './derecho.js';
+import { calcularUniones } from './uniones.js';
 
 const solapa = (a, b) => {
   const tol = 0.5;
@@ -82,8 +83,15 @@ export function construir(cfg) {
     }
   }
 
+  // Cómo se une cada pieza con sus vecinas: cola, tornillos y dónde va cada uno
+  const un = calcularUniones({ partes });
+
   return {
     partes,
+    juntas: un.juntas,
+    juntasPorPieza: un.porPieza,
+    tornillos: un.tornillos,
+    sinUnion: un.sinUnion,
     decos: ctx.decos,
     layout: ctx.layout,
     uniones: ctx.uniones,

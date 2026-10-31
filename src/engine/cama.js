@@ -277,24 +277,15 @@ export function cama(ctx, G) {
   portal('de la cabecera, 120', bahiaCab, zCentro, zCab);
 
   // ---- Uniones ----
-  ctx.unir(G, 'cola_tornillo', 2 * L, 'Placas con panel central, largueros y listones');
-  ctx.unir(G, 'cola_tornillo', 2 * (yT + L), 'Frente del pie con sus costados y el panel central');
-  ctx.unir(G, 'cola_tornillo', 4 * (yCostado - luzPiso), 'Costados fijos del pasillo con las tapas del módulo (frente del pie, panel central y guía) y con los refuerzos de piso');
-  ctx.unir(G, 'cola_tornillo', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Portales con el lomo móvil y con las puntas de los listones de las correderas');
+  ctx.unir(G, 'cola', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Portales con el lomo móvil y con las puntas de los listones de las correderas');
   ctx.unir(G, 'directo', 0, 'Cada portal, atornillado al canto del lomo móvil (uno cada 150 mm) y a las puntas de los dos listones de las correderas', {
     herraje: 'Tornillo avellanado 4x40 mm (portales al lomo y a los listones)',
     cantidad: Math.ceil((zonaPie.z1 - zonaPie.z0) / 150) + 1 + Math.ceil((zonaCab.z1 - zonaCab.z0) / 150) + 1 + 8,
   });
-  ctx.unir(G, 'cola_tornillo', 2 * (yB + 560), 'Guías con refuerzos de piso y largueros');
-  ctx.unir(G, 'cola_tornillo', 4 * sh, 'Listones de las bisagras de las puertas, de testa contra los refuerzos de piso de sus puntas');
-  ctx.unir(G, 'cola_tornillo', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Varillas con el listón de unión');
+  ctx.unir(G, 'cola', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Varillas con el listón de unión');
   ctx.unir(G, 'directo', 0, 'Cada varilla, atornillada al listón de unión desde arriba (2 tornillos avellanados por varilla)', {
     herraje: 'Tornillo avellanado 4x30 mm (varillas al listón de unión)',
     cantidad: 2 * (repPie.n + repCab.n),
-  });
-  ctx.unir(G, 'directo', 0, 'Placas fijas atornilladas desde arriba a los apoyos (se pueden levantar)', {
-    herraje: 'Tornillo avellanado 4x40 mm (placas de la cama)',
-    cantidad: 24,
   });
   ctx.unir(G, 'directo', 0, 'Módulo del pie (60) unido al de la cabecera (120) con dos tornillos de 25 mm, como en el instructivo', {
     herraje: 'Tornillo 4x25 mm (unión de los dos módulos)',
