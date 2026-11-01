@@ -297,6 +297,17 @@ function Escena(props) {
     return q;
   };
 
+  // Cada tornillo acompaña a la pieza que atraviesa: se separa con la vista explotada y se va con el cajón al abrirlo.
+  // (Las piezas que salen con la cama no llevan tornillos de unión: al extender la cama los tornillos se quedan en su lugar.)
+  const despTornillos = verTornillos
+    ? new Map(
+        data.partes.map((p) => {
+          const q = colocada(p);
+          return [p.id, [q.x - p.x, q.y - p.y, q.z - p.z]];
+        })
+      )
+    : null;
+
   // Modo pieza: la pieza que se muestra, desde dónde se mira y qué piezas siguen en escena mientras se van o llegan
   const parteFoco = useMemo(() => data.partes.find((p) => p.id === foco), [data, foco]);
   const camFoco = useMemo(
@@ -491,8 +502,8 @@ function Escena(props) {
           return tieneContorno(p) ? <PlacaCortada key={p.id} p={q} {...comun} /> : <Caja key={p.id} {...comun} />;
         })}
 
-      {verTornillos && !activo && explosion < 0.02 && abierto < 0.02 && camaAbierta < 0.02 && (
-        <Tornillos3D tornillos={data.tornillos} grupoDe={grupoDePieza} visibles={visibles} seleccion={seleccion} />
+      {verTornillos && !activo && (
+        <Tornillos3D tornillos={data.tornillos} grupoDe={grupoDePieza} visibles={visibles} seleccion={seleccion} desp={despTornillos} />
       )}
 
       {data.decos

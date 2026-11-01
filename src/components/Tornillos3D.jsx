@@ -7,8 +7,9 @@ import { colorTornillo } from '../engine/uniones.js';
 const m = (v) => v / 1000;
 const EJES = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] };
 const ARRIBA = new THREE.Vector3(0, 1, 0);
+const SIN_DESP = [0, 0, 0];
 
-export default function Tornillos3D({ tornillos, grupoDe, visibles, seleccion }) {
+export default function Tornillos3D({ tornillos, grupoDe, visibles, seleccion, desp }) {
   const lista = useMemo(() => tornillos.filter((t) => visibles[grupoDe.get(t.cara)]), [tornillos, grupoDe, visibles]);
   const cana = useRef();
   const cabeza = useRef();
@@ -21,7 +22,8 @@ export default function Tornillos3D({ tornillos, grupoDe, visibles, seleccion })
     const color = new THREE.Color();
     lista.forEach((t, i) => {
       dir.set(...EJES[t.eje]).multiplyScalar(t.sentido);
-      entrada.set(m(t.x), m(t.y), m(t.z));
+      const d = (desp && desp.get(t.cara)) || SIN_DESP;
+      entrada.set(m(t.x + d[0]), m(t.y + d[1]), m(t.z + d[2]));
       o.quaternion.setFromUnitVectors(ARRIBA, dir);
       // Caña: desde la cara por donde entra hasta la punta
       o.position.copy(entrada).addScaledVector(dir, m(t.largo) / 2);
@@ -42,7 +44,7 @@ export default function Tornillos3D({ tornillos, grupoDe, visibles, seleccion })
       im.instanceMatrix.needsUpdate = true;
       if (im.instanceColor) im.instanceColor.needsUpdate = true;
     }
-  }, [lista, seleccion]);
+  }, [lista, seleccion, desp]);
 
   if (!lista.length) return null;
   const sinRayo = () => null; // los tornillos no tapan los clics sobre la madera
