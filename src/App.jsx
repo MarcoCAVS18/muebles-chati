@@ -18,7 +18,7 @@ import { Armado } from './components/Armado.jsx';
 import { armarTutorial } from './engine/tutorial.js';
 import { useEsMovil, TACTIL } from './util/pantalla.js';
 import { Icono } from './components/Icono.jsx';
-import { TENEMOS_INICIAL } from './data/stock.js';
+import { TENEMOS_INICIAL, STOCK_VERSION } from './data/stock.js';
 import { estadoDe } from './engine/colores.js';
 import { cuentaTornillos } from './engine/uniones.js';
 
@@ -156,7 +156,11 @@ export default function App() {
             // Un guardado viejo no trae los consumos nuevos: se suman los que falten
             if (Array.isArray(d.cargas)) setCargas([...d.cargas, ...CARGAS_INICIALES.filter((c) => !d.cargas.some((g) => g.id === c.id))]);
             if (d.elec) setElec(mezclar(ELECTRICA_INICIAL, d.elec));
-            if (Array.isArray(d.tenemos)) setTenemos(d.tenemos.filter((x) => typeof x === 'string'));
+            // Si la lista inicial creció desde que se guardó, las maderas nuevas se suman una vez
+            if (Array.isArray(d.tenemos)) {
+              const ids = d.tenemos.filter((x) => typeof x === 'string');
+              setTenemos(d.stockV === STOCK_VERSION ? ids : [...new Set([...ids, ...TENEMOS_INICIAL])]);
+            }
           }
         }
         listo.current = true;

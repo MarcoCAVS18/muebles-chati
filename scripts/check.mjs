@@ -545,9 +545,10 @@ function L_E() {
   exigir(ESTADOS.tenemos.color !== ESTADOS.falta.color, 'los dos colores de la madera deberían ser distintos');
   exigir(!Object.values(ROLES).some((r) => r.color === ESTADOS.tenemos.color || r.color === ESTADOS.falta.color), 'los colores de tenemos y falta no deberían repetir los de los roles');
   const set = new Set(TENEMOS_INICIAL);
-  exigir(data.partes.filter((p) => p.grupo === 'Cama' && /^CAM-(0[1-7]|2[0-3]|3[12])$/.test(p.id)).every((p) => estadoDe(p, set) === 'tenemos'), 'las maderas de la lista deberían figurar como que ya las tenemos');
+  exigir(data.partes.filter((p) => p.tipo === 'liston').every((p) => set.has(p.id)), 'todos los listones están cortados: deberían figurar como que ya los tenemos');
+  exigir(data.partes.filter((p) => p.grupo === 'Cama' && /^CAM-(0[1-7]|1[135-9]|2\d|30|3[12])$/.test(p.id)).every((p) => estadoDe(p, set) === 'tenemos'), 'las maderas de la lista deberían figurar como que ya las tenemos');
   exigir(data.partes.filter((p) => p.grupo !== 'Cama').every((p) => estadoDe(p, set) === 'falta'), 'las maderas de los otros muebles deberían figurar como que faltan');
-  for (const id of ['CAM-10', 'CAM-12', 'CAM-14', 'CAM-11', 'CAM-13', 'CAM-15', 'CAM-25', 'CAM-29']) exigir(estadoDe(data.partes.find((p) => p.id === id), set) === 'falta', `${id} debería figurar como que falta`);
+  for (const id of ['CAM-10', 'CAM-12', 'CAM-14']) exigir(estadoDe(data.partes.find((p) => p.id === id), set) === 'falta', `${id} debería figurar como que falta`);
   // Las varillas móviles salen de las placas CAM-01 y CAM-02: cuentan como que ya están
   const varillasE = data.partes.filter((p) => p.salidaDe);
   exigir(varillasE.length === 2 && varillasE.every((p) => estadoDe(p, set) === 'tenemos'), 'las varillas que salen de las placas que ya tenemos deberían figurar como que ya están');
