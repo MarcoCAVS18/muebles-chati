@@ -657,27 +657,27 @@ export function electrico3d(cfg) {
   const pl = van.puertaLateral;
   const zPuerta0 = van.largo - pl.desdeMamparo - pl.largo; // la puerta corrediza derecha termina 90 mm antes del mamparo
   const escenario = [
-    { nombre: 'Puerta lateral corrediza derecha', x: van.ancho - 8, y: 0, z: zPuerta0, sx: 8, sy: 1100, sz: pl.largo, color: '#80cbc4', opacidad: 0.22 },
-    { nombre: 'Viga sin aislar (izquierda)', x: 0, y: 0, z: zPuerta0 - pl.vigas, sx: 22, sy: van.alto, sz: pl.vigas, color: '#a1887f', opacidad: 0.4 },
-    { nombre: 'Vigas sin aislar (derecha)', x: van.ancho - 22, y: 0, z: zPuerta0 - pl.vigas, sx: 22, sy: van.alto, sz: pl.vigas, color: '#a1887f', opacidad: 0.4 },
-    { nombre: 'Piso de la cabina', x: 0, y: -12, z: zb + 8, sx: van.ancho, sy: 12, sz: 900, color: '#6d5a44' },
+    { clave: 'puertaLateral', nombre: 'Puerta lateral corrediza derecha', x: van.ancho - 8, y: 0, z: zPuerta0, sx: 8, sy: 1100, sz: pl.largo, color: '#80cbc4', opacidad: 0.22 },
+    { clave: 'vigaIzq', nombre: 'Viga sin aislar (izquierda)', x: 0, y: 0, z: zPuerta0 - pl.vigas, sx: 22, sy: van.alto, sz: pl.vigas, color: '#a1887f', opacidad: 0.4 },
+    { clave: 'vigasDer', nombre: 'Vigas sin aislar (derecha)', x: van.ancho - 22, y: 0, z: zPuerta0 - pl.vigas, sx: 22, sy: van.alto, sz: pl.vigas, color: '#a1887f', opacidad: 0.4 },
+    { clave: 'pisoCabina', nombre: 'Piso de la cabina', x: 0, y: -12, z: zb + 8, sx: van.ancho, sy: 12, sz: 900, color: '#6d5a44' },
     // Asiento del acompañante (lado derecho)
-    { nombre: 'Asiento del acompañante - base', x: 1070, y: 330, z: zb + 120, sx: 560, sy: 120, sz: 480, color: '#37474f', opacidad: 0.35 },
-    { nombre: 'Asiento del acompañante - respaldo', x: 1070, y: 450, z: zb + 20, sx: 560, sy: 620, sz: 130, color: '#37474f', opacidad: 0.35 },
+    { clave: 'asientoAcompBase', nombre: 'Asiento del acompañante - base', x: 1070, y: 330, z: zb + 120, sx: 560, sy: 120, sz: 480, color: '#37474f', opacidad: 0.35 },
+    { clave: 'asientoAcompRespaldo', nombre: 'Asiento del acompañante - respaldo', x: 1070, y: 450, z: zb + 20, sx: 560, sy: 620, sz: 130, color: '#37474f', opacidad: 0.35 },
     // Asiento del conductor (lado izquierdo)
-    { nombre: 'Asiento del conductor - base', x: 150, y: 330, z: zb + 120, sx: 560, sy: 120, sz: 480, color: '#37474f', opacidad: 0.35 },
-    { nombre: 'Asiento del conductor - respaldo', x: 150, y: 450, z: zb + 20, sx: 560, sy: 620, sz: 130, color: '#37474f', opacidad: 0.35 },
+    { clave: 'asientoCondBase', nombre: 'Asiento del conductor - base', x: 150, y: 330, z: zb + 120, sx: 560, sy: 120, sz: 480, color: '#37474f', opacidad: 0.35 },
+    { clave: 'asientoCondRespaldo', nombre: 'Asiento del conductor - respaldo', x: 150, y: 450, z: zb + 20, sx: 560, sy: 620, sz: 130, color: '#37474f', opacidad: 0.35 },
   ];
   const decos = [
-    { nombre: 'Pasacables en el fondo del mueble', x: xEnt - 20, y: yEnt - 15, z: zFondo - 4, sx: 40, sy: 30, sz: 18, color: '#212121' },
+    { clave: 'pasacables', nombre: 'Pasacables en el fondo del mueble', x: xEnt - 20, y: yEnt - 15, z: zFondo - 4, sx: 40, sy: 30, sz: 18, color: '#212121' },
   ];
   // Detalles del techo que se ven junto con el eléctrico
   const decosElec = [
     // Cuello flexible y cabeza de la lámpara: apuntan hacia la cama
-    { nombre: 'Cuello flexible de la lámpara', x: xViga + lm.x / 2 - 4, y: yTopeL, z: zL - 4, sx: 8, sy: 140, sz: 8, color: '#424242' },
-    { nombre: 'Cabeza de la lámpara', x: xViga + lm.x / 2 - 4, y: yTopeL + 125, z: zL - 15, sx: 55, sy: 30, sz: 30, color: '#212121' },
+    { clave: 'cuelloLampara', nombre: 'Cuello flexible de la lámpara', x: xViga + lm.x / 2 - 4, y: yTopeL, z: zL - 4, sx: 8, sy: 140, sz: 8, color: '#424242' },
+    { clave: 'cabezaLampara', nombre: 'Cabeza de la lámpara', x: xViga + lm.x / 2 - 4, y: yTopeL + 125, z: zL - 15, sx: 55, sy: 30, sz: 30, color: '#212121' },
     {
-      nombre: 'Hueco del extractor',
+      clave: 'huecoExtractor', nombre: 'Hueco del extractor',
       x: ex.x - ex.hueco / 2,
       y: yTecho - 26,
       z: ex.z - ex.hueco / 2,

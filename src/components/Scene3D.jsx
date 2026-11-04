@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Caja, PlacaCortada, COLORES, aplicarFade, m, tieneContorno } from './Piezas3D.jsx';
@@ -189,7 +190,7 @@ function Giro({ pivote, giro, children }) {
 
 function Escena(props) {
   const {
-    data, elec3d, tramos, van, visibles, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
+    data, equiposT, t, elec3d, tramos, van, visibles, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
     seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar,
     enfoque, setEnfoque, invertir, verContexto, reserva, resaltadas, colores, cotas, estadoMadera, tenemos, verTornillos,
   } = props;
@@ -470,7 +471,7 @@ function Escena(props) {
               if (p.abre) setElemento(p.abre);
               else setSeleccion(p.id);
             },
-            onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? ` (${TACTIL ? 'toque' : 'clic'} para ver el equipo y el video)` : ''} - ${TACTIL ? 'doble toque' : 'doble clic'} para verla sola`),
+            onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? t(TACTIL ? 'hover.equipoToque' : 'hover.equipoClic') : ''} - ${t(TACTIL ? 'hover.solaToque' : 'hover.solaClic')}`),
             onOut: () => setHover(''),
           };
           const mov = abrir.porParte[p.id];
@@ -545,7 +546,7 @@ function Escena(props) {
 
       {/* Equipos de agua y cocina */}
       {mostrarEquipos &&
-        data.equipos
+        (equiposT || data.equipos)
           .filter((e) => visibles[e.grupo])
           .map((e) => {
             const q = desplazar(e, e.grupo);
@@ -563,7 +564,7 @@ function Escena(props) {
                 bordes="#222"
                 resaltar={elemento === e.id}
                 onClick={clic(e.id)}
-                onOver={sobre(`${e.nombre}: ${e.nota || ''} (${TACTIL ? 'toque' : 'clic'} para ver el video)`)}
+                onOver={sobre(`${e.nombre}: ${e.nota || ''} ${t(TACTIL ? 'hover.videoToque' : 'hover.videoClic')}`)}
                 onOut={() => setHover('')}
               />
             );
@@ -588,7 +589,7 @@ function Escena(props) {
               bordes="#111"
               resaltar={elemento === e.id}
               onClick={clic(e.id)}
-              onOver={sobre(`${e.nombre}: ${e.nota || ''} (${TACTIL ? 'toque' : 'clic'} para ver el video)`)}
+              onOver={sobre(`${e.nombre}: ${e.nota || ''} ${t(TACTIL ? 'hover.videoToque' : 'hover.videoClic')}`)}
               onOut={() => setHover('')}
             />
           );
@@ -605,7 +606,7 @@ function Escena(props) {
             seccion={seccionDe[c.id]}
             elegido={elemento === c.id}
             onClick={clic(c.id)}
-            onOver={sobre(`${c.nombre} (${TACTIL ? 'toque' : 'clic'} para ver el video)`)}
+            onOver={sobre(`${c.nombre} ${t(TACTIL ? 'hover.videoToque' : 'hover.videoClic')}`)}
             onOut={() => setHover('')}
           />
         ))}
@@ -626,7 +627,7 @@ function Escena(props) {
             <group scale={[-1, 1, 1]}>
               <PiezaEnfoque q={q} color={color} bordes={bordeDe(p)} activa={id === foco} {...ent} onFin={() => quitar(id)} />
             </group>
-            <AnotacionesDe key={`${id}:${invertir}`} q={q} invertir={invertir} xMedio={van.ancho / 2} fov={camera.fov} visible={id === foco && anotId === id} />
+            <AnotacionesDe key={`${id}:${invertir}`} q={q} invertir={invertir} xMedio={van.ancho / 2} fov={camera.fov} visible={id === foco && anotId === id} t={t} />
             <UnionesPieza uniones={data.juntasPorPieza[id]} desp={[q.x - p.x, q.y - p.y, q.z - p.z]} visible={id === foco && anotId === id} />
           </React.Fragment>
         );
@@ -640,6 +641,8 @@ function Escena(props) {
 
 export default function Scene3D(props) {
   const { van } = props;
+  // El idioma entra por acá y no dentro del Canvas, que es otro árbol de React
+  const { t } = useTranslation();
   return (
     <Canvas
       flat
@@ -652,7 +655,7 @@ export default function Scene3D(props) {
       }}
     >
       <color attach="background" args={['#6a47f2']} />
-      <Escena {...props} />
+      <Escena {...props} t={t} />
     </Canvas>
   );
 }

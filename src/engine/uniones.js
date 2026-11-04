@@ -233,15 +233,17 @@ const CARAS = {
   z: { 1: 'la cara de la puerta trasera', '-1': 'la cara de la cabina' },
 };
 
-export function describirUnion(j) {
+// Si se pasa la función de traducción t, el texto sale en el idioma elegido; sin ella queda en español
+export function describirUnion(j, t) {
   // sentido = hacia dónde avanza el tornillo; la cara de entrada queda del lado contrario
-  const lado = CARAS[j.eje][String(j.sentido)];
-  const cola = j.cola ? 'cola + ' : '';
+  const lado = t ? t(`union.lados.${j.eje}${j.sentido}`) : CARAS[j.eje][String(j.sentido)];
+  const cola = j.cola ? (t ? t('union.cola') : 'cola + ') : '';
   const n = j.cantidad;
-  const sep = j.cantidad > 1 && j.paso ? `, uno cada ${j.paso} mm` : '';
-  const lin = j.lineas === 2 ? ' en 2 hileras' : '';
-  if (!n) return { cola, tornillos: '', lado, texto: j.cola ? 'solo cola' : 'sin fijación' };
-  const tornillos = `${n} ${n === 1 ? 'tornillo' : 'tornillos'} ${fmt(j.tornillo.d)}x${j.tornillo.largo}${lin}${sep}`;
+  const sep = j.cantidad > 1 && j.paso ? (t ? t('union.paso', { mm: j.paso }) : `, uno cada ${j.paso} mm`) : '';
+  const lin = j.lineas === 2 ? (t ? t('union.hileras') : ' en 2 hileras') : '';
+  if (!n) return { cola, tornillos: '', lado, texto: j.cola ? (t ? t('union.soloCola') : 'solo cola') : t ? t('union.sinFijacion') : 'sin fijación' };
+  const tam = `${fmt(j.tornillo.d)}x${j.tornillo.largo}`;
+  const tornillos = t ? t('union.tornillos', { count: n, tam, hileras: lin, paso: sep }) : `${n} ${n === 1 ? 'tornillo' : 'tornillos'} ${tam}${lin}${sep}`;
   return { cola, tornillos, lado, texto: `${cola}${tornillos}` };
 }
 

@@ -8,17 +8,17 @@ const DISYUNTORES = [6, 10, 13, 16, 20, 25, 32];
 const FACTOR_FUSIBLE = { nevera: 2.5, bomba: 2.5 };
 // Caminos de la energía de la batería a cada consumo: la caída de tensión se suma a lo largo de todo el camino
 const CAMINOS = [
-  { nombre: 'Entrada del DC-DC (batería del auto hasta el DC-DC)', ids: ['c_auto_anl', 'c_largo'] },
-  { nombre: 'Salida del DC-DC hasta la batería de 150 Ah (pasa por el disyuntor 1)', ids: ['c_dcdc_cb1', 'c_cb1_bat'] },
-  { nombre: 'Batería hasta el inversor', ids: ['c_bat_fusp', 'c_fusp_inv'] },
-  { nombre: 'Batería hasta la heladera', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_nevera'] },
-  { nombre: 'Batería hasta la bomba', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_bomba'] },
-  { nombre: 'Batería hasta la tira LED 1', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledA'] },
-  { nombre: 'Batería hasta la tira LED 2', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledB'] },
-  { nombre: 'Batería hasta la tira LED 3', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledC'] },
-  { nombre: 'Batería hasta la tira LED 4', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledD'] },
-  { nombre: 'Batería hasta la lámpara flexible', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_lampara'] },
-  { nombre: 'Batería hasta el calefactor de la batería', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_calef', 'c_termo_calef'] },
+  { id: 'dcdcEntrada', nombre: 'Entrada del DC-DC (batería del auto hasta el DC-DC)', ids: ['c_auto_anl', 'c_largo'] },
+  { id: 'dcdcSalida', nombre: 'Salida del DC-DC hasta la batería de 150 Ah (pasa por el disyuntor 1)', ids: ['c_dcdc_cb1', 'c_cb1_bat'] },
+  { id: 'inversor', nombre: 'Batería hasta el inversor', ids: ['c_bat_fusp', 'c_fusp_inv'] },
+  { id: 'nevera', nombre: 'Batería hasta la heladera', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_nevera'] },
+  { id: 'bomba', nombre: 'Batería hasta la bomba', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_bomba'] },
+  { id: 'ledA', nombre: 'Batería hasta la tira LED 1', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledA'] },
+  { id: 'ledB', nombre: 'Batería hasta la tira LED 2', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledB'] },
+  { id: 'ledC', nombre: 'Batería hasta la tira LED 3', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledC'] },
+  { id: 'ledD', nombre: 'Batería hasta la tira LED 4', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_ledD'] },
+  { id: 'lampara', nombre: 'Batería hasta la lámpara flexible', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_panel', 'c_panel_lampara'] },
+  { id: 'calefBateria', nombre: 'Batería hasta el calefactor de la batería', ids: ['c_bat_cb2', 'c_cb2_caja', 'c_caja_calef', 'c_termo_calef'] },
 ];
 const RHO_COBRE = 0.0172; // ohm * mm2 / m
 
@@ -148,6 +148,7 @@ export function calcularElectrica(cargas, e, cables = []) {
     if (!cambio) break;
   }
   const caminosRes = caminos.map((c) => ({
+    id: c.id,
     nombre: c.nombre,
     ids: c.ids,
     caidaPct: sumaPct(c),
@@ -163,46 +164,56 @@ export function calcularElectrica(cargas, e, cables = []) {
 
   // Cable a comprar, por sección (los de CC llevan positivo y negativo)
   const mapa = new Map();
-  const sumar = (clave, item, metros) => {
-    const prev = mapa.get(clave) || { item, metros: 0 };
+  const sumar = (clave, item, metros, tipo, seccion) => {
+    const prev = mapa.get(clave) || { item, tipo, seccion, metros: 0 };
     prev.metros += metros;
     mapa.set(clave, prev);
   };
   for (const t of tramos) {
     const m = t.largoM;
     if (t.tipo === 'dc') {
-      sumar(`dc-${t.seccion}`, `Cable de cobre flexible ${t.seccion} mm2 (rojo y negro)`, m * 2);
+      sumar(`dc-${t.seccion}`, `Cable de cobre flexible ${t.seccion} mm2 (rojo y negro)`, m * 2, 'dc', t.seccion);
     } else if (t.tipo === 'ac') {
-      sumar(`ac-${t.seccion}`, `Cable 3 x ${t.seccion} mm2 para 230 V`, m);
+      sumar(`ac-${t.seccion}`, `Cable 3 x ${t.seccion} mm2 para 230 V`, m, 'ac', t.seccion);
     } else if (t.tipo === 'senal') {
-      sumar(`se-${t.seccion}`, `Cable de señal 2 x ${t.seccion} mm2`, m);
+      sumar(`se-${t.seccion}`, `Cable de señal 2 x ${t.seccion} mm2`, m, 'senal', t.seccion);
     }
   }
   const cableCompras = [...mapa.values()]
     .map((c) => ({ ...c, metros: Math.ceil(c.metros * 10) / 10 }))
     .sort((a, b) => a.item.localeCompare(b.item));
 
+  // Cada aviso lleva el texto en español (avisos) y su clave con los números (avisosT) para mostrarlo en el idioma elegido
   const avisos = [];
-  if (autonomiaDias < 1.5) avisos.push('La autonomía sin manejar es menor a 1,5 días. Revisar consumos o sumar batería.');
+  const avisosT = [];
+  const aviso = (clave, params, texto) => {
+    avisos.push(texto);
+    avisosT.push({ clave, params });
+  };
+  if (autonomiaDias < 1.5) aviso('autonomia', {}, 'La autonomía sin manejar es menor a 1,5 días. Revisar consumos o sumar batería.');
   if (inversor) {
-    avisos.push(
+    aviso(
+      'inversor',
+      { amp: Math.round(ampInversor), v: vDiseno, ah: e.bateriaAh },
       `El inversor a plena carga pide unos ${Math.round(ampInversor)} A de la batería (a ${vDiseno} V) y más en el arranque de cargas con motor. Confirmar con la ficha de la batería de ${e.bateriaAh} Ah que el BMS entrega esa corriente de forma continua y el pico del inversor.`
     );
   }
-  if (e.cargadorRealA > e.cargadorNominalA) avisos.push('La corriente real de carga supera la nominal del DC-DC.');
-  avisos.push(
+  if (e.cargadorRealA > e.cargadorNominalA) aviso('cargadorSupera', {}, 'La corriente real de carga supera la nominal del DC-DC.');
+  aviso(
+    'dcdcEntrada',
+    { nominal: e.cargadorNominalA, vCarga, amp: ampDcdcEntrada.toFixed(0), vEntrada, ef: Math.round(efCargador * 100) },
     `Entrada del DC-DC: con ${e.cargadorNominalA} A de salida a ${vCarga} V se calculan unos ${ampDcdcEntrada.toFixed(0)} A de entrada (a ${vEntrada} V y ${Math.round(efCargador * 100)} % de rendimiento). Confirmar con el manual del DC-DC comprado y usar el fusible de entrada que pide el fabricante.`
   );
-  avisos.push('El DC-DC debe ser compatible con alternador inteligente (el Jumpy lo es) y necesita su cable de señal de encendido (ignición) con fusible propio. El fusible ANL va a menos de 30 cm del borne de la batería del auto.');
-  avisos.push('Heladera y bomba: el fusible se calcula con 2,5 veces la corriente de trabajo por el arranque del motor. Confirmar con el manual de cada una (algunas heladeras piden fusible de 15 A y cable de 2,5 mm2).');
+  aviso('dcdcAlternador', {}, 'El DC-DC debe ser compatible con alternador inteligente (el Jumpy lo es) y necesita su cable de señal de encendido (ignición) con fusible propio. El fusible ANL va a menos de 30 cm del borne de la batería del auto.');
+  aviso('heladeraBomba', {}, 'Heladera y bomba: el fusible se calcula con 2,5 veces la corriente de trabajo por el arranque del motor. Confirmar con el manual de cada una (algunas heladeras piden fusible de 15 A y cable de 2,5 mm2).');
   if (inversor) {
-    avisos.push('Lado de 230 V: el inversor necesita un diferencial de 30 mA y un disyuntor (6 A). El técnico define si hace falta puentear neutro y tierra según el modelo del inversor.');
+    aviso('lado230', {}, 'Lado de 230 V: el inversor necesita un diferencial de 30 mA y un disyuntor (6 A). El técnico define si hace falta puentear neutro y tierra según el modelo del inversor.');
   }
-  avisos.push('Los dos disyuntores de 120 A (DC-DC a batería y batería a caja de fusibles) son corte manual y protección de último recurso (supuesto: confirmar con la ficha de la batería que 120 A es adecuado para su BMS). No reemplazan a los fusibles: un disyuntor de 120 A no protege a un cable más fino, así que cada línea mantiene el fusible de la tabla.');
-  avisos.push('Todavía no están en el diseño: corte manual para la línea del inversor, shunt o monitor de batería y una barra para el negativo general (la caja de 12 salidas ya trae negativos individuales, pero el negativo del DC-DC, del inversor y de la batería necesita una barra).');
-  avisos.push('Calefactor de la batería: la almohadilla de 30 W va bajo la batería, sobre una plancha aislante, y el termostato la enciende a 4 grados y la apaga a 10 (sonda pegada a la batería, lejos de la almohadilla). Con su salida de 5 A en la caja de fusibles. Confirmar en la etiqueta o el manual de la batería hasta qué temperatura se puede cargar (invierno en Suecia).');
-  if (caminosRes.some((c) => !c.ok)) avisos.push('Algún camino pasa la caída máxima aunque se usó la sección más grande de la lista: acortar el recorrido.');
-  avisos.push('Los largos de cable salen del recorrido dibujado en 3D, con 15 % de sobrante. Medir en la van antes de cortar.');
+  aviso('disyuntores120', {}, 'Los dos disyuntores de 120 A (DC-DC a batería y batería a caja de fusibles) son corte manual y protección de último recurso (supuesto: confirmar con la ficha de la batería que 120 A es adecuado para su BMS). No reemplazan a los fusibles: un disyuntor de 120 A no protege a un cable más fino, así que cada línea mantiene el fusible de la tabla.');
+  aviso('faltan', {}, 'Todavía no están en el diseño: corte manual para la línea del inversor, shunt o monitor de batería y una barra para el negativo general (la caja de 12 salidas ya trae negativos individuales, pero el negativo del DC-DC, del inversor y de la batería necesita una barra).');
+  aviso('calefactor', {}, 'Calefactor de la batería: la almohadilla de 30 W va bajo la batería, sobre una plancha aislante, y el termostato la enciende a 4 grados y la apaga a 10 (sonda pegada a la batería, lejos de la almohadilla). Con su salida de 5 A en la caja de fusibles. Confirmar en la etiqueta o el manual de la batería hasta qué temperatura se puede cargar (invierno en Suecia).');
+  if (caminosRes.some((c) => !c.ok)) aviso('caminoPasa', {}, 'Algún camino pasa la caída máxima aunque se usó la sección más grande de la lista: acortar el recorrido.');
+  aviso('largosCable', {}, 'Los largos de cable salen del recorrido dibujado en 3D, con 15 % de sobrante. Medir en la van antes de cortar.');
 
   return {
     filas,
@@ -220,5 +231,6 @@ export function calcularElectrica(cargas, e, cables = []) {
     ramales,
     cableCompras,
     avisos,
+    avisosT,
   };
 }

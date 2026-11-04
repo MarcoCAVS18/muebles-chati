@@ -148,7 +148,7 @@ export function AnotacionesDe({ q, invertir, xMedio, fov, visible }) {
 export const COLOR_ATRAVIESA = '#ff7043';
 export const COLOR_RECIBE = '#1e88e5';
 
-export function UnionesPieza({ uniones, desp, visible }) {
+export function UnionesPieza({ uniones, desp, visible, t }) {
   const items = uniones ? uniones.juntas.filter((x) => x.junta.cantidad > 0) : [];
   if (!visible || !items.length) return null;
   const ajustes = { depthTest: false, transparent: true, renderOrder: 12 };
@@ -173,8 +173,8 @@ export function UnionesPieza({ uniones, desp, visible }) {
         const centro = inicios.reduce((s, v) => [s[0] + v[0] / inicios.length, s[1] + v[1] / inicios.length, s[2] + v[2] / inicios.length], [0, 0, 0]);
         const texto =
           papel === 'cara'
-            ? `${j.cantidad} × ${String(j.tornillo.d).replace('.', ',')}x${j.tornillo.largo} · Ø${String(j.pretaladro.pasante).replace('.', ',')} pasante y avellanado`
-            : `${j.cantidad} × guía Ø${String(j.pretaladro.guia).replace('.', ',')} · ${fmt(j.pretaladro.prof)} mm de profundidad`;
+            ? t('pieza.tornillo3d', { cantidad: j.cantidad, tornillo: `${String(j.tornillo.d).replace('.', ',')}x${j.tornillo.largo}`, pasante: String(j.pretaladro.pasante).replace('.', ',') })
+            : t('pieza.guia3d', { cantidad: j.cantidad, guia: String(j.pretaladro.guia).replace('.', ','), prof: fmt(j.pretaladro.prof) });
         return (
           <group key={`${j.id}${papel}`}>
             {inicios.map((v, k) => (

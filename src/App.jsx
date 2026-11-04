@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import SelectorIdioma from './components/SelectorIdioma.jsx';
+import { traductor, traducirElec3d, traducirResultado, equipoT } from './i18n/electrico.js';
 import { cargarProyecto, guardarProyecto } from './almacen.js';
 import { firebaseActivo } from './firebase.js';
 import { CONFIG_INICIAL, CARGAS_INICIALES, ELECTRICA_INICIAL } from './data/defaults.js';
@@ -27,15 +30,17 @@ const ICONO_TAB = { Despiece: 'lista', 'Placas y cortes': 'hoja', Herrajes: 'lla
 
 // Barra de abajo en el celular: el 3D, las medidas y las pestañas de la derecha
 const ITEMS_MOVIL = [
-  { clave: '3D', etiqueta: '3D', icono: 'cubo' },
-  { clave: 'Medidas', etiqueta: 'Medidas', icono: 'regla' },
-  { clave: 'Despiece', etiqueta: 'Despiece', icono: 'lista' },
-  { clave: 'Placas y cortes', etiqueta: 'Cortes', icono: 'hoja' },
-  { clave: 'Herrajes', etiqueta: 'Herrajes', icono: 'llave' },
-  { clave: 'Eléctrica', etiqueta: 'Eléctrica', icono: 'rayo' },
-  { clave: 'Armado', etiqueta: 'Armado', icono: 'libro' },
-  { clave: 'Compras', etiqueta: 'Compras', icono: 'carrito' },
+  { clave: '3D', texto: 'vista3d', icono: 'cubo' },
+  { clave: 'Medidas', texto: 'medidas', icono: 'regla' },
+  { clave: 'Despiece', texto: 'despiece', icono: 'lista' },
+  { clave: 'Placas y cortes', texto: 'cortes', icono: 'hoja' },
+  { clave: 'Herrajes', texto: 'herrajes', icono: 'llave' },
+  { clave: 'Eléctrica', texto: 'electrica', icono: 'rayo' },
+  { clave: 'Armado', texto: 'armado', icono: 'libro' },
+  { clave: 'Compras', texto: 'compras', icono: 'carrito' },
 ];
+// Las pestañas se identifican por su nombre en español; el texto que se ve sale de las traducciones
+const CLAVE_TAB = { Despiece: 'despiece', 'Placas y cortes': 'placas', Herrajes: 'herrajes', Eléctrica: 'electrica', Armado: 'armado', Compras: 'compras' };
 
 // Mezcla lo guardado con los valores iniciales: solo se conservan las claves que existen hoy
 function mezclar(base, guardado) {
@@ -51,6 +56,8 @@ function mezclar(base, guardado) {
 }
 
 export default function App() {
+  const { t, i18n } = useTranslation();
+  const lng = i18n.resolvedLanguage;
   const [cfg, setCfg] = useState(CONFIG_INICIAL);
   const [cargas, setCargas] = useState(CARGAS_INICIALES);
   const [elec, setElec] = useState(ELECTRICA_INICIAL);
@@ -186,7 +193,7 @@ export default function App() {
 
   const data = useMemo(() => construir(cfg), [cfg]);
   const conjuntoTenemos = useMemo(() => new Set(tenemos), [tenemos]);
-  const alternarTenemos = (id) => setTenemos((t) => (t.includes(id) ? t.filter((x) => x !== id) : [...t, id]));
+  const alternarTenemos = (id) => setTenemos((lista) => (lista.includes(id) ? lista.filter((x) => x !== id) : [...lista, id]));
   const cuentasEstado = useMemo(() => {
     const c = { tenemos: 0, falta: 0 };
     for (const p of data.partes) c[estadoDe(p, conjuntoTenemos)] += 1;
@@ -198,11 +205,16 @@ export default function App() {
   const peso = useMemo(() => pesoEstimado(data.partes, cfg), [data, cfg]);
   const elec3d = useMemo(() => electrico3d(cfg), [cfg]);
   const resElec = useMemo(() => calcularElectrica(cargas, elec, elec3d.cables), [cargas, elec, elec3d]);
+  // Lo eléctrico, el agua y el gas se calculan con los textos originales y se muestran en el idioma elegido
+  const tx = useMemo(() => traductor(i18n), [lng]);
+  const elec3dT = useMemo(() => traducirElec3d(elec3d, tx, cfg), [elec3d, tx, cfg]);
+  const resElecT = useMemo(() => traducirResultado(resElec, tx, elec3dT), [resElec, tx, elec3dT]);
+  const equiposT = useMemo(() => data.equipos.map((e) => equipoT(tx, e)), [data, tx]);
   const tutorial = useMemo(() => armarTutorial(data, plan, cfg, elec3d), [data, plan, cfg, elec3d]);
   const compras = useMemo(() => listaDeCompras(data, plan, cfg, resElec, elec3d), [data, plan, cfg, resElec, elec3d]);
   const elementos = useMemo(
-    () => [...elec3d.equipos, ...data.equipos].map((e) => ({ id: e.id, nombre: e.nombre, nota: e.nota })),
-    [elec3d, data]
+    () => [...elec3dT.equipos, ...equiposT].map((e) => ({ id: e.id, nombre: e.nombre, nota: e.nota })),
+    [elec3dT, equiposT]
   );
 
   const cambiar = (ruta, valor) => setCfg((c) => escribir(c, ruta, valor));
@@ -306,20 +318,24 @@ export default function App() {
     <div className={`app${esMovil ? ' movil' : ''}${enfoque ? ' en-enfoque' : ''}`} data-panel={panel}>
       {esMovil && (
         <header className="cabecera-movil">
-          <b>La Chata</b>
-          <span className={`chip-nube${nube === 'error' ? ' mal' : ''}`}>
-            {{ apagada: 'Sin nube', cargando: 'Cargando...', guardando: 'Guardando...', guardado: 'Guardado', error: 'Error de nube' }[nube]}
-          </span>
+          <b>{t('app.nombre')}</b>
+          <div className="cabecera-derecha">
+            <SelectorIdioma />
+            <span className={`chip-nube${nube === 'error' ? ' mal' : ''}`}>{t(`nube.${nube}`)}</span>
+          </div>
         </header>
       )}
       <aside className="lateral">
-        <h1>La Chata</h1>
-        <p className="nota">Muebles a medida. Medidas en mm.</p>
+        <div className="titulo-lateral">
+          <h1>{t('app.nombre')}</h1>
+          <SelectorIdioma />
+        </div>
+        <p className="nota">{t('app.subtitulo')}</p>
         {SECCIONES_CFG.map((s) => (
-          <Seccion key={s.titulo} titulo={s.titulo} campos={s.campos} cfg={cfg} cambiar={cambiar} />
+          <Seccion key={s.clave} clave={s.clave} titulo={s.titulo} campos={s.campos} cfg={cfg} cambiar={cambiar} />
         ))}
         <button className="reset" onClick={() => setCfg(CONFIG_INICIAL)}>
-          Volver a las medidas iniciales
+          {t('app.volverMedidas')}
         </button>
       </aside>
 
@@ -327,8 +343,9 @@ export default function App() {
         <div className="visor">
           <Scene3D
             data={data}
-            elec3d={elec3d}
-            tramos={resElec.tramos}
+            equiposT={equiposT}
+            elec3d={elec3dT}
+            tramos={resElecT.tramos}
             van={cfg.van}
             visibles={visibles}
             explosion={explosion}
@@ -379,14 +396,14 @@ export default function App() {
               visibles={visibles}
               setVisibles={setVisibles}
               capas={[
-                { etiqueta: 'Agua, cocina y gas', valor: mostrarEquipos, poner: setMostrarEquipos },
-                { etiqueta: 'Eléctrico y mangueras', valor: mostrarElectrico, poner: setMostrarElectrico },
-                { etiqueta: 'Asientos', valor: mostrarAsientos, poner: setMostrarAsientos },
-                { etiqueta: 'Pasarruedas', valor: mostrarArcos, poner: setMostrarArcos },
-                { etiqueta: 'Ver interior', valor: transparentar, poner: setTransparentar },
-                { etiqueta: 'Ver tornillos', valor: verTornillos, poner: setVerTornillos },
+                { etiqueta: t('capas.equipos'), valor: mostrarEquipos, poner: setMostrarEquipos },
+                { etiqueta: t('capas.electrico'), valor: mostrarElectrico, poner: setMostrarElectrico },
+                { etiqueta: t('capas.asientos'), valor: mostrarAsientos, poner: setMostrarAsientos },
+                { etiqueta: t('capas.pasarruedas'), valor: mostrarArcos, poner: setMostrarArcos },
+                { etiqueta: t('capas.interior'), valor: transparentar, poner: setTransparentar },
+                { etiqueta: t('capas.tornillos'), valor: verTornillos, poner: setVerTornillos },
               ]}
-              camaTexto={`Cama: ${Math.round((cfg.cama.ancho + cfg.cama.extension * camaAbierta) / 10)} cm`}
+              camaTexto={t('info.camaTexto', { cm: Math.round((cfg.cama.ancho + cfg.cama.extension * camaAbierta) / 10) })}
               camaAbierta={camaAbierta}
               setCamaAbierta={setCamaAbierta}
               abierto={abierto}
@@ -397,12 +414,12 @@ export default function App() {
                 resaltadas && esMovil ? (
                   <button className="pill-cta volver-paso" onClick={() => irA('Armado')}>
                     <Icono n="izq" />
-                    Paso {pasoVivo.numero}
+                    {t('app.paso', { n: pasoVivo.numero })}
                   </button>
                 ) : tab === 'Armado' && !esMovil ? null : (
                   <button className="pill-cta" onClick={() => irA('Armado')}>
                     <Icono n="martillo" />
-                    Cómo se arma
+                    {t('app.comoSeArma')}
                   </button>
                 )
               }
@@ -415,10 +432,10 @@ export default function App() {
                   (parteSel
                     ? `${parteSel.id} - ${parteSel.nombre}`
                     : resaltadas
-                      ? `Paso ${pasoVivo.numero} de ${pasoVivo.total}: ${pasoVivo.titulo}. Las piezas de este paso están en rosa.`
+                      ? t('info.paso', { numero: pasoVivo.numero, total: pasoVivo.total, titulo: pasoVivo.titulo })
                       : TACTIL
-                      ? 'Tocá una pieza. Doble toque en una madera para verla sola. Tocá un equipo o cable eléctrico para ver el video.'
-                      : 'Pasá el mouse sobre una pieza. Doble clic en una madera para verla sola. Clic en un equipo o cable eléctrico para ver el video.')}
+                      ? t('info.tactil')
+                      : t('info.mouse'))}
                 </div>
               </div>
             )}
@@ -441,22 +458,19 @@ export default function App() {
           )}
           <PanelElemento
             id={elemento}
-            elec3d={elec3d}
-            dataEquipos={data.equipos}
-            tramos={resElec.tramos}
+            elec3d={elec3dT}
+            dataEquipos={equiposT}
+            tramos={resElecT.tramos}
             elec={elec}
             cerrar={cerrarElemento}
           />
         </div>
         <div className="estado">
-          <span>Peso aprox. de los muebles: {Math.round(peso)} kg</span>
-          <span>{data.partes.length} piezas</span>
-          <span className={`nube${nube === 'error' ? ' mal' : ''}`}>
-            Nube:{' '}
-            {{ apagada: 'sin configurar', cargando: 'cargando...', guardando: 'guardando...', guardado: 'guardado', error: 'error al sincronizar' }[nube]}
-          </span>
+          <span>{t('barraEstado.peso', { kg: Math.round(peso) })}</span>
+          <span>{t('barraEstado.piezas', { count: data.partes.length })}</span>
+          <span className={`nube${nube === 'error' ? ' mal' : ''}`}>{t('barraEstado.nube', { estado: t(`nubeLarga.${nube}`) })}</span>
           <span className={avisos.length ? 'mal' : 'bien'}>
-            {avisos.length ? `${avisos.length} aviso(s)` : 'Sin interferencias'}
+            {avisos.length ? t('barraEstado.avisos', { count: avisos.length }) : t('barraEstado.sinInterferencias')}
           </span>
         </div>
         {avisos.length > 0 && (
@@ -470,10 +484,10 @@ export default function App() {
 
       <section className="derecha">
         <nav>
-          {TABS.map((t) => (
-            <button key={t} className={t === tab ? 'activa' : ''} onClick={() => setTab(t)}>
-              <Icono n={ICONO_TAB[t]} />
-              {t}
+          {TABS.map((nombre) => (
+            <button key={nombre} className={nombre === tab ? 'activa' : ''} onClick={() => setTab(nombre)}>
+              <Icono n={ICONO_TAB[nombre]} />
+              {t(`tabs.${CLAVE_TAB[nombre]}`)}
             </button>
           ))}
         </nav>
@@ -483,7 +497,7 @@ export default function App() {
           {tab === 'Herrajes' && <Herrajes data={data} fijaciones={fijaciones} />}
           {tab === 'Eléctrica' && (
             <Electrica
-              res={resElec}
+              res={resElecT}
               cargas={cargas}
               setCargas={setCargas}
               elec={elec}
@@ -499,13 +513,13 @@ export default function App() {
       </section>
 
       {esMovil && (
-        <nav className="barra-movil" aria-label="Secciones">
+        <nav className="barra-movil" aria-label={t('app.secciones')}>
           {ITEMS_MOVIL.map((it) => {
             const activo = it.clave === '3D' ? panel === '3D' : it.clave === 'Medidas' ? panel === 'Medidas' : panel === 'Tabs' && tab === it.clave;
             return (
               <button key={it.clave} className={activo ? 'activa' : ''} onClick={() => irA(it.clave)} aria-current={activo ? 'page' : undefined}>
                 <Icono n={it.icono} />
-                <span>{it.etiqueta}</span>
+                <span>{t(`movil.${it.texto}`)}</span>
               </button>
             );
           })}

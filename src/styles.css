@@ -1697,3 +1697,76 @@ pre {
   width: 18px;
   height: 18px;
 }
+
+/* Switch de idioma (ES / EN / SV) en el header */
+.titulo-lateral {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.idiomas {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--lila);
+}
+
+.idiomas button {
+  font-family: var(--f-titulo);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  min-width: 34px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--violeta-hondo);
+  cursor: pointer;
+}
+
+.idiomas button.on {
+  background: var(--violeta);
+  color: #fff;
+}
+
+.idiomas button:focus-visible {
+  outline: 2px solid var(--violeta);
+  outline-offset: 2px;
+}
+
+.cabecera-derecha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cabecera-movil .idiomas {
+  background: rgba(29, 18, 89, 0.34);
+}
+
+.cabecera-movil .idiomas button {
+  color: #fff;
+  min-height: 32px;
+}
+
+.cabecera-movil .idiomas button.on {
+  background: #fff;
+  color: var(--violeta-hondo);
+}
+
+/* En el celular el switch va en la cabecera de arriba; apaisado, que no tiene cabecera, queda en la hoja de medidas */
+.movil .titulo-lateral {
+  display: none;
+}
+
+@media (max-height: 500px) {
+  .movil .titulo-lateral {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

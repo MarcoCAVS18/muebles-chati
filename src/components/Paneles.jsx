@@ -1,4 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { nombreGrupo, nombreMaterial } from '../i18n/util.js';
+import { traductor } from '../i18n/electrico.js';
 import { pasosDeCorte } from '../engine/packer.js';
 import { useDobleToque, TACTIL } from '../util/pantalla.js';
 
@@ -19,35 +22,35 @@ const csv = (filas) =>
 
 // ---------- Despiece ----------
 export function Despiece({ data, cfg, seleccion, setSeleccion, enfocar }) {
+  const { t } = useTranslation();
   const esDoble = useDobleToque();
   const exportar = () => {
-    const filas = [['Id', 'Mueble', 'Pieza', 'Material', 'Largo', 'Ancho', 'Espesor']];
+    const filas = [[t('paneles.id'), t('paneles.mueble'), t('paneles.pieza'), t('paneles.material'), t('paneles.largo'), t('paneles.ancho'), t('paneles.espesor')]];
     for (const p of data.partes) {
       const d = [p.sx, p.sy, p.sz].sort((a, b) => b - a);
-      const mat = p.tipo === 'liston' ? cfg.listones[p.mat].nombre : cfg.materiales[p.mat].nombre;
-      filas.push([p.id, p.grupo, p.nombre, mat, n0(d[0]), n0(d[1]), n0(d[2])]);
+      filas.push([p.id, nombreGrupo(t, p.grupo), p.nombre, nombreMaterial(t, cfg, p.mat), n0(d[0]), n0(d[1]), n0(d[2])]);
     }
     descargar('despiece.csv', csv(filas));
   };
   return (
     <div>
       <div className="barra">
-        <span>{data.partes.length} piezas. {TACTIL ? 'Doble toque' : 'Doble clic'} en una fila para verla sola.</span>
-        <button onClick={exportar}>Exportar CSV</button>
+        <span>{t(TACTIL ? 'paneles.despiece.ayudaToque' : 'paneles.despiece.ayudaClic', { count: data.partes.length })}</span>
+        <button onClick={exportar}>{t('paneles.exportarCsv')}</button>
       </div>
       <table className="tabla-despiece">
         <thead>
           <tr>
-            <th>Id</th>
-            <th>Pieza</th>
-            <th>Material</th>
-            <th>Largo x Ancho x Esp.</th>
+            <th>{t('paneles.id')}</th>
+            <th>{t('paneles.pieza')}</th>
+            <th>{t('paneles.material')}</th>
+            <th>{t('paneles.dimensiones')}</th>
           </tr>
         </thead>
         <tbody>
           {data.partes.map((p) => {
             const d = [p.sx, p.sy, p.sz].sort((a, b) => b - a);
-            const mat = p.tipo === 'liston' ? cfg.listones[p.mat].nombre : cfg.materiales[p.mat].nombre;
+            const mat = nombreMaterial(t, cfg, p.mat);
             return (
               <tr key={p.id} id={`fila-${p.id}`} className={seleccion === p.id ? 'sel' : ''} onClick={(e) => (esDoble(p.id, e.timeStamp) ? enfocar(p.id) : setSeleccion(p.id))}>
                 <td className="c-id">{p.id}</td>
@@ -61,7 +64,7 @@ export function Despiece({ data, cfg, seleccion, setSeleccion, enfocar }) {
                         enfocar(p.id);
                       }}
                     >
-                      Ver sola
+                      {t('paneles.verSola')}
                     </button>
                   )}
                 </td>
@@ -113,38 +116,39 @@ function Hoja({ hoja, mat, recorte, onSel, onEnfocar, seleccion }) {
 }
 
 export function Placas({ plan, cfg, partes, seleccion, setSeleccion, enfocar }) {
+  const { t } = useTranslation();
   const sel = partes.find((p) => p.id === seleccion);
   return (
     <div>
       <p className="nota">
-        {TACTIL ? 'Tocá una pieza para elegirla y doble toque para verla sola. Deslizá a los costados para recorrer la hoja.' : 'Doble clic en una pieza para verla sola.'}
+        {t(TACTIL ? 'paneles.placas.notaToque' : 'paneles.placas.notaClic')}
       </p>
       {sel && (
         <div className="pieza-elegida">
           <span>
             <b>{sel.id}</b> {sel.nombre}
           </span>
-          <button onClick={() => enfocar(sel.id)}>Ver sola</button>
+          <button onClick={() => enfocar(sel.id)}>{t('paneles.verSola')}</button>
         </div>
       )}
       {Object.entries(plan.planPlacas).map(([mat, res]) => (
         <section key={mat}>
           <h3>
-            {cfg.materiales[mat].nombre}: {res.hojas.length} hojas ({Math.round(res.aprovechamientoTotal * 100)} % de aprovechamiento)
+            {t('paneles.placas.hojas', { material: nombreMaterial(t, cfg, mat), count: res.hojas.length, pct: Math.round(res.aprovechamientoTotal * 100) })}
           </h3>
           {res.sinColocar.length > 0 && (
-            <p className="aviso">No entran en la hoja: {res.sinColocar.map((i) => i.id).join(', ')}</p>
+            <p className="aviso">{t('paneles.placas.sinColocar', { ids: res.sinColocar.map((i) => i.id).join(', ') })}</p>
           )}
           {res.hojas.map((h) => (
             <div key={h.numero} className="hoja">
               <h4>
-                Hoja {h.numero} ({Math.round(h.aprovechamiento * 100)} % usado)
+                {t('paneles.placas.hoja', { n: h.numero, pct: Math.round(h.aprovechamiento * 100) })}
               </h4>
               <div className="hoja-scroll">
                 <Hoja hoja={h} mat={cfg.materiales[mat]} recorte={res.recorte} onSel={setSeleccion} onEnfocar={enfocar} seleccion={seleccion} />
               </div>
               <details>
-                <summary>Cómo cortar esta hoja</summary>
+                <summary>{t('paneles.placas.comoCortar')}</summary>
                 <pre>{pasosDeCorte(h, cfg.corte).join('\n')}</pre>
               </details>
             </div>
@@ -154,25 +158,23 @@ export function Placas({ plan, cfg, partes, seleccion, setSeleccion, enfocar }) 
       {Object.entries(plan.planListones).map(([mat, res]) => (
         <section key={mat}>
           <h3>
-            {cfg.listones[mat].nombre}: {res.barras.length} barras de {cfg.listones[mat].largo} mm
+            {t('paneles.placas.barras', { material: nombreMaterial(t, cfg, mat), count: res.barras.length, largo: cfg.listones[mat].largo })}
           </h3>
           {res.barras.map((b, i) => (
             <p key={i} className="barra-liston">
-              Barra {i + 1}: {b.items.map((it) => `${it.id} (${n0(it.largo)})`).join(' + ')} - sobran {n0(cfg.listones[mat].largo - b.usado)} mm
+              {t('paneles.placas.barra', { n: i + 1, items: b.items.map((it) => `${it.id} (${n0(it.largo)})`).join(' + '), mm: n0(cfg.listones[mat].largo - b.usado) })}
             </p>
           ))}
         </section>
       ))}
-      <p className="nota">
-        Los cortes son de tipo guillotina: primero se cortan tiras a lo ancho de la hoja y después cada tira.
-        Sirve para sierra circular con guía. Las piezas se ordenan con la veta a lo largo de la hoja.
-      </p>
+      <p className="nota">{t('paneles.placas.guillotina')}</p>
     </div>
   );
 }
 
 // ---------- Herrajes y fijaciones ----------
 export function Herrajes({ data, fijaciones }) {
+  const { t } = useTranslation();
   const porGrupo = {};
   for (const h of data.herrajes) {
     const g = (porGrupo[h.grupo] = porGrupo[h.grupo] || new Map());
@@ -183,20 +185,20 @@ export function Herrajes({ data, fijaciones }) {
   }
   return (
     <div>
-      <h3>Dónde van enganchados</h3>
+      <h3>{t('paneles.herrajes.dondeVan')}</h3>
       <table>
         <thead>
           <tr>
-            <th>Mueble</th>
-            <th>Punto</th>
-            <th>Cómo</th>
-            <th>Cant.</th>
+            <th>{t('paneles.mueble')}</th>
+            <th>{t('paneles.herrajes.punto')}</th>
+            <th>{t('paneles.herrajes.como')}</th>
+            <th>{t('paneles.herrajes.cant')}</th>
           </tr>
         </thead>
         <tbody>
           {data.anclajes.map((a, i) => (
             <tr key={i}>
-              <td>{a.grupo}</td>
+              <td>{nombreGrupo(t, a.grupo)}</td>
               <td>{a.punto}</td>
               <td>
                 {a.metodo}
@@ -208,10 +210,10 @@ export function Herrajes({ data, fijaciones }) {
         </tbody>
       </table>
 
-      <h3>Herrajes por mueble</h3>
+      <h3>{t('paneles.herrajes.porMueble')}</h3>
       {Object.entries(porGrupo).map(([g, mapa]) => (
         <div key={g}>
-          <h4>{g}</h4>
+          <h4>{nombreGrupo(t, g)}</h4>
           <table>
             <tbody>
               {[...mapa.entries()].map(([nombre, v]) => (
@@ -226,7 +228,7 @@ export function Herrajes({ data, fijaciones }) {
         </div>
       ))}
 
-      <h3>Tornillos, escuadras y cola (con 10 % de margen)</h3>
+      <h3>{t('paneles.herrajes.tornillos')}</h3>
       <table>
         <tbody>
           {fijaciones.totales.map((f) => (
@@ -244,39 +246,37 @@ export function Herrajes({ data, fijaciones }) {
 
 // ---------- Eléctrica ----------
 export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, elemento, setElemento }) {
+  const { t, i18n } = useTranslation();
+  const tx = traductor(i18n);
   const cambiarCarga = (id, campo, valor) =>
     setCargas(cargas.map((c) => (c.id === id ? { ...c, [campo]: valor } : c)));
   const num = (v) => (Number.isNaN(parseFloat(v)) ? 0 : parseFloat(v));
   return (
     <div>
-      <p className="nota">
-        Sistema: batería del auto, fusible ANL, cable largo bajo los asientos, DC-DC, batería de 150 Ah, caja de fusibles,
-        inversor, panel de 5 interruptores, 2 enchufes con USB-C, 4 tiras LED y la lámpara flexible. El extractor no lleva conexión. Sin panel solar. Tocá cualquier elemento o cable
-        (acá o en el 3D) para ver cómo se instala en un video. Los consumos son estimados.
-      </p>
+      <p className="nota">{t('paneles.electrica.sistema')}</p>
       <div className="resumen">
         <div>
-          <b>{n0(res.whDia)} Wh/día</b>
-          <span>{res.ahDia.toFixed(1)} Ah/día</span>
+          <b>{t('paneles.electrica.whDia', { n: n0(res.whDia) })}</b>
+          <span>{t('paneles.electrica.ahDia', { n: res.ahDia.toFixed(1) })}</span>
         </div>
         <div>
-          <b>{res.autonomiaDias === Infinity ? '-' : res.autonomiaDias.toFixed(1)} días</b>
-          <span>autonomía sin manejar</span>
+          <b>{res.autonomiaDias === Infinity ? '-' : t('paneles.electrica.autonomia', { n: res.autonomiaDias.toFixed(1) })}</b>
+          <span>{t('paneles.electrica.autonomiaTexto')}</span>
         </div>
         <div>
-          <b>{res.horasConduccion.toFixed(1)} h</b>
-          <span>de manejo para recargar</span>
+          <b>{t('paneles.electrica.horas', { n: res.horasConduccion.toFixed(1) })}</b>
+          <span>{t('paneles.electrica.manejoTexto')}</span>
         </div>
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>Consumo</th>
+            <th>{t('paneles.electrica.consumo')}</th>
             <th>W</th>
-            <th>Horas</th>
-            <th>Ciclo</th>
-            <th>Wh/día</th>
+            <th>{t('paneles.electrica.horasCol')}</th>
+            <th>{t('paneles.electrica.ciclo')}</th>
+            <th>{t('paneles.electrica.whCol')}</th>
           </tr>
         </thead>
         <tbody>
@@ -284,7 +284,7 @@ export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, el
             const fila = res.filas.find((f) => f.id === c.id);
             return (
               <tr key={c.id}>
-                <td>{c.nombre}</td>
+                <td>{tx(`elec.cargas.${c.id}`, c.nombre)}</td>
                 <td>
                   <input className="mini" type="number" value={c.w} onChange={(e) => cambiarCarga(c.id, 'w', num(e.target.value))} />
                 </td>
@@ -303,35 +303,35 @@ export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, el
 
       {res.filas.filter((f) => f.calculada).map((f) => (
         <p key={f.id} className="nota">
-          {f.nombre}: {f.w} W x {f.horas} h = {n0(f.wh)} Wh por día (ESTIMADO, ya está sumado en el total).
+          {t('paneles.electrica.calculada', { nombre: f.nombre, w: f.w, horas: f.horas, wh: n0(f.wh) })}
         </p>
       ))}
 
       <fieldset>
-        <legend>Parámetros</legend>
+        <legend>{t('paneles.electrica.parametros')}</legend>
         <label className="campo">
-          <span>Batería (Ah)</span>
+          <span>{t('paneles.electrica.bateria')}</span>
           <input type="number" value={elec.bateriaAh} onChange={(e) => setElec({ ...elec, bateriaAh: num(e.target.value) })} />
         </label>
         <label className="campo">
-          <span>Potencia del inversor (W)</span>
+          <span>{t('paneles.electrica.inversorW')}</span>
           <input type="number" value={elec.inversorW} onChange={(e) => setElec({ ...elec, inversorW: num(e.target.value) })} />
         </label>
         <label className="campo">
-          <span>Corriente real de carga (A)</span>
+          <span>{t('paneles.electrica.cargador')}</span>
           <input type="number" value={elec.cargadorRealA} onChange={(e) => setElec({ ...elec, cargadorRealA: num(e.target.value) })} />
         </label>
         <label className="campo">
-          <span>Caída máxima (%)</span>
+          <span>{t('paneles.electrica.caidaMax')}</span>
           <input type="number" step="0.5" value={elec.caidaMaxPct} onChange={(e) => setElec({ ...elec, caidaMaxPct: num(e.target.value) })} />
         </label>
         <label className="campo">
-          <span>Incluir inversor 230 V</span>
+          <span>{t('paneles.electrica.incluirInversor')}</span>
           <input type="checkbox" checked={elec.inversor} onChange={(e) => setElec({ ...elec, inversor: e.target.checked })} />
         </label>
       </fieldset>
 
-      <h3>Elementos (tocá uno para ver el video)</h3>
+      <h3>{t('paneles.electrica.elementos')}</h3>
       <table>
         <tbody>
           {elementos.map((e) => (
@@ -343,39 +343,39 @@ export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, el
         </tbody>
       </table>
 
-      <h3>Cables y fusibles (largo medido en el 3D)</h3>
+      <h3>{t('paneles.electrica.cablesFusibles')}</h3>
       <table>
         <thead>
           <tr>
-            <th>Tramo</th>
-            <th>Largo</th>
+            <th>{t('paneles.electrica.tramo')}</th>
+            <th>{t('paneles.largo')}</th>
             <th>A</th>
-            <th>Cable</th>
-            <th>Fusible</th>
-            <th>Caída</th>
+            <th>{t('paneles.electrica.cable')}</th>
+            <th>{t('paneles.electrica.fusible')}</th>
+            <th>{t('paneles.electrica.caida')}</th>
           </tr>
         </thead>
         <tbody>
-          {res.tramos.map((t) => (
-            <tr key={t.id} className={`fila-click ${elemento === t.id ? 'sel' : ''}`} onClick={() => setElemento(t.id)}>
-              <td>{t.nombre}</td>
-              <td>{t.largoM.toFixed(2)} m</td>
-              <td>{t.amperes.toFixed(1)}</td>
-              <td>{t.seccion} mm2</td>
-              <td>{t.sinFusible || t.tipo === 'senal' ? '-' : `${t.fusible} A`}</td>
-              <td>{t.caidaPct.toFixed(1)} %</td>
+          {res.tramos.map((tr) => (
+            <tr key={tr.id} className={`fila-click ${elemento === tr.id ? 'sel' : ''}`} onClick={() => setElemento(tr.id)}>
+              <td>{tr.nombre}</td>
+              <td>{tr.largoM.toFixed(2)} m</td>
+              <td>{tr.amperes.toFixed(1)}</td>
+              <td>{tr.seccion} mm2</td>
+              <td>{tr.sinFusible || tr.tipo === 'senal' ? '-' : `${tr.fusible} A`}</td>
+              <td>{tr.caidaPct.toFixed(1)} %</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <h3>Caída de tensión acumulada por camino</h3>
+      <h3>{t('paneles.electrica.caidaAcumulada')}</h3>
       <table>
         <thead>
           <tr>
-            <th>Camino</th>
-            <th>Largo</th>
-            <th>Caída</th>
+            <th>{t('paneles.electrica.camino')}</th>
+            <th>{t('paneles.largo')}</th>
+            <th>{t('paneles.electrica.caida')}</th>
           </tr>
         </thead>
         <tbody>
@@ -384,14 +384,14 @@ export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, el
               <td>{c.nombre}</td>
               <td>{c.largoM.toFixed(2)} m</td>
               <td>
-                {c.caidaPct.toFixed(1)} % (máx. {elec.caidaMaxPct} %)
+                {t('paneles.electrica.caidaMaxima', { pct: c.caidaPct.toFixed(1), max: elec.caidaMaxPct })}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <h3>Cable a comprar</h3>
+      <h3>{t('paneles.electrica.cableComprar')}</h3>
       <table>
         <tbody>
           {res.cableCompras.map((c) => (
@@ -408,18 +408,16 @@ export function Electrica({ res, cargas, setCargas, elec, setElec, elementos, el
           {a}
         </p>
       ))}
-      <p className="nota">
-        Las secciones salen de la caída de tensión y de una corriente admisible conservadora. Confirmar con la ficha del cable
-        comprado antes de instalar. Todo conectado al sistema del auto: usar fusible en cada derivación y proteger los pasos por chapa.
-      </p>
+      <p className="nota">{t('paneles.electrica.nota')}</p>
     </div>
   );
 }
 
 // ---------- Compras ----------
 export function Compras({ filas }) {
+  const { t } = useTranslation();
   const exportar = () => {
-    const f = [['Categoría', 'Ítem', 'Cantidad', 'Nota']];
+    const f = [[t('paneles.compras.categoria'), t('paneles.compras.item'), t('paneles.compras.cantidad'), t('paneles.compras.nota')]];
     for (const r of filas) f.push([r.categoria, r.item, r.cantidad, r.nota]);
     descargar('compras.csv', csv(f));
   };
@@ -427,8 +425,8 @@ export function Compras({ filas }) {
   return (
     <div>
       <div className="barra">
-        <span>Lista para llevar a Derome y al resto de tiendas</span>
-        <button onClick={exportar}>Exportar CSV</button>
+        <span>{t('paneles.compras.lista')}</span>
+        <button onClick={exportar}>{t('paneles.exportarCsv')}</button>
       </div>
       {cats.map((c) => (
         <div key={c}>

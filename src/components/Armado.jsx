@@ -1,6 +1,7 @@
 // Pestaña "Armado": un camino por mueble. Portada con la escalera de pasos, y cada paso abierto con sus tareas tildables.
 // El contenido sale de engine/tutorial.js; acá solo se arma la experiencia.
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDobleToque, TACTIL } from '../util/pantalla.js';
 import { Icono } from './Icono.jsx';
 import '../armado.css';
@@ -50,6 +51,7 @@ const proyectar = (x, y, z) => [(x - y) * AX * ESC, ((x + y) * AY - z) * ESC];
 const pts = (lista) => lista.map((p) => p.join(',')).join(' ');
 
 function Escalera({ pasos, hechos, actual, nuevo, abrir, completo }) {
+  const { t } = useTranslation();
   const n = pasos.length;
   const ancho = 0.92;
   const fondo = 2.2;
@@ -79,12 +81,12 @@ function Escalera({ pasos, hechos, actual, nuevo, abrir, completo }) {
   const y1 = Math.max(...todos.map((q) => q[1])) + 10;
 
   return (
-    <svg className="esc" viewBox={`${x0} ${y0} ${x1 - x0} ${y1 - y0}`} role="group" aria-label="Escalera de pasos del mueble">
+    <svg className="esc" viewBox={`${x0} ${y0} ${x1 - x0} ${y1 - y0}`} role="group" aria-label={t('armado.escalera')}>
       <polygon className={`esc-asta${completo ? ' ok' : ''}`} points={pts([[pie[0] - 1.8, pie[1]], [pie[0] + 1.8, pie[1]], [punta[0] + 1.8, punta[1]], [punta[0] - 1.8, punta[1]]])} />
       <polygon className={`esc-banderin${completo ? ' ok' : ''}`} points={pts(banderin)} />
       {[...bloques].reverse().map((b) => {
         const estado = hechos.has(b.p.id) ? 'hecho' : actual === b.p.id ? 'actual' : 'pend';
-        const rotulo = `Paso ${b.i + 1}: ${b.p.titulo}. ${estado === 'hecho' ? 'Hecho' : estado === 'actual' ? 'Sigue este' : 'Pendiente'}`;
+        const rotulo = t('armado.rotulo', { n: b.i + 1, titulo: b.p.titulo, estado: t(estado === 'hecho' ? 'armado.estadoHecho' : estado === 'actual' ? 'armado.estadoActual' : 'armado.estadoPendiente') });
         return (
           <g
             key={b.p.id}
@@ -116,15 +118,16 @@ function Escalera({ pasos, hechos, actual, nuevo, abrir, completo }) {
 
 /* ---------- Piezas del paso, como tablitas con su rótulo a lápiz ---------- */
 function Piezas({ piezas, seleccion, setSeleccion, enfocar }) {
+  const { t } = useTranslation();
   const esDoble = useDobleToque();
   const [todas, setTodas] = useState(false);
   const lista = todas ? piezas : piezas.slice(0, 8);
   return (
     <section className="a-bloque">
       <h3>
-        Maderas de este paso <span className="a-cuenta">{piezas.length}</span>
+        {t('armado.maderasPaso')} <span className="a-cuenta">{piezas.length}</span>
       </h3>
-      <p className="nota">{TACTIL ? 'Tocá una para verla en el 3D. Doble toque para verla sola.' : 'Un clic la marca en el 3D. Doble clic la muestra sola.'}</p>
+      <p className="nota">{t(TACTIL ? 'armado.ayudaToque' : 'armado.ayudaClic')}</p>
       <ul className="a-maderas">
         {lista.map((p) => (
           <li key={p.id}>
@@ -139,7 +142,7 @@ function Piezas({ piezas, seleccion, setSeleccion, enfocar }) {
       </ul>
       {piezas.length > 8 && (
         <button className="a-sec a-ver-mas" onClick={() => setTodas(!todas)}>
-          {todas ? 'Ver menos' : `Ver las ${piezas.length} maderas`}
+          {todas ? t('armado.verMenos') : t('armado.verTodas', { n: piezas.length })}
         </button>
       )}
     </section>
@@ -175,16 +178,17 @@ function Tabla({ tabla }) {
 
 /* ---------- Un paso abierto ---------- */
 function PasoAbierto({ paso, numero, total, tareas, alternarTarea, hecho, hacerYSeguir, anterior, hayAnterior, alMapa, deshacer, seleccion, setSeleccion, enfocar, ver3D, esMovil }) {
+  const { t } = useTranslation();
   const tildadas = paso.hacer.filter((_, i) => tareas.has(`${paso.id}:${i}`)).length;
   return (
     <div className="a-paso">
       <header className="a-paso-cab">
         <button className="a-sec a-volver" onClick={alMapa}>
           <Icono n="izq" />
-          Todos los pasos
+          {t('armado.todosPasos')}
         </button>
         <span className="a-posicion">
-          Paso {numero} de {total}
+          {t('armado.posicion', { numero, total })}
         </span>
       </header>
       <div className="a-cinta" aria-hidden="true">
@@ -200,22 +204,20 @@ function PasoAbierto({ paso, numero, total, tareas, alternarTarea, hecho, hacerY
         (esMovil ? (
           <button className="a-ver3d" onClick={ver3D}>
             <Icono n="cubo" />
-            Ver estas maderas en el 3D
+            {t('armado.ver3d')}
           </button>
         ) : (
           <p className="a-aviso3d">
             <i aria-hidden="true" />
-            Las maderas de este paso están en rosa en el 3D.
+            {t('armado.aviso3d')}
           </p>
         ))}
 
       {paso.hacer.length > 0 && (
         <section className="a-bloque">
           <h3>
-            Qué hacer{' '}
-            <span className="a-cuenta">
-              {tildadas} de {paso.hacer.length}
-            </span>
+            {t('armado.queHacer')}{' '}
+            <span className="a-cuenta">{t('armado.cuenta', { hechas: tildadas, total: paso.hacer.length })}</span>
           </h3>
           <ol className="a-tareas">
             {paso.hacer.map((h, i) => {
@@ -224,7 +226,7 @@ function PasoAbierto({ paso, numero, total, tareas, alternarTarea, hecho, hacerY
               const { titulo, resto } = partir(h);
               return (
                 <li key={k} className={`a-tarea${ok ? ' ok' : ''}`}>
-                  <button className="a-check" role="checkbox" aria-checked={ok} aria-label={`Tarea ${i + 1}`} onClick={() => alternarTarea(k)}>
+                  <button className="a-check" role="checkbox" aria-checked={ok} aria-label={t('armado.tarea', { n: i + 1 })} onClick={() => alternarTarea(k)}>
                     <Icono n="check" />
                   </button>
                   <div className="a-tarea-texto" onClick={() => alternarTarea(k)}>
@@ -247,29 +249,29 @@ function PasoAbierto({ paso, numero, total, tareas, alternarTarea, hecho, hacerY
         <p key={i} className="a-ojo">
           <Icono n="aviso" />
           <span>
-            <b>Ojo.</b> {o}
+            <b>{t('armado.ojo')}</b> {o}
           </span>
         </p>
       ))}
 
       {paso.piezas.length > 0 && <Piezas piezas={paso.piezas} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} />}
-      {(paso.tablas || []).map((t, i) => (
-        <Tabla key={i} tabla={t} />
+      {(paso.tablas || []).map((tb, i) => (
+        <Tabla key={i} tabla={tb} />
       ))}
 
       <footer className="a-pie">
         {hayAnterior && (
-          <button className="a-sec a-pie-ant" onClick={anterior} aria-label="Paso anterior">
+          <button className="a-sec a-pie-ant" onClick={anterior} aria-label={t('armado.pasoAnterior')}>
             <Icono n="izq" />
           </button>
         )}
         {hecho && (
           <button className="a-sec" onClick={deshacer}>
-            Desmarcar
+            {t('armado.desmarcar')}
           </button>
         )}
         <button className="a-principal" onClick={hacerYSeguir}>
-          {hecho ? 'Siguiente paso' : numero === total ? 'Terminar el mueble' : 'Paso hecho, siguiente'}
+          {hecho ? t('armado.siguiente') : numero === total ? t('armado.terminar') : t('armado.hechoSiguiente')}
           <Icono n="der" />
         </button>
       </footer>
@@ -279,27 +281,26 @@ function PasoAbierto({ paso, numero, total, tareas, alternarTarea, hecho, hacerY
 
 /* ---------- Antes de empezar: herramientas tildables, reglas, seguridad y orden ---------- */
 function Taller({ generales, herramientas, alternarHerramienta }) {
+  const { t } = useTranslation();
   const [vista, setVista] = useState('herramientas');
   const tildadas = generales.herramientas.filter((_, i) => herramientas.has(`h${i}`)).length;
   const vistas = [
-    ['herramientas', `Herramientas ${tildadas}/${generales.herramientas.length}`],
-    ['reglas', 'Reglas de unión'],
-    ['seguridad', 'Seguridad'],
-    ['orden', 'Orden de los muebles'],
+    ['herramientas', t('armado.herramientas', { hechas: tildadas, total: generales.herramientas.length })],
+    ['reglas', t('armado.reglas')],
+    ['seguridad', t('armado.seguridad')],
+    ['orden', t('armado.orden')],
   ];
   return (
     <details className="a-det a-taller">
       <summary>
-        <span>Antes de empezar</span>
-        <span className="a-cuenta">
-          {tildadas} de {generales.herramientas.length}
-        </span>
+        <span>{t('armado.antes')}</span>
+        <span className="a-cuenta">{t('armado.cuenta', { hechas: tildadas, total: generales.herramientas.length })}</span>
         <Icono n="abajo" />
       </summary>
       <div className="a-segmentos" role="tablist">
-        {vistas.map(([k, t]) => (
+        {vistas.map(([k, rotulo]) => (
           <button key={k} role="tab" aria-selected={vista === k} className={vista === k ? 'activa' : ''} onClick={() => setVista(k)}>
-            {t}
+            {rotulo}
           </button>
         ))}
       </div>
@@ -309,7 +310,7 @@ function Taller({ generales, herramientas, alternarHerramienta }) {
             const ok = herramientas.has(`h${i}`);
             return (
               <li key={i} className={ok ? 'ok' : ''}>
-                <button className="a-check" role="checkbox" aria-checked={ok} aria-label="Ya la tengo" onClick={() => alternarHerramienta(`h${i}`)}>
+                <button className="a-check" role="checkbox" aria-checked={ok} aria-label={t('armado.yaLaTengo')} onClick={() => alternarHerramienta(`h${i}`)}>
                   <Icono n="check" />
                 </button>
                 <span onClick={() => alternarHerramienta(`h${i}`)}>{x}</span>
@@ -348,6 +349,7 @@ function Taller({ generales, herramientas, alternarHerramienta }) {
 
 /* ---------- Pestaña ---------- */
 export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo, ver3D, esMovil }) {
+  const { t } = useTranslation();
   const [idx, setIdx] = useState(() => {
     const g = leer(CLAVES.mueble, 0);
     return Number.isInteger(g) && g >= 0 && g < tutorial.muebles.length ? g : 0;
@@ -430,7 +432,7 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
                 setAbierto('');
               }}
             >
-              {x.titulo.replace('Mueble ', '').replace(/^./, (c) => c.toUpperCase())}
+              {t(`armado.muebleCorto.${x.grupo}`, { defaultValue: x.titulo.replace('Mueble ', '').replace(/^./, (c) => c.toUpperCase()) })}
               <small>
                 {n}/{x.pasos.length}
               </small>
@@ -466,15 +468,15 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
             <div className="a-escena">
               <dl className="a-datos">
                 <div>
-                  <dt>pasos</dt>
+                  <dt>{t('armado.pasos')}</dt>
                   <dd>{pasos.length}</dd>
                 </div>
                 <div>
-                  <dt>maderas</dt>
+                  <dt>{t('armado.maderas')}</dt>
                   <dd>{m.cantidadPiezas}</dd>
                 </div>
                 <div>
-                  <dt>herrajes</dt>
+                  <dt>{t('armado.herrajes')}</dt>
                   <dd>{m.cantidadHerrajes}</dd>
                 </div>
               </dl>
@@ -482,15 +484,15 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
             </div>
             <div className="a-hero-pie">
               <button className="a-cta" onClick={() => abrir((proximo || pasos[0]).id)}>
-                {completo ? 'Repasar desde el principio' : hechosAqui === 0 ? 'Empezar el armado' : `Seguir con el paso ${pasos.indexOf(proximo) + 1}`}
+                {completo ? t('armado.repasar') : hechosAqui === 0 ? t('armado.empezar') : t('armado.seguir', { n: pasos.indexOf(proximo) + 1 })}
                 <Icono n={completo ? 'bandera' : 'martillo'} />
               </button>
-              <span className="a-hero-estado">{completo ? 'Mueble terminado' : `${hechosAqui} de ${pasos.length} pasos hechos`}</span>
+              <span className="a-hero-estado">{completo ? t('armado.terminado') : t('armado.pasosHechos', { hechas: hechosAqui, total: pasos.length })}</span>
             </div>
           </section>
 
           <section className="a-bloque a-resumen">
-            <h3>En pocas palabras</h3>
+            <h3>{t('armado.pocasPalabras')}</h3>
             <ul className="a-lista">
               {m.resumen.map((x, k) => (
                 <li key={k}>{x}</li>
@@ -503,7 +505,7 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
           {m.esperar.length > 0 && (
             <details className="a-det a-falta">
               <summary>
-                <span>Qué falta definir antes de armar</span>
+                <span>{t('armado.falta')}</span>
                 <span className="a-cuenta">{m.esperar.length}</span>
                 <Icono n="abajo" />
               </summary>
@@ -519,7 +521,7 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
           )}
 
           <section className="a-bloque">
-            <h3>Los {pasos.length} pasos</h3>
+            <h3>{t('armado.losPasos', { total: pasos.length })}</h3>
             <ol className="a-camino">
               {pasos.map((p, k) => {
                 const ok = hechos.has(p.id);
@@ -531,9 +533,9 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
                       <span className="a-num">{ok ? <Icono n="check" /> : k + 1}</span>
                       <span className="a-fila-texto">
                         <span className="a-fila-titulo">{p.titulo}</span>
-                        <span className="a-fila-meta">{ok ? 'Hecho' : p.hacer.length ? `${n} de ${p.hacer.length} tareas` : 'Sin tareas'}</span>
+                        <span className="a-fila-meta">{ok ? t('armado.estadoHecho') : p.hacer.length ? t('armado.tareasDe', { n, total: p.hacer.length }) : t('armado.sinTareas')}</span>
                       </span>
-                      {ahora && <span className="a-ahora">Sigue este</span>}
+                      {ahora && <span className="a-ahora">{t('armado.sigueEste')}</span>}
                       <Icono n="der" />
                     </button>
                   </li>
@@ -544,11 +546,11 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
 
           <details className="a-det a-compras">
             <summary>
-              <span>Qué comprar para este mueble</span>
+              <span>{t('armado.comprar')}</span>
               <span className="a-cuenta">{m.lista.herrajes.length + m.lista.fijaciones.length}</span>
               <Icono n="abajo" />
             </summary>
-            <h4>Herrajes</h4>
+            <h4>{t('armado.herrajesTitulo')}</h4>
             <ul className="a-cantidades">
               {m.lista.herrajes.map((h, k) => (
                 <li key={k}>
@@ -560,8 +562,8 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
                 </li>
               ))}
             </ul>
-            <h4>Tornillos y fijaciones</h4>
-            <p className="nota">Cantidades justas, sin el 10 % de margen.</p>
+            <h4>{t('armado.tornillosTitulo')}</h4>
+            <p className="nota">{t('armado.cantidadesJustas')}</p>
             <ul className="a-cantidades">
               {m.lista.fijaciones.map((h, k) => (
                 <li key={k}>

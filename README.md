@@ -19,6 +19,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 
 - `npm run check` prueba el motor de cálculo sin abrir el navegador.
 - `npm run build` genera la versión para publicar.
+- `node scripts/check-i18n.mjs` comprueba que español, inglés y sueco tengan las mismas claves y que lo eléctrico cubra todos los ids del motor.
 
 ## Qué calcula
 
@@ -189,3 +190,12 @@ automático) y Hosting para publicar la app.
 
 Las reglas actuales dejan abierto solo ese documento, sin login. Quien tenga la URL puede leerlo y
 modificarlo. Si querés cerrarlo, hay que agregar Firebase Auth.
+
+## Idiomas
+
+La interfaz está en español (por defecto), inglés y sueco, con el selector ES / EN / SV en la cabecera. El idioma elegido queda guardado en el navegador.
+
+- `src/i18n/es.js` es la fuente de todas las claves; `en.js` y `sv.js` tienen que tener exactamente las mismas.
+- Lo eléctrico, el agua y el gas (equipos, cables, mangueras, consumos, avisos y fichas) están en `elec.en.js` y `elec.sv.js`, por id del elemento. Los cálculos usan siempre los datos originales: solo se traduce lo que se muestra (`src/i18n/electrico.js`). Si falta una traducción, queda el texto en español.
+- Por ahora siguen en español los nombres de las piezas, el tutorial de armado y las notas que arma el motor (herrajes y compras).
+

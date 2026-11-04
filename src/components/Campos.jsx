@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function leer(obj, ruta) {
   return ruta.split('.').reduce((o, k) => o[k], obj);
@@ -13,13 +14,15 @@ export function escribir(obj, ruta, valor) {
   return copia;
 }
 
-export function Seccion({ titulo, campos, cfg, cambiar }) {
+// El texto en español que traen los campos es el de respaldo: lo que se ve sale de las traducciones (secciones.* y campos.*)
+export function Seccion({ clave, titulo, campos, cfg, cambiar }) {
+  const { t } = useTranslation();
   return (
     <fieldset>
-      <legend>{titulo}</legend>
+      <legend>{t(`secciones.${clave}`, { defaultValue: titulo })}</legend>
       {campos.map((c) => (
         <label key={c.ruta} className="campo">
-          <span>{c.etiqueta}</span>
+          <span>{t(`campos.${c.ruta}`, { defaultValue: c.etiqueta })}</span>
           {c.tipo === 'check' ? (
             <input
               type="checkbox"
@@ -45,6 +48,7 @@ export function Seccion({ titulo, campos, cfg, cambiar }) {
 
 export const SECCIONES_CFG = [
   {
+    clave: 'vehiculo',
     titulo: 'Vehículo (mm)',
     campos: [
       { ruta: 'van.ancho', etiqueta: 'Ancho de piso' },
@@ -62,6 +66,7 @@ export const SECCIONES_CFG = [
     ],
   },
   {
+    clave: 'materiales',
     titulo: 'Materiales',
     campos: [
       { ruta: 'materiales.estructura.t', etiqueta: 'Placa estructura (mm)' },
@@ -74,6 +79,7 @@ export const SECCIONES_CFG = [
     ],
   },
   {
+    clave: 'trasero',
     titulo: 'Mueble trasero (cruzado)',
     campos: [
       { ruta: 'trasero.ancho', etiqueta: 'Ancho total' },
@@ -86,6 +92,7 @@ export const SECCIONES_CFG = [
     ],
   },
   {
+    clave: 'cama',
     titulo: 'Cama extensible',
     campos: [
       { ruta: 'cama.ancho', etiqueta: 'Ancho cerrada' },
@@ -110,6 +117,7 @@ export const SECCIONES_CFG = [
     ],
   },
   {
+    clave: 'derecho',
     titulo: 'Mueble derecho',
     campos: [
       { ruta: 'derecho.profundidad', etiqueta: 'Profundidad' },
@@ -124,6 +132,7 @@ export const SECCIONES_CFG = [
     ],
   },
   {
+    clave: 'equipos',
     titulo: 'Equipos (estimados)',
     campos: [
       { ruta: 'equipos.bateria.x', etiqueta: 'Batería 150 Ah: largo' },
@@ -148,6 +157,7 @@ export const SECCIONES_CFG = [
     ],
   },
   {
+    clave: 'techo',
     titulo: 'Techo (extractor, tiras LED) y lámpara',
     campos: [
       { ruta: 'extractor.x', etiqueta: 'Extractor: centro (x)' },
