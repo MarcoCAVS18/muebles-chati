@@ -19,6 +19,9 @@ import { Seccion, SECCIONES_CFG, escribir } from './components/Campos.jsx';
 import { Despiece, Placas, Herrajes, Electrica, Compras } from './components/Paneles.jsx';
 import { Armado } from './components/Armado.jsx';
 import { armarTutorial } from './engine/tutorial.js';
+import { armarSecuencia } from './engine/secuencia.js';
+import { crearReproductor, useReproductor } from './util/reproductor.js';
+import BarraArmado from './components/BarraArmado.jsx';
 import { useEsMovil, TACTIL } from './util/pantalla.js';
 import { Icono } from './components/Icono.jsx';
 import { TENEMOS_INICIAL, STOCK_VERSION } from './data/stock.js';
@@ -211,6 +214,14 @@ export default function App() {
   const resElecT = useMemo(() => traducirResultado(resElec, tx, elec3dT), [resElec, tx, elec3dT]);
   const equiposT = useMemo(() => data.equipos.map((e) => equipoT(tx, e)), [data, tx]);
   const tutorial = useMemo(() => armarTutorial(data, plan, cfg, elec3d), [data, plan, cfg, elec3d]);
+  // Armado animado: la secuencia de cada mueble sale de los pasos del tutorial y de las uniones
+  const secuencias = useMemo(() => Object.fromEntries(tutorial.muebles.map((mu) => [mu.grupo, armarSecuencia(data, mu)])), [data, tutorial]);
+  const reproductor = useMemo(() => crearReproductor(), []);
+  const armado = useReproductor(reproductor);
+  useEffect(() => {
+    // Si cambia una medida mientras se reproduce, la secuencia vieja ya no sirve
+    reproductor.cerrar();
+  }, [secuencias, reproductor]);
   const compras = useMemo(() => listaDeCompras(data, plan, cfg, resElec, elec3d), [data, plan, cfg, resElec, elec3d]);
   const elementos = useMemo(
     () => [...elec3dT.equipos, ...equiposT].map((e) => ({ id: e.id, nombre: e.nombre, nota: e.nota })),
@@ -262,6 +273,14 @@ export default function App() {
       setTab(clave);
       setPanel('Tabs');
     }
+  };
+  const animar = (grupo, pasoId = '') => {
+    if (!secuencias[grupo]) return;
+    setEnfoque('');
+    setElemento('');
+    setSeleccion('');
+    if (esMovil) setPanel('3D');
+    reproductor.abrir(secuencias[grupo], pasoId);
   };
   const ir = (paso) => {
     const lista = data.partes;
@@ -374,6 +393,8 @@ export default function App() {
             reserva={reserva}
             visible={!esMovil || panel === '3D'}
             resaltadas={resaltadas}
+            armado={armado}
+            reproductor={reproductor}
           />
           <div className="hud">
             <Barra3D
@@ -424,7 +445,7 @@ export default function App() {
                 )
               }
             />
-            {!enfoque && (
+            {!enfoque && !armado.activo && (
               <div className="hud-abajo">
                 {verTornillos && !resaltadas ? <LeyendaTornillos cuentas={cuentasTornillos} /> : estado && !resaltadas ? <LeyendaEstado cuentas={cuentasEstado} /> : colores && !resaltadas && <Leyenda />}
                 <div className="info">
@@ -440,6 +461,7 @@ export default function App() {
               </div>
             )}
           </div>
+          {armado.activo && <BarraArmado rep={reproductor} data={data} />}
           {enfoque && (
             <PanelPieza
               partes={data.partes}
@@ -507,7 +529,7 @@ export default function App() {
               setElemento={abrirElemento}
             />
           )}
-          {tab === 'Armado' && <Armado tutorial={tutorial} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} setPasoVivo={setPasoVivo} ver3D={() => irA('3D')} esMovil={esMovil} />}
+          {tab === 'Armado' && <Armado tutorial={tutorial} seleccion={seleccion} setSeleccion={setSeleccion} enfocar={enfocar} setPasoVivo={setPasoVivo} ver3D={() => irA('3D')} esMovil={esMovil} secuencias={secuencias} animar={animar} />}
           {tab === 'Compras' && <Compras filas={compras} />}
         </div>
       </section>

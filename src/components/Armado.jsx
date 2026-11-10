@@ -177,7 +177,7 @@ function Tabla({ tabla }) {
 }
 
 /* ---------- Un paso abierto ---------- */
-function PasoAbierto({ paso, numero, total, tareas, alternarTarea, hecho, hacerYSeguir, anterior, hayAnterior, alMapa, deshacer, seleccion, setSeleccion, enfocar, ver3D, esMovil }) {
+function PasoAbierto({ paso, numero, total, tareas, alternarTarea, hecho, hacerYSeguir, anterior, hayAnterior, alMapa, deshacer, seleccion, setSeleccion, enfocar, ver3D, esMovil, tieneAnim, animarPaso }) {
   const { t } = useTranslation();
   const tildadas = paso.hacer.filter((_, i) => tareas.has(`${paso.id}:${i}`)).length;
   return (
@@ -199,6 +199,16 @@ function PasoAbierto({ paso, numero, total, tareas, alternarTarea, hecho, hacerY
 
       <h2 className="a-titulo-paso">{paso.titulo}</h2>
       <p className="a-intro">{paso.intro}</p>
+
+      {tieneAnim && (
+        <button className="a-animar" onClick={animarPaso}>
+          <Icono n="play" />
+          <span>
+            <b>{t('armadoAnim.boton')}</b>
+            <small>{t('armadoAnim.botonAyuda')}</small>
+          </span>
+        </button>
+      )}
 
       {paso.piezas.length > 0 &&
         (esMovil ? (
@@ -348,7 +358,7 @@ function Taller({ generales, herramientas, alternarHerramienta }) {
 }
 
 /* ---------- Pestaña ---------- */
-export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo, ver3D, esMovil }) {
+export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo, ver3D, esMovil, secuencias, animar }) {
   const { t } = useTranslation();
   const [idx, setIdx] = useState(() => {
     const g = leer(CLAVES.mueble, 0);
@@ -459,6 +469,8 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
           enfocar={enfocar}
           ver3D={ver3D}
           esMovil={esMovil}
+          tieneAnim={!!(secuencias && secuencias[m.grupo] && secuencias[m.grupo].pasos.some((q) => q.id === paso.id))}
+          animarPaso={() => animar(m.grupo, paso.id)}
         />
       ) : (
         <>
@@ -489,6 +501,15 @@ export function Armado({ tutorial, seleccion, setSeleccion, enfocar, setPasoVivo
               </button>
               <span className="a-hero-estado">{completo ? t('armado.terminado') : t('armado.pasosHechos', { hechas: hechosAqui, total: pasos.length })}</span>
             </div>
+            {secuencias && secuencias[m.grupo] && secuencias[m.grupo].eventos.length > 0 && (
+              <button className="a-animar a-animar-mueble" onClick={() => animar(m.grupo)}>
+                <Icono n="play" />
+                <span>
+                  <b>{t('armadoAnim.botonMueble')}</b>
+                  <small>{t('armadoAnim.botonMuebleAyuda')}</small>
+                </span>
+              </button>
+            )}
           </section>
 
           <section className="a-bloque a-resumen">

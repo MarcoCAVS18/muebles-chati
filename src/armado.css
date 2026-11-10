@@ -1011,3 +1011,44 @@
     font-size: 15.5px;
   }
 }
+
+
+/* ---------- Armado animado: botones para verlo en el 3D ---------- */
+.a-animar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 12px 16px;
+  text-align: left;
+  background: var(--amarillo);
+  color: var(--violeta-noche);
+  --canto: #d99a0f;
+  border-radius: 20px;
+}
+
+.a-animar svg {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+}
+
+.a-animar b {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.a-animar small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  opacity: 0.82;
+}
+
+.a-animar-mueble {
+  margin: 12px 0 0;
+}

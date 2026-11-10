@@ -25,6 +25,13 @@ const TRAZOS = {
   cotas: ['M3 7v10', 'M21 7v10', 'M3 12h18', 'M6.5 9 3 12l3.5 3', 'M17.5 9 21 12l-3.5 3'],
   ajustes: ['M4 7h9', 'M17 7h3', 'M4 17h3', 'M11 17h9', 'M15 4.5v5', 'M9 14.5v5'],
   camara: ['M4 8h3l1.5-2h7L17 8h3v11H4Z', 'M12 16.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z'],
+  play: ['M8 5v14l11-7L8 5Z'],
+  pausa: ['M8 5v14', 'M16 5v14'],
+  saltoIzq: ['M7 5v14', 'M18 5 10 12l8 7V5Z'],
+  saltoDer: ['M17 5v14', 'M6 5l8 7-8 7V5Z'],
+  pasoIzq: ['M11 6l-6 6 6 6', 'M19 6l-6 6 6 6'],
+  pasoDer: ['M13 6l6 6-6 6', 'M5 6l6 6-6 6'],
+  repetir: ['M4 12a8 8 0 0 1 14-5.3L20 9', 'M20 4v5h-5', 'M20 12a8 8 0 0 1-14 5.3L4 15', 'M4 20v-5h5'],
 };
 
 export function Icono({ n }) {

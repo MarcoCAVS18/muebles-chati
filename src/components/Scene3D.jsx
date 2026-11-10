@@ -6,6 +6,8 @@ import { OrbitControls } from '@react-three/drei';
 import { Caja, PlacaCortada, COLORES, aplicarFade, m, tieneContorno } from './Piezas3D.jsx';
 import { PiezaEnfoque, AnotacionesDe, UnionesPieza, aMundo } from './Enfoque.jsx';
 import Tornillos3D from './Tornillos3D.jsx';
+import ArmadoAnimado from './ArmadoAnimado.jsx';
+import { focoDe } from '../engine/secuencia.js';
 import { Piso } from './Piso3D.jsx';
 import { CotasGlobales } from './Cotas3D.jsx';
 import { posarCamara } from '../engine/enfoque.js';
@@ -39,6 +41,13 @@ export const VISTAS = {
 };
 
 const FOTO_VERTICAL = { pos: [1.7, 4.3, -3.1], target: [-0.86, 0.2, 1.35] };
+
+// Desde dónde se mira el armado animado de cada mueble (dirección en el mundo: el eje x está espejado)
+const DIRECCION_ARMADO = {
+  'Mueble trasero': [0.75, 0.75, -1.5],
+  Cama: [1.1, 0.9, -1.2],
+  'Mueble derecho': [1.6, 0.8, -0.9],
+};
 
 // Cámara: salta a una vista guardada y vuela (con arco y frenado suave) hacia la pieza elegida y de vuelta
 const suave = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -192,7 +201,7 @@ function Escena(props) {
   const {
     data, equiposT, t, elec3d, tramos, van, visibles, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
     seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar,
-    enfoque, setEnfoque, invertir, verContexto, reserva, resaltadas, colores, cotas, estadoMadera, tenemos, verTornillos,
+    enfoque, setEnfoque, invertir, verContexto, reserva, colores, cotas, estadoMadera, tenemos, verTornillos, armado, reproductor,
   } = props;
   const esDoble = useDobleToque();
   const controles = useRef();
@@ -204,6 +213,9 @@ function Escena(props) {
   const { camera, size } = useThree();
   const foco = enfoque;
   const activo = !!foco;
+  // Armado animado: solo se ve el mueble que se está armando, con lo que ya está colocado
+  const modoArmado = !!(armado && armado.activo && armado.seq);
+  const resaltadas = modoArmado ? null : props.resaltadas;
 
   // Explotar, abrir los cajones y sacar las varillas se animan: los valores de la escena siguen a los de los controles
   const act = useRef({ ex: props.explosion, ab: props.abierto, ca: props.camaAbierta });
@@ -219,9 +231,9 @@ function Escena(props) {
     }
     if (cambio) latir((n) => n + 1);
   });
-  const explosion = act.current.ex;
-  const abierto = act.current.ab;
-  const camaAbierta = act.current.ca;
+  const explosion = modoArmado ? 0 : act.current.ex;
+  const abierto = modoArmado ? 0 : act.current.ab;
+  const camaAbierta = modoArmado ? 0 : act.current.ca;
 
   // Rol de color de cada madera y cómo se mueve cada una al abrir
   const roles = useMemo(() => Object.fromEntries(data.partes.map((p) => [p.id, rolDe(p)])), [data]);
@@ -400,6 +412,89 @@ function Escena(props) {
     }
   });
 
+  // ---------- Armado animado ----------
+  // Qué maderas y qué tornillos ya están colocados (los de los eventos anteriores al que está pasando)
+  const indiceArmado = modoArmado ? armado.indice : 0;
+  const colocadasArm = useMemo(() => {
+    const s = new Set();
+    if (!modoArmado) return s;
+    for (let i = 0; i < indiceArmado; i++) if (armado.seq.eventos[i].tipo === 'pieza') s.add(armado.seq.eventos[i].id);
+    return s;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modoArmado, armado && armado.seq, indiceArmado]);
+  const tornillosFijos = useMemo(() => {
+    if (!modoArmado) return [];
+    const juntas = new Set();
+    for (let i = 0; i < indiceArmado; i++) if (armado.seq.eventos[i].tipo === 'tornillos') armado.seq.eventos[i].juntas.forEach((j) => juntas.add(j));
+    return data.tornillos.filter((q) => juntas.has(q.junta));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modoArmado, armado && armado.seq, indiceArmado, data]);
+  const eventoArm = modoArmado ? armado.seq.eventos[indiceArmado] : null;
+  const piezaEnVuelo = eventoArm && eventoArm.tipo === 'pieza' ? eventoArm.id : '';
+
+  // La cámara sigue la acción: el destino se corre hacia la madera (o los tornillos) del momento y la distancia se ajusta.
+  // La dirección la elige quien mira (arrastrando); si toca la cámara, el zoom automático espera unos segundos.
+  const focos = useRef(new Map());
+  const toque = useRef(0);
+  const vistaAntes = useRef(null);
+  const focoArm = (i) => {
+    if (!focos.current.has(i)) focos.current.set(i, focoDe(data, armado.seq.eventos[i]));
+    return focos.current.get(i);
+  };
+  useEffect(() => {
+    focos.current.clear();
+  }, [data, armado && armado.seq]);
+  useEffect(() => {
+    const c = controles.current;
+    if (!c) return undefined;
+    const alTocar = () => {
+      toque.current = performance.now();
+    };
+    c.addEventListener('start', alTocar);
+    return () => c.removeEventListener('start', alTocar);
+  }, []);
+  const volarA = (pos, destino, dur) => {
+    const c = controles.current;
+    if (!c) return;
+    const t0 = c.target.clone();
+    const d0v = camera.position.clone().sub(t0);
+    const d1v = pos.clone().sub(destino);
+    const d0 = d0v.clone().normalize();
+    const d1 = d1v.clone().normalize();
+    anim.current = { t: 0, dur, t0, t1: destino.clone(), d0, l0: d0v.length(), l1: d1v.length(), giro: new THREE.Quaternion().setFromUnitVectors(d0, d1) };
+  };
+  // Al entrar: la cámara vuela hasta el primer plano; al salir, vuelve a la vista que había
+  useEffect(() => {
+    const c = controles.current;
+    if (!c) return;
+    if (modoArmado) {
+      if (!vistaAntes.current) vistaAntes.current = { pos: camera.position.clone(), target: c.target.clone() };
+      const f = focoArm(armado.indice);
+      const tgt = new THREE.Vector3(...aMundo(f.c));
+      const dir = new THREE.Vector3(...(DIRECCION_ARMADO[armado.grupo] || DIRECCION_ARMADO['Mueble trasero'])).normalize();
+      volarA(tgt.clone().addScaledVector(dir, f.d / 1000), tgt, 1.3);
+    } else if (vistaAntes.current) {
+      volarA(vistaAntes.current.pos, vistaAntes.current.target, 1.0);
+      vistaAntes.current = null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modoArmado]);
+  useFrame((_, dt) => {
+    if (!modoArmado) return;
+    reproductor.avanzar(dt);
+    const c = controles.current;
+    if (!c || anim.current || !armado.seguir || activo) return;
+    const f = focoArm(Math.min(reproductor.estado().indice, armado.seq.eventos.length - 1));
+    const tgt = new THREE.Vector3(...aMundo(f.c));
+    const resto = camera.position.clone().sub(c.target);
+    const largo = resto.length();
+    c.target.lerp(tgt, 1 - Math.exp(-Math.min(dt, 0.05) * 2.6));
+    const quieto = performance.now() - toque.current > 3500;
+    const nuevo = quieto ? THREE.MathUtils.lerp(largo, f.d / 1000, 1 - Math.exp(-Math.min(dt, 0.05) * 2)) : largo;
+    camera.position.copy(c.target).addScaledVector(resto.normalize(), nuevo);
+    c.update();
+  });
+
   const seccionDe = useMemo(() => {
     const mapa = {};
     for (const t of tramos) mapa[t.id] = t.seccion;
@@ -431,15 +526,22 @@ function Escena(props) {
 
       {mostrarArcos && data.arcos.map((a) => <Caja key={a.nombre} {...a} color="#3a2a8f" opacidad={0.8} bordes="#1d1259" />)}
 
-      {mostrarAsientos &&
+      {mostrarAsientos && !modoArmado &&
         elec3d.escenario.map((e) => (
           <Caja key={e.nombre} {...e} bordes="#263238" onOver={sobre(e.nombre)} onOut={() => setHover('')} />
         ))}
-      {mostrarAsientos && elec3d.decos.map((d) => <Caja key={d.nombre} {...d} bordes={null} />)}
+      {mostrarAsientos && !modoArmado && elec3d.decos.map((d) => <Caja key={d.nombre} {...d} bordes={null} />)}
 
       {data.partes
-        .filter((p) => visibles[p.grupo] && p.id !== foco)
+        .filter((p) => (modoArmado ? p.grupo === armado.grupo : visibles[p.grupo]) && p.id !== foco)
         .map((p) => {
+          if (modoArmado) {
+            // La que está llegando la dibuja ArmadoAnimado; las que todavía faltan se ven como una sombra muy suave
+            if (p.id === piezaEnVuelo) return null;
+            if (!colocadasArm.has(p.id)) {
+              return <Caja key={p.id} x={p.x} y={p.y} z={p.z} sx={p.sx} sy={p.sy} sz={p.sz} color="#ffffff" opacidad={0.045} bordes={null} />;
+            }
+          }
           const q = colocada(p);
           const elegida = seleccion === p.id;
           // Las piezas del paso que se está armando se ven rosa; el resto se apaga si el paso es de pocas piezas
@@ -454,12 +556,12 @@ function Escena(props) {
             sy: p.sy,
             sz: p.sz,
             color,
-            opacidad: transparentar ? 0.12 : apagar ? 0.16 : verTornillos && !activo ? 0.3 : 1,
+            opacidad: transparentar ? 0.12 : apagar ? 0.16 : verTornillos && !activo && !modoArmado ? 0.3 : 1,
             bordes: elegida ? '#bf360c' : enPaso ? '#8a1b45' : bordeDe(p),
             brillo: enPaso && !elegida ? '#ff4f8b' : undefined,
             onClick: (e) => {
               e.stopPropagation();
-              if (activo) return;
+              if (activo || modoArmado) return;
               // Doble clic o doble toque: la madera se queda sola en pantalla con sus medidas y cortes
               if (esDoble(p.id, e.nativeEvent && e.nativeEvent.timeStamp)) {
                 setElemento('');
@@ -503,12 +605,19 @@ function Escena(props) {
           return tieneContorno(p) ? <PlacaCortada key={p.id} p={q} {...comun} /> : <Caja key={p.id} {...comun} />;
         })}
 
-      {verTornillos && !activo && (
+      {modoArmado && (
+        <>
+          <Tornillos3D tornillos={tornillosFijos} grupoDe={grupoDePieza} visibles={{ [armado.grupo]: true }} seleccion="" desp={null} />
+          <ArmadoAnimado rep={reproductor} seq={armado.seq} indice={armado.indice} data={data} colorDe={colorDe} bordeDe={bordeDe} />
+        </>
+      )}
+
+      {verTornillos && !activo && !modoArmado && (
         <Tornillos3D tornillos={data.tornillos} grupoDe={grupoDePieza} visibles={visibles} seleccion={seleccion} desp={despTornillos} />
       )}
 
       {data.decos
-        .filter((d) => visibles[d.grupo])
+        .filter((d) => !modoArmado && visibles[d.grupo])
         .map((d) => {
           const q0 = d.forma && d.forma !== 'boton' ? d : desplazar(d, d.grupo);
           const q = d.ext ? { ...q0, x: q0.x + (data.layout.cama?.extension || 0) * camaAbierta } : q0;
@@ -545,7 +654,7 @@ function Escena(props) {
 
 
       {/* Equipos de agua y cocina */}
-      {mostrarEquipos &&
+      {mostrarEquipos && !modoArmado &&
         (equiposT || data.equipos)
           .filter((e) => visibles[e.grupo])
           .map((e) => {
@@ -571,7 +680,7 @@ function Escena(props) {
           })}
 
       {/* Sistema eléctrico */}
-      {mostrarElectrico &&
+      {mostrarElectrico && !modoArmado &&
         elec3d.equipos.map((e) => {
           const q = desplazar(e, e.en || e.grupo);
           return (
@@ -595,9 +704,9 @@ function Escena(props) {
           );
         })}
 
-      {mostrarElectrico && (elec3d.decosElec || []).map((d) => <Caja key={d.nombre} {...d} bordes={null} />)}
+      {mostrarElectrico && !modoArmado && (elec3d.decosElec || []).map((d) => <Caja key={d.nombre} {...d} bordes={null} />)}
 
-      {mostrarElectrico &&
+      {mostrarElectrico && !modoArmado &&
         explosion < 0.02 &&
         [...elec3d.cables, ...elec3d.mangueras].map((c) => (
           <Cable
@@ -612,7 +721,7 @@ function Escena(props) {
         ))}
 
       </group>
-      {cotas && !activo && explosion < 0.02 && abierto < 0.02 && camaAbierta < 0.02 && <CotasGlobales cajas={cajasCotas} />}
+      {cotas && !activo && !modoArmado && explosion < 0.02 && abierto < 0.02 && camaAbierta < 0.02 && <CotasGlobales cajas={cajasCotas} />}
       </group>
 
       {/* Modo pieza: la madera elegida (fuera del grupo que se desvanece) y sus cotas */}

@@ -20,6 +20,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - `npm run check` prueba el motor de cálculo sin abrir el navegador.
 - `npm run build` genera la versión para publicar.
 - `node scripts/check-i18n.mjs` comprueba que español, inglés y sueco tengan las mismas claves y que lo eléctrico cubra todos los ids del motor.
+- `node scripts/check-secuencia.mjs` comprueba el armado animado: cada madera llega una sola vez, los tornillos entran después de que estén las dos maderas y no queda ninguna unión sin cubrir.
 
 ## Qué calcula
 
@@ -83,6 +84,15 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   horizontal la tarjeta de la pieza va a un costado. El panel con el video de cada equipo sube desde abajo.
 - Lista de compras agrupada.
 - Avisos si una pieza choca con otro mueble, con el pasarruedas o se sale de la van.
+
+## Armado animado
+
+En la pestaña Armado, cada paso tiene el botón **Ver armado animado** y la portada de cada mueble tiene **Ver el mueble armándose**. En el 3D las maderas del paso llegan una por una (la primera de cada módulo aparece flotando y baja; las demás se deslizan hasta apoyarse), se extiende la cola sobre el contacto y los tornillos entran girando. Una barra abajo del 3D permite pausar, saltar de madera o de paso, cambiar la velocidad (0.5x a 4x), mover la línea de tiempo y apagar la cámara automática.
+
+- `src/engine/secuencia.js` arma la secuencia a partir de los pasos del tutorial y de las uniones: orden de las maderas, por dónde llega cada una (primero por el eje de sus uniones; si está tapado, por un lado libre) y cuándo entran los tornillos. Si cambia una medida, la secuencia cambia sola.
+- `src/util/reproductor.js` lleva el reloj. El 3D lo lee en cada cuadro y la pantalla solo se vuelve a dibujar cuando cambia el evento o play y pausa.
+- `src/components/ArmadoAnimado.jsx` dibuja lo que se mueve y `src/components/BarraArmado.jsx` la barra.
+- Por ahora no se animan los herrajes, bisagras, manijas ni las decoraciones: solo maderas, cola y tornillos.
 
 ## Dónde cambiar cosas
 

@@ -1770,3 +1770,182 @@ pre {
     justify-content: flex-end;
   }
 }
+
+
+/* ============================================================
+   Armado animado: barra de reproducción sobre el 3D
+   ============================================================ */
+.arm-barra {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  max-width: 780px;
+  margin: 0 auto;
+  display: grid;
+  gap: 8px;
+  padding: 10px 14px 12px;
+  background: rgba(29, 18, 89, 0.94);
+  color: #fff;
+  border-radius: 22px;
+  box-shadow: var(--sombra-flota), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(6px);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.arm-texto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-height: 24px;
+}
+
+.arm-texto p {
+  flex: 1 1 220px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.arm-chip {
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--amarillo);
+  color: var(--violeta-noche);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.arm-chip.claro {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.arm-tiempo {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--amarillo);
+  cursor: pointer;
+}
+
+.arm-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.arm-grupo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.arm-boton {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+}
+
+.arm-boton:active {
+  box-shadow: none;
+}
+
+.arm-boton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.arm-boton.principal {
+  width: 46px;
+  height: 46px;
+  margin: 0 4px;
+  background: var(--amarillo);
+  color: var(--violeta-noche);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 3px 0 #d99a0f;
+}
+
+.arm-boton.principal:active {
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3), 0 1px 0 #d99a0f;
+}
+
+.arm-chico {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.arm-chico:active {
+  box-shadow: none;
+}
+
+.arm-chico svg {
+  width: 15px;
+  height: 15px;
+}
+
+.arm-chico.activo {
+  background: var(--amarillo);
+  color: var(--violeta-noche);
+}
+
+.arm-vel {
+  gap: 4px;
+}
+
+@media (hover: hover) {
+  .arm-boton:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .arm-boton.principal:hover {
+    background: #ffd465;
+  }
+
+  .arm-chico:hover:not(.activo) {
+    background: rgba(255, 255, 255, 0.26);
+  }
+}
+
+/* Celular: la barra pasa a dos filas y los controles se reparten el ancho */
+@media (max-width: 640px) {
+  .arm-barra {
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    padding: 8px 10px 10px;
+    border-radius: 18px;
+  }
+
+  .arm-texto p {
+    flex-basis: 100%;
+    font-size: 12.5px;
+  }
+
+  .arm-controles {
+    justify-content: center;
+  }
+}
+
+@media (max-height: 500px) {
+  .arm-texto p {
+    display: none;
+  }
+}
