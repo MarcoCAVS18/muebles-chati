@@ -656,11 +656,51 @@ function cama(data, plan, cfg, e3, cortes) {
   });
   const pasos = [];
 
+  // Lo único de la cama que toca la van: los listones de pared (la pared no es recta) y, más tarde, los refuerzos de piso
+  const listonesPared = por(/^Listón de pared/);
+  const refuerzos = por(/^Refuerzo de piso/);
+  const archIzq = (cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10;
+  const anchoModulo = r0(cm.ancho + (portales[0] ? portales[0].sx : 15));
+
+  pasos.push({
+    id: 'cam-0',
+    titulo: 'Relevar la van y probar los listones en seco',
+    intro: 'La van no es recta: la pared se curva y el piso tiene altos y bajos. Antes de cortar nada, medí lo que toca la cama y probá los listones en seco. Con esas medidas se cortan las piezas, se ajustan los listones y las cajas se arman afuera, sabiendo adónde van a ir.',
+    hacer: [
+      `Pared izquierda: apoyá una regla recta o un nivel largo contra la pared, con su cara de arriba a ${r0(lay.yB)} mm del piso (a esa altura quedan los listones de pared, ${ids(listonesPared)} en el 3D), y medí el hueco entre la regla y la pared cada 250 mm: desde la puerta trasera hasta el pasarruedas, y después del arco. Esa es la forma que tiene que copiar cada listón.`,
+      `Línea de nivel: con un láser o una manguera de nivel, marcá en la pared los ${r0(lay.yB)} mm en los dos extremos. Si el piso sube o baja, anotá cuánto: los listones de pared y los largueros de las cajas tienen que quedar a la misma altura.`,
+      `Piso: apoyá la regla donde van a ir los refuerzos (${ids(refuerzos)}) y fijate si hay huecos o costillas. Las cajas se apoyan acá, así que lo que no sea plano se calza o se rellena con adhesivo de montaje.`,
+      `Pasarruedas izquierdo: medí su altura real con la tapa puesta y compará con los ${archIzq} cm que usa el modelo. Si cambia, cambia la altura de la cama.`,
+      `Puerta de entrada: las cajas se llevan armadas, así que medí el hueco por donde van a entrar. Cada módulo mide unos ${anchoModulo} mm de ancho y ${r0(lay.yT)} mm de alto; el de la cabecera tiene ${cm.largoCabecera} mm de largo y el del pie ${cm.largo - cm.largoCabecera} mm. Pasan de costado si hace falta.`,
+      'Probá los listones en seco: con un recorte de 30 x 30 del mismo largo (o una tira de cartón) apoyalo contra la pared y marcá con lápiz donde no toca. Esa marca es lo que hay que sacar en el taller.',
+      'Anotá todo en un cuaderno y sacale fotos a cada tramo de pared. Si una medida difiere más de 5 mm de la del modelo, cambiala en la pestaña Medidas antes de cortar.',
+    ],
+    piezas: [...f(/^Listón de pared/), ...f(/^Refuerzo de piso/)],
+    tablas: [
+      {
+        titulo: 'Relevamiento de la van',
+        cabecera: ['Qué medir', 'Dónde', 'Modelo', 'Para qué'],
+        filas: [
+          ['Hueco entre la regla y la pared', `Pared izquierda a ${r0(lay.yB)} mm, cada 250 mm`, 'pared recta (0 mm)', 'La forma de cada listón de pared'],
+          ['Altura del pasarruedas con su tapa', 'Pared izquierda', `${archIzq} cm`, 'La altura de la cama'],
+          ['Huecos bajo la regla', 'Piso, bajo cada refuerzo', 'plano', 'Cuñas y relleno bajo las cajas'],
+          ['Nivel del piso de punta a punta', 'Piso, de la puerta trasera al mueble trasero', 'a nivel', 'Dejar las dos cajas a la misma altura'],
+          ['Hueco de la puerta de entrada', 'Ancho y alto libres', `módulo de ${anchoModulo} x ${r0(lay.yT)} mm`, 'Que los módulos pasen armados'],
+        ],
+      },
+    ],
+    ojo: [
+      'Medí con el piso despejado, sin goma ni felpudo: cualquier cosa debajo de la regla falsea las medidas.',
+      'Los listones de pared son lo único de la cama que se fija a la pared. Las cajas se apoyan en el piso y se calzan: por eso la pared se mide ahora y el piso se resuelve cuando las cajas ya están en la van.',
+    ],
+  });
+
   pasos.push({
     id: 'cam-1',
     titulo: 'Cortar y rotular',
     intro: `La cama sale de contrachapado de ${t} mm y de listones de 45x45 y 30x30. Seguí el plano de «Placas y cortes».`,
     hacer: [
+      'Cortá con las medidas de la tabla, ya recalculadas con lo que mediste en la van.',
       'Cortá las piezas rectas; las curvas y las ranuras se hacen después (paso siguiente).',
       `Las dos placas miden ${cm.ancho} mm de ancho. Las varillas que se extienden no se cortan aparte: son los pedazos que salen de las ranuras de su placa, y por eso no figuran en la tabla de hojas.`,
       'Rotulá cada pieza con su id (CAM-xx) en la cara que va por dentro.',
@@ -691,48 +731,43 @@ function cama(data, plan, cfg, e3, cortes) {
     ],
   });
 
-  const refuerzos = por(/^Refuerzo de piso/);
   pasos.push({
-    id: 'cam-3',
-    titulo: 'Refuerzos al piso de la van',
-    intro: `Son ${refuerzos.length} listones de 45x45 pegados al piso: dos por módulo. Sostienen las paredes de la caja y no se ven.`,
+    id: 'cam-5',
+    titulo: 'Preparar los listones de pared en el taller',
+    intro: `Los ${listonesPared.length} listones de pared (${ids(listonesPared)}) son lo único de la cama que se fija a la pared, y la pared no es recta. Se ajustan a ella en el taller antes de atornillar nada.`,
     hacer: [
-      `Marcá en el piso la posición de cada refuerzo (en el 3D, ${ids(refuerzos)}). Esquivan el pasarruedas.`,
-      'Pegá con adhesivo de montaje y atornillá a un listón del piso. Sellá cada agujero con butilo.',
-      `Cuidado con el largo del tornillo: el listón mide ${sh} mm de alto, y un 25 mm no llega al piso. Con un listón de piso de 30 mm de alto, el tornillo tiene que medir al menos ${sh + 25} mm (5x70).`,
+      'Cortá cada listón unos 20 mm más largo y apoyalo contra una regla, calzado con tacos del tamaño del hueco más grande que mediste.',
+      'Pasá la forma de la pared al listón: con un compás abierto al hueco más grande, o con un trozo de lápiz, dibujá en el listón el contorno que marca la pared. Es el borde que va a quedar contra la pared.',
+      'Sacá el sobrante con cepillo o lija hasta la línea. Probalo en la van contra la pared y repetí hasta que apoye parejo en todo su largo.',
+      'Recién entonces cortá a la medida final (el largo está en la tabla de barras) y rotulá cada listón con su id y la cara que va contra la pared.',
+      `La cara de arriba del listón tiene que quedar a ${r0(lay.yB)} mm del piso. Su altura se ajusta al final, cuando las cajas ya estén en la van: por eso todavía no se fija a la pared.`,
     ],
-    piezas: f(/^Refuerzo de piso/),
-    ojo: ['El modelo trae tornillos de 25 mm, que solo sirven si el refuerzo mide menos de 25 mm de alto. Medí el piso antes de comprar los tornillos.'],
+    piezas: f(/^Listón de pared/),
+    ojo: [
+      'Si el hueco pasa de unos 8 mm, no lo cepilles de más: rellená con tacos de madera pegados o con adhesivo de montaje, porque un listón de 30 mm perdería sección justo donde apoya la placa.',
+      'Si el listón sigue una pared muy curva, cortalo en tramos más cortos que sigan la curva en vez de forzarlo.',
+    ],
   });
 
   pasos.push({
     id: 'cam-4',
-    titulo: 'Cajas de los dos módulos',
-    intro: `La cama son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada uno es una caja abierta con un costado hacia el pasillo, y entre los dos llenan los ${cm.largo / 10} cm de la cama.`,
+    titulo: 'Cajas de los dos módulos, armadas afuera',
+    intro: `La cama son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada uno es una caja abierta con un costado hacia el pasillo, y entre los dos llenan los ${cm.largo / 10} cm de la cama. Se arman en el taller, sobre una mesa plana, y se llevan armados a la van.`,
     hacer: [
-      'Módulo del pie: frente (con ventana) y panel central. Cola y 4x40 contra los refuerzos del piso.',
+      `Refuerzos de piso (${ids(refuerzos)}, dos por módulo): son listones de 45x45 que quedan abajo y sostienen las paredes de la caja. Apoyalos en la mesa: no se pegan al piso de la van, van con la caja. Esquivan el pasarruedas.`,
+      'Módulo del pie: frente (con ventana) y panel central. Cola y 4x40 contra los refuerzos.',
       'Módulo de la cabecera: panel central y la guía, que cierra el extremo contra el frente del mueble trasero.',
       `Alturas: el frente del pie y la guía llegan a ${lay.yT} mm, a ras de la superficie donde dormís; el panel central llega a ${lay.yB} mm, justo bajo las placas.`,
-      `Costados del pasillo (${ids(costados)}): son FIJOS. Van de pie contra el frente del pie, el panel central y la guía (cola y 4x40 desde afuera, y a la punta de los refuerzos de piso). Miden ${r0(lay.yCostado - 5)} mm de alto y quedan 5 mm sobre el piso. No llegan hasta la placa: los listones de las correderas pasan por encima con ${r0(lay.yB - 30 - lay.yCostado)} mm de luz.`,
-      'Todo parado y a escuadra. Pegá cada pieza contra su refuerzo y atornillá a través del refuerzo, no al piso.',
+      `Costados del pasillo (${ids(costados)}): son FIJOS. Van de pie contra el frente del pie, el panel central y la guía (cola y 4x40 desde afuera, y a la punta de los refuerzos). Miden ${r0(lay.yCostado - 5)} mm de alto y quedan 5 mm sobre el piso. No llegan hasta la placa: los listones de las correderas pasan por encima con ${r0(lay.yB - 30 - lay.yCostado)} mm de luz.`,
+      `Largueros de apoyo (a ${r0(por(/^Larguero de apoyo \(pie\)/)[0].x)} mm de la pared izquierda de la van) y largueros de las puntas (a ${r0(por(/^Larguero de las puntas \(pie\)/)[0].x)} mm): entre el frente, el panel central y la guía, a ras de la cara de abajo de la placa. Cola y 4x40 por los cantos.`,
+      'Las varillas se deslizan por encima de los largueros y del borde del pasarruedas: pegales cinta de teflón (PTFE) en la cara de arriba.',
+      'Todo a escuadra: medí las dos diagonales de cada caja y que den lo mismo. Pegá cada pieza contra su refuerzo y atornillá a través del refuerzo.',
     ],
-    piezas: [...filas(frentePie, cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...filas(costados, cortes)],
+    piezas: [...f(/^Refuerzo de piso/), ...filas(frentePie, cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...filas(costados, cortes), ...f(/^Larguero/)],
     ojo: [
       'El panel central se acorta para esquivar el pasarruedas: probalo en seco contra el arco antes de pegar.',
-      'Cada caja se sostiene con el frente, el panel central, la guía, los refuerzos del piso, los largueros y la pared: revisá que no se abra ni se deforme antes de seguir.',
+      'Cada caja se sostiene con el frente, el panel central, la guía, los refuerzos y los largueros: revisá que no se abra ni se deforme antes de seguir. Una caja torcida no va a apoyar bien en el piso de la van.',
     ],
-  });
-
-  pasos.push({
-    id: 'cam-5',
-    titulo: 'Largueros y listones de pared',
-    intro: 'Sobre las cajas van los listones de 30x30 donde apoyan las placas y las varillas.',
-    hacer: [
-      `Largueros de apoyo (a ${r0(por(/^Larguero de apoyo \(pie\)/)[0].x)} mm de la pared izquierda de la van) y largueros de las puntas (a ${r0(por(/^Larguero de las puntas \(pie\)/)[0].x)} mm): entre el frente, el panel central y la guía, a ras de la cara de abajo de la placa. Cola y 4x40 por los cantos.`,
-      'Listones de pared (a la izquierda): contra la pared, a la misma altura. Sobre el pasarruedas no hay listón: la placa apoya ahí, con fieltro.',
-      'Las varillas se deslizan por encima de los largueros y del borde del pasarruedas: pegales cinta de teflón (PTFE) en la cara de arriba.',
-    ],
-    piezas: [...f(/^Larguero/), ...f(/^Listón de pared/)],
   });
 
   pasos.push({
@@ -780,6 +815,24 @@ function cama(data, plan, cfg, e3, cortes) {
   });
 
   pasos.push({
+    id: 'cam-10',
+    titulo: 'Llevar los módulos a la van y fijarlos',
+    intro: 'Con las dos cajas armadas, con sus varillas y sus puertas, se llevan a la van y se apoyan en el piso. Recién ahí se fijan los listones de pared, a la altura que quedaron los largueros.',
+    hacer: [
+      'El mueble trasero tiene que estar ya en su lugar: la guía de la cabecera cierra contra su frente. Entrá primero el módulo de la cabecera y después el del pie.',
+      'Apoyá cada caja en el piso con los costados fijos hacia el pasillo. Probá que cada caja esquive el pasarruedas y que las dos queden pegadas entre sí.',
+      `Nivelá: apoyá un nivel sobre los largueros de las dos cajas y calzá con cuñas bajo los refuerzos hasta que la cara de arriba de los largueros quede a ${r0(lay.yB)} mm del piso, en la línea que marcaste en la pared, y las dos cajas coincidan.`,
+      `Fijá cada caja al piso a través de los refuerzos (${ids(refuerzos)}): adhesivo de montaje, dos tornillos por refuerzo y butilo en cada agujero. Cuidado con el largo: el refuerzo mide ${sh} mm de alto, y un tornillo de 25 mm no llega al piso. Con un listón de piso de 30 mm de alto, el tornillo tiene que medir al menos ${sh + 25} mm (5x70).`,
+      `Listones de pared (${ids(listonesPared)}): con las cajas ya niveladas, apoyalos contra la pared, a ras de los largueros, comprobá con la regla y fijalos con adhesivo de montaje y los tornillos o remaches que correspondan en ese punto de la chapa.`,
+    ],
+    piezas: f(/^Listón de pared/),
+    ojo: [
+      'El modelo trae tornillos de 25 mm, que solo sirven si el refuerzo mide menos de 25 mm de alto. Medí el piso antes de comprar los tornillos.',
+      'No aprietes un listón contra la pared hasta cerrar un hueco grande: lo deformás. Si queda separado, rellená con adhesivo o un taco.',
+    ],
+  });
+
+  pasos.push({
     id: 'cam-8',
     titulo: 'Placas de la plataforma',
     intro: 'Las dos placas se atornillan desde arriba a los largueros y listones, y se pueden levantar para llegar al piso.',
@@ -814,10 +867,12 @@ function cama(data, plan, cfg, e3, cortes) {
       `Son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada placa es un peine y sus varillas salen de las ranuras. Cada módulo tiene una puerta que baja en la ventana del costado fijo.`,
       'Los costados del pasillo con sus puertas son fijos. Los portales (una U invertida por módulo) salen junto con las varillas y los listones de las correderas y son la base de la extensión.',
       'Se apoya en el piso (refuerzos), en la pared izquierda (listones) y en el frente del mueble trasero.',
+      'Se arma entera afuera, módulo por módulo, y se lleva a la van: lo único que se ajusta a la van son los listones de pared.',
     ],
     lista: listaDe(data, G),
     pasos,
     esperar: [
+      'Medidas reales de la van (pared, piso, pasarruedas y puerta de entrada): se toman en el primer paso, antes de cortar.',
       'Altura del listón del piso (largo de los tornillos de los refuerzos).',
       `Correderas de carga de 500 mm de bajo perfil (máximo ${cm.alturaCorredera} mm de alto) y comprobadas contra el recorrido (${cm.extension} mm).`,
       'Prueba de flexión de las varillas abiertas con peso real, antes de cortar las placas definitivas.',
