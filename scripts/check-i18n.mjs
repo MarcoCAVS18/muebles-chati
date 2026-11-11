@@ -1,6 +1,8 @@
 // Verifica los diccionarios de idiomas: node scripts/check-i18n.mjs
 // 1) en y sv tienen exactamente las claves de es (más el bloque elec), 2) los {{parametros}} coinciden,
 // 3) lo eléctrico cubre todos los ids que arma el motor.
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import es from '../src/i18n/es.js';
 import en from '../src/i18n/en.js';
 import sv from '../src/i18n/sv.js';
@@ -80,6 +82,37 @@ for (const [nombre, dic] of [['en', en], ['sv', sv]]) {
   const permitidos = { m: 1, hueco: 1, marco: 1, sec: 1, amp: 1, v: 1, ah: 1, nominal: 1, vCarga: 1, vEntrada: 1, ef: 1 };
   for (const [k, v] of Object.entries(hojas(elec))) {
     for (const p of params(v).split(',').filter(Boolean)) if (!permitidos[p]) mal(`${nombre}: parámetro desconocido {{${p}}} en elec.${k}`);
+  }
+}
+
+// 4) Un componente que recibe `t` como prop tiene que recibirlo en cada lugar donde se usa:
+// si falta, la app se rompe recién al abrir esa pantalla (ej.: el modo pieza con doble clic).
+{
+  const lista = (dir) =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? lista(join(dir, e.name)) : e.name.endsWith('.jsx') ? [join(dir, e.name)] : []));
+  const archivos = lista(new URL('../src', import.meta.url).pathname).map((f) => [f, readFileSync(f, 'utf8')]);
+  const conT = new Set();
+  for (const [, src] of archivos) {
+    for (const m of src.matchAll(/function\s+([A-Z]\w*)\s*\(\s*\{([^}]*)\}\s*\)/g)) {
+      if (m[2].split(',').some((p) => p.trim().split(/[\s=]/)[0] === 't')) conT.add(m[1]);
+    }
+  }
+  for (const [archivo, src] of archivos) {
+    for (const nombre of conT) {
+      for (const m of src.matchAll(new RegExp(`<${nombre}(?=[\\s/>])`, 'g'))) {
+        // Se lee la etiqueta completa hasta su cierre, sin cortarse en los > de las flechas ni en llaves
+        let prof = 0;
+        let fin = m.index;
+        for (; fin < src.length; fin += 1) {
+          const c = src[fin];
+          if (c === '{') prof += 1;
+          else if (c === '}') prof -= 1;
+          else if (c === '>' && prof === 0 && src[fin - 1] !== '=') break;
+        }
+        const etiqueta = src.slice(m.index, fin + 1);
+        if (!/\bt=\{/.test(etiqueta) && !/\{\.\.\.props\}/.test(etiqueta)) mal(`<${nombre}> en ${archivo.split('/src/')[1]} no recibe la prop t`);
+      }
+    }
   }
 }
 

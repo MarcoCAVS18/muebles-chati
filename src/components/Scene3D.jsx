@@ -748,7 +748,7 @@ function Escena(props) {
               <PiezaEnfoque q={q} color={color} bordes={bordeDe(p)} activa={id === foco} {...ent} onFin={() => quitar(id)} />
             </group>
             <AnotacionesDe key={`${id}:${invertir}`} q={q} invertir={invertir} xMedio={van.ancho / 2} fov={camera.fov} visible={id === foco && anotId === id} t={t} />
-            <UnionesPieza uniones={data.juntasPorPieza[id]} desp={[q.x - p.x, q.y - p.y, q.z - p.z]} visible={id === foco && anotId === id} />
+            <UnionesPieza uniones={data.juntasPorPieza[id]} desp={[q.x - p.x, q.y - p.y, q.z - p.z]} visible={id === foco && anotId === id} t={t} />
           </React.Fragment>
         );
       })}
