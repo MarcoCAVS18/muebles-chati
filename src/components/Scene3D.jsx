@@ -11,7 +11,7 @@ import { focoDe } from '../engine/secuencia.js';
 import { Piso } from './Piso3D.jsx';
 import { CotasGlobales } from './Cotas3D.jsx';
 import { posarCamara } from '../engine/enfoque.js';
-import { rolDe, ROLES, ESTADOS, estadoDe, oscurecer } from '../engine/colores.js';
+import { rolDe, ROLES, ESTADOS, estadoDe, oscurecer, esColorValido } from '../engine/colores.js';
 import { planAbrir } from '../engine/abrir.js';
 import { useDobleToque, TACTIL } from '../util/pantalla.js';
 
@@ -201,7 +201,7 @@ function Escena(props) {
   const {
     data, equiposT, t, elec3d, tramos, van, visibles, mostrarEquipos, mostrarArcos, mostrarElectrico, mostrarAsientos,
     seleccion, setSeleccion, elemento, setElemento, setHover, vista, transparentar,
-    enfoque, setEnfoque, invertir, verContexto, reserva, colores, cotas, estadoMadera, tenemos, verTornillos, armado, reproductor,
+    enfoque, setEnfoque, invertir, verContexto, reserva, colores, cotas, estadoMadera, tenemos, colorPiezas, verTornillos, armado, reproductor,
   } = props;
   const esDoble = useDobleToque();
   const controles = useRef();
@@ -238,17 +238,28 @@ function Escena(props) {
   // Rol de color de cada madera y cómo se mueve cada una al abrir
   const roles = useMemo(() => Object.fromEntries(data.partes.map((p) => [p.id, rolDe(p)])), [data]);
   const abrir = useMemo(() => planAbrir(data), [data]);
-  // Con «lo que tenemos y lo que falta» prendido manda ese color; si no, el rol de la madera o su color propio
+  // Color pastel que se le puso a mano a la madera (no se ve con «lo que tenemos y lo que falta», que usa los suyos)
+  const propioDe = (p) => {
+    const c = !estadoMadera && colorPiezas ? colorPiezas[p.id] : null;
+    return esColorValido(c) ? c : null;
+  };
+  // Con «lo que tenemos y lo que falta» prendido manda ese color; si no, el color propio, el rol de la madera o su color de siempre
   const colorDe = (p) =>
     estadoMadera
       ? ESTADOS[estadoDe(p, tenemos)].color
-      : colores
+      : propioDe(p) || (colores
         ? ROLES[roles[p.id]].color
         : p.tipo === 'liston'
           ? '#c49a5e'
-          : p.color || COLORES[p.grupo];
+          : p.color || COLORES[p.grupo]);
   const bordeDe = (p) =>
-    estadoMadera ? oscurecer(ESTADOS[estadoDe(p, tenemos)].color, 0.5) : colores ? oscurecer(ROLES[roles[p.id]].color, 0.5) : '#6b4f2a';
+    estadoMadera
+      ? oscurecer(ESTADOS[estadoDe(p, tenemos)].color, 0.5)
+      : propioDe(p)
+        ? oscurecer(propioDe(p), 0.5)
+        : colores
+          ? oscurecer(ROLES[roles[p.id]].color, 0.5)
+          : '#6b4f2a';
 
   // Centro de cada grupo para separar las piezas al "explotar" la vista
   const centros = useMemo(() => {
@@ -547,7 +558,7 @@ function Escena(props) {
           // Las piezas del paso que se está armando se ven rosa; el resto se apaga si el paso es de pocas piezas
           const enPaso = !!resaltadas && resaltadas.has(p.id);
           const apagar = !!resaltadas && !enPaso && !elegida && resaltadas.size < data.partes.length * 0.6;
-          const color = elegida ? '#ff7043' : enPaso ? '#ff4f8b' : colorDe(p);
+          const color = elegida ? propioDe(p) || '#ff7043' : enPaso ? '#ff4f8b' : colorDe(p);
           const comun = {
             x: q.x,
             y: q.y,

@@ -94,6 +94,10 @@ En la pestaña Armado, cada paso tiene el botón **Ver armado animado** y la por
 - `src/components/ArmadoAnimado.jsx` dibuja lo que se mueve y `src/components/BarraArmado.jsx` la barra.
 - Por ahora no se animan los herrajes, bisagras, manijas ni las decoraciones: solo maderas, cola y tornillos.
 
+## Colores a mano
+
+Con un clic en una madera aparece, abajo del 3D, una barra de colores pastel para pintarla (otra vez el mismo color, o «Sin color», la deja como estaba). El color se guarda con el proyecto en Firebase (`colorPiezas`, un `{ id: '#rrggbb' }`) y se ve en el 3D, en el modo pieza y en el armado animado. Con «lo que tenemos y lo que falta» prendido manda ese código de colores. Los colores están en `PASTELES` de `src/engine/colores.js`.
+
 ## Dónde cambiar cosas
 
 - `src/data/defaults.js`: medidas de la van, materiales, equipos y consumos iniciales.

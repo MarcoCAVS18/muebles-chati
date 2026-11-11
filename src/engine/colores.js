@@ -37,3 +37,22 @@ export function oscurecer(hex, k = 0.5) {
   const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
   return `#${c.map((v, i) => Math.round(v * (1 - k) + base[i] * k).toString(16).padStart(2, '0')).join('')}`;
 }
+
+// Colores pastel para pintar a mano una madera. El id sirve para el nombre traducido (paleta.colores.<id>)
+export const PASTELES = [
+  { id: 'rosa', color: '#ffb7c5' },
+  { id: 'coral', color: '#ffa99c' },
+  { id: 'durazno', color: '#ffcba4' },
+  { id: 'manteca', color: '#fff0a6' },
+  { id: 'lima', color: '#d7f2a5' },
+  { id: 'menta', color: '#b4ead6' },
+  { id: 'aqua', color: '#a9e5e8' },
+  { id: 'cielo', color: '#b9dcff' },
+  { id: 'lavanda', color: '#d2c6ff' },
+  { id: 'lila', color: '#ecc8f4' },
+  { id: 'arena', color: '#ecdcc2' },
+  { id: 'perla', color: '#e2e2ec' },
+];
+
+// Un color guardado solo sirve si es un hex de seis cifras
+export const esColorValido = (c) => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c);

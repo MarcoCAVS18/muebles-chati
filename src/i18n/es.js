@@ -360,6 +360,17 @@ export default {
     linea: 'Avance del armado',
     verSiguiente: 'Ver el paso siguiente',
   },
+  paleta: {
+    titulo: 'Color de la madera',
+    pintar: 'Pintar de {{color}}',
+    quitar: 'Sin color',
+    quitarAyuda: 'Vuelve al color de siempre',
+    avisoEstado: 'Ahora se ve «lo que tenemos y lo que falta»: apagalo para ver el color elegido.',
+    colores: {
+      rosa: 'Rosa', coral: 'Coral', durazno: 'Durazno', manteca: 'Manteca', lima: 'Lima', menta: 'Menta',
+      aqua: 'Aqua', cielo: 'Cielo', lavanda: 'Lavanda', lila: 'Lila', arena: 'Arena', perla: 'Perla',
+    },
+  },
   campos: {
     van: {
       ancho: 'Ancho de piso',

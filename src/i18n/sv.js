@@ -360,6 +360,17 @@ export default {
     linea: 'Hopsättningens förlopp',
     verSiguiente: 'Se nästa steg',
   },
+  paleta: {
+    titulo: 'Träets färg',
+    pintar: 'Måla {{color}}',
+    quitar: 'Ingen färg',
+    quitarAyuda: 'Tillbaka till vanliga färgen',
+    avisoEstado: 'Du ser «vad vi har och vad som saknas»: stäng av det för att se vald färg.',
+    colores: {
+      rosa: 'Rosa', coral: 'Korall', durazno: 'Persika', manteca: 'Smör', lima: 'Lime', menta: 'Mynta',
+      aqua: 'Akva', cielo: 'Himmel', lavanda: 'Lavendel', lila: 'Lila', arena: 'Sand', perla: 'Pärla',
+    },
+  },
   campos: {
     van: {
       ancho: 'Golvbredd',

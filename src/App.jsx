@@ -15,6 +15,7 @@ import Scene3D, { VISTAS } from './components/Scene3D.jsx';
 import Barra3D, { Leyenda, LeyendaEstado, LeyendaTornillos } from './components/Barra3D.jsx';
 import PanelElemento from './components/PanelElemento.jsx';
 import PanelPieza from './components/PanelPieza.jsx';
+import PaletaColor from './components/PaletaColor.jsx';
 import { Seccion, SECCIONES_CFG, escribir } from './components/Campos.jsx';
 import { Despiece, Placas, Herrajes, Electrica, Compras } from './components/Paneles.jsx';
 import { Armado } from './components/Armado.jsx';
@@ -25,7 +26,7 @@ import BarraArmado from './components/BarraArmado.jsx';
 import { useEsMovil, TACTIL } from './util/pantalla.js';
 import { Icono } from './components/Icono.jsx';
 import { TENEMOS_INICIAL, STOCK_VERSION } from './data/stock.js';
-import { estadoDe } from './engine/colores.js';
+import { estadoDe, esColorValido } from './engine/colores.js';
 import { cuentaTornillos } from './engine/uniones.js';
 
 const TABS = ['Despiece', 'Placas y cortes', 'Herrajes', 'Eléctrica', 'Armado', 'Compras'];
@@ -88,6 +89,7 @@ export default function App() {
   const [colores, setColores] = useState(true); // colores por rol de la madera
   const [estado, setEstado] = useState(false); // dos colores: la madera que ya tenemos y la que falta
   const [tenemos, setTenemos] = useState(TENEMOS_INICIAL); // ids de las maderas que ya están
+  const [colorPiezas, setColorPiezas] = useState({}); // color pastel elegido a mano para cada madera: { id: '#rrggbb' }
   // El modo sale de los controles, así que los controles finos y los tres botones siempre coinciden
   const modo = explosion > 0.02 ? 'explotado' : abierto > 0.02 || camaAbierta > 0.02 ? 'abierto' : 'armado';
   const elegirModo = (m) => {
@@ -166,6 +168,9 @@ export default function App() {
             // Un guardado viejo no trae los consumos nuevos: se suman los que falten
             if (Array.isArray(d.cargas)) setCargas([...d.cargas, ...CARGAS_INICIALES.filter((c) => !d.cargas.some((g) => g.id === c.id))]);
             if (d.elec) setElec(mezclar(ELECTRICA_INICIAL, d.elec));
+            if (d.colorPiezas && typeof d.colorPiezas === 'object') {
+              setColorPiezas(Object.fromEntries(Object.entries(d.colorPiezas).filter(([, v]) => esColorValido(v))));
+            }
             // Si la lista inicial creció desde que se guardó, las maderas nuevas se suman una vez
             if (Array.isArray(d.tenemos)) {
               const ids = d.tenemos.filter((x) => typeof x === 'string');
@@ -187,15 +192,22 @@ export default function App() {
     if (!firebaseActivo || !listo.current) return undefined;
     setNube('guardando');
     const id = setTimeout(() => {
-      guardarProyecto({ cfg, cargas, elec, tenemos })
+      guardarProyecto({ cfg, cargas, elec, tenemos, colorPiezas })
         .then(() => setNube('guardado'))
         .catch(() => setNube('error'));
     }, 1500);
     return () => clearTimeout(id);
-  }, [cfg, cargas, elec, tenemos]);
+  }, [cfg, cargas, elec, tenemos, colorPiezas]);
 
   const data = useMemo(() => construir(cfg), [cfg]);
   const conjuntoTenemos = useMemo(() => new Set(tenemos), [tenemos]);
+  const pintarPieza = (id, color) =>
+    setColorPiezas((m) => {
+      const n = { ...m };
+      if (color) n[id] = color;
+      else delete n[id];
+      return n;
+    });
   const alternarTenemos = (id) => setTenemos((lista) => (lista.includes(id) ? lista.filter((x) => x !== id) : [...lista, id]));
   const cuentasEstado = useMemo(() => {
     const c = { tenemos: 0, falta: 0 };
@@ -386,6 +398,7 @@ export default function App() {
             verTornillos={verTornillos}
             estadoMadera={estado}
             tenemos={conjuntoTenemos}
+            colorPiezas={colorPiezas}
             enfoque={enfoque}
             setEnfoque={enfocar}
             invertir={invertir}
@@ -448,6 +461,7 @@ export default function App() {
             {!enfoque && !armado.activo && (
               <div className="hud-abajo">
                 {verTornillos && !resaltadas ? <LeyendaTornillos cuentas={cuentasTornillos} /> : estado && !resaltadas ? <LeyendaEstado cuentas={cuentasEstado} /> : colores && !resaltadas && <Leyenda />}
+                {parteSel && <PaletaColor id={parteSel.id} actual={colorPiezas[parteSel.id]} elegir={pintarPieza} estado={estado} />}
                 <div className="info">
                 {hover ||
                   (parteSel

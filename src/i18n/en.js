@@ -360,6 +360,17 @@ export default {
     linea: 'Assembly progress',
     verSiguiente: 'Watch the next step',
   },
+  paleta: {
+    titulo: 'Wood color',
+    pintar: 'Paint {{color}}',
+    quitar: 'No color',
+    quitarAyuda: 'Back to the usual color',
+    avisoEstado: 'You are seeing "what we have and what is missing": turn it off to see the chosen color.',
+    colores: {
+      rosa: 'Pink', coral: 'Coral', durazno: 'Peach', manteca: 'Butter', lima: 'Lime', menta: 'Mint',
+      aqua: 'Aqua', cielo: 'Sky', lavanda: 'Lavender', lila: 'Lilac', arena: 'Sand', perla: 'Pearl',
+    },
+  },
   campos: {
     van: {
       ancho: 'Floor width',
