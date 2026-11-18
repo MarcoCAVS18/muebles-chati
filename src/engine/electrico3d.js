@@ -18,6 +18,7 @@
 // techo y baja por la viga.
 
 import { disposicionTrasero } from './disposicion.js';
+import { planoFondo } from './fondoInclinado.js';
 
 export const GRUPO_ELEC = 'Eléctrico';
 
@@ -175,7 +176,13 @@ export function electrico3d(cfg) {
   const yCan = yTecho - 12; // cota de los cables en el techo
   const zFinA = zLed0 + largoLed;
   const xCeil = xViga + 90; // por el techo el cable de la lámpara corre cerca de la pared izquierda, antes de bajar por la viga
-  const zAtras = zFondo - 5; // pegado al fondo del mueble
+  // Con el fondo inclinado (variante) la cara de adelante del fondo se corre hacia el frente al subir: los cables que van pegados
+  // al fondo lo hacen detrás de lo más alto de su recorrido (las tapas), para no entrar en la madera
+  const inc = cfg.trasero.fondoInclinado ? planoFondo(cfg) : null;
+  const zAtras = inc ? Math.min(zFondo - 5, inc.zFrente(yTapa) - 5) : zFondo - 5; // pegado al fondo del mueble
+  // Entrada del cable largo: pasa por el hueco bajo los asientos, por detrás del fondo, y lo atraviesa a yEnt
+  const zDetras = inc ? inc.zAtras(yEnt) + 8 : zb + 8;
+  const zDentro = inc ? inc.zFrente(95) - 6 : zFondo - 6;
   const zTr = zFL + 2; // cara trasera del tablero
   const yHueco = 505; // altura del tablero: de ahí bajan los cables al hueco entre los estantes
   const yGap = L.E.yEstante + 15 + 28; // altura de los cables en el hueco entre el estante del eléctrico y el de la heladera
@@ -218,10 +225,10 @@ export function electrico3d(cfg) {
         [anlCaja.x - 20, 30, zA + 10],
         [anlCaja.x - 20, 30, zUnder],
         [xEnt, 30, zUnder],
-        [xEnt, 30, zb + 8],
-        [xEnt, yEnt, zb + 8],
-        [xEnt, yEnt, zFondo - 6],
-        [xEnt, 95, zFondo - 6],
+        [xEnt, 30, zDetras],
+        [xEnt, yEnt, zDetras],
+        [xEnt, yEnt, zDentro],
+        [xEnt, 95, zDentro],
         [xEnt, 95, zRutaLargo],
         [dcdc.x + dcdc.sx / 2, 95, zRutaLargo],
         [dcdc.x + dcdc.sx / 2, 95, dcdc.z + dcdc.sz + 2],
@@ -669,7 +676,7 @@ export function electrico3d(cfg) {
     { clave: 'asientoCondRespaldo', nombre: 'Asiento del conductor - respaldo', x: 150, y: 450, z: zb + 20, sx: 560, sy: 620, sz: 130, color: '#37474f', opacidad: 0.35 },
   ];
   const decos = [
-    { clave: 'pasacables', nombre: 'Pasacables en el fondo del mueble', x: xEnt - 20, y: yEnt - 15, z: zFondo - 4, sx: 40, sy: 30, sz: 18, color: '#212121' },
+    { clave: 'pasacables', nombre: 'Pasacables en el fondo del mueble', x: xEnt - 20, y: yEnt - 15, z: inc ? inc.zFrente(yEnt) - 4 : zFondo - 4, sx: 40, sy: 30, sz: 18, color: '#212121' },
   ];
   // Detalles del techo que se ven junto con el eléctrico
   const decosElec = [

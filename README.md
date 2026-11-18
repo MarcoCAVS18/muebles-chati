@@ -98,6 +98,15 @@ En la pestaña Armado, cada paso tiene el botón **Ver armado animado** y la por
 
 Con un clic en una madera aparece, abajo del 3D, una barra de colores pastel para pintarla (otra vez el mismo color, o «Sin color», la deja como estaba). El color se guarda con el proyecto en Firebase (`colorPiezas`, un `{ id: '#rrggbb' }`) y se ve en el 3D, en el modo pieza y en el armado animado. Con «lo que tenemos y lo que falta» prendido manda ese código de colores. Los colores están en `PASTELES` de `src/engine/colores.js`.
 
+## Fondo inclinado del mueble trasero (variante opcional)
+
+Detrás del mueble trasero, la separación metálica y los asientos dejan un hueco en cuña: mucho en el piso y casi nada arriba. En «Medidas», sección «Mueble trasero», el casillero **Fondo inclinado** (apagado por defecto) cambia el fondo plano por un solo plano inclinado que sigue ese perfil. Con 10 mm de aire (campo «Aire del fondo inclinado») queda a unos 10,9° respecto de la vertical: el mueble gana unos 143 mm de fondo abajo, donde van la batería y los bidones, y pierde unos 14 mm arriba.
+
+- El perfil es lo que se midió con una tanza vertical el 18/11 (igual en todo el ancho, 0 = piso terminado) y está en `src/data/perfilMamparo.js`. El plano sale de ahí (`src/engine/fondoInclinado.js`): el más profundo que no toca nada con el aire pedido. Si volvés a medir, se cambian esos números y se recalcula todo.
+- Con la variante prendida cambian: los dos fondos (parados, con el largo sobre la pendiente, girados en el 3D sobre su borde de abajo), los costados y los dos divisores (borde de atrás cortado en diagonal), la base, los estantes y los apoyos (más largos, hasta la cara de adelante del fondo), el recorrido del cable largo y del cable de la bomba, y el tutorial del mueble trasero (cortes en diagonal y biselado de los cantos). Las demás piezas, los ids y los frentes quedan igual.
+- Los fondos inclinados no entran en el cálculo automático de uniones: sus uniones (cola y tornillos 3,5x20 cada 100 mm a las bases y los divisores) están escritas a mano en `trasero.js` y suman a Fijaciones y Compras.
+- `node scripts/check.mjs` prueba siempre las dos versiones: que el plano no toque lo medido, que los equipos y cables no entren en el fondo y que nada más se mueva.
+
 ## Dónde cambiar cosas
 
 - `src/data/defaults.js`: medidas de la van, materiales, equipos y consumos iniciales.

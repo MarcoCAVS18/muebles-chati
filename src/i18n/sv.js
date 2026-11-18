@@ -405,6 +405,8 @@ export default {
       zocalo: 'Sockel',
       divisor1: 'Elavsnittets slut (x)',
       divisor2: 'Kökets slut (x)',
+      fondoInclinado: 'Lutande baksida (följer plåtväggen och sätena)',
+      aireFondo: 'Spel för den lutande baksidan (mm)',
     },
     cama: {
       ancho: 'Bredd ihopfälld',

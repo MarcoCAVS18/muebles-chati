@@ -85,6 +85,17 @@ export function PlacaCortada({ p, x, y, z, color, opacidad = 1, bordes, onClick,
   );
 }
 
+// Pieza definida parada que va girada sobre su borde de abajo-atrás (el fondo inclinado del mueble trasero). inc = { y, z, ang }:
+// y y z son el pivote en mm (ya corrido si la vista está explotada) y ang el ángulo respecto de la vertical. Gira en el eje x
+// con la parte de arriba hacia el frente del mueble, por eso el signo menos.
+export function Inclinada({ inc, children }) {
+  return (
+    <group position={[0, m(inc.y), m(inc.z)]} rotation={[-inc.ang, 0, 0]}>
+      <group position={[0, -m(inc.y), -m(inc.z)]}>{children}</group>
+    </group>
+  );
+}
+
 // Opacidad de todo un grupo: multiplica la que tenía cada material y la devuelve cuando f vuelve a 1
 export function aplicarFade(raiz, f) {
   raiz.traverse((o) => {

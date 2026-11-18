@@ -81,11 +81,26 @@ export function agujerosDe(data, e3) {
       for (const p of placas) {
         const o = [p.x, p.y, p.z];
         const s = [p.sx, p.sy, p.sz];
-        if (s[k] > 16) continue;
-        if (!(lo < o[k] - 0.5 && hi > o[k] + s[k] + 0.5)) continue;
-        if ([0, 1, 2].filter((j) => j !== k).some((j) => a[j] < o[j] + 3 || a[j] > o[j] + s[j] - 3)) continue;
+        let punto = a;
+        if (p.inclinada) {
+          // Placa girada (el fondo inclinado): la cruza un cable que va a lo largo de z. A la altura del cable la placa está en
+          // otro z, y la distancia al borde de abajo se mide sobre la pendiente
+          if (k !== 2) continue;
+          const inc = p.inclinada;
+          const cos = Math.cos(inc.ang);
+          const zAtras = inc.z - Math.tan(inc.ang) * (a[1] - inc.y);
+          const zFrente = zAtras - p.sz / cos;
+          if (!(lo < zFrente - 0.5 && hi > zAtras + 0.5)) continue;
+          const v = (a[1] - inc.y) / cos;
+          if (a[0] < p.x + 3 || a[0] > p.x + p.sx - 3 || v < 3 || v > p.sy - 3) continue;
+          punto = [a[0], p.y + v, a[2]];
+        } else {
+          if (s[k] > 16) continue;
+          if (!(lo < o[k] - 0.5 && hi > o[k] + s[k] + 0.5)) continue;
+          if ([0, 1, 2].filter((j) => j !== k).some((j) => a[j] < o[j] + 3 || a[j] > o[j] + s[j] - 3)) continue;
+        }
         if (!mapa.has(p.id)) mapa.set(p.id, { p, k, hits: [] });
-        mapa.get(p.id).hits.push({ nombre: c.nombre, punto: a });
+        mapa.get(p.id).hits.push({ nombre: c.nombre, punto });
       }
     }
   }
@@ -333,6 +348,9 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
   const entraPiso = 50 - (t + L.yBase);
   const estantes = por(/^Estante/);
   const pasos = [];
+  // Variante del fondo inclinado (apagada por defecto): cambia el corte de algunas piezas y cómo se pega el fondo
+  const inc = cfg.trasero.fondoInclinado ? data.layout.fondoInclinado : null;
+  const ladosInc = por(/^(Costado (izquierdo|derecho)$|Divisor)/).filter((q) => q.silueta && q.silueta.tipo === 'atrasInclinado');
 
   pasos.push({
     id: 'tra-1',
@@ -343,6 +361,12 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       'Cortá primero las tiras de la hoja a lo ancho y después cada tira a lo largo, como dice el plano.',
       'Rotulá cada pieza con su id (TRA-xx) en la cara que va por dentro, apenas la cortás. Con tantas piezas parecidas es la única forma de no confundirse.',
       'Lijá los cantos que quedan a la vista (frentes, tapas, zócalos) y sellá los de bidones, fregadero y cajón de agua.',
+      ...(inc
+        ? [
+            `Fondo inclinado (${fmt(inc.grados)}°): los costados y los divisores no son rectángulos. Cortalos como rectángulo del largo mayor y después recortá el borde de atrás en diagonal: ${ladosInc.map((q) => `${q.id} mide ${fmt(q.silueta.uAb)} mm abajo y ${fmt(q.silueta.uAr)} mm arriba`).join('; ')} (medidas desde el borde del frente). Marcá los dos puntos, uní con una regla larga y cortá con sierra circular guiada.`,
+            `Los dos fondos miden ${fmt(inc.largoFondo)} mm de largo: es el largo sobre la pendiente, no la altura del mueble.`,
+          ]
+        : []),
     ],
     piezas: [],
     tablas: [tablaCortes(G, 'TRA-', plan, cfg)],
@@ -390,10 +414,17 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       'Pegá y atornillá la base al costado (4x40 desde la cara de afuera del costado, a ras del borde de atrás y del frente).',
       'Parate el divisor 1 sobre la base, a ras del borde derecho, y atornillalo desde abajo, entre los apoyos. Escuadralo con la escuadra grande.',
       'Pegá el zócalo al frente de la base, entre el costado y el divisor.',
-      'Pegá el fondo de 9 mm contra los cantos de atrás (base, divisor) con puntas o tornillos 3x20 cada 100 mm. Es lo que te deja la caja a escuadra: medí las dos diagonales.',
+      inc
+        ? `Pegá el fondo inclinado de 9 mm contra los cantos de atrás (base, divisor) con cola y tornillos 3,5x20 cada 100 mm por la cara del fondo. Antes biselá esos cantos a ${fmt(inc.grados)}° (sierra circular inclinada, se sacan unos 3 mm) para que el fondo apoye en toda la cara; sin bisel apoya solo en la arista de arriba. Es lo que te deja la caja a escuadra: medí las dos diagonales.`
+        : 'Pegá el fondo de 9 mm contra los cantos de atrás (base, divisor) con puntas o tornillos 3x20 cada 100 mm. Es lo que te deja la caja a escuadra: medí las dos diagonales.',
     ],
     piezas: [...f(/^(Base|Zócalo frontal) \(eléctrico\)|^Apoyo bajo la base.*\(eléctrico\)/), ...f(/^Costado izquierdo$/), ...f(/^Divisor eléctrico y cocina/), ...f(/^Fondo eléctrico/)],
     ojo: [
+      ...(inc
+        ? [
+            `El fondo va inclinado ${fmt(inc.grados)}°: sigue la separación metálica y los asientos. Abajo el mueble gana ${r0(inc.gananciaPiso)} mm de fondo y arriba pierde ${r0(inc.perdidaTecho)} mm, con ${r0(inc.aire)} mm de aire contra el metal y el asiento. Las medidas salen del perfil que mediste con la tanza.`,
+          ]
+        : []),
       'El fondo de 9 mm no toca el canto del costado izquierdo (el costado mide 15 mm y el fondo empieza a 15): la escuadra la da la base. Que no se mueva hasta fijarla a la van.',
       'No pongas todavía los estantes ni los marcos: la batería y los equipos pesados entran por arriba y por adelante.',
     ],
@@ -406,7 +437,9 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     hacer: [
       'Pegá y atornillá los tres apoyos debajo de la base, igual que en el módulo eléctrico.',
       'Apoyá el costado derecho acostado y fijale la base (4x40 desde afuera). Parate el divisor 2 sobre la base y atornillalo desde abajo, entre los apoyos.',
-      'Pegá el zócalo al frente y el fondo de 9 mm atrás, con puntas o tornillos 3x20.',
+      inc
+        ? `Pegá el zócalo al frente y el fondo inclinado de 9 mm atrás, con cola y tornillos 3,5x20 cada 100 mm por la cara del fondo. Biselá a ${fmt(inc.grados)}° los cantos de atrás de la base y del divisor 2.`
+        : 'Pegá el zócalo al frente y el fondo de 9 mm atrás, con puntas o tornillos 3x20.',
       (() => {
         const b = por(/^Base \(cocina y agua\)/)[0];
         const h = b && (b.huecos || []).find((q) => q.tipo === 'asiento');
@@ -428,7 +461,9 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       'Antes de subir nada: marcá en el piso de la van dónde están los 4 listones del piso (medí desde la pared izquierda) y pasalos a la base de cada módulo. Los tornillos al piso tienen que caer sobre un listón.',
       `Tornillo al piso: 5x50 entra ${entraPiso} mm en el listón (${50} mm menos ${t} mm de base y ${L.yBase} mm de apoyo). Antes de usarlo medí la altura del listón: el tornillo no puede pasar de su altura menos 5 mm. Si el listón es más bajo, usá 5x40.`,
       'Primero el módulo eléctrico: contra el mamparo y la pared izquierda. Nivelalo con cuñas de contrachapado, sellá con butilo cada agujero del piso y atornillá.',
-      'Fijá el costado izquierdo a la pared y el fondo al mamparo con escuadras L (arriba y abajo). Dejá sin tapar el pasacables del eléctrico en el fondo.',
+      inc
+        ? 'Fijá el costado izquierdo a la pared y el fondo al mamparo con escuadras L, solo en la parte alta, donde el fondo roza con el mamparo. Abajo el fondo queda con aire frente al metal: no lo fuerces contra él. Dejá sin tapar el pasacables del eléctrico en el fondo.'
+        : 'Fijá el costado izquierdo a la pared y el fondo al mamparo con escuadras L (arriba y abajo). Dejá sin tapar el pasacables del eléctrico en el fondo.',
       'Después el módulo de cocina y agua: deslizalo hasta que toque la cara derecha del divisor 1. Pasá cola en los cantos que se tocan (base, zócalo, fondo) y atornillalo al piso igual que el otro.',
       'Unión: tres tornillos 4x25 desde el compartimento eléctrico, a través del divisor 1, al montante izquierdo de la cocina (arriba, al medio y abajo). Son 4x25 porque un 4x40 atraviesa el montante de 15 mm.',
       'Dos escuadras L 40x40 debajo de la tapa 2 (cuando la pongas, paso 10), contra la cara del divisor 1, con tornillos cortos de 12 mm para que no atraviesen los 15 mm.',

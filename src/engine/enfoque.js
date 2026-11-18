@@ -110,7 +110,7 @@ export function contorno(p) {
       radio: s.radio,
       recorte: null,
       arco: null,
-      huecos: [],
+      huecos: huecosDe(p, s.plano), // un costado con el borde inclinado puede llevar además un calado (la puerta lateral)
       silueta: s,
     };
   }
@@ -224,7 +224,13 @@ export function describirPieza(p, cfg) {
           : `${c.esquinas} esquinas redondeadas de radio R${fmt(c.radio)} mm (fresadora con fresa de radio o plantilla)`,
       });
     }
-    if (c.silueta) {
+    if (c.silueta && c.silueta.tipo === 'atrasInclinado') {
+      const s = c.silueta;
+      lineas.push({
+        tipo: 'recto',
+        texto: `El borde de atrás va inclinado ${fmt(s.grados)}° para seguir el fondo inclinado: mide ${fmt(s.uAb)} mm abajo y ${fmt(s.uAr)} mm arriba (medidas desde el borde del frente). Marcá los dos puntos, uní con una regla larga y cortá con sierra circular guiada. Los demás bordes quedan a 90°`,
+      });
+    } else if (c.silueta) {
       const s = c.silueta;
       lineas.push({
         tipo: 'arco',
@@ -501,7 +507,17 @@ export function anotarPieza(p, cam) {
         arcos.push({ pts, tipo: 'redondo', etiqueta, pos });
       }
     }
-    if (c.silueta) {
+    if (c.silueta && c.silueta.tipo === 'atrasInclinado') {
+      // Largo abajo y arriba del borde de atrás inclinado, medidos desde el borde del frente
+      const s = c.silueta;
+      const U = (u, v) => {
+        const [a, b] = aMarco(s.plano, u, v);
+        return V(a, b);
+      };
+      const cotaS = (ini, fin, valor, nom) => cotas.push({ ini, fin, ext: [], valor, nombre: nom, tipo: 'arco' });
+      cotaS(U(0, 40), U(s.uAb, 40), s.uAb, 'Largo abajo');
+      cotaS(U(0, s.h - 40), U(s.uAr, s.h - 40), s.uAr, 'Largo arriba');
+    } else if (c.silueta) {
       // Ancho del calado, lo que lo separa del borde del frente y su altura
       const s = c.silueta;
       const vAncho = s.a1 - 40;

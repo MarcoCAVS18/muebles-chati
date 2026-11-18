@@ -89,6 +89,8 @@ export const SECCIONES_CFG = [
       { ruta: 'trasero.zocalo', etiqueta: 'Zócalo' },
       { ruta: 'trasero.divisor1', etiqueta: 'Fin del eléctrico (x)' },
       { ruta: 'trasero.divisor2', etiqueta: 'Fin de la cocina (x)' },
+      { ruta: 'trasero.fondoInclinado', etiqueta: 'Fondo inclinado (sigue la separación y los asientos)', tipo: 'check' },
+      { ruta: 'trasero.aireFondo', etiqueta: 'Aire del fondo inclinado (mm)' },
     ],
   },
   {

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { Caja, PlacaCortada, COLORES, aplicarFade, m, tieneContorno } from './Piezas3D.jsx';
+import { Caja, PlacaCortada, Inclinada, COLORES, aplicarFade, m, tieneContorno } from './Piezas3D.jsx';
 import { PiezaEnfoque, AnotacionesDe, UnionesPieza, aMundo } from './Enfoque.jsx';
 import Tornillos3D from './Tornillos3D.jsx';
 import ArmadoAnimado from './ArmadoAnimado.jsx';
@@ -550,7 +550,8 @@ function Escena(props) {
             // La que está llegando la dibuja ArmadoAnimado; las que todavía faltan se ven como una sombra muy suave
             if (p.id === piezaEnVuelo) return null;
             if (!colocadasArm.has(p.id)) {
-              return <Caja key={p.id} x={p.x} y={p.y} z={p.z} sx={p.sx} sy={p.sy} sz={p.sz} color="#ffffff" opacidad={0.045} bordes={null} />;
+              const sombra = <Caja key={p.id} x={p.x} y={p.y} z={p.z} sx={p.sx} sy={p.sy} sz={p.sz} color="#ffffff" opacidad={0.045} bordes={null} />;
+              return p.inclinada ? <Inclinada key={p.id} inc={p.inclinada}>{sombra}</Inclinada> : sombra;
             }
           }
           const q = colocada(p);
@@ -587,6 +588,15 @@ function Escena(props) {
             onOver: sobre(`${p.id} - ${p.nombre}${p.abre ? t(TACTIL ? 'hover.equipoToque' : 'hover.equipoClic') : ''} - ${t(TACTIL ? 'hover.solaToque' : 'hover.solaClic')}`),
             onOut: () => setHover(''),
           };
+          // Fondo inclinado: la pieza está definida parada y se gira sobre su borde de abajo-atrás
+          if (p.inclinada) {
+            const inc = { ...p.inclinada, y: p.inclinada.y + (q.y - p.y), z: p.inclinada.z + (q.z - p.z) };
+            return (
+              <Inclinada key={p.id} inc={inc}>
+                <Caja {...comun} />
+              </Inclinada>
+            );
+          }
           const mov = abrir.porParte[p.id];
           // Puertas con las bisagras abajo (cama): quedan fijas en la caja y giran sobre su borde de abajo
           if (mov && mov.tipo === 'tapa') {

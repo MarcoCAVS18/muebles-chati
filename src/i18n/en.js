@@ -405,6 +405,8 @@ export default {
       zocalo: 'Plinth',
       divisor1: 'End of the electrical part (x)',
       divisor2: 'End of the kitchen (x)',
+      fondoInclinado: 'Sloped back (follows the metal divider and the seats)',
+      aireFondo: 'Clearance of the sloped back (mm)',
     },
     cama: {
       ancho: 'Width closed',

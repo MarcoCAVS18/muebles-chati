@@ -120,6 +120,7 @@ export function calcularUniones(data) {
     for (let j = i + 1; j < partes.length; j++) {
       const a = partes[i];
       const b = partes[j];
+      if (a.inclinada || b.inclinada) continue; // el fondo inclinado se define parado pero está girado: sus uniones van a mano en el mueble
       for (const e of EJES) {
         const [u, v] = EJES.filter((k) => k !== e);
         const ou = Math.min(fin(a, u), fin(b, u)) - Math.max(ini(a, u), ini(b, u));

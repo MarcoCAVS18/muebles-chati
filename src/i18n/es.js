@@ -405,6 +405,8 @@ export default {
       zocalo: 'Zócalo',
       divisor1: 'Fin del eléctrico (x)',
       divisor2: 'Fin de la cocina (x)',
+      fondoInclinado: 'Fondo inclinado (sigue la separación y los asientos)',
+      aireFondo: 'Aire del fondo inclinado (mm)',
     },
     cama: {
       ancho: 'Ancho cerrada',

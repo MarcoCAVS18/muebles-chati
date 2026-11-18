@@ -7,6 +7,7 @@
 import { cajon } from './cajon.js';
 import { frenteZ } from './frentes.js';
 import { disposicionTrasero } from './disposicion.js';
+import { planoFondo } from './fondoInclinado.js';
 
 export function trasero(ctx, G) {
   const { cfg, t, tb } = ctx;
@@ -19,6 +20,56 @@ export function trasero(ctx, G) {
   const largoIntE = profL - t - tb; // profundidad interior de la sección eléctrica
 
   ctx.layout.trasero = L;
+
+  // Variante opcional: fondo inclinado (ver fondoInclinado.js). Con ella apagada todo queda exactamente como antes.
+  const inc = tr.fondoInclinado ? planoFondo(cfg) : null;
+  if (inc) ctx.layout.fondoInclinado = { grados: inc.grados, aire: inc.aire, gananciaPiso: inc.gananciaPiso, perdidaTecho: inc.perdidaTecho, largoFondo: inc.largoFondo };
+  // Dónde termina una pieza horizontal cuya cara de arriba está a la altura yTop: contra la cara de adelante del fondo
+  const zFinHasta = (yTop) => (inc ? Math.floor(inc.zFrente(yTop)) : zFondo);
+  // Largo de una pieza horizontal que va de zIni hasta el fondo (el original es el largo del fondo plano)
+  const largoHasta = (zIni, yTop, original) => (inc ? zFinHasta(yTop) - zIni : original);
+  // Pieza vertical (costado o divisor) con el borde de atrás inclinado: da su largo máximo y el contorno
+  const bordeInclinado = (zIni, y0, alto) => {
+    const uAb = zFinHasta(y0) - zIni;
+    const uAr = zFinHasta(y0 + alto) - zIni;
+    return {
+      sz: uAb,
+      silueta: {
+        plano: 'zy',
+        tipo: 'atrasInclinado',
+        w: uAb,
+        h: alto,
+        uAb,
+        uAr,
+        grados: inc.grados,
+        esquinas: 0,
+        radio: 0,
+        cmds: [
+          { t: 'M', u: 0, v: 0 },
+          { t: 'L', u: uAb, v: 0 },
+          { t: 'L', u: uAr, v: alto },
+          { t: 'L', u: 0, v: alto },
+          { t: 'L', u: 0, v: 0 },
+        ],
+      },
+    };
+  };
+  // El fondo inclinado se define parado (ancho x largo sobre la pendiente x espesor) y el 3D lo gira sobre su borde de abajo
+  const fondoInc = (nombre, x, sx) => {
+    const zp = Math.round(inc.zAtras(yBase) * 10) / 10;
+    return ctx.parte({
+      grupo: G,
+      nombre,
+      mat: 'fondo',
+      x,
+      y: yBase,
+      z: zp - tb,
+      sx,
+      sy: Math.round(inc.largoFondo * 10) / 10,
+      sz: tb,
+      inclinada: { y: yBase, z: zp, ang: inc.ang },
+    });
+  };
 
   // Los bornes de la batería necesitan lugar para el cable entre ella y el estante que cierra el compartimento
   const aireBornes = E.yEstante - (E.bateria.y + E.bateria.sy);
@@ -45,12 +96,15 @@ export function trasero(ctx, G) {
     sx: t,
     sy: tr.alto - t,
     sz: profL - tb,
+    ...(inc ? bordeInclinado(zFL, 0, tr.alto - t) : {}),
     huecos: [{ tipo: 'puerta', a0: pl.y0, a1: pl.y1, b0: pl.z0 - zFL, b1: pl.z1 - zFL, r: 6 }],
   });
-  P('Costado derecho', x1 - t, 0, zF, t, tr.alto - t, prof - tb);
+  if (inc) ctx.parte({ grupo: G, nombre: 'Costado derecho', mat: 'estructura', x: x1 - t, y: 0, z: zF, sx: t, sy: tr.alto - t, ...bordeInclinado(zF, 0, tr.alto - t) });
+  else P('Costado derecho', x1 - t, 0, zF, t, tr.alto - t, prof - tb);
   // El fondo va en dos mitades, una por módulo (el mueble se arma en dos módulos que se unen adentro de la van)
-  P('Fondo eléctrico (contra el mamparo)', t, yBase, zB - tb, d1, tr.alto - t - yBase, tb, 'fondo');
-  P('Base (eléctrico)', t, yBase, L.E.zIn, d1 + t - t, t, largoIntE);
+  if (inc) fondoInc('Fondo eléctrico (inclinado)', t, d1);
+  else P('Fondo eléctrico (contra el mamparo)', t, yBase, zB - tb, d1, tr.alto - t - yBase, tb, 'fondo');
+  P('Base (eléctrico)', t, yBase, L.E.zIn, d1 + t - t, t, largoHasta(L.E.zIn, yBase + t, largoIntE));
   // La base de la cocina lleva calado el asiento circular de la garrafa: apoya en el piso a través del círculo
   {
     const xb = d1 + t;
@@ -63,7 +117,7 @@ export function trasero(ctx, G) {
       z: zIn,
       sx: x1 - t - xb,
       sy: t,
-      sz: largoInt,
+      sz: largoHasta(zIn, yBase + t, largoInt),
       huecos: [{ tipo: 'asiento', a0: K.asiento.cx - K.asiento.r - xb, a1: K.asiento.cx + K.asiento.r - xb, b0: K.asiento.cz - K.asiento.r - zIn, b1: K.asiento.cz + K.asiento.r - zIn, r: K.asiento.r }],
     });
   }
@@ -72,15 +126,20 @@ export function trasero(ctx, G) {
 
   // Divisores entre secciones: el primero sigue la L y queda a la vista como escalón
   const altoDiv = yTapa - yPiso;
-  P('Divisor eléctrico y cocina (escalón de la L)', d1, yPiso, E.zIn, t, altoDiv, largoIntE);
-  P('Divisor cocina y agua', d2, yPiso, zIn, t, altoDiv, largoInt);
+  if (inc) {
+    ctx.parte({ grupo: G, nombre: 'Divisor eléctrico y cocina (escalón de la L)', mat: 'estructura', x: d1, y: yPiso, z: E.zIn, sx: t, sy: altoDiv, ...bordeInclinado(E.zIn, yPiso, altoDiv) });
+    ctx.parte({ grupo: G, nombre: 'Divisor cocina y agua', mat: 'estructura', x: d2, y: yPiso, z: zIn, sx: t, sy: altoDiv, ...bordeInclinado(zIn, yPiso, altoDiv) });
+  } else {
+    P('Divisor eléctrico y cocina (escalón de la L)', d1, yPiso, E.zIn, t, altoDiv, largoIntE);
+    P('Divisor cocina y agua', d2, yPiso, zIn, t, altoDiv, largoInt);
+  }
 
   // Estantes
-  P('Estante que cierra el compartimento eléctrico', sec.E.x0, E.yEstante, E.zIn, sec.E.x1 - sec.E.x0, t, largoIntE);
+  P('Estante que cierra el compartimento eléctrico', sec.E.x0, E.yEstante, E.zIn, sec.E.x1 - sec.E.x0, t, largoHasta(E.zIn, E.yEstante + t, largoIntE));
   // El estante de la heladera empieza 10 mm antes que ella: delante queda libre para que bajen los cables del tablero
-  P('Estante de la heladera', sec.E.x0, E.yEstanteNevera, E.zNevera - 10, sec.E.x1 - sec.E.x0, t, largoIntE - (E.zNevera - 10 - E.zIn));
-  P('Estante sobre la garrafa (bajo los cajones de cocina)', sec.K.x0, K.yEstante, zIn, sec.K.x1 - sec.K.x0, t, largoInt);
-  P('Estante sobre los bidones', sec.W.x0, W.yEstante, zIn, sec.W.x1 - sec.W.x0, t, largoInt);
+  P('Estante de la heladera', sec.E.x0, E.yEstanteNevera, E.zNevera - 10, sec.E.x1 - sec.E.x0, t, largoHasta(E.zNevera - 10, E.yEstanteNevera + t, largoIntE - (E.zNevera - 10 - E.zIn)));
+  P('Estante sobre la garrafa (bajo los cajones de cocina)', sec.K.x0, K.yEstante, zIn, sec.K.x1 - sec.K.x0, t, largoHasta(zIn, K.yEstante + t, largoInt));
+  P('Estante sobre los bidones', sec.W.x0, W.yEstante, zIn, sec.W.x1 - sec.W.x0, t, largoHasta(zIn, W.yEstante + t, largoInt));
 
   // Tapas: una por sección, atornilladas desde arriba
   P('Tapa 1 (eléctrico)', 0, yTapa, zFL, d1 + t, t, profL);
@@ -185,12 +244,13 @@ export function trasero(ctx, G) {
 
   // Lo que sigue se agrega al final para no mover los ids de las demás piezas.
   // Segunda mitad del fondo (cocina y agua), contra el mamparo
-  P('Fondo cocina y agua (contra el mamparo)', d1 + t, yBase, zB - tb, x1 - t - (d1 + t), tr.alto - t - yBase, tb, 'fondo');
+  if (inc) fondoInc('Fondo cocina y agua (inclinado)', d1 + t, x1 - t - (d1 + t));
+  else P('Fondo cocina y agua (contra el mamparo)', d1 + t, yBase, zB - tb, x1 - t - (d1 + t), tr.alto - t - yBase, tb, 'fondo');
   // Apoyos bajo las bases: la base queda a yBase del piso, y sin apoyo se pandea con la carga de los bidones y la batería.
   // Son tiras de canto (de recorte de la hoja de 15 mm) en el sentido del ancho: adelante, al medio y atrás. Cruzan los
   // listones del piso, que van a lo largo de la van, y ahí se atornillan.
   const apoyos = (sufijo, x, sx, zIni) => {
-    const zAtras = zFondo - t;
+    const zAtras = zFinHasta(yBase) - t;
     for (const [lugar, z] of [
       ['adelante', zIni],
       ['al medio', (zIni + zAtras) / 2],
@@ -256,11 +316,36 @@ export function trasero(ctx, G) {
   ctx.unir(G, 'piso', x1 - 2 * t, 'Zócalo y base al piso de la van');
   ctx.unir(G, 'pared', tr.alto + profL, 'Costado izquierdo a la pared izquierda');
   ctx.unir(G, 'pared', tr.alto + prof, 'Costado derecho a la pared derecha');
-  ctx.unir(G, 'pared', x1, 'Fondo al mamparo de los asientos (escuadras en la parte alta)');
+  if (inc) {
+    ctx.unir(G, 'pared', x1, 'Fondo inclinado al mamparo de los asientos (escuadras en la parte alta, donde roza)');
+    // El fondo inclinado no entra en el cálculo automático de uniones (su posición real es girada): se cuentan acá. Va pegado y
+    // atornillado a los cantos de atrás de las bases y los divisores; los estantes no se pegan (apoyan en soportes)
+    const cos = Math.cos(inc.ang);
+    const cantos = [
+      ['base del eléctrico', d1],
+      ['base de la cocina y el agua', x1 - t - (d1 + t)],
+      ['divisor 1', altoDiv / cos],
+      ['divisor 2', altoDiv / cos],
+    ];
+    const largoCantos = cantos.reduce((a, [, l]) => a + l, 0);
+    ctx.unir(G, 'cola', largoCantos, 'Fondo inclinado pegado a los cantos de atrás de las dos bases y los dos divisores');
+    ctx.unir(G, 'directo', largoCantos, 'Tornillos por la cara del fondo inclinado, uno cada 100 mm, a las bases y los divisores', {
+      herraje: 'Tornillo aglomerado 3,5x20 mm',
+      cantidad: Math.ceil(largoCantos / 100),
+    });
+  } else {
+    ctx.unir(G, 'pared', x1, 'Fondo al mamparo de los asientos (escuadras en la parte alta)');
+  }
   ctx.anclaje(G, 'Piso de la van', 'Escuadras L a la base y tornillos al listón del piso, con butilo', 8, 'Sellar los agujeros');
   ctx.anclaje(G, 'Pared izquierda', 'Escuadras L al costado izquierdo', 4, 'Remache o autoperforante');
   ctx.anclaje(G, 'Pared derecha', 'Escuadras L al costado derecho', 4, 'Remache o autoperforante; revisar que no tape la puerta corrediza');
-  ctx.anclaje(G, 'Mamparo', 'Escuadras L al fondo, arriba y abajo', 6, 'Dejar el pasacables del eléctrico sin tapar');
+  ctx.anclaje(
+    G,
+    'Mamparo',
+    inc ? 'Escuadras L al fondo inclinado, en la parte alta, contra el mamparo' : 'Escuadras L al fondo, arriba y abajo',
+    6,
+    inc ? 'Abajo el fondo no toca el metal: queda con aire. Dejar el pasacables del eléctrico sin tapar' : 'Dejar el pasacables del eléctrico sin tapar',
+  );
 
   // Herrajes
   ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 4, 'Dos en la puerta de la garrafa (bisagra a la derecha) y dos en la puerta lateral del compartimento eléctrico');

@@ -4,7 +4,7 @@
 import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
-import { Caja, PlacaCortada, aplicarFade, m, tieneContorno } from './Piezas3D.jsx';
+import { Caja, PlacaCortada, Inclinada, aplicarFade, m, tieneContorno } from './Piezas3D.jsx';
 import { colorTornillo } from '../engine/uniones.js';
 import { TIEMPOS } from '../engine/secuencia.js';
 
@@ -52,12 +52,14 @@ function Vuelo({ rep, ev, parte, color, bordes }) {
   useFrame(actualizar);
 
   const comun = { x: parte.x, y: parte.y, z: parte.z, sx: parte.sx, sy: parte.sy, sz: parte.sz, color, bordes };
+  // El fondo inclinado se define parado y se dibuja girado sobre su borde de abajo-atrás
+  const girar = (hijo) => (parte.inclinada ? <Inclinada inc={parte.inclinada}>{hijo}</Inclinada> : hijo);
   return (
     <>
       <group ref={fantasma}>
-        <Caja x={parte.x} y={parte.y} z={parte.z} sx={parte.sx} sy={parte.sy} sz={parte.sz} color="#ff4f8b" opacidad={0.14} bordes="#ff4f8b" />
+        {girar(<Caja x={parte.x} y={parte.y} z={parte.z} sx={parte.sx} sy={parte.sy} sz={parte.sz} color="#ff4f8b" opacidad={0.14} bordes="#ff4f8b" />)}
       </group>
-      <group ref={g}>{tieneContorno(parte) ? <PlacaCortada p={parte} {...comun} /> : <Caja {...comun} />}</group>
+      <group ref={g}>{girar(tieneContorno(parte) ? <PlacaCortada p={parte} {...comun} /> : <Caja {...comun} />)}</group>
     </>
   );
 }

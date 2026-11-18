@@ -59,6 +59,10 @@ export const CONFIG_INICIAL = {
     // Interiores de 620 (eléctrica con la heladera arriba), 330 (cocina) y 550 (agua con los bidones girados): suman 1500
     divisor1: 635, // fin de la sección eléctrica
     divisor2: 980, // fin de la cocina
+    // Variante: el fondo se inclina para seguir la separación metálica y los asientos (perfil medido en data/perfilMamparo.js).
+    // Apagada por defecto: con ella el mueble gana fondo abajo y pierde unos milímetros arriba
+    fondoInclinado: false,
+    aireFondo: 10, // mm que queda entre el fondo inclinado y el metal o los asientos
   },
 
   // Cama extensible de 71 a 120 cm, hecha con dos placas en peine: cada una se corta con ranuras abiertas hacia el pasillo y

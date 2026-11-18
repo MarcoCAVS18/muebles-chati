@@ -4,6 +4,7 @@ import { trasero } from './trasero.js';
 import { cama } from './cama.js';
 import { derecho } from './derecho.js';
 import { calcularUniones } from './uniones.js';
+import { planoFondo } from './fondoInclinado.js';
 
 const solapa = (a, b) => {
   const tol = 0.5;
@@ -45,9 +46,11 @@ export function construir(cfg) {
   const avisos = [...ctx.avisos];
   const partes = ctx.partes;
 
-  // Límites de la van
+  // Límites de la van. Con el fondo inclinado el mueble trasero entra en el hueco que deja la separación metálica detrás del mamparo
+  const holguraFondo = cfg.trasero.fondoInclinado ? Math.max(0, planoFondo(cfg).gananciaPiso) + 1 : 0;
   for (const p of partes) {
-    if (p.x < -0.5 || p.y < -0.5 || p.z < -0.5 || p.x + p.sx > van.ancho + 0.5 || p.y + p.sy > van.alto + 0.5 || p.z + p.sz > van.largo + 0.5) {
+    const zTope = van.largo + (p.grupo === 'Mueble trasero' ? holguraFondo : 0);
+    if (p.x < -0.5 || p.y < -0.5 || p.z < -0.5 || p.x + p.sx > van.ancho + 0.5 || p.y + p.sy > van.alto + 0.5 || p.z + p.sz > zTope + 0.5) {
       avisos.push(`${p.id} (${p.nombre}) se sale del interior de la van.`);
     }
   }

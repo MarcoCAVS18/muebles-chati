@@ -13,6 +13,8 @@ import { armarTutorial, agujerosDe, caladosDe } from '../src/engine/tutorial.js'
 import { rolDe, ROLES, ESTADOS, estadoDe, oscurecer } from '../src/engine/colores.js';
 import { TENEMOS_INICIAL } from '../src/data/stock.js';
 import { planAbrir, llaveCajon } from '../src/engine/abrir.js';
+import { planoFondo } from '../src/engine/fondoInclinado.js';
+import { PERFIL_MAMPARO } from '../src/data/perfilMamparo.js';
 
 const data = construir(CONFIG_INICIAL);
 const plan = planificar(data.partes, CONFIG_INICIAL);
@@ -128,7 +130,8 @@ exigir(cfgI.cama.varillasPie === 3 && cfgI.cama.varillasCabecera === 6 && cfgI.c
 }
 exigir(Math.abs(vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL) >= 0 && vn.largo - cfgI.cama.largo - cfgI.trasero.profundidadL < vn.archInicio, 'la cama más la L deberían terminar antes del pasarruedas');
 exigir(cfgI.trasero.ancho === 1560 && cfgI.trasero.ancho <= cfgI.van.ancho, 'el mueble trasero debería medir 1560 mm de ancho y caber en la van');
-exigir(tra.every((p) => p.z + p.sz <= cfgI.van.largo + 0.5), 'el mueble trasero se sale del mamparo');
+// Con el fondo inclinado el mueble entra en el hueco que deja la separación metálica: se controla en su propio bloque
+exigir(cfgI.trasero.fondoInclinado || tra.every((p) => p.z + p.sz <= cfgI.van.largo + 0.5), 'el mueble trasero se sale del mamparo');
 
 // Cada equipo y cada cable tiene un video propio (sin caer en el video genérico) y una ficha
 const ids = [...data.equipos, ...e3.equipos].map((e) => e.id);
@@ -319,7 +322,9 @@ exigir(e3.cables.some((c) => c.hasta === 'bomba') && CARGAS_INICIALES.some((c) =
 
 // ---- Modo pieza: contorno, descripción de cortes, cámara y cotas ----
 const conContorno = data.partes.filter((p) => contorno(p));
-exigir(conContorno.length === 14, `deberían tener contorno propio 14 piezas (2 placas, 2 juegos de varillas, el frente del pie con su puerta, 2 costados fijos, 2 portales, 2 puertas de los módulos, el costado izquierdo con su puerta y la base de la cocina con su asiento), hay ${conContorno.length}`);
+// Con el fondo inclinado se suman 3: el costado derecho y los dos divisores, que llevan el borde de atrás inclinado
+const contornosEsperados = cfgI.trasero.fondoInclinado ? 17 : 14;
+exigir(conContorno.length === contornosEsperados, `deberían tener contorno propio ${contornosEsperados} piezas (2 placas, 2 juegos de varillas, el frente del pie con su puerta, 2 costados fijos, 2 portales, 2 puertas de los módulos, el costado izquierdo con su puerta y la base de la cocina con su asiento${cfgI.trasero.fondoInclinado ? ', más el costado derecho y los 2 divisores inclinados' : ''}), hay ${conContorno.length}`);
 const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
 const pie = data.partes.find((p) => /^Placa del pie/.test(p.nombre));
 exigir(contorno(cab).esquinas === 4 && contorno(cab).peine && !contorno(cab).recorte, 'la placa de la cabecera debería ser un peine de 4 esquinas redondeadas, sin recorte');
@@ -492,7 +497,7 @@ function L_E() {
   const L = disposicionTrasero(cfgI);
   const fondos = tra.filter((p) => /^Fondo /.test(p.nombre));
   exigir(fondos.length === 2 && Math.abs(fondos.reduce((s, p) => s + p.sx, 0) - (L.x1 - 2 * L.t)) < 0.5, 'las dos mitades del fondo deberían sumar el ancho interior del mueble');
-  exigir(fondos.every((p) => Math.abs(p.z + p.sz - L.zB) < 0.5), 'el fondo debería apoyar contra el mamparo');
+  exigir(cfgI.trasero.fondoInclinado || fondos.every((p) => Math.abs(p.z + p.sz - L.zB) < 0.5), 'el fondo debería apoyar contra el mamparo');
   const apoyos = tra.filter((p) => /^Apoyo bajo la base/.test(p.nombre));
   exigir(apoyos.length === 6 && apoyos.every((p) => p.y === 0 && Math.abs(p.sy - L.yBase) < 0.5), 'deberían ser 6 apoyos que llenan el hueco entre el piso y la base');
   const delanteras = tra.filter((p) => / - delantera$/.test(p.nombre));
@@ -637,6 +642,95 @@ function L_E() {
   // Las uniones del instructivo (primer tornillo a 30 mm, no más de 150 mm entre tornillos en la madera de 15 mm)
   for (const j of data.juntas.filter((x) => x.cantidad > 1 && x.tornillo.largo >= 25 && !x.desmontable)) {
     exigir(j.paso <= 160, `la unión ${j.id} separa los tornillos ${j.paso} mm: el máximo es 150 mm`);
+  }
+}
+
+// ---- Variante: fondo inclinado (se prueba siempre, con su propia configuración, aunque esté apagada por defecto) ----
+{
+  const cfgV = structuredClone(CONFIG_INICIAL);
+  cfgV.trasero.fondoInclinado = true;
+  const dv = construir(cfgV);
+  const pv = planificar(dv.partes, cfgV);
+  const tv = dv.partes.filter((p) => p.grupo === 'Mueble trasero');
+  const base0 = construir({ ...structuredClone(CONFIG_INICIAL), trasero: { ...CONFIG_INICIAL.trasero, fondoInclinado: false } });
+  const plano = planoFondo(cfgV);
+  const Lv = disposicionTrasero(cfgV);
+  exigir(dv.avisos.length === 0 && pv.lista.avisos.length === 0, `el fondo inclinado no debería dar avisos: ${[...dv.avisos, ...pv.lista.avisos]}`);
+  // Mismas piezas, mismos ids y en el mismo orden: solo cambian los nombres de los dos fondos
+  exigir(dv.partes.length === base0.partes.length && dv.partes.every((q, i) => q.id === base0.partes[i].id), 'el fondo inclinado no debería mover los ids de las piezas');
+  // El plano que sale de las medidas: unos 10,9 grados y unos 14 cm más de fondo en el piso con 1 cm de aire
+  exigir(Math.abs(plano.grados - 10.9) < 0.15 && plano.gananciaPiso > 140 && plano.gananciaPiso < 147, `el plano del fondo inclinado debería salir de unos 10,9 grados y 143 mm en el piso, salió ${plano.grados.toFixed(2)} grados y ${plano.gananciaPiso.toFixed(1)} mm`);
+  // El plano no toca la separación ni los asientos: la cara de atrás queda al menos 'aire' mm antes de lo medido
+  for (let y = plano.yIni; y <= plano.yFin; y += 5) {
+    let sup = PERFIL_MAMPARO[PERFIL_MAMPARO.length - 1][1];
+    for (let i = 1; i < PERFIL_MAMPARO.length; i++) {
+      if (y <= PERFIL_MAMPARO[i][0]) {
+        const [y0, d0] = PERFIL_MAMPARO[i - 1];
+        const [y1, d1] = PERFIL_MAMPARO[i];
+        sup = d0 + ((d1 - d0) * (y - y0)) / (y1 - y0);
+        break;
+      }
+    }
+    exigir(plano.sAtras(y) <= sup - plano.aire + 0.01, `el fondo inclinado toca lo medido a ${y} mm de altura (sale ${plano.sAtras(y).toFixed(1)} y hay ${sup.toFixed(1)} libres)`);
+  }
+  // Los dos fondos: parados, con el largo de la pendiente, y giran sobre su borde de abajo-atrás: arriba llegan a la altura de las tapas
+  const fondosV = tv.filter((p) => /^Fondo /.test(p.nombre));
+  exigir(fondosV.length === 2 && fondosV.every((p) => p.inclinada && /inclinado/.test(p.nombre)), 'los dos fondos deberían ser inclinados');
+  exigir(Math.abs(fondosV.reduce((a, p) => a + p.sx, 0) - (Lv.x1 - 2 * Lv.t)) < 0.5, 'las dos mitades del fondo inclinado deberían sumar el ancho interior');
+  for (const f of fondosV) {
+    exigir(Math.abs(f.sz - Lv.tb) < 1e-6 && Math.abs(f.sy - plano.largoFondo) < 0.1, `el fondo ${f.id} debería medir ${plano.largoFondo.toFixed(1)} sobre la pendiente y ${Lv.tb} de espesor`);
+    // Esquina de arriba-atrás después de girar: (dy, dz) = (largo, 0) respecto del pivote, girado -ang sobre x
+    const ang = f.inclinada.ang;
+    const yTop = f.inclinada.y + f.sy * Math.cos(ang);
+    const zTop = f.inclinada.z - f.sy * Math.sin(ang);
+    exigir(Math.abs(yTop - plano.yFin) < 0.2 && Math.abs(zTop - plano.zAtras(plano.yFin)) < 0.2, `el fondo ${f.id} girado debería terminar arriba en y=${plano.yFin}, z=${plano.zAtras(plano.yFin).toFixed(1)}; termina en y=${yTop.toFixed(1)}, z=${zTop.toFixed(1)}`);
+    exigir(f.inclinada.z - f.sz >= f.z - 0.01 && Math.abs(f.z + f.sz - f.inclinada.z) < 0.01, `el pivote de ${f.id} debería ser su borde de abajo-atrás`);
+    exigir(pv.lista.placas.fondo.some((q) => q.id === f.id && [q.L, q.A].some((v) => Math.abs(v - f.sy) < 0.1) && Math.abs(q.t - Lv.tb) < 0.1), `el despiece de ${f.id} debería traer su largo real sobre la pendiente`);
+  }
+  // Las piezas horizontales llegan hasta la cara de adelante del fondo (a ras, sin entrar ni dejar luz grande)
+  for (const p of tv.filter((q) => /^(Base \(|Estante)/.test(q.nombre))) {
+    const zFin = p.z + p.sz;
+    const lim = plano.zFrente(p.y + p.sy);
+    exigir(zFin <= lim + 0.01 && zFin >= lim - 1.01, `${p.id} (${p.nombre}) debería terminar contra la cara de adelante del fondo (termina ${zFin}, el fondo está en ${lim.toFixed(1)})`);
+  }
+  // Los costados y los divisores llevan el borde de atrás inclinado: más largos abajo que arriba, y con el calado de la puerta intacto
+  for (const p of tv.filter((q) => /^(Costado (izquierdo|derecho)$|Divisor)/.test(q.nombre))) {
+    const s = p.silueta;
+    exigir(s && s.tipo === 'atrasInclinado' && s.uAb > s.uAr && Math.abs(s.uAb - p.sz) < 0.01, `${p.id} (${p.nombre}) debería llevar el borde de atrás inclinado`);
+    exigir(Math.abs(s.grados - plano.grados) < 1e-6, `${p.id} debería tener la misma inclinación del fondo`);
+    const c = contorno(p);
+    exigir(c && c.silueta === s && Math.abs(Math.atan((s.uAb - s.uAr) / s.h) * 180 / Math.PI - plano.grados) < 0.3, `el contorno de ${p.id} debería seguir el fondo`);
+  }
+  const costI = tv.find((p) => p.nombre === 'Costado izquierdo');
+  exigir(contorno(costI).huecos.length === 1 && contorno(costI).huecos[0].tipo === 'puerta', 'el costado izquierdo inclinado debería conservar el calado de la puerta lateral');
+  exigir(describirPieza(costI, cfgV).lineas.some((l) => /inclinado/.test(l.texto)) && describirPieza(costI, cfgV).lineas.some((l) => /puerta/i.test(l.texto)), 'la ficha del costado izquierdo inclinado debería describir el corte inclinado y el calado');
+  // Todo cabe en la van: lo único que pasa del mamparo es el hueco de la separación metálica, hasta lo que gana en el piso
+  exigir(tv.every((p) => p.z + p.sz <= cfgV.van.largo + plano.gananciaPiso + 1.01), 'el mueble trasero se pasa del hueco que deja la separación');
+  // Uniones: el fondo no entra en las automáticas y se cuentan a mano (cola y tornillos 3,5x20)
+  exigir(fondosV.every((f) => dv.juntasPorPieza[f.id].juntas.length === 0), 'el fondo inclinado no debería tener uniones automáticas');
+  exigir(dv.uniones.some((u) => u.tipo === 'cola' && /Fondo inclinado/.test(u.detalle)) && dv.uniones.some((u) => u.tipo === 'directo' && /fondo inclinado/i.test(u.detalle) && u.herraje === 'Tornillo aglomerado 3,5x20 mm' && u.cantidad > 20), 'faltan las uniones a mano del fondo inclinado');
+  // Ningún equipo ni cable entra en la madera del fondo inclinado (por debajo de las tapas)
+  const e3v = electrico3d(cfgV);
+  for (const e of [...dv.equipos, ...e3v.equipos]) {
+    if (e.x === undefined || e.y + e.sy > plano.yFin || e.z + e.sz < cfgV.van.largo - 700 || e.z > cfgV.van.largo + 50) continue;
+    exigir(e.z + e.sz <= plano.zFrente(e.y + e.sy) + 0.01, `${e.nombre} entra en el fondo inclinado (llega a z=${(e.z + e.sz).toFixed(1)} y el fondo está en ${plano.zFrente(e.y + e.sy).toFixed(1)})`);
+  }
+  for (const c of e3v.cables) {
+    for (const [x, y, z] of c.puntos) {
+      if (y < plano.yIni || y > plano.yFin || z < cfgV.van.largo - 700) continue;
+      exigir(z <= plano.zFrente(y) + 0.01 || z >= plano.zAtras(y) - 0.01, `el cable ${c.id} pasa por dentro de la madera del fondo inclinado en (${x.toFixed(0)}, ${y.toFixed(0)}, ${z.toFixed(0)})`);
+    }
+  }
+  // El cable largo atraviesa el fondo por el agujero de 20 mm (no por una muesca) y el pasacables queda en el espesor del fondo
+  const agV = agujerosDe(dv, e3v).filter((a) => /^Fondo eléctrico/.test(a.nombre));
+  exigir(agV.length === 1 && /Agujero de 20 mm/.test(agV[0].que) && /^a 603 mm del lado izquierdo/.test(agV[0].donde), `el cable largo debería atravesar el fondo inclinado por un agujero de 20 mm: ${JSON.stringify(agV)}`);
+  const pasa = e3v.decos.find((d) => d.clave === 'pasacables');
+  exigir(pasa && pasa.z >= plano.zFrente(pasa.y + pasa.sy / 2) - 8 && pasa.z + pasa.sz >= plano.zAtras(pasa.y + pasa.sy / 2) - 2, 'el pasacables debería quedar en el espesor del fondo inclinado');
+  // El resto del mueble no cambia: mismas piezas de los frentes, tapas y cajones
+  for (const re of [/^Tapa /, /^Frente /, /^Zócalo/, /^Cajón /]) {
+    const a = tv.filter((p) => re.test(p.nombre)).map((p) => [p.nombre, p.x, p.y, p.z, p.sx, p.sy, p.sz].join());
+    const b = base0.partes.filter((p) => p.grupo === 'Mueble trasero' && re.test(p.nombre)).map((p) => [p.nombre, p.x, p.y, p.z, p.sx, p.sy, p.sz].join());
+    exigir(a.join('|') === b.join('|'), `con el fondo inclinado no deberían cambiar ${re}`);
   }
 }
 process.exit(fallos ? 1 : 0);
