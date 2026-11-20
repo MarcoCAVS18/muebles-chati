@@ -77,6 +77,10 @@ export const CONFIG_INICIAL = {
     plataforma: 400, // altura de la cara superior: pasarruedas izquierdo (380) + fieltro (5) + placa (15)
     fieltro: 5, // entre las placas y el pasarruedas izquierdo
     largoCabecera: 1200, // largo del módulo de la cabecera (el otro, de 600 mm, va al pie)
+    // Variante: base de piso reforzada, como la armó Marco en el taller. Cada módulo lleva un marco de piso de listones de 45 x 45
+    // (sus dos refuerzos y dos rieles, uno al borde del pasillo y otro sobre la cara del pasarruedas) y de ahí salen postes
+    // verticales hasta los listones de pared y los largueros. Apagada por defecto: no cambia ninguna pieza del modelo actual
+    baseReforzada: false,
     // Peine: ranuras abiertas hacia el pasillo (el fondo lleva esquinas redondeadas). Todas las ranuras miden ranura.ancho en las
     // dos placas y el peine queda centrado en cada placa (misma madera en los dos extremos); con ranura.ancho en 0, el ancho sale
     // de repartir las varillas en la bahía. El dedo fijo que queda entre dos ranuras mide lo mismo (dedo: 1 = igual que la ranura)

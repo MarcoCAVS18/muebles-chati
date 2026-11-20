@@ -107,6 +107,17 @@ Detrás del mueble trasero, la separación metálica y los asientos dejan un hue
 - Los fondos inclinados no entran en el cálculo automático de uniones: sus uniones (cola y tornillos 3,5x20 cada 100 mm a las bases y los divisores) están escritas a mano en `trasero.js` y suman a Fijaciones y Compras.
 - `node scripts/check.mjs` prueba siempre las dos versiones: que el plano no toque lo medido, que los equipos y cables no entren en el fondo y que nada más se mueva.
 
+## Base reforzada de la cama (variante opcional)
+
+En «Medidas», sección «Cama», el casillero **Base reforzada** (apagado por defecto) agrega la base que se armó en el taller. Cada módulo se arma sobre un marco de piso de listones de 45 x 45 (sus dos refuerzos de piso y dos rieles) y de ahí salen postes verticales de 30 x 30 hasta los listones de pared y los largueros.
+
+- Los dos rieles de cada módulo son el del pasillo y el de la cara del pasarruedas (a 190 mm de la pared). El del pasillo es el listón de las bisagras (CAM-11 y CAM-13) hecho de 45 x 45 y al piso, en el mismo lugar y con el mismo id: es lo único existente que cambia, y solo con la variante prendida. Se suman 12 maderas al final de la cama (CAM-33 a CAM-44): riel del pie, riel de la cabecera, listón de piso contra la pared del pie, viga del medio de la cabecera y 8 postes. Ningún otro id ni medida se mueve.
+- Los postes van sobre los marcos o la viga y suben hasta la cara de abajo de los listones de pared y de los largueros (355 mm); los dos de junto al panel central llegan hasta la placa (385 mm). El de la cabecera pegado al final del pasarruedas apoya en el piso porque ahí no se armó listón de piso.
+- El tutorial suma dos pasos antes de las cajas («Marcos de piso» y «Postes verticales») y los refuerzos y los rieles se arman ahí, no más adelante. El armado animado sigue ese orden.
+- Dos uniones de madera contra madera de la misma sección no entran en el cálculo automático: están escritas a mano en `cama.js` y suman a Fijaciones y Compras (cola y tornillos 4x80 de testa, y 4x50 en los postes).
+- Las medidas salen de las fotos del taller y de las posiciones del modelo, no de una medición con metro: confirmar la posición de los rieles de la cara del pasarruedas y la altura real de los postes.
+- `node scripts/check.mjs` prueba siempre las dos versiones: que no cambie ninguna otra madera, que nada se cruce y que cada poste apoye abajo y arriba.
+
 ## Dónde cambiar cosas
 
 - `src/data/defaults.js`: medidas de la van, materiales, equipos y consumos iniciales.

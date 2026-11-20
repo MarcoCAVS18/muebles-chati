@@ -404,11 +404,11 @@ exigir(!data.partes.some((p) => p.grupo === 'Cama' && /cajón|Cajón/.test(p.nom
 // Las puertas quedan fijas en la caja (no salen con la extensión), bajan sobre su borde de abajo y las bisagras van a un listón fijo pegado al costado cerrado
 exigir(frentesCajon.every((p) => !p.ext && p.bisagraAbajo), 'las puertas de la cama deberían quedar fijas en la caja y bajar sobre su borde de abajo');
 {
-  const lb = data.partes.filter((p) => /^Listón de las bisagras/.test(p.nombre));
+  const lb = data.partes.filter((p) => /^(Listón de las bisagras|Riel del pasillo)/.test(p.nombre));
   exigir(lb.length === 2 && lb.every((p) => !p.ext && Math.abs(p.x + p.sx - costados[0].x) < 0.01), 'los listones de las bisagras deberían quedar fijos contra la cara de adentro del costado cerrado');
   for (const f of frentesCajon) {
     const l = lb.find((q) => q.z <= f.z + 3 && q.z + q.sz >= f.z + f.sz - 3);
-    exigir(l && l.y + l.sy <= f.y && f.y - (l.y + l.sy) <= 5, `${f.id} debería tener su listón de bisagras justo bajo el borde de abajo`);
+    exigir(l && (cfgI.cama.baseReforzada ? Math.abs(l.y + l.sy - f.y) <= 5 : l.y + l.sy <= f.y && f.y - (l.y + l.sy) <= 5), `${f.id} debería tener su listón de bisagras justo bajo el borde de abajo`);
     exigir((f.huecos || []).length === 1 && f.huecos[0].tipo === 'agarradera', `${f.id} debería llevar su agarradera`);
   }
   const bisag = data.herrajes.find((h) => h.grupo === 'Cama' && /Bisagra de cazoleta/.test(h.nombre));
@@ -550,7 +550,7 @@ function L_E() {
   exigir(ESTADOS.tenemos.color !== ESTADOS.falta.color, 'los dos colores de la madera deberían ser distintos');
   exigir(!Object.values(ROLES).some((r) => r.color === ESTADOS.tenemos.color || r.color === ESTADOS.falta.color), 'los colores de tenemos y falta no deberían repetir los de los roles');
   const set = new Set(TENEMOS_INICIAL);
-  exigir(data.partes.filter((p) => p.tipo === 'liston').every((p) => set.has(p.id)), 'todos los listones están cortados: deberían figurar como que ya los tenemos');
+  exigir(data.partes.filter((p) => p.tipo === 'liston' && !/^(Riel del pie|Riel de la cabecera|Listón de piso|Viga del medio|Poste)/.test(p.nombre)).every((p) => set.has(p.id)), 'todos los listones están cortados: deberían figurar como que ya los tenemos');
   exigir(data.partes.filter((p) => p.grupo === 'Cama' && /^CAM-(0[1-7]|1[135-9]|2\d|30|3[12])$/.test(p.id)).every((p) => estadoDe(p, set) === 'tenemos'), 'las maderas de la lista deberían figurar como que ya las tenemos');
   exigir(data.partes.filter((p) => p.grupo !== 'Cama').every((p) => estadoDe(p, set) === 'falta'), 'las maderas de los otros muebles deberían figurar como que faltan');
   for (const id of ['CAM-10', 'CAM-12', 'CAM-14']) exigir(estadoDe(data.partes.find((p) => p.id === id), set) === 'falta', `${id} debería figurar como que falta`);
@@ -620,7 +620,7 @@ function L_E() {
   exigir(sumaCantidad === data.tornillos.length, 'la cantidad de tornillos del 3D debería coincidir con la de las uniones');
   // Las placas de la cama se atornillan desde arriba, sin cola, a sus apoyos
   const juntasPlaca = data.juntas.filter((j) => /^Placa (de la|del)/.test(porId.get(j.cara).nombre) || /^Placa (de la|del)/.test(porId.get(j.canto).nombre));
-  exigir(juntasPlaca.length === 6 && juntasPlaca.reduce((t, j) => t + j.cantidad, 0) >= 20 && juntasPlaca.every((j) => j.eje === 'y' && j.sentido === -1 && !j.cola && /^Placa (de la|del)/.test(porId.get(j.cara).nombre)), 'las placas de la cama deberían atornillarse solo desde arriba y sin cola');
+  exigir(juntasPlaca.length === (cfgI.cama.baseReforzada ? 8 : 6) && juntasPlaca.reduce((t, j) => t + j.cantidad, 0) >= 20 && juntasPlaca.every((j) => j.eje === 'y' && j.sentido === -1 && !j.cola && /^Placa (de la|del)/.test(porId.get(j.cara).nombre)), 'las placas de la cama deberían atornillarse solo desde arriba y sin cola');
   // El piso de 9 mm de un cajón lleva tornillos de 3,5x30, el resto de las maderas de 15 mm lleva 4x40 en canto y 4x25 cara contra cara
   const pisosCajon = data.juntas.filter((j) => /piso del cajón$/.test(porId.get(j.canto).nombre));
   exigir(pisosCajon.length > 0 && pisosCajon.every((j) => j.tornillo.d === 3.5 && j.tornillo.largo === 30), 'el piso de 9 mm de los cajones debería llevar tornillos de 3,5x30');
@@ -732,5 +732,80 @@ function L_E() {
     const b = base0.partes.filter((p) => p.grupo === 'Mueble trasero' && re.test(p.nombre)).map((p) => [p.nombre, p.x, p.y, p.z, p.sx, p.sy, p.sz].join());
     exigir(a.join('|') === b.join('|'), `con el fondo inclinado no deberían cambiar ${re}`);
   }
+}
+// ---- Variante: base reforzada de la cama (se prueba siempre, con su propia configuración, aunque esté apagada por defecto) ----
+{
+  const cfgB = structuredClone(CONFIG_INICIAL);
+  cfgB.cama.baseReforzada = true;
+  const db = construir(cfgB);
+  const pb = planificar(db.partes, cfgB);
+  const b0 = construir({ ...structuredClone(CONFIG_INICIAL), cama: { ...CONFIG_INICIAL.cama, baseReforzada: false } });
+  exigir(db.avisos.length === 0 && pb.lista.avisos.length === 0, `la base reforzada no debería dar avisos: ${[...db.avisos, ...pb.lista.avisos]}`);
+  const camB = db.partes.filter((p) => p.grupo === 'Cama');
+  const cam0 = b0.partes.filter((p) => p.grupo === 'Cama');
+  // Nada de lo que ya estaba cambia: mismos ids y mismas medidas, salvo los dos listones de las bisagras (ahora rieles de 45 x 45 al piso, mismo id)
+  exigir(camB.length === cam0.length + 12, `la base reforzada debería sumar 12 maderas a la cama (suma ${camB.length - cam0.length})`);
+  exigir(db.partes.length === b0.partes.length + 12, 'la base reforzada solo debería agregar maderas a la cama');
+  const bisagrasIds = cam0.filter((p) => /^Listón de las bisagras/.test(p.nombre)).map((p) => p.id);
+  for (const q of cam0) {
+    const n = camB.find((p) => p.id === q.id);
+    if (bisagrasIds.includes(q.id)) continue;
+    exigir(n && [n.nombre, n.x, n.y, n.z, n.sx, n.sy, n.sz].join() === [q.nombre, q.x, q.y, q.z, q.sx, q.sy, q.sz].join(), `con la base reforzada no debería cambiar ${q.id} (${q.nombre})`);
+  }
+  exigir(db.partes.filter((p) => p.grupo !== 'Cama').every((q) => { const o = b0.partes.find((p) => p.id === q.id); return o && [o.x, o.y, o.z, o.sx, o.sy, o.sz].join() === [q.x, q.y, q.z, q.sx, q.sy, q.sz].join(); }), 'la base reforzada no debería mover los otros muebles');
+  // Los rieles del pasillo ocupan el lugar de los listones de las bisagras: mismo z y mismo largo, 45 x 45 al piso contra el costado
+  for (const id of bisagrasIds) {
+    const o = cam0.find((p) => p.id === id);
+    const n = camB.find((p) => p.id === id);
+    exigir(/^Riel del pasillo/.test(n.nombre) && n.mat === 'l45x45' && n.x === 660 && n.sx === 45 && n.y === 0 && n.sy === 45 && n.z === o.z && n.sz === o.sz, `${id} debería ser el riel del pasillo (45 x 45 al piso, en el lugar del listón de las bisagras)`);
+  }
+  // Lo que agrega: dos rieles sobre la cara del pasarruedas, un listón contra la pared en el pie, una viga en la cabecera y 8 postes
+  const nuevas = camB.slice(cam0.length);
+  const caja = (re) => nuevas.filter((p) => re.test(p.nombre));
+  const rielP = caja(/^Riel del pie/)[0];
+  const rielC = caja(/^Riel de la cabecera/)[0];
+  const listonP = caja(/^Listón de piso del pie/)[0];
+  const viga = caja(/^Viga del medio/)[0];
+  const postes = caja(/^Poste/);
+  exigir(rielP && rielC && listonP && viga && postes.length === 8, 'faltan piezas de la base reforzada');
+  exigir(rielP.x === 190 && rielP.sx === 45 && rielP.z === 100 && Math.abs(rielP.sz - 487.5) < 0.01, `el riel del pie debería ir a 190 mm de la pared, de 100 a 587,5 mm: ${rielP.x} ${rielP.z} ${rielP.sz}`);
+  exigir(rielC.x === 190 && rielC.z === 1120 && rielC.z + rielC.sz === 1780, 'el riel de la cabecera debería ir desde el final del pasarruedas (1120) hasta el refuerzo de la tapa (1780)');
+  exigir(listonP.x === 10 && listonP.z === 100 && listonP.z + listonP.sz === 320, 'el listón contra la pared del pie debería ir de 100 a 320 mm (hasta el pasarruedas)');
+  exigir(viga.x === 235 && viga.x + viga.sx === 660 && viga.z === 1211, 'la viga del medio debería ir entre los dos rieles de la cabecera, a la mitad de los largueros');
+  // Ninguna madera nueva se cruza con otra del modelo
+  const cruza = (a, b) => a.x < b.x + b.sx - 0.01 && b.x < a.x + a.sx - 0.01 && a.y < b.y + b.sy - 0.01 && b.y < a.y + a.sy - 0.01 && a.z < b.z + b.sz - 0.01 && b.z < a.z + a.sz - 0.01;
+  for (const n of nuevas) {
+    for (const q of db.partes) {
+      if (q.id === n.id) continue;
+      exigir(!cruza(n, q), `${n.id} (${n.nombre}) se cruza con ${q.id} (${q.nombre})`);
+    }
+    exigir(n.x >= 10 - 0.01 && n.x + n.sx <= 705 + 0.01, `${n.id} se sale del ancho de la caja`);
+  }
+  // Cada poste apoya abajo (el piso o un listón de piso) y arriba (un listón, un larguero o la placa), a ras
+  const toca = (a, b) => a.x < b.x + b.sx - 0.01 && b.x < a.x + a.sx - 0.01 && a.z < b.z + b.sz - 0.01 && b.z < a.z + a.sz - 0.01;
+  for (const p of postes) {
+    const abajo = p.y === 0 || camB.some((q) => q.id !== p.id && Math.abs(q.y + q.sy - p.y) < 0.01 && toca(p, q));
+    const arriba = camB.some((q) => q.id !== p.id && Math.abs(q.y - (p.y + p.sy)) < 0.01 && toca(p, q));
+    exigir(abajo, `${p.id} (${p.nombre}) no apoya abajo`);
+    exigir(arriba, `${p.id} (${p.nombre}) no llega a lo que sostiene arriba`);
+  }
+  // Las uniones a mano de la base están contadas (cola y tornillos de testa y de los postes)
+  exigir(db.uniones.some((u) => u.tipo === 'cola' && /Marcos de piso/.test(u.detalle)) && db.uniones.some((u) => /rieles y viga de piso/.test(u.herraje || '') && u.cantidad === 2 * 10), 'faltan las uniones a mano de los marcos de piso');
+  exigir(db.uniones.filter((u) => /\(postes\)/.test(u.herraje || '')).reduce((t, u) => t + u.cantidad, 0) === 2 * 7 + 2 * 6 + 2 * 4, 'los tornillos de los postes no coinciden con lo esperado');
+  // El despiece trae los listones nuevos: los rieles y la viga de 45 x 45, los postes de 30 x 30
+  exigir(pb.planListones.l45x45 && pb.planListones.l45x45.sinColocar.length === 0 && pb.planListones.l30x30 && pb.planListones.l30x30.sinColocar.length === 0, 'los listones nuevos deberían entrar en las barras');
+  // Tutorial: dos pasos nuevos antes de las cajas, los refuerzos y los rieles se arman ahí y no se repiten
+  const tutB = armarTutorial(db, pb, cfgB, electrico3d(cfgB));
+  const camT = tutB.muebles.find((m) => m.grupo === 'Cama');
+  const idsPasos = camT.pasos.map((x) => x.id);
+  exigir(idsPasos.indexOf('cam-11') >= 0 && idsPasos.indexOf('cam-11') < idsPasos.indexOf('cam-12') && idsPasos.indexOf('cam-12') < idsPasos.indexOf('cam-4'), `los pasos de la base reforzada deberían ir antes de las cajas: ${idsPasos}`);
+  const enPaso = (id) => new Set((camT.pasos.find((x) => x.id === id).piezas || []).map((r) => r.id));
+  const marcos = enPaso('cam-11');
+  exigir(['CAM-20', 'CAM-21', 'CAM-22', 'CAM-23', ...bisagrasIds, rielP.id, rielC.id, listonP.id, viga.id].every((id) => marcos.has(id)), 'el paso de los marcos de piso debería traer refuerzos, rieles, listón de piso y viga');
+  exigir(postes.every((p) => enPaso('cam-12').has(p.id)), 'el paso de los postes debería traer los 8 postes');
+  exigir(!['CAM-20', 'CAM-21', 'CAM-22', 'CAM-23'].some((id) => enPaso('cam-4').has(id)) && !bisagrasIds.some((id) => enPaso('cam-7').has(id)), 'los refuerzos y los rieles no deberían repetirse en las cajas ni en las puertas');
+  // Sin la variante, los pasos nuevos no existen
+  const camT0 = armarTutorial(b0, planificar(b0.partes, CONFIG_INICIAL), CONFIG_INICIAL, electrico3d(CONFIG_INICIAL)).muebles.find((m) => m.grupo === 'Cama');
+  exigir(!camT0.pasos.some((x) => x.id === 'cam-11' || x.id === 'cam-12'), 'sin la base reforzada no debería haber pasos nuevos');
 }
 process.exit(fallos ? 1 : 0);

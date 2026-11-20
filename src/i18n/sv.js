@@ -416,6 +416,7 @@ export default {
       plataforma: 'Plattformens höjd (hjulhus + filt + skiva)',
       fieltro: 'Filt över hjulhuset',
       largoCabecera: 'Längd på huvudmodulen',
+      baseReforzada: 'Förstärkt bas (golvramar och lodräta stolpar)',
       varillasPie: 'Stavar i fotmodulen',
       varillasCabecera: 'Stavar i huvudmodulen',
       ranura: {

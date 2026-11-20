@@ -104,6 +104,7 @@ export const SECCIONES_CFG = [
       { ruta: 'cama.plataforma', etiqueta: 'Altura de la plataforma (pasarruedas + fieltro + placa)' },
       { ruta: 'cama.fieltro', etiqueta: 'Fieltro sobre el pasarruedas' },
       { ruta: 'cama.largoCabecera', etiqueta: 'Largo del módulo de la cabecera' },
+      { ruta: 'cama.baseReforzada', etiqueta: 'Base reforzada (marcos de piso y postes verticales)', tipo: 'check' },
       { ruta: 'cama.varillasPie', etiqueta: 'Varillas del módulo del pie' },
       { ruta: 'cama.varillasCabecera', etiqueta: 'Varillas del módulo de la cabecera' },
       { ruta: 'cama.ranura.ancho', etiqueta: 'Ancho de cada ranura (0 = repartir en la bahía)' },

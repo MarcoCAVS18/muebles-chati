@@ -199,8 +199,10 @@ export function cama(ctx, G) {
       bisagraAbajo: true,
       huecos: [{ tipo: 'agarradera', a0: aAg - 24, a1: aAg, b0: (ancho + 4) / 2 - 50, b1: (ancho + 4) / 2 + 50, r: 11 }],
     });
-    // El listón queda fijo entre los dos refuerzos de piso de su módulo (tope contra cada uno, 10 mm sobre el piso)
-    LST(`Listón de las bisagras (${nombre})`, x1 - t - 30, ve.zocalo - 30, b.z0 + sh, 30, 30, b.z1 - b.z0 - 2 * sh);
+    // El listón queda fijo entre los dos refuerzos de piso de su módulo (tope contra cada uno, 10 mm sobre el piso).
+    // Con la base reforzada es el riel del pasillo: un listón de 45 x 45 al piso, en el mismo lugar y con el mismo id
+    if (ca.baseReforzada) LST45(`Riel del pasillo (${nombre}): lleva las bisagras`, x1 - t - sh, 0, b.z0 + sh, sh, sh, b.z1 - b.z0 - 2 * sh);
+    else LST(`Listón de las bisagras (${nombre})`, x1 - t - 30, ve.zocalo - 30, b.z0 + sh, 30, 30, b.z1 - b.z0 - 2 * sh);
     // Botón push al centro de la puerta, hacia el pasillo
     ctx.boton({ grupo: G, nombre: `Puerta del módulo ${nombre} (bisagras abajo)`, eje: 'x+', x: x1, y: yFrente + altoFrente / 2, z: z0 + ancho / 2 });
     return ancho;
@@ -276,6 +278,58 @@ export function cama(ctx, G) {
   portal('del pie, 60', bahiaPie, zPie, zCentro);
   portal('de la cabecera, 120', bahiaCab, zCentro, zCab);
 
+  // ---- Base reforzada (variante, al final para no mover los ids) ----
+  // Cada módulo se arma sobre un marco de piso de listones de 45 x 45: sus dos refuerzos de piso y dos rieles. Uno de los rieles
+  // es el del pasillo (el listón de las bisagras de arriba, ya hecho de 45 x 45 y al piso); el otro va sobre la línea de la cara
+  // del pasarruedas. Del marco salen postes verticales de 30 x 30 hasta la cara de abajo de los listones de pared y de los
+  // largueros, y los dos de junto al panel central llegan hasta la placa. El pie lleva además un listón al piso contra la pared,
+  // entre su refuerzo y el pasarruedas, y la cabecera una viga en el medio entre sus dos rieles.
+  let base = null;
+  if (ca.baseReforzada) {
+    const xCaja = xArco; // cara del pasarruedas del lado del pasillo
+    const xRielPas = x1 - t - sh; // riel del pasillo (CAM de las bisagras)
+    const zP0 = bahiaPie.z0 + sh;
+    const zP1 = bahiaPie.z1 - sh;
+    const zC0 = bahiaCab.z0 + sh;
+    const zC1 = bahiaCab.z1 - sh;
+    const yLst = yB - 30; // cara de abajo de los listones de pared y de los largueros
+    const poste = (nombre, x, z, y0, y1) => LST(nombre, x, y0, z, 30, y1 - y0, 30);
+
+    // Rieles y listón de piso
+    LST45('Riel del pie (sobre la cara del pasarruedas)', xCaja, 0, zP0, sh, sh, zP1 - zP0);
+    const zRielCab0 = Math.max(zC0, arcoFin); // desde donde termina el pasarruedas
+    LST45('Riel de la cabecera (desde el final del pasarruedas)', xCaja, 0, zRielCab0, sh, sh, zC1 - zRielCab0);
+    const largoPared = arcoIni - zP0;
+    const listonPared = largoPared > 100;
+    if (listonPared) LST45('Listón de piso del pie (contra la pared)', x0, 0, zP0, sh, sh, largoPared);
+
+    // Viga del medio de la cabecera: entre el riel del pasarruedas y el del pasillo, bajo la mitad de los largueros
+    const zMed = (zonaCab.z0 + zonaCab.z1) / 2;
+    const xVigaIni = xCaja + sh;
+    const xVigaFin = xRielPas;
+    const viga = xVigaFin - xVigaIni > 100;
+    if (viga) LST45('Viga del medio de la cabecera (entre los rieles)', xVigaIni, 0, Math.round(zMed - sh / 2), xVigaFin - xVigaIni, sh, sh);
+
+    // Postes (todos de 30 x 30)
+    let nPostes = 0;
+    const nuevo = (nombre, x, z, y0, y1) => {
+      poste(nombre, x, z, y0, y1);
+      nPostes += 1;
+    };
+    nuevo('Poste de la esquina del pie (bajo el listón de pared)', x0, bahiaPie.z0 + 5, sh, yLst);
+    if (listonPared) nuevo('Poste del pie contra el pasarruedas (bajo el listón de pared)', x0, arcoIni - 30, sh, yLst);
+    nuevo('Poste del pie junto al panel central (contra el pasarruedas, hasta la placa)', xCaja, zPanel - 30, sh, yB);
+    nuevo('Poste de la cabecera junto al panel central (contra el pasarruedas, hasta la placa)', xCaja, zPanel + t, sh, yB);
+    if (arcoFin + 30 <= bahiaCab.z1) nuevo('Poste de la cabecera contra el pasarruedas (bajo el listón de pared)', x0, arcoFin, 0, yLst);
+    nuevo('Poste de la esquina de la cabecera (bajo el listón de pared)', x0, bahiaCab.z1 - 5 - 30, sh, yLst);
+    if (viga) {
+      nuevo('Poste del medio bajo el larguero de apoyo (cabecera)', xL1, Math.round(zMed - 15), sh, yLst);
+      nuevo('Poste del medio bajo el larguero de las puntas (cabecera)', xL2, Math.round(zMed - 15), sh, yLst);
+    }
+    base = { rieles: 2 + (listonPared ? 1 : 0), listonPared, viga, postes: nPostes, xCaja, xRielPas, yLst, zMed };
+    ctx.layout.cama.base = base;
+  }
+
   // ---- Uniones ----
   ctx.unir(G, 'cola', 2 * (zonaPie.z1 - zonaPie.z0 + zonaCab.z1 - zonaCab.z0), 'Portales con el lomo móvil y con las puntas de los listones de las correderas');
   ctx.unir(G, 'directo', 0, 'Cada portal, atornillado al canto del lomo móvil (uno cada 150 mm) y a las puntas de los dos listones de las correderas', {
@@ -299,6 +353,30 @@ export function cama(ctx, G) {
     herraje: 'Tornillo aglomerado 4x50 mm (cama al mueble trasero)',
     cantidad: 10,
   });
+  if (base) {
+    // Puntas de listón de piso pegadas de testa: rieles contra los refuerzos (pie: 2 + 2 + el listón de pared; cabecera: 2 + 1) y la viga
+    const puntas = 4 + (base.listonPared ? 1 : 0) + 3 + (base.viga ? 2 : 0);
+    ctx.unir(G, 'cola', puntas * sh, 'Marcos de piso: rieles, listón de piso y viga pegados de testa a los refuerzos de piso y entre sí');
+    ctx.unir(G, 'directo', 0, 'Cada punta de riel o de viga, atornillada de testa a través del listón que la recibe (2 tornillos por punta)', {
+      herraje: 'Tornillo aglomerado 4x80 mm (rieles y viga de piso)',
+      cantidad: 2 * puntas,
+    });
+    const arriba = base.postes - 2; // los dos de junto al panel central llegan hasta la placa
+    const sobreListon = base.postes - (arcoFin + 30 <= bahiaCab.z1 ? 1 : 0); // el de contra el pasarruedas de la cabecera apoya en el piso
+    ctx.unir(G, 'cola', base.postes * 2 * 30, 'Postes pegados abajo (marco o viga de piso) y arriba (listón de pared o larguero)');
+    ctx.unir(G, 'directo', 0, 'Cada poste, 2 tornillos en diagonal en la base hacia el listón de piso', {
+      herraje: 'Tornillo aglomerado 4x50 mm (postes)',
+      cantidad: 2 * sobreListon,
+    });
+    ctx.unir(G, 'directo', 0, 'Cada poste bajo un listón de pared o un larguero, 2 tornillos desde arriba a través del listón (con la placa todavía sin poner)', {
+      herraje: 'Tornillo aglomerado 4x50 mm (postes)',
+      cantidad: 2 * arriba,
+    });
+    ctx.unir(G, 'directo', 0, 'Los postes que tocan el pasarruedas, atornillados a su caja (2 tornillos cada uno)', {
+      herraje: 'Tornillo aglomerado 4x50 mm (postes)',
+      cantidad: 2 * (2 + (base.listonPared ? 1 : 0) + (arcoFin + 30 <= bahiaCab.z1 ? 1 : 0)),
+    });
+  }
   ctx.unir(G, 'pared', ca.largo, 'Listones contra la pared izquierda');
   ctx.anclaje(G, 'Piso de la van', 'Refuerzos de piso, 2 tornillos de 25 mm cada uno (4 por módulo)', 8, 'Sellar los agujeros');
   ctx.anclaje(G, 'Mueble trasero', 'Guía de la cabecera atornillada a los montantes y al travesaño del frente del mueble', 2, 'La cama termina contra ese frente');
@@ -313,7 +391,7 @@ export function cama(ctx, G) {
   );
   ctx.herraje(G, 'Retén o traba para las varillas', 2, 'Para que no salgan solas al frenar');
   ctx.herrajeBotones(G); // un botón push en cada puerta
-  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas de la cama)', 7, 'Tres en la puerta de la cabecera, dos en la del pie y dos en la del frente del pie, sobre el borde de abajo: la puerta baja hasta el piso al abrir. Se atornillan al listón de las bisagras (o al refuerzo de piso en el frente del pie)');
+  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas de la cama)', 7, 'Tres en la puerta de la cabecera, dos en la del pie y dos en la del frente del pie, sobre el borde de abajo: la puerta baja hasta el piso al abrir. Se atornillan al ' + (ca.baseReforzada ? 'riel del pasillo' : 'listón de las bisagras') + ' (o al refuerzo de piso en el frente del pie)');
   ctx.herraje(G, 'Tirador embutido para las varillas', 2, 'Una agarradera al borde del lomo móvil: el borde de 15 mm es muy fino para un botón push');
   ctx.herraje(G, 'Cinta adhesiva de teflón (PTFE) 25 mm', 1, 'Sobre los largueros y el borde del pasarruedas, donde deslizan las varillas');
   ctx.herraje(G, 'Fresadora con fresa de radio o plantilla y lijadora', 1, `Para las esquinas R${R} de las placas y las varillas y para pulir las ranuras`);

@@ -416,6 +416,7 @@ export default {
       plataforma: 'Altura de la plataforma (pasarruedas + fieltro + placa)',
       fieltro: 'Fieltro sobre el pasarruedas',
       largoCabecera: 'Largo del módulo de la cabecera',
+      baseReforzada: 'Base reforzada (marcos de piso y postes verticales)',
       varillasPie: 'Varillas del módulo del pie',
       varillasCabecera: 'Varillas del módulo de la cabecera',
       ranura: {

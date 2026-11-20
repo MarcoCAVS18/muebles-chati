@@ -694,6 +694,10 @@ function cama(data, plan, cfg, e3, cortes) {
   // Lo único de la cama que toca la van: los listones de pared (la pared no es recta) y, más tarde, los refuerzos de piso
   const listonesPared = por(/^Listón de pared/);
   const refuerzos = por(/^Refuerzo de piso/);
+  // Variante de la base reforzada: marcos de piso y postes verticales (el riel del pasillo es el listón de las bisagras)
+  const base = lay.base || null;
+  const rielesPasillo = por(/^Riel del pasillo/);
+  const reBisagras = /^(Listón de las bisagras|Riel del pasillo)/;
   const archIzq = (cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10;
   const anchoModulo = r0(cm.ancho + (portales[0] ? portales[0].sx : 15));
 
@@ -784,12 +788,67 @@ function cama(data, plan, cfg, e3, cortes) {
     ],
   });
 
+  if (base) {
+    const rP = por(/^Riel del pie/)[0];
+    const rC = por(/^Riel de la cabecera/)[0];
+    const lP = por(/^Listón de piso del pie/)[0];
+    const vg = por(/^Viga del medio/)[0];
+    const rielPiePas = rielesPasillo.find((q) => /del pie/.test(q.nombre));
+    const rielCabPas = rielesPasillo.find((q) => /de la cabecera/.test(q.nombre));
+    const refPie = por(/^Refuerzo de piso del módulo del pie/);
+    const refCab = por(/^Refuerzo de piso del módulo de la cabecera/);
+    const largo = (q) => (q ? r0(q.sz) : 0);
+    pasos.push({
+      id: 'cam-11',
+      titulo: 'Marcos de piso: la base de cada módulo',
+      intro: 'Cada módulo se arma sobre un marco de piso de listones de 45 x 45. Es la base de todo lo demás: se arma primero, sobre una superficie plana, y tiene que quedar bien a escuadra. Los refuerzos de piso son los dos lados que cruzan; los rieles son los dos lados largos.',
+      hacer: [
+        `Marco del pie: los refuerzos ${refPie.map((q) => q.id).join(' y ')} cruzados, y entre ellos dos rieles de ${largo(rP)} mm: el del pasillo (${rielPiePas ? rielPiePas.id : ''}) y el de la cara del pasarruedas (${rP ? rP.id : ''}), que queda a ${rP ? r0(rP.x) : ''} mm de la pared de la van. Los rieles van de testa contra los refuerzos: cola y 2 tornillos 4x80 por punta, atravesando el refuerzo.`,
+        lP ? `Listón contra la pared (${lP.id}, ${largo(lP)} mm): sale del refuerzo ${refPie[0] ? refPie[0].id : ''} y llega hasta donde arranca el pasarruedas, a ${r0(lP.x)} mm de la pared. Cola y 2 tornillos 4x80 por la cara del refuerzo.` : 'El pasarruedas empieza pegado al módulo del pie: no hay listón contra la pared.',
+        `Marco de la cabecera: los refuerzos ${refCab.map((q) => q.id).join(' y ')} y dos rieles: el del pasillo (${rielCabPas ? rielCabPas.id : ''}, ${largo(rielCabPas)} mm) y el de la cara del pasarruedas (${rC ? rC.id : ''}, ${largo(rC)} mm), que arranca donde termina el pasarruedas y llega hasta ${refCab[refCab.length - 1] ? refCab[refCab.length - 1].id : ''}. Del lado del pasarruedas la caja de la rueda hace de segundo riel.`,
+        vg ? `Viga del medio (${vg.id}, ${r0(vg.sx)} mm): va entre los dos rieles de la cabecera, a ${r0(vg.z)} mm de la puerta trasera, justo en la mitad de los largueros. Cola y 2 tornillos 4x80 por punta.` : 'La cabecera es corta: no lleva viga del medio.',
+        'Medí las dos diagonales de cada marco: tienen que dar lo mismo, con un par de milímetros de diferencia a lo sumo. Si no, empujá una esquina antes de que seque la cola.',
+        'Las escuadras de chapa que pongas en las esquinas sirven solo para sostener mientras seca la cola: la unión la hacen la cola y los tornillos. Sacalas al final si querés la base solo de madera.',
+      ],
+      piezas: [...f(/^Refuerzo de piso/), ...f(/^Riel/), ...f(/^Listón de piso del pie/), ...f(/^Viga del medio/)],
+      ojo: [
+        'El riel del pasillo ocupa el lugar del listón de las bisagras de antes: es el mismo listón, de 45 x 45 y al piso. Ahí se atornillan después las bisagras de cazoleta de las puertas.',
+        'Los rieles de la cara del pasarruedas quedan 5 mm separados de la caja del modelo. Medí la caja de verdad y, si cambia, ajustá la posición del riel.',
+        'Los marcos se apoyan en el piso y no se fijan todavía: se fijan a la van con los refuerzos, cuando los módulos ya están adentro.',
+      ],
+    });
+
+    const pp = (re) => por(re).map((q) => q.id).join(' y ');
+    pasos.push({
+      id: 'cam-12',
+      titulo: 'Postes verticales: la fortaleza',
+      intro: 'Del marco de piso salen postes verticales de 30 x 30 que sostienen los listones de pared y los largueros. Así la cama no cuelga de la pared ni descansa en el piso de la van: se sostiene sola, sobre su propio marco.',
+      hacer: [
+        `Esquinas del pie: ${pp(/^Poste de la esquina del pie/)} (sobre el refuerzo del frente, bajo el extremo del listón de pared)${por(/^Poste del pie contra el pasarruedas/).length ? ` y ${pp(/^Poste del pie contra el pasarruedas/)} (sobre el listón contra la pared, pegado a la caja del pasarruedas)` : ''}. Miden ${r0(por(/^Poste de la esquina del pie/)[0].sy)} mm.`,
+        `Esquinas de la cabecera: ${pp(/^Poste de la esquina de la cabecera/)} (sobre el refuerzo de la tapa, bajo el otro extremo del listón de pared)${por(/^Poste de la cabecera contra el pasarruedas/).length ? ` y ${pp(/^Poste de la cabecera contra el pasarruedas/)} (pegado al final de la caja del pasarruedas; apoya directo en el piso y mide ${r0(por(/^Poste de la cabecera contra el pasarruedas/)[0].sy)} mm)` : ''}.`,
+        `Junto al panel central: ${pp(/^Poste del pie junto al panel/)} y ${pp(/^Poste de la cabecera junto al panel/)}, uno de cada lado, pegados al panel y a la caja del pasarruedas, sobre los refuerzos de piso. Son los únicos que llegan hasta la placa (${r0(por(/^Poste del pie junto al panel/)[0].sy)} mm).`,
+        por(/^Poste del medio/).length ? `En el medio de la cabecera: ${pp(/^Poste del medio/)}, sobre la viga, bajo los largueros de apoyo y de las puntas. Evitan que esos largueros de ${r0(por(/^Larguero de apoyo \(cabecera\)/)[0].sz)} mm se combén.` : 'La cabecera no lleva postes del medio.',
+        `Pegá cada poste en su base y atornillalo con 2 tornillos 4x50 en diagonal. Los que tocan la caja del pasarruedas van además atornillados a ella (2 tornillos cada uno).`,
+        `Los listones de pared (${ids(listonesPared)}) se apoyan después sobre estos postes, en el paso de llevar los módulos a la van: se atornillan desde arriba, 2 tornillos 4x50 por poste, antes de poner las placas.`,
+        `Todos los postes terminan a ${r0(base.yLst)} mm del piso (cara de abajo de los listones y de los largueros), salvo los dos de junto al panel, que llegan a ${r0(lay.yB)} mm y sostienen la placa.`,
+      ],
+      piezas: f(/^Poste/),
+      ojo: [
+        'Comprobá con escuadra y nivel que cada poste esté vertical antes de que seque la cola: un poste torcido sube o baja el listón que sostiene.',
+        'Cortá los postes todos a la misma medida y probá cada uno en su lugar: si el piso del taller no es plano, la altura real puede cambiar unos milímetros.',
+        `El poste ${por(/^Poste de la cabecera contra el pasarruedas/)[0] ? por(/^Poste de la cabecera contra el pasarruedas/)[0].id : ''} apoya en el piso porque no hay listón de piso debajo. Si querés darle base, sumá un listón de 45 x 45 contra la pared, entre el pasarruedas y el refuerzo de la tapa, como el del pie.`,
+      ],
+    });
+  }
+
   pasos.push({
     id: 'cam-4',
     titulo: 'Cajas de los dos módulos, armadas afuera',
     intro: `La cama son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada uno es una caja abierta con un costado hacia el pasillo, y entre los dos llenan los ${cm.largo / 10} cm de la cama. Se arman en el taller, sobre una mesa plana, y se llevan armados a la van.`,
     hacer: [
-      `Refuerzos de piso (${ids(refuerzos)}, dos por módulo): son listones de 45x45 que quedan abajo y sostienen las paredes de la caja. Apoyalos en la mesa: no se pegan al piso de la van, van con la caja. Esquivan el pasarruedas.`,
+      base
+        ? `Los refuerzos de piso (${ids(refuerzos)}) ya están armados en los marcos de piso, con sus postes (pasos anteriores). Las paredes de la caja se pegan contra ellos.`
+        : `Refuerzos de piso (${ids(refuerzos)}, dos por módulo): son listones de 45x45 que quedan abajo y sostienen las paredes de la caja. Apoyalos en la mesa: no se pegan al piso de la van, van con la caja. Esquivan el pasarruedas.`,
       'Módulo del pie: frente (con ventana) y panel central. Cola y 4x40 contra los refuerzos.',
       'Módulo de la cabecera: panel central y la guía, que cierra el extremo contra el frente del mueble trasero.',
       `Alturas: el frente del pie y la guía llegan a ${lay.yT} mm, a ras de la superficie donde dormís; el panel central llega a ${lay.yB} mm, justo bajo las placas.`,
@@ -798,7 +857,7 @@ function cama(data, plan, cfg, e3, cortes) {
       'Las varillas se deslizan por encima de los largueros y del borde del pasarruedas: pegales cinta de teflón (PTFE) en la cara de arriba.',
       'Todo a escuadra: medí las dos diagonales de cada caja y que den lo mismo. Pegá cada pieza contra su refuerzo y atornillá a través del refuerzo.',
     ],
-    piezas: [...f(/^Refuerzo de piso/), ...filas(frentePie, cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...filas(costados, cortes), ...f(/^Larguero/)],
+    piezas: [...(base ? [] : f(/^Refuerzo de piso/)), ...filas(frentePie, cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...filas(costados, cortes), ...f(/^Larguero/)],
     ojo: [
       'El panel central se acorta para esquivar el pasarruedas: probalo en seco contra el arco antes de pegar.',
       'Cada caja se sostiene con el frente, el panel central, la guía, los refuerzos y los largueros: revisá que no se abra ni se deforme antes de seguir. Una caja torcida no va a apoyar bien en el piso de la van.',
@@ -832,17 +891,21 @@ function cama(data, plan, cfg, e3, cortes) {
     titulo: 'Puertas de los costados',
     intro: 'Cada ventana la cierra una puerta que baja con bisagras en el borde de abajo (como en las fotos de referencia): dos puertas hacia el pasillo y una en el frente del pie, hacia la puerta trasera. Las tres cuelgan de piezas FIJAS de la caja (los costados fijos, sus listones y el refuerzo de piso) y nunca quedan en el aire: la cama se extiende y las puertas se quedan donde están. Atrás queda el hueco de guardado: no hay cajones ni correderas.',
     hacer: [
-      `Listón de las bisagras (${ids(por(/^Listón de las bisagras/))}): va fijo en la caja, contra la cara de adentro del costado fijo, entre los dos refuerzos de piso de su módulo. Apoyalo de testa contra cada refuerzo, pegalo y atornillalo desde el refuerzo. Su cara de arriba queda a ${r0(cfg.cama.ventana.zocalo)} mm del piso, a ras del borde de abajo de la ventana del costado.`,
+      base
+        ? `Riel del pasillo (${ids(rielesPasillo)}): ya está puesto en el marco de piso, contra la cara de adentro del costado fijo y entre los dos refuerzos de su módulo. Hace de listón de las bisagras: las cazoletas se atornillan a su cara del pasillo. Su cara de arriba queda a ${r0(cfg.cama.ventana.apoyoCajon)} mm del piso, apenas sobre el borde de abajo de la ventana (${r0(cfg.cama.ventana.zocalo)} mm): la puerta lo pasa por adelante.`
+        : `Listón de las bisagras (${ids(por(/^Listón de las bisagras/))}): va fijo en la caja, contra la cara de adentro del costado fijo, entre los dos refuerzos de piso de su módulo. Apoyalo de testa contra cada refuerzo, pegalo y atornillalo desde el refuerzo. Su cara de arriba queda a ${r0(cfg.cama.ventana.zocalo)} mm del piso, a ras del borde de abajo de la ventana del costado.`,
       'Cazoletas: broca Forstner de 35 mm, 12 mm de profundidad (con tope), con el centro a 22,5 mm del canto de la bisagra. Probá antes en un recorte. Son 3 bisagras en la puerta de la cabecera, 2 en la del pie y 2 en la del frente del pie.',
       'Poné cada puerta de costado en la ventana del costado fijo, con 3 mm de luz a cada lado, con las bisagras en el borde de abajo y atornilladas al listón. Cerrada, el portal queda delante: la puerta sale por su calado de abajo.',
       `Puerta del frente del pie (${ids(por(/^Puerta del frente del pie/))}): entra en la ventana del frente con 3 mm de luz. Sus bisagras se atornillan al refuerzo de piso que tiene detrás (${ids(por(/^Refuerzo de piso del módulo del pie \(frente\)/))}), que llega justo hasta su borde de abajo. Baja hacia la puerta trasera de la van.`,
       'Agarradera: el calado de la puerta es la escotadura para el dedo, a 18 mm del borde de arriba. El botón push va debajo y traba la puerta cerrada.',
       'Probá abrir y cerrar con la cama cerrada (la puerta pasa por el calado del portal) y con la cama extendida (el portal ya no está: la puerta queda libre bajo la extensión). Baja hasta quedar horizontal y apoya o se frena con una cinta o un tope.',
     ],
-    piezas: [...filas(por(/^Puerta del (módulo|frente)/), cortes), ...f(/^Listón de las bisagras/)],
+    piezas: [...filas(por(/^Puerta del (módulo|frente)/), cortes), ...(base ? [] : f(reBisagras))],
     tablas: [tablaBotones(data, G)],
     ojo: [
-      'Las bisagras de cazoleta traen una placa de unos 35 a 40 mm: el listón es de 30 x 30. Comprá una bisagra y probala; si no entra, usá un listón de 45 x 45 y subí el zócalo de la ventana.',
+      base
+        ? 'Las bisagras de cazoleta traen una placa de unos 35 a 40 mm: el riel de 45 x 45 le da lugar de sobra. Comprá una bisagra y probala igual.'
+        : 'Las bisagras de cazoleta traen una placa de unos 35 a 40 mm: el listón es de 30 x 30. Comprá una bisagra y probala; si no entra, usá un listón de 45 x 45 y subí el zócalo de la ventana.',
       `Abierta, la puerta llega a ${r0(por(/^Puerta del módulo de la cabecera/)[0]?.sy || 0)} mm hacia el pasillo y queda unos ${r0(cfg.cama.ventana.zocalo)} mm sobre el piso: sostenela con una cinta, un tope o un calce para que no cuelgue.`,
       'El eje de giro está del lado de afuera del canto de abajo, para que la esquina de abajo no baje y no roce el zócalo. Una bisagra de cazoleta lo deja unos milímetros más adentro: probá una muestra y, si roza, redondeá la esquina de abajo de la puerta (R5) o bajá el zócalo 3 mm. También sirve una bisagra de piano por afuera.',
       `La puerta del frente del pie abierta se extiende unos ${r0(por(/^Puerta del frente del pie/)[0]?.sy || 0)} mm hacia atrás: se usa con la puerta trasera de la van abierta.`,
@@ -902,6 +965,7 @@ function cama(data, plan, cfg, e3, cortes) {
       `Son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada placa es un peine y sus varillas salen de las ranuras. Cada módulo tiene una puerta que baja en la ventana del costado fijo.`,
       'Los costados del pasillo con sus puertas son fijos. Los portales (una U invertida por módulo) salen junto con las varillas y los listones de las correderas y son la base de la extensión.',
       'Se apoya en el piso (refuerzos), en la pared izquierda (listones) y en el frente del mueble trasero.',
+      ...(base ? ['Base reforzada: cada módulo se arma sobre un marco de piso de listones de 45 x 45 y de ahí salen postes verticales hasta los listones de pared y los largueros, así la cama se sostiene sola.'] : []),
       'Se arma entera afuera, módulo por módulo, y se lleva a la van: lo único que se ajusta a la van son los listones de pared.',
     ],
     lista: listaDe(data, G),

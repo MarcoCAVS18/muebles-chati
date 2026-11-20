@@ -416,6 +416,7 @@ export default {
       plataforma: 'Platform height (wheel arch + felt + board)',
       fieltro: 'Felt over the wheel arch',
       largoCabecera: 'Length of the head module',
+      baseReforzada: 'Reinforced base (floor frames and vertical posts)',
       varillasPie: 'Rods of the foot module',
       varillasCabecera: 'Rods of the head module',
       ranura: {
