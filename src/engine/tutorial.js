@@ -698,6 +698,11 @@ function cama(data, plan, cfg, e3, cortes) {
   const base = lay.base || null;
   const rielesPasillo = por(/^Riel del pasillo/);
   const reBisagras = /^(Listón de las bisagras|Riel del pasillo)/;
+  // Los largueros cuelgan de la placa: se arman con ella. Con los postes del medio, los de la cabecera se apoyan primero en ellos
+  const largueros = por(/^Larguero/);
+  const largueroCab = base ? largueros.filter((q) => /\(cabecera\)/.test(q.nombre)) : [];
+  const largueroPlaca = largueros.filter((q) => !largueroCab.includes(q));
+  const listaIds = (ps) => ps.map((q) => q.id).join(', ');
   const archIzq = (cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10;
   const anchoModulo = r0(cm.ancho + (portales[0] ? portales[0].sx : 15));
 
@@ -829,10 +834,13 @@ function cama(data, plan, cfg, e3, cortes) {
         `Junto al panel central: ${pp(/^Poste del pie junto al panel/)} y ${pp(/^Poste de la cabecera junto al panel/)}, uno de cada lado, pegados al panel y a la caja del pasarruedas, sobre los refuerzos de piso. Son los únicos que llegan hasta la placa (${r0(por(/^Poste del pie junto al panel/)[0].sy)} mm).`,
         por(/^Poste del medio/).length ? `En el medio de la cabecera: ${pp(/^Poste del medio/)}, sobre la viga, bajo los largueros de apoyo y de las puntas. Evitan que esos largueros de ${r0(por(/^Larguero de apoyo \(cabecera\)/)[0].sz)} mm se combén.` : 'La cabecera no lleva postes del medio.',
         `Pegá cada poste en su base y atornillalo con 2 tornillos 4x50 en diagonal. Los que tocan la caja del pasarruedas van además atornillados a ella (2 tornillos cada uno).`,
+        largueroCab.length
+          ? `Largueros de la cabecera (${listaIds(largueroCab)}, ${r0(largueroCab[0].sz)} mm): apoyalos en el piso del taller, sobre los dos postes del medio, y atornillalos a ellos desde arriba (2 tornillos 4x50 por poste, con cola). Quedan a ${r0(largueroCab[0].x)} mm y a ${r0(largueroCab[1] ? largueroCab[1].x : largueroCab[0].x)} mm de la pared izquierda y sus puntas quedan libres: la placa los termina de sostener.`
+          : 'La cabecera es corta: sus largueros se arman con la placa.',
         `Los listones de pared (${ids(listonesPared)}) se apoyan después sobre estos postes, en el paso de llevar los módulos a la van: se atornillan desde arriba, 2 tornillos 4x50 por poste, antes de poner las placas.`,
         `Todos los postes terminan a ${r0(base.yLst)} mm del piso (cara de abajo de los listones y de los largueros), salvo los dos de junto al panel, que llegan a ${r0(lay.yB)} mm y sostienen la placa.`,
       ],
-      piezas: f(/^Poste/),
+      piezas: [...f(/^Poste/), ...filas(largueroCab, cortes)],
       ojo: [
         'Comprobá con escuadra y nivel que cada poste esté vertical antes de que seque la cola: un poste torcido sube o baja el listón que sostiene.',
         'Cortá los postes todos a la misma medida y probá cada uno en su lugar: si el piso del taller no es plano, la altura real puede cambiar unos milímetros.',
@@ -853,36 +861,13 @@ function cama(data, plan, cfg, e3, cortes) {
       'Módulo de la cabecera: panel central y la guía, que cierra el extremo contra el frente del mueble trasero.',
       `Alturas: el frente del pie y la guía llegan a ${lay.yT} mm, a ras de la superficie donde dormís; el panel central llega a ${lay.yB} mm, justo bajo las placas.`,
       `Costados del pasillo (${ids(costados)}): son FIJOS. Van de pie contra el frente del pie, el panel central y la guía (cola y 4x40 desde afuera, y a la punta de los refuerzos). Miden ${r0(lay.yCostado - 5)} mm de alto y quedan 5 mm sobre el piso. No llegan hasta la placa: los listones de las correderas pasan por encima con ${r0(lay.yB - 30 - lay.yCostado)} mm de luz.`,
-      `Largueros de apoyo (a ${r0(por(/^Larguero de apoyo \(pie\)/)[0].x)} mm de la pared izquierda de la van) y largueros de las puntas (a ${r0(por(/^Larguero de las puntas \(pie\)/)[0].x)} mm): entre el frente, el panel central y la guía, a ras de la cara de abajo de la placa. Cola y 4x40 por los cantos.`,
-      'Las varillas se deslizan por encima de los largueros y del borde del pasarruedas: pegales cinta de teflón (PTFE) en la cara de arriba.',
+      'Los largueros no se arman acá: no apoyan en la caja, cuelgan de la placa (se arman con ella, en el paso de las placas).',
       'Todo a escuadra: medí las dos diagonales de cada caja y que den lo mismo. Pegá cada pieza contra su refuerzo y atornillá a través del refuerzo.',
     ],
-    piezas: [...(base ? [] : f(/^Refuerzo de piso/)), ...filas(frentePie, cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...filas(costados, cortes), ...f(/^Larguero/)],
+    piezas: [...(base ? [] : f(/^Refuerzo de piso/)), ...filas(frentePie, cortes), ...f(/^Panel central/), ...f(/^Guía de la cabecera/), ...filas(costados, cortes)],
     ojo: [
       'El panel central se acorta para esquivar el pasarruedas: probalo en seco contra el arco antes de pegar.',
-      'Cada caja se sostiene con el frente, el panel central, la guía, los refuerzos y los largueros: revisá que no se abra ni se deforme antes de seguir. Una caja torcida no va a apoyar bien en el piso de la van.',
-    ],
-  });
-
-  pasos.push({
-    id: 'cam-6',
-    titulo: 'Varillas extensibles',
-    intro: `Las varillas de cada placa salen hacia el pasillo y agrandan la cama de ${cm.ancho / 10} a ${(cm.ancho + cm.extension) / 10} cm. Quedan intercaladas con los dedos fijos de la placa.`,
-    hacer: [
-      `Cada juego de varillas sale de la placa unido por su lomo. Pegá el listón de unión (${ids(por(/^Listón de unión de las varillas/))}) por debajo, a ${r0(por(/^Listón de unión de las varillas \(pie\)/)[0].x)} mm de la pared, y atornillá cada varilla desde arriba con dos tornillos avellanados.`,
-      `Correderas de carga de 500 mm (100 kg) de bajo perfil, de no más de ${cm.alturaCorredera} mm de alto: una a cada lado de cada juego de varillas, la parte que se mueve va al listón de la corredera (${ids(por(/^Listón de la corredera/))}), que acompaña a las varillas, y la parte fija a la caja.`,
-      'Las varillas no se atornillan a la placa: solo cuelgan de las correderas y apoyan sobre los largueros.',
-      `Portales (${ids(portales)}): son una U invertida de la altura de la cama, con dos patas y un travesaño arriba. Van por afuera del costado fijo y salen con la cama. Apoyá cada portal contra las puntas de los dos listones de las correderas de su módulo (cada listón termina contra la cara de adentro del portal, a la altura del travesaño) y atornillalo a ellos y al canto del lomo móvil, uno cada 150 mm. Tiene que quedar a ras de las varillas (${lay.yT} mm) y 5 mm sobre el piso. Cerrada, la cama suma ${r0(portales[0] ? portales[0].sx : 15)} mm de ancho por el portal.`,
-      'Cada juego lleva un retén para que no salga solo al frenar y una agarradera embutida en el borde del lomo.',
-      `Probalas con peso: tienen que correr enteras y quedar firmes abiertas (${cm.extension} mm de extensión).`,
-    ],
-    piezas: [...filasVarillas(varillas), ...f(/^Listón de la corredera/), ...f(/^Listón de unión de las varillas/), ...filas(portales, cortes)],
-    ojo: [
-      `Esto depende de la corredera que compres: comprala antes de cortar y verificá la altura real. Tiene que entrar en el listón de 30 x 30 (${cm.alturaCorredera} mm de alto como máximo).`,
-      `Los portales pesan unos kilos y cuelgan solo del lomo y de los listones. Sus patas quedan 5 mm sobre el piso: apoyan recién cuando la punta flexa. Si querés apoyo real, pegales un deslizador de fieltro o teflón en la base de las patas.`,
-      'Atornillar contra el canto del lomo (15 mm) es un empalme de testa: usá cola, taladro guía y tornillos de 40 mm, y probalo con peso. Si no aguanta, sumá escuadras de acero por adentro de las patas.',
-      `Las correderas de 500 mm tienen que recorrer ${cm.extension} mm: si recorren menos, la cama abierta queda más angosta que ${(cm.ancho + cm.extension) / 10} cm.`,
-      'Abiertas, las varillas quedan en voladizo (solo las sostienen las correderas): probalas con el peso de dos personas sentadas en el borde. Si flexionan, sumá una pata plegable o una traba en el borde del pasillo.',
+      'Cada caja se sostiene con el frente, el panel central, la guía y los refuerzos: revisá que no se abra ni se deforme antes de seguir. Una caja torcida no va a apoyar bien en el piso de la van.',
     ],
   });
 
@@ -898,7 +883,7 @@ function cama(data, plan, cfg, e3, cortes) {
       'Poné cada puerta de costado en la ventana del costado fijo, con 3 mm de luz a cada lado, con las bisagras en el borde de abajo y atornilladas al listón. Cerrada, el portal queda delante: la puerta sale por su calado de abajo.',
       `Puerta del frente del pie (${ids(por(/^Puerta del frente del pie/))}): entra en la ventana del frente con 3 mm de luz. Sus bisagras se atornillan al refuerzo de piso que tiene detrás (${ids(por(/^Refuerzo de piso del módulo del pie \(frente\)/))}), que llega justo hasta su borde de abajo. Baja hacia la puerta trasera de la van.`,
       'Agarradera: el calado de la puerta es la escotadura para el dedo, a 18 mm del borde de arriba. El botón push va debajo y traba la puerta cerrada.',
-      'Probá abrir y cerrar con la cama cerrada (la puerta pasa por el calado del portal) y con la cama extendida (el portal ya no está: la puerta queda libre bajo la extensión). Baja hasta quedar horizontal y apoya o se frena con una cinta o un tope.',
+      'Probá abrir y cerrar cada puerta. Baja hasta quedar horizontal y apoya o se frena con una cinta o un tope. Cuando más adelante pongas el portal (paso de las varillas), volvé a probarla: con la cama cerrada pasa por el calado del portal y con la cama extendida el portal ya no está y la puerta queda libre bajo la extensión.',
     ],
     piezas: [...filas(por(/^Puerta del (módulo|frente)/), cortes), ...(base ? [] : f(reBisagras))],
     tablas: [tablaBotones(data, G)],
@@ -915,13 +900,13 @@ function cama(data, plan, cfg, e3, cortes) {
   pasos.push({
     id: 'cam-10',
     titulo: 'Llevar los módulos a la van y fijarlos',
-    intro: 'Con las dos cajas armadas, con sus varillas y sus puertas, se llevan a la van y se apoyan en el piso. Recién ahí se fijan los listones de pared, a la altura que quedaron los largueros.',
+    intro: 'Con las dos cajas armadas y con sus puertas, se llevan a la van y se apoyan en el piso. Recién ahí se fijan los listones de pared, a la altura de la cara de arriba del panel central. Las placas, los largueros y las varillas se arman después, ya con las cajas en su lugar.',
     hacer: [
       'El mueble trasero tiene que estar ya en su lugar: la guía de la cabecera cierra contra su frente. Entrá primero el módulo de la cabecera y después el del pie.',
       'Apoyá cada caja en el piso con los costados fijos hacia el pasillo. Probá que cada caja esquive el pasarruedas y que las dos queden pegadas entre sí.',
-      `Nivelá: apoyá un nivel sobre los largueros de las dos cajas y calzá con cuñas bajo los refuerzos hasta que la cara de arriba de los largueros quede a ${r0(lay.yB)} mm del piso, en la línea que marcaste en la pared, y las dos cajas coincidan.`,
+      `Nivelá: apoyá un nivel sobre la cara de arriba del panel central y de la guía y calzá con cuñas bajo los refuerzos hasta que quede a ${r0(lay.yB)} mm del piso, en la línea que marcaste en la pared, y las dos cajas coincidan.`,
       `Fijá cada caja al piso a través de los refuerzos (${ids(refuerzos)}): adhesivo de montaje, dos tornillos por refuerzo y butilo en cada agujero. Cuidado con el largo: el refuerzo mide ${sh} mm de alto, y un tornillo de 25 mm no llega al piso. Con un listón de piso de 30 mm de alto, el tornillo tiene que medir al menos ${sh + 25} mm (5x70).`,
-      `Listones de pared (${ids(listonesPared)}): con las cajas ya niveladas, apoyalos contra la pared, a ras de los largueros, comprobá con la regla y fijalos con adhesivo de montaje y los tornillos o remaches que correspondan en ese punto de la chapa.`,
+      `Listones de pared (${ids(listonesPared)}): con las cajas ya niveladas, apoyalos contra la pared${base ? ', sobre los postes,' : ','} a ras de la cara de arriba del panel central (${r0(lay.yB)} mm), comprobá con la regla y fijalos con adhesivo de montaje y los tornillos o remaches que correspondan en ese punto de la chapa.`,
     ],
     piezas: f(/^Listón de pared/),
     ojo: [
@@ -933,15 +918,44 @@ function cama(data, plan, cfg, e3, cortes) {
   pasos.push({
     id: 'cam-8',
     titulo: 'Placas de la plataforma',
-    intro: 'Las dos placas se atornillan desde arriba a los largueros y listones, y se pueden levantar para llegar al piso.',
+    intro: `Las dos placas se apoyan en el panel central, en la guía, en el frente y en los listones de pared (y en el pasarruedas), y se pueden levantar para llegar al piso. Los largueros (${listaIds(largueroPlaca)}) no apoyan en el piso: cuelgan de la placa, por debajo, y le dan rigidez y apoyo a las varillas.`,
     hacer: [
       `Pegá fieltro o goma de ${cm.fieltro} mm sobre los pasarruedas (0,8 m cada uno).`,
       `El pasarruedas izquierdo, con su tapa, llega a ${(cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10} cm; con ${cm.fieltro} mm de fieltro y la placa de ${t} mm, la cama queda a ${cm.plataforma / 10} cm. La placa lleva un corte en esa zona para que pase el arco real; todavía no está dibujado en la app.`,
       'Apoyá la placa del pie y la de la cabecera: dejan 3 mm de luz entre ellas.',
+      `Largueros (${listaIds(largueroPlaca)}): quedan a ras de la cara de abajo de la placa, los de apoyo a ${r0(por(/^Larguero de apoyo \(pie\)/)[0].x)} mm de la pared izquierda de la van y los de las puntas a ${r0(por(/^Larguero de las puntas \(pie\)/)[0].x)} mm. Lo más cómodo es dar vuelta cada placa sobre la mesa, pegarles los largueros por debajo y atornillarlos desde arriba, y apoyar el conjunto en la caja. Dejá 3 mm de luz contra los listones de las correderas.${largueroCab.length ? ` Los largueros de la cabecera (${listaIds(largueroCab)}) ya están sobre los postes del medio: bajá la placa sobre ellos.` : ''}`,
       'Atornillá desde arriba solo los dedos y el borde fijo, con tornillos avellanados 4x40 a los largueros y listones. Avellaná la cabeza para que no moleste el colchón.',
-      'Metí las varillas en las ranuras con la luz de cada lado y probá que corran antes de poner el colchón.',
+      'Las varillas se deslizan por encima de los largueros y del borde del pasarruedas: pegales cinta de teflón (PTFE) en la cara de arriba antes de armar las varillas, en el paso siguiente.',
     ],
-    piezas: filas(placas, cortes),
+    piezas: [...filas(placas, cortes), ...filas(largueroPlaca, cortes)],
+    ojo: [
+      base
+        ? 'El peso baja así: colchón y varillas, a la placa y los largueros, a los postes, a los marcos de piso y al piso. Por el lado de la pared apoya además en el pasarruedas.'
+        : 'El peso baja así: colchón y varillas, a la placa y los largueros, al panel central, la guía y el frente (por el lado de la pared, a los listones y al pasarruedas) y de ahí al piso. Los largueros solos no llegan a ningún apoyo: los sostiene la placa.',
+    ],
+  });
+
+  pasos.push({
+    id: 'cam-6',
+    titulo: 'Varillas extensibles',
+    intro: `Las varillas de cada placa salen hacia el pasillo y agrandan la cama de ${cm.ancho / 10} a ${(cm.ancho + cm.extension) / 10} cm. Quedan intercaladas con los dedos fijos de la placa.`,
+    hacer: [
+      'Las placas y los largueros ya están puestos: las varillas entran en las ranuras de cada placa con la luz de cada lado y apoyan sobre los largueros. Probá que corran antes de poner el colchón.',
+      `Cada juego de varillas sale de la placa unido por su lomo. Pegá el listón de unión (${ids(por(/^Listón de unión de las varillas/))}) por debajo, a ${r0(por(/^Listón de unión de las varillas \(pie\)/)[0].x)} mm de la pared, y atornillá cada varilla desde arriba con dos tornillos avellanados.`,
+      `Correderas de carga de 500 mm (100 kg) de bajo perfil, de no más de ${cm.alturaCorredera} mm de alto: una a cada lado de cada juego de varillas, la parte que se mueve va al listón de la corredera (${ids(por(/^Listón de la corredera/))}), que acompaña a las varillas, y la parte fija a la caja.`,
+      'Las varillas no se atornillan a la placa: solo cuelgan de las correderas y apoyan sobre los largueros.',
+      `Portales (${ids(portales)}): son una U invertida de la altura de la cama, con dos patas y un travesaño arriba. Van por afuera del costado fijo y salen con la cama. Apoyá cada portal contra las puntas de los dos listones de las correderas de su módulo (cada listón termina contra la cara de adentro del portal, a la altura del travesaño) y atornillalo a ellos y al canto del lomo móvil, uno cada 150 mm. Tiene que quedar a ras de las varillas (${lay.yT} mm) y 5 mm sobre el piso. Cerrada, la cama suma ${r0(portales[0] ? portales[0].sx : 15)} mm de ancho por el portal.`,
+      'Cada juego lleva un retén para que no salga solo al frenar y una agarradera embutida en el borde del lomo.',
+      `Probalas con peso: tienen que correr enteras y quedar firmes abiertas (${cm.extension} mm de extensión).`,
+    ],
+    piezas: [...filasVarillas(varillas), ...f(/^Listón de la corredera/), ...f(/^Listón de unión de las varillas/), ...filas(portales, cortes)],
+    ojo: [
+      `Esto depende de la corredera que compres: comprala antes de cortar y verificá la altura real. Tiene que entrar en el listón de 30 x 30 (${cm.alturaCorredera} mm de alto como máximo).`,
+      `Los portales pesan unos kilos y cuelgan solo del lomo y de los listones. Sus patas quedan 5 mm sobre el piso: apoyan recién cuando la punta flexa. Si querés apoyo real, pegales un deslizador de fieltro o teflón en la base de las patas.`,
+      'Atornillar contra el canto del lomo (15 mm) es un empalme de testa: usá cola, taladro guía y tornillos de 40 mm, y probalo con peso. Si no aguanta, sumá escuadras de acero por adentro de las patas.',
+      `Las correderas de 500 mm tienen que recorrer ${cm.extension} mm: si recorren menos, la cama abierta queda más angosta que ${(cm.ancho + cm.extension) / 10} cm.`,
+      'Abiertas, las varillas quedan en voladizo (solo las sostienen las correderas): probalas con el peso de dos personas sentadas en el borde. Si flexionan, sumá una pata plegable o una traba en el borde del pasillo.',
+    ],
   });
 
   pasos.push({
@@ -965,6 +979,9 @@ function cama(data, plan, cfg, e3, cortes) {
       `Son dos módulos: el del pie (${cm.largo / 10 - cm.largoCabecera / 10} cm) y el de la cabecera (${cm.largoCabecera / 10} cm). Cada placa es un peine y sus varillas salen de las ranuras. Cada módulo tiene una puerta que baja en la ventana del costado fijo.`,
       'Los costados del pasillo con sus puertas son fijos. Los portales (una U invertida por módulo) salen junto con las varillas y los listones de las correderas y son la base de la extensión.',
       'Se apoya en el piso (refuerzos), en la pared izquierda (listones) y en el frente del mueble trasero.',
+      base
+        ? 'El peso baja por la placa y los largueros a los postes, de ahí a los marcos de piso y al piso; por el lado de la pared apoya además en el pasarruedas.'
+        : 'El peso baja por la placa al panel central, la guía y el frente, a los listones de pared y al pasarruedas; los largueros cuelgan de la placa y no llegan al piso solos.',
       ...(base ? ['Base reforzada: cada módulo se arma sobre un marco de piso de listones de 45 x 45 y de ahí salen postes verticales hasta los listones de pared y los largueros, así la cama se sostiene sola.'] : []),
       'Se arma entera afuera, módulo por módulo, y se lleva a la van: lo único que se ajusta a la van son los listones de pared.',
     ],

@@ -47,6 +47,17 @@ for (const m of tutorial.muebles) {
   const sinCubrir = data.juntas.filter((j) => j.grupo === m.grupo && (j.cantidad || 0) > 0 && !cubiertas.has(j.id));
   for (const j of sinCubrir) mal(`${m.grupo}: la unión ${j.id} (${j.cara} con ${j.canto}) no tiene su evento de tornillos`);
 
+  // La cama: ningún larguero se arma en el aire (cuelga de la placa o se apoya en los postes) y las varillas van después de las placas
+  if (m.grupo === 'Cama') {
+    const nombres = new Map(data.partes.map((p) => [p.id, p.nombre]));
+    for (const e of seq.eventos) {
+      if (e.tipo === 'pieza' && e.modo === 'flota' && /^Larguero/.test(nombres.get(e.id))) mal(`${m.grupo}: ${e.id} (larguero) aparece flotando`);
+    }
+    const orden = m.pasos.map((p) => p.id);
+    if (orden.indexOf('cam-8') < 0 || orden.indexOf('cam-6') < orden.indexOf('cam-8')) mal(`${m.grupo}: las varillas (cam-6) deberían ir después de las placas (cam-8): ${orden}`);
+    if (orden.indexOf('cam-10') > orden.indexOf('cam-8')) mal(`${m.grupo}: llevar a la van (cam-10) debería ir antes de las placas (cam-8): ${orden}`);
+  }
+
   const min = Math.floor(seq.duracion / 60);
   const seg = Math.round(seq.duracion % 60);
   console.log(
