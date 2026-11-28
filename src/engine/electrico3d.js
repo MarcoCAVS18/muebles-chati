@@ -25,7 +25,7 @@ export const GRUPO_ELEC = 'Eléctrico';
 export function electrico3d(cfg) {
   const { van, equipos: eq, vehiculo: ve, led, extractor: ex, lampara: lamp } = cfg;
   const L = disposicionTrasero(cfg);
-  const { zF, zFL, zB: zb, zFondo, yTapa, sec, E, K, W } = L;
+  const { zF, zFL, zB: zb, zFondo, yTapa, sec, E, W } = L;
   const bomba = W.bomba;
   const EN = 'Mueble trasero';
 
@@ -166,7 +166,7 @@ export function electrico3d(cfg) {
     ledA, ledB, ledC, ledD, lampara, extractor, bateriaAuto, anlCaja,
   ];
 
-  // --- Cables (puntos en mm). tipo: dc | ac | senal | agua | gas ---
+  // --- Cables (puntos en mm). tipo: dc | ac | senal | agua ---
   const zA = ve.bateriaZ - 10; // cota z del fusible ANL del auto
   const xTerm = bateriaAuto.x + 20; // borne positivo de la batería del auto
   const xEnt = sec.E.x1 - 17; // por donde entra el cable largo al mueble, entre el ANL y el divisor
@@ -481,7 +481,7 @@ export function electrico3d(cfg) {
         [bomba.x + bomba.sx / 2, bomba.y + 60, zAtras],
         [bomba.x + bomba.sx / 2, bomba.y + 60, bomba.z + bomba.sz + 1],
       ],
-      nota: 'Va por el hueco sobre el estante y por atrás de los cajones, y cruza los dos divisores por la parte alta del fondo con pasacables hasta la bomba. Es el tramo más largo de 12 V del mueble: pasa detrás del anafe, así que va dentro de una funda o canaleta y lejos del caño de gas.',
+      nota: 'Va por el hueco sobre el estante y por atrás de los cajones, y cruza los dos divisores por la parte alta del fondo con pasacables hasta la bomba. Es el tramo más largo de 12 V del mueble: pasa detrás de los cajones de cocina, así que va dentro de una funda o canaleta.',
     },
     {
       id: 'c_caja_calef',
@@ -583,17 +583,11 @@ export function electrico3d(cfg) {
     },
   ];
 
-  // --- Mangueras de agua y de gas ---
+  // --- Mangueras de agua ---
   const bl = W.bidones[0]; // bidón de agua limpia, atrás y cerca de la bomba
   const cuello = [bl.x + bl.sx - 30, bl.y + bl.sy, bl.z + bl.sz / 2]; // boca del bidón, del lado de la pared derecha
-  const reg = eq.regulador;
-  const yRegulador = K.yAsiento + eq.garrafa.y; // base del regulador, sobre la garrafa
-  const zRegulador = K.zGar + 80 + reg.z / 2; // centro del regulador en z
   const xBombaC = W.xBomba + W.bomba.sx / 2; // centro de la bomba
   const xCanillaC = W.xCanilla + 15; // centro de la canilla
-  const xValvula = sec.K.x1 - 100 + eq.valvulaGas.x / 2; // centro de la llave de corte (ver trasero.js)
-  const yValvula = K.yAnafe - eq.valvulaGas.y - 15;
-  const zValvula = zFondo - 20 - eq.valvulaGas.z / 2;
   const zB = zb;
   const mangueras = [
     {
@@ -628,34 +622,6 @@ export function electrico3d(cfg) {
         [xCanillaC, 851, zB - 30],
       ],
       nota: 'Sube por al lado del fregadero y atraviesa la tapa por un agujero junto a la canilla.',
-    },
-    {
-      id: 'm_gas_regulador',
-      nombre: 'Manguera de gas del regulador a la llave de corte',
-      tipo: 'gas',
-      desde: 'regulador',
-      hasta: 'valvulaGas',
-      video: 'gas',
-      puntos: [
-        [K.xGar, yRegulador + reg.y + 1, zRegulador],
-        [xValvula, yRegulador + reg.y + 1, zRegulador],
-        [xValvula, yRegulador + reg.y + 1, zValvula],
-        [xValvula, yValvula - 1, zValvula],
-      ],
-      nota: 'Manguera flexible certificada para gas con abrazaderas. Corre bajo el estante hasta el fondo y sube por atrás de los cajones de cocina; con bucle suficiente para que la puerta de la garrafa se abra sin tirar.',
-    },
-    {
-      id: 'm_gas_anafe',
-      nombre: 'Caño de gas de la llave de corte al anafe',
-      tipo: 'gas',
-      desde: 'valvulaGas',
-      hasta: 'anafe',
-      video: 'gas',
-      puntos: [
-        [xValvula, yValvula + eq.valvulaGas.y + 1, zValvula],
-        [xValvula, K.yAnafe - 1, zValvula],
-      ],
-      nota: 'Tramo corto y fijo hasta la entrada del anafe. Probar todas las uniones con agua jabonosa.',
     },
   ];
 

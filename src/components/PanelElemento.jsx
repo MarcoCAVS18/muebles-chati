@@ -119,47 +119,57 @@ export default function PanelElemento({ id, elec3d, dataEquipos, tramos, elec, c
         </>
       )}
 
-      <h4>{t('elemento.videoRecomendado')}</h4>
-      {!verVideo ? (
-        <button className="ver-video" onClick={() => setVerVideo(true)}>
-          {t('elemento.ver', { titulo: actual.titulo })}
-        </button>
+      {actual ? (
+        <>
+        <h4>{t('elemento.videoRecomendado')}</h4>
+        {!verVideo ? (
+          <button className="ver-video" onClick={() => setVerVideo(true)}>
+            {t('elemento.ver', { titulo: actual.titulo })}
+          </button>
+        ) : (
+          <div className="reproductor">
+            <iframe
+              key={actual.id}
+              src={urlEmbed(actual.id)}
+              title={actual.titulo}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        )}
+        <ul className="videos">
+          {videos.map((v, i) => (
+            <li key={v.id}>
+              <button
+                className={i === indice ? 'activo' : ''}
+                onClick={() => {
+                  setIndice(i);
+                  setVerVideo(true);
+                }}
+              >
+                {v.titulo}
+                {v.idioma === 'en' ? t('elemento.enIngles') : ''}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p className="enlaces">
+          <a href={urlVideo(actual.id)} target="_blank" rel="noreferrer">
+            {t('elemento.abrirYoutube')}
+          </a>
+          {' | '}
+          <a href={urlBusqueda(busqueda)} target="_blank" rel="noreferrer">
+            {t('elemento.buscarMas')}
+          </a>
+        </p>
+        </>
       ) : (
-        <div className="reproductor">
-          <iframe
-            key={actual.id}
-            src={urlEmbed(actual.id)}
-            title={actual.titulo}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
+        <p className="enlaces">
+          <a href={urlBusqueda(busqueda)} target="_blank" rel="noreferrer">
+            {t('elemento.buscarMas')}
+          </a>
+        </p>
       )}
-      <ul className="videos">
-        {videos.map((v, i) => (
-          <li key={v.id}>
-            <button
-              className={i === indice ? 'activo' : ''}
-              onClick={() => {
-                setIndice(i);
-                setVerVideo(true);
-              }}
-            >
-              {v.titulo}
-              {v.idioma === 'en' ? t('elemento.enIngles') : ''}
-            </button>
-          </li>
-        ))}
-      </ul>
-      <p className="enlaces">
-        <a href={urlVideo(actual.id)} target="_blank" rel="noreferrer">
-          {t('elemento.abrirYoutube')}
-        </a>
-        {' | '}
-        <a href={urlBusqueda(busqueda)} target="_blank" rel="noreferrer">
-          {t('elemento.buscarMas')}
-        </a>
-      </p>
     </aside>
   );
 }

@@ -91,7 +91,7 @@ exigir(xMax - CONFIG_INICIAL.cama.x0 >= 1200 - 1, 'la cama extendida no llega a 
 exigir(data.partes.filter((p) => p.perfil).length === 4, 'faltan los contornos de las placas y de las varillas');
 exigir(data.decos.every((d) => d.id), 'decos sin id');
 
-// ---- Diseño: mueble trasero de 500 mm con una L de 570 mm a la izquierda (eléctrico), cocina con gas al centro, agua a la derecha ----
+// ---- Diseño: mueble trasero de 500 mm con una L de 570 mm a la izquierda (eléctrico), cocina al centro, agua a la derecha ----
 const cfgI = CONFIG_INICIAL;
 const tra = data.partes.filter((p) => p.grupo === 'Mueble trasero');
 exigir(cfgI.trasero.profundidad === 500, 'el mueble trasero debería tener 500 mm de profundidad');
@@ -151,11 +151,10 @@ for (let i = 0; i < interiores.length; i++) {
   }
 }
 // La heladera asoma por la tapa 1 (la tapa lleva el recorte), por eso también está encastrada
-const ENCASTRADOS = ['fregadero', 'anafe', 'canilla', 'detectorGas', 'nevera'];
+const ENCASTRADOS = ['fregadero', 'canilla', 'nevera'];
 for (const e of interiores) {
   if (ENCASTRADOS.includes(e.id)) continue;
-  // La garrafa baja por el círculo del asiento de la base de la cocina (se revisa más abajo que entre en el círculo)
-  for (const p of tra) if (!(e.id === 'garrafa' && p.nombre === 'Base (cocina y agua)')) exigir(!solapan(e, p), `el equipo ${e.id} atraviesa la pieza ${p.id} (${p.nombre})`);
+  for (const p of tra) exigir(!solapan(e, p), `el equipo ${e.id} atraviesa la pieza ${p.id} (${p.nombre})`);
 }
 // Orden del mueble trasero, visto desde la puerta trasera: eléctrico a la izquierda, cocina al centro y agua a la derecha
 const eqE = (id) => e3.equipos.find((q) => q.id === id) || data.equipos.find((q) => q.id === id);
@@ -168,7 +167,7 @@ for (const id of ['bateria', 'inversor', 'dcdc', 'fusibles', 'fusiblePrincipal']
   exigir(e && freg_dist(e) >= 400, `${id} debería quedar lejos del fregadero`);
 }
 exigir(centroX('nevera') < xDiv1, 'la heladera debería estar en la sección eléctrica (arriba de la batería)');
-for (const id of ['garrafa', 'regulador', 'anafe']) {
+for (const id of ['anafe', 'cartucho', 'cartucho2']) {
   exigir(centroX(id) > xDiv1 && centroX(id) < xDiv2, `${id} debería estar en la sección de la cocina (centro)`);
 }
 for (const id of ['fregadero', 'bidon1', 'bidon2', 'bomba', 'canilla']) {
@@ -181,26 +180,36 @@ function freg_dist(e) {
   const f = data.equipos.find((q) => q.id === 'fregadero');
   return f.x - (e.x + e.sx);
 }
-// Garrafa FIJA en su compartimento: la puerta con la bisagra a la derecha empieza después del borde de la cama, la base
-// lleva un círculo de asiento y nada de la cama se cruza con el barrido de la puerta.
+// Guardado del anafe portátil (sin gas fijo): la puerta con la bisagra a la derecha empieza después del borde de la cama, el anafe
+// entra de canto con dos cartuchos parados al lado, y nada de la cama se cruza con el barrido de la puerta.
 const dispo = disposicionTrasero(cfgI);
 const Kd = dispo.K;
-exigir(Kd.puerta.x0 >= data.layout.cama.x1 + 4 - 0.01, 'la puerta de la garrafa debería empezar después del borde de la cama (con 4 mm de aire)');
-exigir(Kd.puerta.x1 <= Kd.puerta.x0 + 260 && Kd.puerta.x1 - Kd.puerta.x0 >= data.equipos.find((e) => e.id === 'garrafa').sx + 5, 'el hueco de la puerta debería dejar pasar la garrafa');
+exigir(Kd.puerta.x0 >= data.layout.cama.x1 + 4 - 0.01, 'la puerta del guardado del anafe debería empezar después del borde de la cama (con 4 mm de aire)');
+exigir(Kd.puerta.x1 <= Kd.puerta.x0 + 260 && Kd.puerta.x1 - Kd.puerta.x0 >= data.equipos.find((e) => e.id === 'anafe').sx + 5, 'el hueco de la puerta debería dejar pasar el anafe de canto');
 {
-  const g = data.equipos.find((e) => e.id === 'garrafa');
+  const ana = data.equipos.find((e) => e.id === 'anafe');
+  const car = data.equipos.filter((e) => /^cartucho/.test(e.id));
+  exigir(car.length === 2, 'debería haber dos cartuchos: uno conectado y uno de repuesto');
+  // Todo el guardado queda dentro del hueco de la puerta, sobre la base y bajo el estante
+  for (const e of [ana, ...car]) {
+    exigir(e.x >= Kd.puerta.x0 && e.x + e.sx <= Kd.puerta.x1, `${e.id} debería quedar dentro del hueco de la puerta`);
+    exigir(e.y >= dispo.yPiso - 0.01 && e.y + e.sy <= Kd.yEstante - 5, `${e.id} debería quedar sobre la base y bajo el estante del guardado`);
+    exigir(e.z >= dispo.zIn - 0.01 && e.z + e.sz <= dispo.zFondo + 0.01, `${e.id} debería quedar entre el frente y el fondo`);
+  }
+  exigir(car.every((c) => !solapan(c, ana)) && !solapan(car[0], car[1]), 'el anafe y los cartuchos no pueden pisarse');
+  exigir(Math.abs(ana.sx - cfgI.equipos.anafe.x) < 0.01 && Math.abs(ana.sy - cfgI.equipos.anafe.y) < 0.01 && Math.abs(ana.sz - cfgI.equipos.anafe.z) < 0.01, 'el anafe se guarda de canto con las medidas de la configuración');
+  // Sin gas fijo: ni garrafa, ni regulador, ni llave de corte, ni detector de GLP, ni asiento redondo en la base
+  exigir(!data.equipos.some((e) => /garrafa|regulador|valvulaGas|detectorGas/.test(e.id)), 'ya no debería haber equipos de gas fijo');
+  exigir(!e3.mangueras.some((m) => m.tipo === 'gas'), 'ya no debería haber mangueras de gas');
   const baseK = tra.find((p) => p.nombre === 'Base (cocina y agua)');
-  const asi = (baseK.huecos || []).find((h) => h.tipo === 'asiento');
-  exigir(asi, 'la base de la cocina debería llevar el círculo de asiento de la garrafa');
-  exigir(Math.abs((asi.a1 - asi.a0) / 2 - Kd.asiento.r) < 0.01 && asi.r === (asi.a1 - asi.a0) / 2, 'el asiento de la garrafa debería ser un círculo');
-  exigir(Math.max(g.sx, g.sz) <= 2 * Kd.asiento.r - 10 + 0.01, 'la garrafa tiene que entrar en el círculo del asiento');
-  exigir(Math.abs(g.x + g.sx / 2 - Kd.asiento.cx) < 0.5 && Math.abs(g.z + g.sz / 2 - Kd.asiento.cz) < 0.5, 'la garrafa debería estar centrada en su asiento');
-  const reg = data.equipos.find((e) => e.id === 'regulador');
-  exigir(reg.y >= g.y + g.sy - 0.5 && reg.y + reg.sy <= Kd.yEstante + 0.5, 'el regulador debería ir sobre la garrafa y bajo el estante');
-  const puerta = tra.find((p) => /^Puerta de la garrafa/.test(p.nombre));
-  exigir(puerta && puerta.abre === 'garrafa' && Math.abs(puerta.x - (Kd.puerta.x0 + 2)) < 0.01, 'falta la puerta de la garrafa o está mal ubicada');
-  exigir(puerta.y + puerta.sy <= Kd.yEstante, 'la puerta de la garrafa no puede pasar del estante');
+  exigir(baseK && !(baseK.huecos || []).some((h) => h.tipo === 'asiento'), 'la base de la cocina ya no lleva el círculo del asiento');
+  exigir(!tra.some((p) => /garrafa/i.test(p.nombre)), 'ninguna pieza del mueble debería nombrar la garrafa');
+  const puerta = tra.find((p) => /^Puerta del guardado del anafe/.test(p.nombre));
+  exigir(puerta && puerta.abre === 'anafe' && Math.abs(puerta.x - (Kd.puerta.x0 + 2)) < 0.01, 'falta la puerta del guardado del anafe o está mal ubicada');
+  exigir(puerta.y + puerta.sy <= Kd.yEstante, 'la puerta del guardado no puede pasar del estante');
   exigir(!tra.some((p) => /Cajón de la garrafa|cajón del gas/i.test(p.nombre)), 'ya no debería haber un cajón de la garrafa');
+  // Los dos cajones de cocina quedan igual que antes: 755 mm es donde terminaba el segundo, 80 mm bajo la tapa
+  exigir(Math.abs(Kd.cajones[1].y1 - (dispo.yTapa - 80)) < 0.01, 'el segundo cajón de cocina debería terminar 80 mm bajo la tapa');
 }
 // Compartimento eléctrico: se entra por una puerta en el costado izquierdo (la que se ve al abrir la puerta corrediza), no por debajo de la cama
 {
@@ -216,7 +225,7 @@ exigir(Kd.puerta.x1 <= Kd.puerta.x0 + 260 && Kd.puerta.x1 - Kd.puerta.x0 >= data
 }
 // Heladera visible: la puerta tiene color propio y abre la ficha del equipo
 exigir(tra.some((p) => p.abre === 'nevera' && p.color), 'la puerta de la heladera debería tener color y abrir la heladera');
-exigir(tra.some((p) => p.abre === 'garrafa'), 'falta la puerta de la garrafa');
+exigir(tra.some((p) => p.abre === 'anafe'), 'falta la puerta del guardado del anafe');
 // El cajón de bidones llega hasta el piso, queda bajo la cama y los frentes altos sobre ella
 const frBid = tra.find((p) => p.nombre === 'Frente cajón de bidones');
 exigir(frBid && frBid.y < 30, 'el frente de bidones debería llegar al piso');
@@ -314,17 +323,17 @@ exigir(tramoDe('c_inv_ench1').fusible === 6, 'la línea de 230 V debería llevar
 exigir(ele.filas.some((f) => f.id === 'inversorEspera'), 'falta el consumo propio del inversor');
 exigir(compras.some((r) => /Interruptor diferencial/.test(r.item)), 'falta el diferencial de 230 V en la lista de compras');
 exigir(!compras.some((r) => /Fusible 7\.5 A/.test(r.item) && /230/.test(r.nota)), 'la línea de 230 V no debería llevar fusible sino disyuntor');
-// Gas
-for (const id of ['anafe', 'garrafa', 'regulador', 'valvulaGas', 'detectorGas']) exigir(data.equipos.some((e) => e.id === id), `falta el equipo de gas ${id}`);
-exigir(e3.mangueras.filter((m) => m.tipo === 'gas').length === 2, 'faltan las mangueras de gas');
+// Cocina portátil: el anafe y los dos cartuchos son equipos, y no queda nada de gas fijo
+for (const id of ['anafe', 'cartucho', 'cartucho2']) exigir(data.equipos.some((e) => e.id === id), `falta el equipo ${id}`);
+exigir(!compras.some((r) => r.categoria === 'Gas'), 'la lista de compras ya no debería tener un sistema de gas fijo');
 // La bomba de agua sigue conectada
 exigir(e3.cables.some((c) => c.hasta === 'bomba') && CARGAS_INICIALES.some((c) => c.id === 'bomba'), 'la bomba de 12 V debería estar conectada');
 
 // ---- Modo pieza: contorno, descripción de cortes, cámara y cotas ----
 const conContorno = data.partes.filter((p) => contorno(p));
 // Con el fondo inclinado se suman 3: el costado derecho y los dos divisores, que llevan el borde de atrás inclinado
-const contornosEsperados = cfgI.trasero.fondoInclinado ? 17 : 14;
-exigir(conContorno.length === contornosEsperados, `deberían tener contorno propio ${contornosEsperados} piezas (2 placas, 2 juegos de varillas, el frente del pie con su puerta, 2 costados fijos, 2 portales, 2 puertas de los módulos, el costado izquierdo con su puerta y la base de la cocina con su asiento${cfgI.trasero.fondoInclinado ? ', más el costado derecho y los 2 divisores inclinados' : ''}), hay ${conContorno.length}`);
+const contornosEsperados = cfgI.trasero.fondoInclinado ? 16 : 13;
+exigir(conContorno.length === contornosEsperados, `deberían tener contorno propio ${contornosEsperados} piezas (2 placas, 2 juegos de varillas, el frente del pie con su puerta, 2 costados fijos, 2 portales, 2 puertas de los módulos y el costado izquierdo con su puerta${cfgI.trasero.fondoInclinado ? ', más el costado derecho y los 2 divisores inclinados' : ''}), hay ${conContorno.length}`);
 const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
 const pie = data.partes.find((p) => /^Placa del pie/.test(p.nombre));
 exigir(contorno(cab).esquinas === 4 && contorno(cab).peine && !contorno(cab).recorte, 'la placa de la cabecera debería ser un peine de 4 esquinas redondeadas, sin recorte');
@@ -530,7 +539,7 @@ function L_E() {
   const ag = agujerosDe(data, e3t).filter((a) => a.grupo === 'Mueble trasero');
   exigir(ag.length >= 8, `el tutorial debería listar los agujeros de los cables y mangueras, hay ${ag.length}`);
   const cal = caladosDe(data, e3t);
-  for (const id of ['Heladera', 'Anafe', 'Fregadero']) exigir(cal.some((c) => c.aparato.startsWith(id)), `falta el calado de ${id} en el tutorial`);
+  for (const id of ['Heladera', 'Fregadero']) exigir(cal.some((c) => c.aparato.startsWith(id)), `falta el calado de ${id} en el tutorial`);
 }
 // ---- Colores por rol y modo Abierto del 3D ----
 {
@@ -577,9 +586,9 @@ function L_E() {
   // Todos los cajones llevan su frente y su caja: el frente y los laterales de cada cajón son el mismo cajón
   exigir(llaveCajon('Frente cajón de cocina 1') === llaveCajon('Cajón de cocina 1 - lateral'), 'el frente de un cajón y su caja deberían ser el mismo cajón');
   for (const m of cajones) exigir(Math.abs(m.v[0]) + Math.abs(m.v[2]) > 0 && m.v[1] === 0, 'un cajón debería deslizar en horizontal');
-  // Las bisagras están del lado contrario al botón. La puerta de la garrafa gira sobre su borde derecho (hueco 724 a 965)
-  const garrafaP = ab.porParte['TRA-25'];
-  exigir(garrafaP && Math.abs(garrafaP.pivote[0] - 963) < 1.5, 'la puerta de la garrafa debería girar sobre su borde derecho');
+  // Las bisagras están del lado contrario al botón. La puerta del guardado del anafe gira sobre su borde derecho (hueco 724 a 965)
+  const guardadoP = ab.porParte['TRA-25'];
+  exigir(guardadoP && Math.abs(guardadoP.pivote[0] - 963) < 1.5, 'la puerta del guardado del anafe debería girar sobre su borde derecho');
   // La puerta lateral gira sobre el borde del lado del mamparo y se abre hacia el pasillo de la van
   const lateralP = ab.porParte['TRA-66'];
   const lat = data.partes.find((q) => q.id === 'TRA-66');

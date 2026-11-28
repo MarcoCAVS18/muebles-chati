@@ -59,7 +59,7 @@ export default {
     compras: 'Compras',
   },
   capas: {
-    equipos: 'Agua, cocina y gas',
+    equipos: 'Agua y cocina',
     electrico: 'Eléctrico y mangueras',
     asientos: 'Asientos',
     pasarruedas: 'Pasarruedas',
@@ -108,7 +108,7 @@ export default {
     arriba: 'Desde arriba',
     cabecera: 'Mueble trasero (completo)',
     agua: 'Agua: fregadero y bidones',
-    cocina: 'Cocina: anafe y gas',
+    cocina: 'Cocina: anafe y cartuchos',
     electrico: 'Zona eléctrica (ver interior)',
     techo: 'Techo: tiras LED y extractor',
     lampara: 'Lámpara flexible (pared izquierda)',
@@ -458,8 +458,7 @@ export default {
         z: 'Bidón 20 L: grosor (a lo largo del cajón)',
         canilla: 'Bidón 20 L: lo que sobresale la canilla',
       },
-      anafe: { x: 'Anafe: ancho', z: 'Anafe: fondo' },
-      garrafa: { x: 'Garrafa: diámetro (estimado)', y: 'Garrafa: alto (estimado)' },
+      anafe: { x: 'Anafe: alto (su grosor de canto)', y: 'Anafe: ancho (su alto de canto)', z: 'Anafe: largo' },
     },
     led: {
       wPorM: 'Tira LED: W por metro',

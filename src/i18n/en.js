@@ -59,7 +59,7 @@ export default {
     compras: 'Shopping',
   },
   capas: {
-    equipos: 'Water, kitchen and gas',
+    equipos: 'Water and kitchen',
     electrico: 'Electrical and hoses',
     asientos: 'Seats',
     pasarruedas: 'Wheel arches',
@@ -108,7 +108,7 @@ export default {
     arriba: 'From above',
     cabecera: 'Rear unit (complete)',
     agua: 'Water: sink and jerrycans',
-    cocina: 'Kitchen: hob and gas',
+    cocina: 'Kitchen: hob and cartridges',
     electrico: 'Electrical area (show interior)',
     techo: 'Roof: LED strips and roof vent',
     lampara: 'Flexible lamp (left wall)',
@@ -458,8 +458,7 @@ export default {
         z: '20 L jerrycan: thickness (along the drawer)',
         canilla: '20 L jerrycan: how far the tap sticks out',
       },
-      anafe: { x: 'Hob: width', z: 'Hob: depth' },
-      garrafa: { x: 'Gas bottle: diameter (estimated)', y: 'Gas bottle: height (estimated)' },
+      anafe: { x: 'Hob: height (its thickness on edge)', y: 'Hob: width (its height on edge)', z: 'Hob: length' },
     },
     led: {
       wPorM: 'LED strip: W per metre',

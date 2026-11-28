@@ -6,7 +6,7 @@
 //   E  eléctrico (la L, 570 mm de fondo): al piso la batería acostada, el inversor, el DC-DC y los
 //      fusibles, bajo el plano de la cama; sobre la cama, el tablero con interruptores y enchufes
 //      y la heladera de tapa arriba, con la tapa a ras de la mesada
-//   K  cocina (500 mm, angosta): anafe arriba, dos cajones de cocina y la garrafa fija al piso, detrás de una puerta
+//   K  cocina (500 mm, angosta): dos cajones de cocina y, al piso, un guardado con puerta para el anafe portátil a cartucho y dos cartuchos
 //   W  agua (500 mm): fregadero arriba, cajón bajo el fregadero y cajón de bidones al piso
 //
 // La cama (superficie a 400 mm, 1800 mm de largo) termina contra el frente de la sección E. Al compartimento eléctrico se
@@ -128,34 +128,39 @@ export function disposicionTrasero(cfg) {
   E.puertaLateral = { y0: yPiso + 5, y1: E.yEstante - 5, z0: zInE + 20, z1: zFondo - 20 };
 
   // --- Sección K: cocina ---
-  const gar = eq.garrafa;
-  const reg = eq.regulador;
+  const ana = eq.anafe;
+  const cart = eq.cartucho;
   const K = {};
-  // La garrafa va fija, parada, detrás de una puerta con la bisagra a la derecha. Apoya en el piso a través de un círculo
-  // calado en la base, que la traba y la deja 15 mm más abajo. La puerta arranca después del borde de la cama: al abrirse,
-  // el borde libre gira hacia la derecha y nunca pasa bajo la cama.
+  // Al piso hay un guardado detrás de una puerta con la bisagra a la derecha: el anafe portátil de canto y dos cartuchos parados.
+  // La puerta arranca después del borde de la cama: al abrirse, el borde libre gira hacia la derecha y nunca pasa bajo la cama.
   const xBordeCama = ca.x0 + ca.ancho;
-  K.yAsiento = yBase; // base de la garrafa
-  K.yEstante = K.yAsiento + gar.y + reg.y + 15; // estante sobre la garrafa con su regulador
+  K.yAsiento = yBase; // base del guardado
+  K.yEstante = K.yAsiento + 405; // estante sobre el guardado: deja 390 mm útiles para el anafe de canto
   K.puerta = { x0: Math.max(hueco.K.x0, xBordeCama + 4), x1: hueco.K.x1 };
   K.anchoCajon = hueco.K.x1 - hueco.K.x0 - 26;
   K.xCajon = hueco.K.x0 + 13;
   K.xCentro = (sec.K.x0 + sec.K.x1) / 2;
-  K.xGar = (K.puerta.x0 + K.puerta.x1) / 2; // centro de la garrafa en x, frente al centro de la puerta
-  K.zGar = zIn + 20; // frente de la garrafa
-  K.asiento = { cx: K.xGar, cz: K.zGar + gar.z / 2, r: Math.max(gar.x, gar.z) / 2 + 5 }; // círculo de la base
-  K.yAnafe = tr.alto - eq.anafe.y; // cara inferior del anafe
-  // Dos cajones de cocina entre el estante de la garrafa y el anafe. Son cortos para dejar libre el fondo
-  // (llave de corte y caño del gas)
+  // El anafe entra de canto, pegado a la izquierda de la puerta, y los dos cartuchos quedan parados a su lado, uno detrás del otro
+  const xAna = K.puerta.x0 + 6;
+  const xCart = xAna + ana.x + 10;
+  K.guardado = {
+    anafe: { x: xAna, y: yPiso, z: zIn },
+    cartuchos: [
+      { x: xCart, y: yPiso, z: zIn + 10 },
+      { x: xCart, y: yPiso, z: zIn + 10 + cart.z + 10 },
+    ],
+    fondo: zFondo - zIn, // lo que mide el guardado en profundidad
+  };
+  // Dos cajones de cocina entre el estante del guardado y el travesaño de arriba (80 mm bajo la tapa)
   const yCajIni = K.yEstante + t + 12;
   K.yCajIni = yCajIni;
-  const yCajFin = K.yAnafe - 25;
+  const yCajFin = yTapa - 80;
   const altoCaj = (yCajFin - yCajIni - 15) / 2;
   K.cajones = [
     { nombre: 'Cajón de cocina 1', y0: yCajIni, y1: yCajIni + altoCaj },
     { nombre: 'Cajón de cocina 2', y0: yCajIni + altoCaj + 15, y1: yCajFin },
   ];
-  K.fondoCajonCocina = 340;
+  K.fondoCajonCocina = 340; // cortos: los cajones no llegan al fondo
 
   // --- Sección W: agua ---
   const W = {

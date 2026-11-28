@@ -1,7 +1,7 @@
 // Mueble cruzado detrás de los asientos, de pared a pared, con frentes planos y puertas a ras.
 // Origen: x = 0 es la pared izquierda, el fondo apoya contra el mamparo (z = largo).
 // Las secciones (ver disposicion.js), de izquierda a derecha: E eléctrico (la L, más profunda, con la
-// heladera arriba), K cocina (angosta, con la garrafa fija detrás de una puerta) y W agua.
+// heladera arriba), K cocina (angosta, con el guardado del anafe portátil detrás de una puerta) y W agua.
 // Los equipos eléctricos se alcanzan por una puerta en el costado izquierdo (la que se ve al abrir la puerta lateral
 // de la van), no por debajo de la cama: el frente de la sección eléctrica queda cerrado, contra la tapa de la cama.
 import { cajon } from './cajon.js';
@@ -76,9 +76,16 @@ export function trasero(ctx, G) {
   if (aireBornes < 55) {
     ctx.aviso(`La batería queda a ${Math.round(aireBornes)} mm del estante del compartimento eléctrico: faltan ${Math.round(55 - aireBornes)} mm para los cables de los bornes.`);
   }
-  // La garrafa entra por el hueco de su puerta, sin rozar los montantes
-  if (eq.garrafa.x + 6 > K.puerta.x1 - K.puerta.x0) {
-    ctx.aviso(`La garrafa (${eq.garrafa.x} mm) no pasa por el hueco de su puerta (${Math.round(K.puerta.x1 - K.puerta.x0)} mm): la puerta arranca después del borde de la cama.`);
+  // El anafe entra de canto por el hueco de su puerta y cabe en el guardado, sin rozar los montantes
+  const fondoGuardado = zFinHasta(yPiso + eq.anafe.y) - zIn;
+  if (eq.anafe.x + 6 > K.puerta.x1 - K.puerta.x0) {
+    ctx.aviso(`El anafe de canto (${eq.anafe.x} mm de grosor) no pasa por el hueco de su puerta (${Math.round(K.puerta.x1 - K.puerta.x0)} mm): la puerta arranca después del borde de la cama.`);
+  }
+  if (eq.anafe.z > fondoGuardado) {
+    ctx.aviso(`El anafe (${eq.anafe.z} mm de largo) no entra en el guardado (${Math.round(fondoGuardado)} mm de fondo).`);
+  }
+  if (eq.anafe.y + 15 > K.yEstante - yPiso) {
+    ctx.aviso(`El anafe parado de canto (${eq.anafe.y} mm de alto) no entra bajo el estante del guardado (${Math.round(K.yEstante - yPiso)} mm).`);
   }
 
   const P = (nombre, x, y, z, sx, sy, sz, mat = 'estructura') => ctx.parte({ grupo: G, nombre, mat, x, y, z, sx, sy, sz });
@@ -105,22 +112,7 @@ export function trasero(ctx, G) {
   if (inc) fondoInc('Fondo eléctrico (inclinado)', t, d1);
   else P('Fondo eléctrico (contra el mamparo)', t, yBase, zB - tb, d1, tr.alto - t - yBase, tb, 'fondo');
   P('Base (eléctrico)', t, yBase, L.E.zIn, d1 + t - t, t, largoHasta(L.E.zIn, yBase + t, largoIntE));
-  // La base de la cocina lleva calado el asiento circular de la garrafa: apoya en el piso a través del círculo
-  {
-    const xb = d1 + t;
-    ctx.parte({
-      grupo: G,
-      nombre: 'Base (cocina y agua)',
-      mat: 'estructura',
-      x: xb,
-      y: yBase,
-      z: zIn,
-      sx: x1 - t - xb,
-      sy: t,
-      sz: largoHasta(zIn, yBase + t, largoInt),
-      huecos: [{ tipo: 'asiento', a0: K.asiento.cx - K.asiento.r - xb, a1: K.asiento.cx + K.asiento.r - xb, b0: K.asiento.cz - K.asiento.r - zIn, b1: K.asiento.cz + K.asiento.r - zIn, r: K.asiento.r }],
-    });
-  }
+  P('Base (cocina y agua)', d1 + t, yBase, zIn, x1 - t - (d1 + t), t, largoHasta(zIn, yBase + t, largoInt));
   P('Zócalo frontal (eléctrico)', t, 0, zFL, d1 + t - t, yBase, t);
   P('Zócalo frontal (cocina y agua)', d1 + t, 0, zF, x1 - t - (d1 + t), yBase, t);
 
@@ -138,7 +130,7 @@ export function trasero(ctx, G) {
   P('Estante que cierra el compartimento eléctrico', sec.E.x0, E.yEstante, E.zIn, sec.E.x1 - sec.E.x0, t, largoHasta(E.zIn, E.yEstante + t, largoIntE));
   // El estante de la heladera empieza 10 mm antes que ella: delante queda libre para que bajen los cables del tablero
   P('Estante de la heladera', sec.E.x0, E.yEstanteNevera, E.zNevera - 10, sec.E.x1 - sec.E.x0, t, largoHasta(E.zNevera - 10, E.yEstanteNevera + t, largoIntE - (E.zNevera - 10 - E.zIn)));
-  P('Estante sobre la garrafa (bajo los cajones de cocina)', sec.K.x0, K.yEstante, zIn, sec.K.x1 - sec.K.x0, t, largoHasta(zIn, K.yEstante + t, largoInt));
+  P('Estante sobre el guardado del anafe (bajo los cajones de cocina)', sec.K.x0, K.yEstante, zIn, sec.K.x1 - sec.K.x0, t, largoHasta(zIn, K.yEstante + t, largoInt));
   P('Estante sobre los bidones', sec.W.x0, W.yEstante, zIn, sec.W.x1 - sec.W.x0, t, largoHasta(zIn, W.yEstante + t, largoInt));
 
   // Tapas: una por sección, atornilladas desde arriba
@@ -168,7 +160,7 @@ export function trasero(ctx, G) {
     ],
   });
   const f = { grupo: G, zf: zF, ya: yBase, yb: yTapa };
-  // Puerta de la garrafa: sube hasta el estante y arranca después del borde de la cama, con la bisagra a la derecha
+  // Puerta del guardado del anafe: sube hasta el estante y arranca después del borde de la cama, con la bisagra a la derecha
   frenteZ(ctx, {
     ...f,
     yb: K.yCajIni,
@@ -176,9 +168,9 @@ export function trasero(ctx, G) {
     xb: d2,
     hx0: K.puerta.x0,
     hx1: K.puerta.x1,
-    marco: 'Frente cocina (garrafa)',
-    tope: 'Frente cocina (garrafa) - travesaño',
-    huecos: [{ nombre: 'Puerta de la garrafa (bisagra a la derecha)', y0: yBase, y1: K.yEstante - 3, color: '#ffcc80', abre: 'garrafa' }],
+    marco: 'Frente cocina (guardado)',
+    tope: 'Frente cocina (guardado) - travesaño',
+    huecos: [{ nombre: 'Puerta del guardado del anafe (bisagra a la derecha)', y0: yBase, y1: K.yEstante - 3, color: '#ffcc80', abre: 'anafe' }],
   });
   frenteZ(ctx, {
     ...f,
@@ -213,7 +205,7 @@ export function trasero(ctx, G) {
       z: zIn + 15,
       ancho: K.anchoCajon,
       alto: c.y1 - c.y0 - 25,
-      fondo: K.fondoCajonCocina, // cortos: atrás quedan libres la llave de corte y el caño del gas
+      fondo: K.fondoCajonCocina, // cortos: no llegan al fondo
       dir: 'z-',
     });
   }
@@ -303,8 +295,8 @@ export function trasero(ctx, G) {
   // los cajones lo llevan al centro.
   const bt = (nombre, x, y, z) => ctx.boton({ grupo: G, nombre, eje: 'z-', x, y, z });
   const centro = (h) => (h.x0 + h.x1) / 2;
-  // La puerta de la garrafa tiene la bisagra a la derecha: el botón va cerca del borde izquierdo
-  bt('Puerta de la garrafa (bisagra a la derecha)', K.puerta.x0 + 2 + 45, K.yEstante - 3 - 60, zF);
+  // La puerta del guardado tiene la bisagra a la derecha: el botón va cerca del borde izquierdo
+  bt('Puerta del guardado del anafe (bisagra a la derecha)', K.puerta.x0 + 2 + 45, K.yEstante - 3 - 60, zF);
   for (const c of K.cajones) bt(`Frente ${c.nombre.toLowerCase()}`, centro(hueco.K), (c.y0 + c.y1) / 2, zF);
   bt('Frente cajón de bidones', centro(hueco.W), W.yEstante - 3 - 60, zF);
   bt('Frente cajón bajo el fregadero', centro(hueco.W), (W.yCajonFregadero + 760) / 2, zF);
@@ -348,12 +340,11 @@ export function trasero(ctx, G) {
   );
 
   // Herrajes
-  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 4, 'Dos en la puerta de la garrafa (bisagra a la derecha) y dos en la puerta lateral del compartimento eléctrico');
+  ctx.herraje(G, 'Bisagra de cazoleta 35 mm (puertas a ras)', 4, 'Dos en la puerta del guardado del anafe (bisagra a la derecha) y dos en la puerta lateral del compartimento eléctrico');
   ctx.herrajeBotones(G); // un botón push por frente: reemplaza al tirador y al imán
   ctx.herraje(G, 'Soporte regulable de estante', 16, 'Estantes del eléctrico (2), la cocina y el agua');
   ctx.herraje(G, 'Sifón y desagüe para fregadero', 1, 'Con la salida hacia un bidón de aguas grises o al piso');
-  ctx.herraje(G, 'Rejilla de ventilación 100 cm2 para el gas', 1, 'Al exterior por el piso, justo bajo el círculo del asiento de la garrafa: el gas pesa más que el aire');
-  ctx.herraje(G, 'Detector de monóxido de carbono', 1, 'Con la cocina a gas en un espacio cerrado es obligatorio en la práctica');
+  ctx.herraje(G, 'Detector de monóxido de carbono', 1, 'Cocinar con un anafe a cartucho dentro de la van produce monóxido: se usa con ventilación y con el detector instalado');
   ctx.herraje(G, 'Extintor de polvo ABC de 1 kg', 1, 'Cerca de la puerta, lejos de la cocina');
   ctx.herraje(G, 'Rejilla de ventilación de la heladera', 2, 'Una abajo y una arriba del frente fijo, para el aire del compresor');
   ctx.herraje(G, 'Rejilla de ventilación para el inversor y el DC-DC', 2, 'En la puerta lateral del compartimento eléctrico: se calientan con carga');
@@ -364,10 +355,7 @@ export function trasero(ctx, G) {
   const freg = eq.fregadero;
   const bid = eq.bidon;
   const ana = eq.anafe;
-  const gar = eq.garrafa;
-  const reg = eq.regulador;
-  const val = eq.valvulaGas;
-  const det = eq.detectorGas;
+  const cart = eq.cartucho;
 
   // Agua (derecha)
   E_({
@@ -448,84 +436,33 @@ export function trasero(ctx, G) {
     nota: 'Sección eléctrica, arriba, apoyada en su estante; se abre por un corte de la tapa 1',
   });
 
-  // Cocina (centro): anafe arriba, dos cajones de cocina y la garrafa fija al piso, detrás de una puerta
-  const zAna = zF + (prof - ana.z) / 2; // el anafe queda centrado en el fondo del mueble
+  // Cocina (centro): dos cajones de cocina y, al piso, el guardado con puerta. El anafe se usa suelto sobre la tapa
   E_({
     id: 'anafe',
-    nombre: 'Anafe de 2 hornallas',
-    x: K.xCentro - ana.x / 2,
-    y: K.yAnafe,
-    z: zAna,
+    nombre: 'Anafe portátil de 2 hornallas a cartucho',
+    x: K.guardado.anafe.x,
+    y: K.guardado.anafe.y,
+    z: K.guardado.anafe.z,
     sx: ana.x,
-    sy: ana.y + 8,
+    sy: ana.y,
     sz: ana.z,
     color: '#78909c',
-    estado: 'Confirmar medidas',
-    nota: 'Empotrado en la tapa 2, sección de la cocina',
+    estado: 'A comprar: confirmar medidas',
+    nota: 'Guardado de canto detrás de la puerta de la cocina. Se saca y se usa suelto sobre la tapa, con el cartucho conectado',
   });
-  for (const dz of [-100, 100]) {
-    ctx.deco({
-      grupo: G,
-      nombre: 'Hornalla',
-      x: K.xCentro - 45,
-      y: tr.alto + 8.1,
-      z: zAna + ana.z / 2 + dz - 45,
-      sx: 90,
-      sy: 1,
-      sz: 90,
-      color: '#212121',
+  K.guardado.cartuchos.forEach((c, i) => {
+    E_({
+      id: i === 0 ? 'cartucho' : 'cartucho2',
+      nombre: i === 0 ? 'Cartucho de gas CV 300 (conectado)' : 'Cartucho de gas CV 300 (repuesto)',
+      x: c.x,
+      y: c.y,
+      z: c.z,
+      sx: cart.x,
+      sy: cart.y,
+      sz: cart.z,
+      color: '#ef6c00',
+      estado: 'A comprar',
+      nota: 'Parado en el guardado, al lado del anafe',
     });
-  }
-  E_({
-    id: 'garrafa',
-    nombre: 'Garrafa de gas chica (recargable)',
-    x: K.xGar - gar.x / 2,
-    y: K.yAsiento,
-    z: K.zGar,
-    sx: gar.x,
-    sy: gar.y,
-    sz: gar.z,
-    color: '#ef6c00',
-    estado: 'A comprar',
-    nota: 'Parada y fija dentro del armario, apoyada en el piso a través del círculo de la base, con correa',
-  });
-  E_({
-    id: 'regulador',
-    nombre: 'Regulador de gas',
-    x: K.xGar - reg.x / 2,
-    y: K.yAsiento + gar.y,
-    z: K.zGar + 80,
-    sx: reg.x,
-    sy: reg.y,
-    sz: reg.z,
-    color: '#fdd835',
-    estado: 'A comprar',
-    nota: 'Sobre la válvula de la garrafa',
-  });
-  E_({
-    id: 'valvulaGas',
-    nombre: 'Llave de corte de gas',
-    x: sec.K.x1 - 100,
-    y: K.yAnafe - val.y - 15,
-    z: zFondo - 20 - val.z,
-    sx: val.x,
-    sy: val.y,
-    sz: val.z,
-    color: '#d84315',
-    estado: 'A comprar',
-    nota: 'Contra el fondo, bajo el anafe y detrás de los cajones de cocina; se alcanza sacando el cajón de arriba',
-  });
-  E_({
-    id: 'detectorGas',
-    nombre: 'Detector de gas (GLP)',
-    x: (hueco.E.x1 + hueco.K.x0 - det.x) / 2,
-    y: 250,
-    z: zF - det.z,
-    sx: det.x,
-    sy: det.y,
-    sz: det.z,
-    color: '#eceff1',
-    estado: 'A comprar',
-    nota: 'En el montante entre el eléctrico y la cocina, cerca del piso: el gas pesa más que el aire',
   });
 }

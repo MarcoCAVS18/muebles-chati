@@ -20,7 +20,6 @@ const COLOR_CABLE = {
   ac: { pos: '#8d6e63', neg: '#1976d2' },
   senal: { pos: '#9e9e9e', neg: '#9e9e9e' },
   agua: { pos: '#29b6f6', neg: null },
-  gas: { pos: '#ff9800', neg: null },
 };
 
 // El modelo usa x = 0 en la pared izquierda mirando hacia los asientos (eje que no es el de three.js).
@@ -32,7 +31,7 @@ export const VISTAS = {
   arriba: { nombre: 'Desde arriba', pos: [-0.86, 4.6, 1.25], target: [-0.86, 0, 1.2] },
   cabecera: { nombre: 'Mueble trasero (completo)', pos: [-0.86, 1.1, -0.35], target: [-0.86, 0.5, 2.2] },
   agua: { nombre: 'Agua: fregadero y bidones', pos: [-1.4, 1.2, 0.6], target: [-1.4, 0.45, 2.2] },
-  cocina: { nombre: 'Cocina: anafe y gas', pos: [-0.86, 1.2, 0.6], target: [-0.86, 0.45, 2.2] },
+  cocina: { nombre: 'Cocina: anafe y cartuchos', pos: [-0.86, 1.2, 0.6], target: [-0.86, 0.45, 2.2] },
   electrico: { nombre: 'Zona eléctrica (ver interior)', pos: [-0.35, 1.2, 0.6], target: [-0.35, 0.4, 2.2] },
   techo: { nombre: 'Techo: tiras LED y extractor', pos: [-0.86, 0.5, 0.1], target: [-0.86, 1.25, 1.6] },
   lampara: { nombre: 'Lámpara flexible (pared izquierda)', pos: [-1.1, 1.0, 0.3], target: [-0.04, 0.8, 1.23] },
@@ -116,7 +115,7 @@ function Tramo({ a, b, r, color, emisivo }) {
 function Cable({ cable, seccion, elegido, onClick, onOver, onOut }) {
   const col = COLOR_CABLE[cable.tipo];
   // El grosor dibujado sale de la sección calculada (no es a escala real)
-  const r = cable.tipo === 'agua' || cable.tipo === 'gas' ? 6 : 1.5 + Math.sqrt(seccion || 1.5) * 0.75;
+  const r = cable.tipo === 'agua' ? 6 : 1.5 + Math.sqrt(seccion || 1.5) * 0.75;
   const juegos = [{ pts: cable.puntos, color: col.pos }];
   if (col.neg) juegos.push({ pts: cable.puntos.map((p) => [p[0] + 14, p[1], p[2] + 14]), color: col.neg });
   return (
@@ -581,7 +580,7 @@ function Escena(props) {
                 setEnfoque(p.id);
                 return;
               }
-              // Las puertas de la heladera, del gas y de lo eléctrico abren la ficha del equipo
+              // Las puertas de la heladera, del anafe y de lo eléctrico abren la ficha del equipo
               if (p.abre) setElemento(p.abre);
               else setSeleccion(p.id);
             },

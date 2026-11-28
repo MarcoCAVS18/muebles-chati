@@ -3,7 +3,7 @@
 Proyecto React + three.js para diseñar los 3 muebles de la Citroën Jumpy y su sistema eléctrico,
 con la distribución de la foto de referencia: mueble trasero cruzado de pared a pared detrás de los asientos
 (de izquierda a derecha: eléctrico al piso con la batería, inversor, DC-DC y fusibles, y sobre la cama el
-panel y los enchufes con dos cajones de cocina arriba; cocina con anafe, gas y heladera al piso, al centro; y agua con
+panel y los enchufes con dos cajones de cocina arriba; cocina con dos cajones y, al piso, el guardado del anafe portátil a cartucho, al centro; y agua con
 fregadero y bidones al piso, a la derecha), cama extensible de 71 a 120 cm de 180 cm de largo (placas de plywood con
 esquinas redondeadas y ranuras en peine, varillas sobre correderas, costados fijos con una puerta que baja y portales en U que salen con la extensión), y mueble
 derecho con cajones, alacena y mesa plegable.
@@ -63,13 +63,13 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   pegada a la batería y salida propia de 5 A), inversor, panel de 5 interruptores, 2 enchufes con USB-C,
   4 tiras LED de 2 m en el techo (dos centrales a los costados del extractor y dos laterales cerca de las paredes, con el mismo
   inicio y fin), lámpara flexible de lectura en la pared izquierda (el cable va por el techo y baja por la viga sin aislar de
-  22 cm), bomba y mangueras de agua y de gas. El extractor del techo (310 x 310 mm con el marco) se abre a mano: está en el 3D
+  22 cm), bomba y mangueras de agua. El extractor del techo (310 x 310 mm con el marco) se abre a mano: está en el 3D
   pero sin conexión eléctrica.
 - Botones push: cada puerta y cada cajón de los tres muebles lleva un botón negro redondo en el 3D, para ver dónde va.
 - Lo que tenemos y lo que falta: el botón de la tilde en la barra del 3D pinta la madera de dos colores (verde, ya la tenemos; ámbar, falta) y cuenta las piezas de cada una. La lista inicial está en `src/data/stock.js` (CAM-01 a 07, 20 a 23, 31 y 32) y se cambia con la casilla «Ya la tenemos» de la tarjeta de cada pieza (doble clic en la madera); se guarda en la nube. Las varillas móviles cuentan como que están si la placa de la que salen está.
   Las varillas de la cama conservan un tirador embutido porque el canto de 15 mm es muy fino para el botón.
-- Sistema de gas en 3D: garrafa chica recargable fija en un compartimento con puerta bajo el anafe, regulador, manguera, llave de corte y
-  detector de gas, con la ventilación al exterior por el piso.
+- Cocina sin gas fijo: anafe portátil de 2 hornallas a cartucho, guardado de canto al piso de la cocina detrás de una puerta, con dos
+  cartuchos parados al lado (uno conectado y uno de repuesto). Se usa suelto sobre la tapa 2, sin calado.
 - Al hacer clic en cualquier equipo, cable o manguera (en el 3D o en la pestaña Eléctrica) se abre un panel con qué
   es, dónde va, cómo se conecta y un video de YouTube recomendado.
 - Modo pieza: doble clic en una madera (en el 3D, en la lista de despiece o en el plano de cortes) y las demás se desvanecen:
@@ -161,17 +161,15 @@ En «Medidas», sección «Cama», el casillero **Base reforzada** (apagado por 
   delanteras se unen cara contra cara de 15 mm, por eso llevan tornillos 4x25 y no 4x40.
 - Mueble derecho: se apoya sobre el pasarruedas derecho. Bajo 43 cm solo queda libre la franja del frente (cerrada con un
   frente ciego) y los dos cajones se acomodan arriba, a partir de los 45 cm.
-- El frente de la cocina y del agua está en z = 1910, 70 mm detrás del frente de la L (z = 1840), donde termina la cama. La garrafa
-  va fija y parada en su compartimento, detrás de una puerta con la bisagra a la derecha que arranca después del borde de la cama
-  (x 724 a 965), así que al abrirse nunca pasa por debajo de ella. Apoya a través de un círculo calado en la base (240 mm de
-  diámetro) que la traba; el regulador queda arriba, bajo el estante. `npm run check` verifica que la garrafa entre en el círculo y
-  que la puerta quede fuera de la cama. La garrafa entra con unos 5 mm de luz en el hueco de la puerta: medirla antes de cortar.
+- El frente de la cocina y del agua está en z = 1910, 70 mm detrás del frente de la L (z = 1840), donde termina la cama. El anafe
+  se guarda de canto en un compartimento al piso, detrás de una puerta con la bisagra a la derecha que arranca después del borde de
+  la cama (x 724 a 965), así que al abrirse nunca pasa por debajo de ella. `npm run check` verifica que el anafe y los dos cartuchos
+  entren en el guardado y que la puerta quede fuera de la cama. El anafe (475 x 295 x 79 mm, estimado como un Primus Kinjia) entra
+  con apenas 1 mm de luz en el fondo del guardado: medir el real antes de cortar el estante y la puerta.
   La sección de agua tapa parte de la puerta lateral derecha (z 1340 a 2320).
-- Gas: la rejilla de ventilación al piso va justo bajo el círculo del asiento de la garrafa (el gas pesa más que el aire). Falta definir el corte en el piso con el instalador.
-- Medidas estimadas de la cocina: anafe 420 x 300 mm, garrafa de 230 mm de diámetro y 330 mm de alto, heladera 420 x 300 x 340 mm,
+- Medidas estimadas de la cocina: anafe portátil de 475 x 295 x 79 mm, cartucho CV 300 de 90 mm de diámetro y 105 de alto, heladera 420 x 300 x 340 mm,
   fregadero 340 de ancho x 400 de fondo, bidones de 20 L de 215 x 400 x 290 mm.
-- Gas: confirmar la normativa de tu país y que lo revise un instalador de gas. El compartimento de la garrafa necesita una rejilla de
-  ventilación hacia el exterior por el piso, detector de gas y detector de monóxido de carbono.
+- Cocinar con un anafe a cartucho dentro de la van produce monóxido: usarlo con la claraboya abierta y con detector de monóxido de carbono.
 - La cama no lleva cajones: cada ventana de los costados la cierra una puerta con bisagras de cazoleta en el borde de abajo que baja hasta el piso, como en las fotos de referencia (Standard Sliding Bed B120). Detrás queda el hueco de guardado del módulo.
 - La cama es como la del instructivo (paso 10): dos módulos, uno de 120 cm (cabecera) y otro de 60 cm (pie), unidos con dos
   tornillos de 25 mm y fijados al piso con refuerzos de 4 tornillos de 25 mm por módulo. Cada módulo es una caja abierta con un
@@ -230,6 +228,6 @@ modificarlo. Si querés cerrarlo, hay que agregar Firebase Auth.
 La interfaz está en español (por defecto), inglés y sueco, con el selector ES / EN / SV en la cabecera. El idioma elegido queda guardado en el navegador.
 
 - `src/i18n/es.js` es la fuente de todas las claves; `en.js` y `sv.js` tienen que tener exactamente las mismas.
-- Lo eléctrico, el agua y el gas (equipos, cables, mangueras, consumos, avisos y fichas) están en `elec.en.js` y `elec.sv.js`, por id del elemento. Los cálculos usan siempre los datos originales: solo se traduce lo que se muestra (`src/i18n/electrico.js`). Si falta una traducción, queda el texto en español.
+- Lo eléctrico y el agua (equipos, cables, mangueras, consumos, avisos y fichas) están en `elec.en.js` y `elec.sv.js`, por id del elemento. Los cálculos usan siempre los datos originales: solo se traduce lo que se muestra (`src/i18n/electrico.js`). Si falta una traducción, queda el texto en español.
 - Por ahora siguen en español los nombres de las piezas, el tutorial de armado y las notas que arma el motor (herrajes y compras).
 

@@ -1,4 +1,4 @@
-// Electrical, water and gas in English, for the installer. Each text is looked up by the id of the device or cable.
+// Electrical and water in English, for the installer. Each text is looked up by the id of the device or cable.
 // Names of boards that stay in Spanish in the parts list (Tapa 1, Tapa 2, Tapa 3) are kept in brackets.
 export default {
   equipos: {
@@ -20,23 +20,9 @@ export default {
       nota: 'Electrical section, on top, resting on its shelf; opens through a cut-out in top panel 1 (Tapa 1)',
       estado: 'To buy: Alpicool G22, 25 L (about 2,000 kr)',
     },
-    anafe: { nombre: '2-burner hob', nota: 'Built into top panel 2 (Tapa 2), kitchen section', estado: 'Confirm dimensions' },
-    garrafa: {
-      nombre: 'Small gas bottle (refillable)',
-      nota: 'Standing and fixed inside the cabinet, resting on the floor through the circle in the base, with a strap',
-      estado: 'To buy',
-    },
-    regulador: { nombre: 'Gas regulator', nota: 'On the gas bottle valve', estado: 'To buy' },
-    valvulaGas: {
-      nombre: 'Gas shut-off valve',
-      nota: 'Against the back, under the hob and behind the kitchen drawers; reached by taking out the top drawer',
-      estado: 'To buy',
-    },
-    detectorGas: {
-      nombre: 'Gas detector (LPG)',
-      nota: 'On the upright between the electrical and kitchen sections, near the floor: the gas is heavier than air',
-      estado: 'To buy',
-    },
+    anafe: { nombre: 'Portable 2-burner cartridge hob', nota: 'Stored on its edge behind the kitchen door. Taken out and used loose on the top panel, with the cartridge connected', estado: 'To buy: confirm dimensions' },
+    cartucho: { nombre: 'Gas cartridge CV 300 (connected)', nota: 'Standing in the storage space, next to the hob', estado: 'To buy' },
+    cartucho2: { nombre: 'Gas cartridge CV 300 (spare)', nota: 'Standing in the storage space, next to the hob', estado: 'To buy' },
     bateria: { nombre: '150 Ah lithium battery', nota: 'Electrical section (left), on the floor, against the back and under the bed plane' },
     fusibles: {
       nombre: 'Fuse box',
@@ -163,7 +149,7 @@ export default {
     },
     c_panel_bomba: {
       nombre: 'Panel to the water pump',
-      nota: 'Runs through the gap above the shelf and behind the drawers, and crosses both dividers along the top of the back panel with grommets to the pump. It is the longest 12 V run in the unit: it passes behind the hob, so it goes inside a sleeve or conduit and away from the gas pipe.',
+      nota: 'Runs through the gap above the shelf and behind the drawers, and crosses both dividers along the top of the back panel with grommets to the pump. It is the longest 12 V run in the unit: it passes behind the kitchen drawers, so it goes inside a sleeve or conduit.',
     },
     c_caja_calef: {
       nombre: 'Fuse box to the heater thermostat',
@@ -193,14 +179,6 @@ export default {
     m_bomba_canilla: {
       nombre: 'Hose from the pump to the tap',
       nota: 'Goes up beside the sink and passes through the top panel via a hole next to the tap.',
-    },
-    m_gas_regulador: {
-      nombre: 'Gas hose from the regulator to the shut-off valve',
-      nota: 'Flexible hose certified for gas, with clamps. Runs under the shelf to the back and goes up behind the kitchen drawers; with enough slack so that the gas bottle door opens without pulling on it.',
-    },
-    m_gas_anafe: {
-      nombre: 'Gas pipe from the shut-off valve to the hob',
-      nota: 'Short fixed run to the hob inlet. Test all joints with soapy water.',
     },
   },
   escena: {
@@ -280,7 +258,6 @@ export default {
     ac: 'install 230v socket camper from inverter',
     senal: 'inverter with remote switch camper installation',
     agua: 'camper van water system pump tank tap installation',
-    gas: 'campervan gas installation bottle regulator',
   },
   info: {
     bateriaAuto: {
@@ -303,7 +280,7 @@ export default {
     },
     bateria: {
       descripcion: '150 Ah lithium (LiFePO4) battery. Powers the fridge, the lights, the pump and the inverter.',
-      ubicacion: 'Electrical section (left) of the rear unit, on the floor, against the back and under the bed plane. It is away from the sink and the gas.',
+      ubicacion: 'Electrical section (left) of the rear unit, on the floor, against the back and under the bed plane. It is away from the sink and the kitchen.',
       consejos: [
         'Fix it with a frame or straps: it must not move when braking. The terminals are on top, with about 6 cm free up to the shelf.',
         'It sits on the heating pad and the insulating sheet: in the cold (below 0 degrees) it must not be charged.',
@@ -470,7 +447,7 @@ export default {
         'It measures 585 without handles and about 598 with them: the section is 620, so about 22 mm are left. Confirm with the real fridge.',
         'Leave air around it: the compressor needs to breathe (vent below and above the fixed front, and the gap behind). Check the manual for how much it needs on each side.',
         'Dedicated line in the fuse box, without a switch.',
-        'It is far from the gas: the gas is on the kitchen floor, in another section.',
+        'It is far from the hob: the kitchen is in another section.',
       ],
       busqueda: 'install 12v compressor fridge campervan',
     },
@@ -499,7 +476,7 @@ export default {
         'Fix it on rubber so that it does not vibrate.',
         'Water filter before the pump.',
         'Reached by taking out the drawer under the sink.',
-        'The 12 V cable arrives from the panel (left side) along the back of the unit: inside a sleeve and away from the gas pipe.',
+        'The 12 V cable arrives from the panel (left side) along the back of the unit: inside a sleeve.',
       ],
       busqueda: 'install 12v water pump campervan',
     },
@@ -527,57 +504,38 @@ export default {
       busqueda: 'install grey water tank campervan',
     },
     anafe: {
-      descripcion: '2-burner hob built into top panel 2 (Tapa 2), in the middle section. With a safety valve (thermocouple) that cuts the gas if the flame goes out.',
-      ubicacion: 'Kitchen section, on top. Below it are two kitchen drawers and, on the floor, the gas bottle compartment with its door.',
+      descripcion: 'Portable 2-burner hob that runs on gas cartridges. It is not fixed: it is used loose on the kitchen top panel and stored on its edge behind the unit door.',
+      ubicacion: 'Stored in the kitchen section, on the floor, behind the door hinged on the right, next to the two cartridges. Above it are two kitchen drawers.',
       consejos: [
-        'The kitchen is 330 mm wide and 500 deep: look for one up to 300 wide and 440 deep (the cut-out has to leave about 25 mm of top panel on each side). The 30 cm domino type are usually 510 deep: they do not fit without making the kitchen deeper.',
-        'The 3D uses 300 x 440 x 70 mm as the size to choose: confirm with the real hob and its cut-out template.',
+        'The 3D uses 475 x 295 x 79 mm (like a Primus Kinjia): this size is to be confirmed with the real hob. On its edge it fits with only 1 mm of clearance at the back of the storage space, so measure it before cutting.',
+        'Before storing it, it has to be off, cold and with the cartridge disconnected.',
+        'To cook, take it out through the door and put it flat on the top panel, with a heat-resistant base underneath.',
         'Always cook with the skylight open.',
         'Keep the area around the hob clear: no curtains or fabric nearby.',
-        'Fix the hob to the top panel with the brackets it comes with.',
       ],
-      busqueda: 'install 2 burner gas hob campervan',
+      busqueda: 'portable 2 burner cartridge stove campervan',
     },
-    garrafa: {
-      descripcion: 'Small refillable gas bottle, standing and fixed in its compartment, on the floor of the unit and below the two kitchen drawers. It is taken out once a week through the door, filled outside and put back.',
-      ubicacion: 'Gas bottle compartment, on the floor of the middle section (below the kitchen drawers and the hob), behind a door hinged on the right.',
+    cartucho: {
+      descripcion: 'Gas cartridge for the portable hob. There are two in the kitchen storage space: one connected to the hob when cooking and one spare.',
+      ubicacion: 'Kitchen storage space, on the floor behind the door, standing next to the hob.',
       consejos: [
-        'To take it out: close the shut-off valve and the bottle valve, open the door, unscrew the regulator and lift it straight up. The bottle stands in a circle cut in the base, which holds it, and the regulator and the hose stay in the compartment.',
-        'The door starts after the edge of the bed, so when it opens it does not go under the bed or touch it. The bottle fits with very little clearance: measure it before cutting the door.',
-        'The hose needs a loose loop so that the door opens without pulling on it.',
-        'Always standing and strapped. Never lying down.',
-        'The gas bottle compartment has to be separate from the rest of the unit, with a ventilation grille of about 100 cm2 to the outside through the floor, right under the seat circle: the gas is heavier than air and has to be able to leave without entering the van.',
-        'Close the bottle valve when driving, sleeping and when leaving.',
-        'Fill only at approved places and respect the expiry date of the bottle.',
-        'Have a certified gas installer check the whole installation: it is the riskiest part of the build.',
-      ],
-      busqueda: 'campervan gas installation bottle ventilation',
-    },
-    regulador: {
-      descripcion: 'Gas (LPG) pressure regulator. Screws onto the gas bottle valve and lowers the pressure to the value the hob asks for.',
-      ubicacion: 'Above the gas bottle, inside its compartment, under the shelf.',
-      consejos: [
-        'The thread and the pressure have to match the bottle and the hob (they change by country).',
-        'Certified hose, with clamps and within its expiry date.',
-        'Test all joints with soapy water before use.',
-      ],
-      busqueda: 'install gas regulator bottle campervan',
-    },
-    valvulaGas: {
-      descripcion: 'Gas shut-off valve. Lets you cut the gas to the hob without opening the bottle.',
-      ubicacion: 'Against the back, under the hob and behind the kitchen drawers. Reached by taking out the top kitchen drawer.',
-      consejos: ['Use a ball valve rated for gas.', 'Label it and make it quick to reach.', 'Always close it when not cooking.'],
-      busqueda: 'campervan gas installation shut-off valve',
-    },
-    detectorGas: {
-      descripcion: 'LPG gas detector with alarm. Gas is heavier than air and collects near the floor.',
-      ubicacion: 'On the upright between the electrical and kitchen sections, near the floor, next to the gas bottle door.',
-      consejos: [
-        'Install it about 30 cm from the floor and away from the hob and the ventilation grilles.',
+        'The 3D uses a CV 300 type: about 90 mm in diameter and 105 high. Buy the type the chosen hob asks for.',
+        'Always store them standing and disconnected, away from heat and sun.',
+        'Change the cartridge outside the van or with the skylight open, away from any flame, and check the seal before connecting the new one.',
         'Add a carbon monoxide detector at bed height.',
-        'Test it now and then with the test button.',
       ],
-      busqueda: 'gas detector motorhome campervan installation',
+      busqueda: 'gas cartridge portable stove campervan safety',
+    },
+    cartucho2: {
+      descripcion: 'Gas cartridge for the portable hob. There are two in the kitchen storage space: one connected to the hob when cooking and one spare.',
+      ubicacion: 'Kitchen storage space, on the floor behind the door, standing next to the hob.',
+      consejos: [
+        'The 3D uses a CV 300 type: about 90 mm in diameter and 105 high. Buy the type the chosen hob asks for.',
+        'Always store them standing and disconnected, away from heat and sun.',
+        'Change the cartridge outside the van or with the skylight open, away from any flame, and check the seal before connecting the new one.',
+        'Add a carbon monoxide detector at bed height.',
+      ],
+      busqueda: 'gas cartridge portable stove campervan safety',
     },
   },
 };

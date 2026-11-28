@@ -159,7 +159,7 @@ export function agujerosDe(data, e3) {
 }
 
 // ---------- Calados de aparatos que atraviesan una placa ----------
-const CALADOS = ['nevera', 'anafe', 'fregadero', 'detectorGas'];
+const CALADOS = ['nevera', 'fregadero'];
 const EN_TABLERO = ['panelSwitches', 'enchufe1', 'enchufe2'];
 
 export function caladosDe(data, e3) {
@@ -321,7 +321,7 @@ function generales(cfg) {
     ],
     seguridad: [
       'Antes de taladrar el piso o una pared de la van mirá qué hay del otro lado (cañerías de combustible, cables, freno). Un tornillo de más largo que el listón del piso puede perforar la chapa o un cable.',
-      'El gas lo conecta un instalador matriculado, no lo hagas vos. Prepará el mueble y los pasos, pero la llave, el regulador y las mangueras de gas las deja probadas él.',
+      'El anafe es a cartucho y no lleva instalación de gas fija. Cocinalo siempre con ventilación (claraboya abierta) y con el detector de monóxido instalado.',
       'La parte eléctrica la revisa el técnico antes de cerrar nada. Conectá la batería siempre al final y con los interruptores abajo.',
       'Gafas, guantes y mascarilla cuando cortás o lijás contrachapado: el polvo de la cola irrita.',
     ],
@@ -393,7 +393,7 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     ],
     ojo: [
       'Las posiciones salen del recorrido de cables del 3D. Si cambiás el recorrido en la pestaña Eléctrica, volvé a mirar esta tabla antes de taladrar.',
-      'Esta tabla no incluye los aparatos que atraviesan una pieza (heladera, anafe, fregadero): esos se cortan con el aparato en la mano, en el paso de las tapas.',
+      'Esta tabla no incluye los aparatos que atraviesan una pieza (heladera, fregadero): esos se cortan con el aparato en la mano, en el paso de las tapas.',
     ],
   });
 
@@ -440,13 +440,6 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       inc
         ? `Pegá el zócalo al frente y el fondo inclinado de 9 mm atrás, con cola y tornillos 3,5x20 cada 100 mm por la cara del fondo. Biselá a ${fmt(inc.grados)}° los cantos de atrás de la base y del divisor 2.`
         : 'Pegá el zócalo al frente y el fondo de 9 mm atrás, con puntas o tornillos 3x20.',
-      (() => {
-        const b = por(/^Base \(cocina y agua\)/)[0];
-        const h = b && (b.huecos || []).find((q) => q.tipo === 'asiento');
-        return h
-          ? `La base lleva un círculo de ${r0(h.a1 - h.a0)} mm de diámetro: es el asiento de la garrafa, que queda fija en el compartimento de la derecha. Calalo antes de armar la caja, con caladora y plantilla, y abajo del círculo va la rejilla de ventilación del gas.`
-          : 'La base lleva el círculo del asiento de la garrafa: calalo antes de armar.';
-      })(),
       'Como falta la pared izquierda, la caja tiende a abrirse en V: atravesale un listón provisorio arriba (atornillado en los dos extremos) hasta que esté apoyada contra el divisor 1.',
     ],
     piezas: [...f(/^(Base|Zócalo frontal) \(cocina y agua\)|^Apoyo bajo la base.*\(cocina y agua\)/), ...f(/^Costado derecho$/), ...f(/^Divisor cocina y agua/), ...f(/^Fondo cocina y agua/)],
@@ -499,7 +492,7 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
   });
 
   const marcoE = por(/^Frente eléctrico - montante|^Tablero del panel|^Frente de la heladera - travesaño|^Frente fijo del eléctrico/);
-  const marcoK = por(/^Frente cocina( \(garrafa\))? - /);
+  const marcoK = por(/^Frente cocina( \(guardado\))? - /);
   const marcoW = por(/^Frente agua - /);
   pasos.push({
     id: 'tra-7',
@@ -532,44 +525,45 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     tablas: [tablaCajones(cajones)],
     ojo: [
       'El cajón de bidones carga unos 40 kg: usá correderas de carga y fijalas con todos los tornillos que traen, en todos los agujeros.',
-      'Los cajones de cocina son cortos a propósito: atrás quedan libres la llave de corte y el caño de gas. No los alargues.',
+      'Los cajones de cocina miden 340 mm de fondo: respetá la medida de la tabla.',
     ],
   });
 
-  const puertaG = por(/^Puerta de la garrafa/)[0];
+  const puertaG = por(/^Puerta del guardado del anafe/)[0];
+  const luzAnafe = inc ? null : Math.round(L.K.guardado.fondo - cfg.equipos.anafe.z);
   const puertaL = por(/^Puerta lateral/)[0];
   pasos.push({
     id: 'tra-9',
     titulo: 'Puertas, frentes y botones push',
-    intro: 'Hay dos puertas con bisagras de cazoleta: la de la garrafa (bisagra a la derecha) y la lateral del compartimento eléctrico, en el costado izquierdo. Los cajones abren con botones push redondos: no hay tiradores.',
+    intro: 'Hay dos puertas con bisagras de cazoleta: la del guardado del anafe (bisagra a la derecha) y la lateral del compartimento eléctrico, en el costado izquierdo. Los cajones abren con botones push redondos: no hay tiradores.',
     hacer: [
       'Cazoletas: broca Forstner de 35 mm, 12 mm de profundidad (con tope), con el centro a 22,5 mm del canto de la bisagra. Probá antes en un recorte.',
       puertaG
-        ? `Puerta de la garrafa (${puertaG.id}): dos bisagras sobre el canto de la derecha, que mide ${r0(puertaG.sy)} mm. Ponelas a 60 mm de cada punta. El hueco de la puerta empieza después del borde de la cama, así que al abrirse no pasa por debajo de ella.`
-        : 'Puerta de la garrafa: dos bisagras sobre el canto de la derecha.',
+        ? `Puerta del guardado del anafe (${puertaG.id}): dos bisagras sobre el canto de la derecha, que mide ${r0(puertaG.sy)} mm. Ponelas a 60 mm de cada punta. El hueco de la puerta empieza después del borde de la cama, así que al abrirse no pasa por debajo de ella.`
+        : 'Puerta del guardado del anafe: dos bisagras sobre el canto de la derecha.',
       puertaL
         ? `Puerta lateral (${puertaL.id}): dos bisagras sobre el canto del lado del mamparo, que mide ${r0(puertaL.sy)} mm; el botón queda del lado de la puerta trasera. Se ve al abrir la puerta corrediza izquierda de la van.`
         : 'Puerta lateral del compartimento eléctrico: dos bisagras.',
       'Botones push: taladrá del diámetro que diga la ficha del botón que compres (el modelo supone 28 mm) y fijalos con su pestillo. Medidas en la tabla.',
       'Dos rejillas de 100 mm en la puerta lateral para el inversor y el DC-DC, y dos en el frente fijo de la heladera (una arriba y una abajo).',
     ],
-    piezas: [...filas(por(/^Puerta de la garrafa/), cortes), ...filas(por(/^Puerta lateral/), cortes), ...filas(por(/^Frente fijo de la heladera/), cortes)],
+    piezas: [...filas(por(/^Puerta del guardado del anafe/), cortes), ...filas(por(/^Puerta lateral/), cortes), ...filas(por(/^Frente fijo de la heladera/), cortes)],
     tablas: [tablaBotones(data, G)],
     ojo: [
       'Los montantes de 15 mm son muy angostos para la placa de la bisagra. Comprá la bisagra recién cuando tengas el contrachapado en la mano y probá una: puede hacer falta una placa con distanciador o un listón detrás del montante.',
-      'La garrafa entra con muy poca luz en la puerta (unos 5 mm): medí la garrafa real antes de cortar la puerta.',
+      `El anafe entra de canto con muy poca luz en el fondo del guardado${luzAnafe === null ? '' : ` (unos ${luzAnafe} mm con la medida estimada)`}: medí el anafe real antes de cortar el estante y la puerta.`,
     ],
   });
 
   pasos.push({
     id: 'tra-10',
     titulo: 'Tapas y calados de los aparatos',
-    intro: 'Las tres tapas se atornillan desde arriba a los costados, divisores y marcos. Los calados del anafe, el fregadero y la heladera se hacen con el aparato real en la mano.',
+    intro: 'Las tres tapas se atornillan desde arriba a los costados, divisores y marcos. Los calados del fregadero y la heladera se hacen con el aparato real en la mano.',
     hacer: [
       'Antes de poner una tapa, pasá lo que va por abajo: mangueras, cables y la batería.',
       'Apoyá la tapa, marcá con cinta de enmascarar el contorno del aparato y dejá 3 a 5 mm de luz. Las medidas de la tabla son del modelo, no del catálogo.',
       'Calá con la caladora (primero un agujero de 10 mm en una esquina), lijá y sellá el canto. En las tapas 2 y 3 sellá bien: acá cae agua.',
-      'Tapa 1: encima del compartimento eléctrico y la heladera. Tapa 2: la cocina. Tapa 3: el fregadero.',
+      'Tapa 1: encima del compartimento eléctrico y la heladera. Tapa 2: la cocina, sin calado: el anafe se apoya suelto encima. Tapa 3: el fregadero.',
       'Atornillá desde arriba cada 150 mm, a 15 mm del borde, con avellanado y masilla. La tapa 2 se une a la tapa 1 con cola en el canto.',
     ],
     piezas: filas(por(/^Tapa \d/), cortes),
@@ -580,23 +574,22 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
         filas: cal.map((c) => [`${c.aparato}${c.estimado ? ' (medida estimada)' : ''}`, `${c.pieza} ${c.nombre}`, c.medida, c.donde]),
       },
     ],
-    ojo: ['El anafe y el fregadero todavía no están elegidos, y la medida de los enchufes y del panel es estimada. No cortes nada de esta tabla hasta tener el aparato.'],
+    ojo: ['El fregadero todavía no está elegido, y la medida de los enchufes y del panel es estimada. No cortes nada de esta tabla hasta tener el aparato.'],
   });
 
   pasos.push({
     id: 'tra-11',
-    titulo: 'Instalaciones: eléctrica, agua y gas',
+    titulo: 'Instalaciones: eléctrica y agua',
     intro: 'Esto no se improvisa: el orden evita que tengas que desarmar.',
     hacer: [
       'Eléctrica: la hace o la revisa el técnico. Los cables ya van en la pestaña Eléctrica, con calibres, fusibles y largos. La batería se conecta al final.',
       'Agua: bidón de agua limpia atrás, bomba a la derecha del mueble, manguera de grado alimenticio con abrazaderas hasta la canilla. El bidón de aguas grises va adelante.',
       'Fregadero: sifón con la salida hacia el bidón de aguas grises. Probalo con agua antes de tapar.',
-      'Gas: caño del regulador a la llave de corte y de ahí al anafe. Lo conecta y lo prueba el instalador. Dejá la garrafa y el regulador libres: la puerta tiene que abrir entera.',
-      'Ventilación del gas: rejilla de 100 cm² al exterior por el piso, justo bajo el círculo del asiento de la garrafa. Se define con el instalador antes de cortar la chapa.',
+      'Cocina: no hay gas fijo. El anafe a cartucho se guarda de canto detrás de su puerta, con los dos cartuchos parados a su lado, y se usa suelto sobre la tapa 2. Probá que entra y sale por la puerta antes de cerrar el mueble.',
       'Detector de monóxido y extintor: el detector junto a la cocina, el extintor cerca de la puerta, lejos de la hornalla.',
     ],
     piezas: [],
-    ojo: ['El corte de la chapa del piso para la ventilación es lo único que no se puede deshacer: no lo hagas hasta hablar con el instalador.'],
+    ojo: ['Cocinar con el anafe dentro de la van produce monóxido: usalo siempre con la claraboya abierta y el detector funcionando.'],
   });
 
   pasos.push({
@@ -627,7 +620,8 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     esperar: [
       'Altura real del listón del piso y posición de los 4 listones (decide el largo de los tornillos al piso).',
       'Si el ancho de 1560 mm vale para toda la van o solo para este mueble.',
-      'Anafe y fregadero elegidos (para cortar las tapas 2 y 3).',
+      'Fregadero elegido (para cortar la tapa 3).',
+      'Anafe a cartucho elegido y medido de canto (largo, ancho y grueso reales) antes de cortar el estante y la puerta de su guardado.',
       'Heladera comprada (para cortar la tapa 1 y hacer las rejillas).',
       'Bisagras y botones push comprados y probados contra el contrachapado.',
     ],

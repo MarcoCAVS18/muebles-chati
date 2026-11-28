@@ -59,7 +59,7 @@ export default {
     compras: 'Inköp',
   },
   capas: {
-    equipos: 'Vatten, kök och gasol',
+    equipos: 'Vatten och kök',
     electrico: 'El och slangar',
     asientos: 'Säten',
     pasarruedas: 'Hjulhus',
@@ -108,7 +108,7 @@ export default {
     arriba: 'Uppifrån',
     cabecera: 'Bakre möbeln (hel)',
     agua: 'Vatten: diskho och dunkar',
-    cocina: 'Kök: spis och gasol',
+    cocina: 'Kök: spis och patroner',
     electrico: 'Elavsnittet (visa insidan)',
     techo: 'Tak: LED-slingor och takventil',
     lampara: 'Flexibel lampa (vänster vägg)',
@@ -458,8 +458,7 @@ export default {
         z: 'Vattendunk 20 L: tjocklek (längs lådan)',
         canilla: 'Vattendunk 20 L: hur mycket kranen sticker ut',
       },
-      anafe: { x: 'Spis: bredd', z: 'Spis: djup' },
-      garrafa: { x: 'Gasolflaska: diameter (uppskattad)', y: 'Gasolflaska: höjd (uppskattad)' },
+      anafe: { x: 'Häll: höjd (dess tjocklek på högkant)', y: 'Häll: bredd (dess höjd på högkant)', z: 'Häll: längd' },
     },
     led: {
       wPorM: 'LED-slinga: W per meter',

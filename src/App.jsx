@@ -159,7 +159,9 @@ export default function App() {
               const ne = d.cfg.equipos && d.cfg.equipos.nevera;
               if (ne && ne.x === 420 && ne.y === 300 && ne.z === 340) d.cfg.equipos.nevera = { ...CONFIG_INICIAL.equipos.nevera };
               const an = d.cfg.equipos && d.cfg.equipos.anafe;
-              if (an && an.x === 420 && an.y === 55 && an.z === 300) d.cfg.equipos.anafe = { ...CONFIG_INICIAL.equipos.anafe };
+              // Un guardado con el anafe empotrado en la tapa (de 70 mm de alto o menos, con la garrafa de gas fija) pasa al anafe portátil
+              // a cartucho que se guarda de canto: cambió lo que significan x, y y z
+              if (an && an.y < 150) d.cfg.equipos.anafe = { ...CONFIG_INICIAL.equipos.anafe };
               // Un guardado con el bidón de 215 x 400 x 290 pasa al bidón plano de 416 x 203 x 408
               const bd = d.cfg.equipos && d.cfg.equipos.bidon;
               if (bd && bd.x === 215 && bd.y === 400 && bd.z === 290) d.cfg.equipos.bidon = { ...CONFIG_INICIAL.equipos.bidon };

@@ -283,11 +283,6 @@ export function describirPieza(p, cfg) {
           tipo: 'arco',
           texto: `Agarradera calada de ${fmt(largo)} x ${fmt(ancho)} mm con esquinas R${fmt(h.r)}, a ${fmt(c.plano === 'zy' ? c.h - h.a1 : c.h - h.b1)} mm del borde de arriba y centrada a lo ancho: es donde se mete el dedo para abrir la puerta (taladro, caladora y lija)`,
         });
-      } else if (h.tipo === 'asiento') {
-        lineas.push({
-          tipo: 'arco',
-          texto: `Calado circular de ${fmt(2 * h.r)} mm de diámetro, el asiento de la garrafa: su centro queda a ${fmt((h.a0 + h.a1) / 2)} mm del borde izquierdo y a ${fmt((h.b0 + h.b1) / 2)} mm del borde del frente (taladro y caladora; la pieza que sale sirve para otra parte)`,
-        });
       } else if (h.tipo === 'puerta') {
         // En el costado (plano zy) la coordenada a es la altura y la b la distancia al frente
         lineas.push({
@@ -534,7 +529,7 @@ export function anotarPieza(p, cam) {
       const h = g.primero;
       const am = (h.a0 + h.a1) / 2;
       const bm = (h.b0 + h.b1) / 2;
-      const nom = { ranura: 'Ranura', puerta: 'Puerta', asiento: 'Asiento', agarradera: 'Agarradera' }[h.tipo] || 'Ventana';
+      const nom = { ranura: 'Ranura', puerta: 'Puerta', agarradera: 'Agarradera' }[h.tipo] || 'Ventana';
       const aEn = (f) => h.a0 + f * (h.a1 - h.a0);
       // La etiqueta puede ir en otro lugar de la línea para que las de una misma ranura no se pisen
       const cota = (ini, fin, valor, nombre, etiquetaPos) => cotas.push({ ini, fin, ext: [], valor, nombre, tipo: 'arco', ...(etiquetaPos ? { etiquetaPos } : {}) });

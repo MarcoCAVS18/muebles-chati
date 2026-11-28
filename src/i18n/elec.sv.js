@@ -1,4 +1,4 @@
-// El, vatten och gasol på svenska, för installatören. Varje text hämtas med id för apparaten eller kabeln.
+// El och vatten på svenska, för installatören. Varje text hämtas med id för apparaten eller kabeln.
 // Skivor som heter på spanska i delförteckningen (Tapa 1, Tapa 2, Tapa 3) står kvar inom parentes.
 export default {
   equipos: {
@@ -20,23 +20,9 @@ export default {
       nota: 'Elavsnittet, högst upp, vilar på sin hylla; öppnas genom ett urtag i toppskiva 1 (Tapa 1)',
       estado: 'Ska köpas: Alpicool G22 på 25 L (ungefär 2 000 kr)',
     },
-    anafe: { nombre: 'Gasolhäll med 2 brännare', nota: 'Infälld i toppskiva 2 (Tapa 2), köksavsnittet', estado: 'Bekräfta måtten' },
-    garrafa: {
-      nombre: 'Liten gasolflaska (påfyllningsbar)',
-      nota: 'Stående och fastsatt i skåpet, står på golvet genom cirkeln i botten, med spännrem',
-      estado: 'Ska köpas',
-    },
-    regulador: { nombre: 'Gasolregulator', nota: 'På gasolflaskans ventil', estado: 'Ska köpas' },
-    valvulaGas: {
-      nombre: 'Avstängningsventil för gasol',
-      nota: 'Mot ryggen, under hällen och bakom kökslådorna; nås genom att ta ut översta lådan',
-      estado: 'Ska köpas',
-    },
-    detectorGas: {
-      nombre: 'Gasolvarnare (LPG)',
-      nota: 'På stolpen mellan elavsnittet och köket, nära golvet: gasol är tyngre än luft',
-      estado: 'Ska köpas',
-    },
+    anafe: { nombre: 'Bärbar gasolhäll med 2 brännare (patron)', nota: 'Förvaras på högkant bakom köksdörren. Tas ut och används löst på toppskivan, med patronen ansluten', estado: 'Ska köpas: bekräfta måtten' },
+    cartucho: { nombre: 'Gasolpatron CV 300 (ansluten)', nota: 'Stående i förvaringsutrymmet, bredvid hällen', estado: 'Ska köpas' },
+    cartucho2: { nombre: 'Gasolpatron CV 300 (reserv)', nota: 'Stående i förvaringsutrymmet, bredvid hällen', estado: 'Ska köpas' },
     bateria: { nombre: 'Litiumbatteri 150 Ah', nota: 'Elavsnittet (vänster), på golvet, mot ryggen och under sängplanet' },
     fusibles: {
       nombre: 'Säkringsbox',
@@ -163,7 +149,7 @@ export default {
     },
     c_panel_bomba: {
       nombre: 'Panel till vattenpumpen',
-      nota: 'Går genom utrymmet ovanför hyllan och bakom lådorna, och korsar de två mellanväggarna högt upp på ryggen med kabelgenomföringar fram till pumpen. Det är den längsta 12 V-sträckan i möbeln: den passerar bakom hällen, så den ligger i ett rör eller en kanal och långt från gasolröret.',
+      nota: 'Går genom utrymmet ovanför hyllan och bakom lådorna, och korsar de två mellanväggarna högt upp på ryggen med kabelgenomföringar fram till pumpen. Det är den längsta 12 V-sträckan i möbeln: den passerar bakom kökslådorna, så den ligger i ett rör eller en kanal.',
     },
     c_caja_calef: {
       nombre: 'Säkringsbox till värmarens termostat',
@@ -193,14 +179,6 @@ export default {
     m_bomba_canilla: {
       nombre: 'Slang från pumpen till kranen',
       nota: 'Går upp vid sidan av diskhon och genom toppskivan via ett hål intill kranen.',
-    },
-    m_gas_regulador: {
-      nombre: 'Gasolslang från regulatorn till avstängningsventilen',
-      nota: 'Flexibel slang certifierad för gasol, med slangklämmor. Går under hyllan till ryggen och upp bakom kökslådorna; med tillräckligt med slack så att gasolflaskans dörr kan öppnas utan att dra i den.',
-    },
-    m_gas_anafe: {
-      nombre: 'Gasolrör från avstängningsventilen till hällen',
-      nota: 'Kort fast sträcka till hällens inlopp. Provtryck alla skarvar med tvålvatten.',
     },
   },
   escena: {
@@ -280,7 +258,6 @@ export default {
     ac: 'installera 230v uttag husbil från växelriktare',
     senal: 'växelriktare med fjärrkontroll installation husbil',
     agua: 'vatteninstallation husbil pump tank kran',
-    gas: 'gasolinstallation husbil gasolflaska regulator',
   },
   info: {
     bateriaAuto: {
@@ -303,7 +280,7 @@ export default {
     },
     bateria: {
       descripcion: 'Litiumbatteri (LiFePO4) på 150 Ah. Driver kylboxen, lamporna, pumpen och växelriktaren.',
-      ubicacion: 'Elavsnittet (vänster) i bakre möbeln, på golvet, mot ryggen och under sängplanet. Det ligger långt från diskhon och gasolen.',
+      ubicacion: 'Elavsnittet (vänster) i bakre möbeln, på golvet, mot ryggen och under sängplanet. Det ligger långt från diskhon och köket.',
       consejos: [
         'Fäst det med ram eller remmar: det får inte röra sig vid inbromsning. Polerna sitter upptill, med cirka 6 cm fritt upp till hyllan.',
         'Det vilar på värmemattan och isolerskivan: i kyla (under 0 grader) får det inte laddas.',
@@ -470,7 +447,7 @@ export default {
         'Den mäter 585 utan handtag och cirka 598 med dem: avsnittet är 620, så cirka 22 mm blir över. Bekräfta med den riktiga kylboxen.',
         'Lämna luft runt den: kompressorn behöver ventileras (galler nedtill och upptill på den fasta fronten, samt utrymmet bakom). Kontrollera i manualen hur mycket den kräver på varje sida.',
         'Egen ledning i säkringsboxen, utan strömbrytare.',
-        'Den ligger långt från gasolen: gasolen finns på köksgolvet, i ett annat avsnitt.',
+        'Den ligger långt från hällen: köket finns i ett annat avsnitt.',
       ],
       busqueda: 'installera kompressorkylbox 12v husbil',
     },
@@ -499,7 +476,7 @@ export default {
         'Fäst den på gummi så att den inte vibrerar.',
         'Vattenfilter före pumpen.',
         'Nås genom att ta ut lådan under diskhon.',
-        'Den 12 V-kabeln kommer från panelen (vänster sida) längs möbelns rygg: i ett rör och långt från gasolröret.',
+        'Den 12 V-kabeln kommer från panelen (vänster sida) längs möbelns rygg: i ett rör.',
       ],
       busqueda: 'installera vattenpump 12v husbil',
     },
@@ -527,57 +504,38 @@ export default {
       busqueda: 'installera gråvattentank husbil',
     },
     anafe: {
-      descripcion: 'Gasolhäll med 2 brännare infälld i toppskiva 2 (Tapa 2), i mittenavsnittet. Med säkerhetsventil (termoelement) som stänger gasolen om lågan slocknar.',
-      ubicacion: 'Köksavsnittet, högst upp. Under finns två kökslådor och, på golvet, gasolflaskans utrymme med sin dörr.',
+      descripcion: 'Bärbar gasolhäll med 2 brännare som går på gasolpatroner. Den är inte fast: den används löst på kökets toppskiva och förvaras på högkant bakom möbelns dörr.',
+      ubicacion: 'Förvaras i köksavsnittet, på golvet, bakom dörren med gångjärn till höger, bredvid de två patronerna. Ovanför finns två kökslådor.',
       consejos: [
-        'Köket är 330 mm brett och 500 djupt: leta efter en som är högst 300 bred och 440 djup (urtaget ska lämna cirka 25 mm av toppskivan på varje sida). Hällar på 30 cm av dominotyp är oftast 510 djupa: de får inte plats utan att köket görs djupare.',
-        '3D använder 300 x 440 x 70 mm som mått att välja: bekräfta med den riktiga hällen och dess mall för urtag.',
+        '3D använder 475 x 295 x 79 mm (som en Primus Kinjia): måttet ska bekräftas med den riktiga hällen. På högkant går den i med bara 1 mm spel i botten av förvaringsutrymmet, så mät den innan du sågar.',
+        'Innan den förvaras ska den vara avstängd, kall och med patronen frånkopplad.',
+        'För att laga mat tar du ut den genom dörren och ställer den platt på toppskivan, med ett värmetåligt underlag under.',
         'Laga alltid mat med takluckan öppen.',
         'Håll utrymmet runt hällen fritt: inga gardiner eller tyger i närheten.',
-        'Fäst hällen i toppskivan med de fästen den levereras med.',
       ],
-      busqueda: 'installera gasolhäll 2 brännare husbil',
+      busqueda: 'bärbar gasolhäll 2 brännare patron husbil',
     },
-    garrafa: {
-      descripcion: 'Liten påfyllningsbar gasolflaska, stående och fastsatt i sitt utrymme, på möbelns golv och under de två kökslådorna. Den tas ut en gång i veckan genom dörren, fylls utomhus och sätts tillbaka.',
-      ubicacion: 'Gasolflaskans utrymme, på golvet i mittenavsnittet (under kökslådorna och hällen), bakom en dörr med gångjärn till höger.',
+    cartucho: {
+      descripcion: 'Gasolpatron för den bärbara hällen. Det finns två i köksförvaringen: en ansluten till hällen när man lagar mat och en reserv.',
+      ubicacion: 'Köksförvaringen, på golvet bakom dörren, stående bredvid hällen.',
       consejos: [
-        'För att ta ut den: stäng avstängningsventilen och flaskans ventil, öppna dörren, skruva loss regulatorn och lyft rakt upp. Flaskan står i en urtagen cirkel i botten som låser den, och regulatorn och slangen blir kvar i utrymmet.',
-        'Dörren börjar efter sängens kant, så när den öppnas går den inte under sängen och rör den inte. Flaskan går i med mycket litet spel: mät den innan du sågar dörren.',
-        'Slangen behöver en lös slinga så att dörren kan öppnas utan att dra i den.',
-        'Alltid stående och fastspänd. Aldrig liggande.',
-        'Gasolflaskans utrymme ska vara avskilt från resten av möbeln, med ett ventilationsgaller på cirka 100 cm2 ut genom golvet, precis under sätescirkeln: gasolen är tyngre än luft och måste kunna lämna utrymmet utan att komma in i bilen.',
-        'Stäng flaskans ventil vid körning, när du sover och när du går därifrån.',
-        'Fyll bara på godkända platser och respektera flaskans utgångsdatum.',
-        'Låt en certifierad gasolinstallatör kontrollera hela installationen: det är den farligaste delen av bygget.',
-      ],
-      busqueda: 'gasolinstallation husbil gasolflaska ventilation',
-    },
-    regulador: {
-      descripcion: 'Tryckregulator för gasol (LPG). Skruvas på gasolflaskans ventil och sänker trycket till det värde som hällen kräver.',
-      ubicacion: 'Ovanför gasolflaskan, inne i dess utrymme, under hyllan.',
-      consejos: [
-        'Gängan och trycket ska passa flaskan och hällen (det varierar mellan länder).',
-        'Certifierad slang, med slangklämmor och inom sitt utgångsdatum.',
-        'Provtryck alla skarvar med tvålvatten innan användning.',
-      ],
-      busqueda: 'installera gasolregulator gasolflaska husbil',
-    },
-    valvulaGas: {
-      descripcion: 'Avstängningsventil för gasol. Gör att man kan stänga gasolen till hällen utan att öppna flaskan.',
-      ubicacion: 'Mot ryggen, under hällen och bakom kökslådorna. Nås genom att ta ut översta kökslådan.',
-      consejos: ['Använd kulventil godkänd för gasol.', 'Märk den och se till att den går snabbt att nå.', 'Stäng den alltid när du inte lagar mat.'],
-      busqueda: 'gasolinstallation husbil avstängningsventil',
-    },
-    detectorGas: {
-      descripcion: 'Gasolvarnare med larm. Gasol är tyngre än luft och samlas nära golvet.',
-      ubicacion: 'På stolpen mellan elavsnittet och köket, nära golvet, bredvid gasolflaskans dörr.',
-      consejos: [
-        'Montera den cirka 30 cm från golvet och långt från hällen och ventilationsgallren.',
+        '3D använder en av typ CV 300: cirka 90 mm i diameter och 105 hög. Köp den typ som den valda hällen kräver.',
+        'Förvara dem alltid stående och frånkopplade, långt från värme och sol.',
+        'Byt patron utomhus eller med takluckan öppen, långt från all låga, och kontrollera packningen innan du ansluter den nya.',
         'Lägg till en kolmonoxidvarnare i sänghöjd.',
-        'Testa den då och då med testknappen.',
       ],
-      busqueda: 'gasolvarnare husbil installation',
+      busqueda: 'gasolpatron bärbar häll husbil säkerhet',
+    },
+    cartucho2: {
+      descripcion: 'Gasolpatron för den bärbara hällen. Det finns två i köksförvaringen: en ansluten till hällen när man lagar mat och en reserv.',
+      ubicacion: 'Köksförvaringen, på golvet bakom dörren, stående bredvid hällen.',
+      consejos: [
+        '3D använder en av typ CV 300: cirka 90 mm i diameter och 105 hög. Köp den typ som den valda hällen kräver.',
+        'Förvara dem alltid stående och frånkopplade, långt från värme och sol.',
+        'Byt patron utomhus eller med takluckan öppen, långt från all låga, och kontrollera packningen innan du ansluter den nya.',
+        'Lägg till en kolmonoxidvarnare i sänghöjd.',
+      ],
+      busqueda: 'gasolpatron bärbar häll husbil säkerhet',
     },
   },
 };

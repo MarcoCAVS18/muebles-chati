@@ -9,7 +9,7 @@
 //     Vista desde la puerta trasera, de izquierda a derecha:
 //       izquierda: electricidad al piso (batería, inversor, DC-DC, fusibles) y arriba interruptores,
 //                  enchufes y la heladera, con la tapa a ras de la mesada; esta sección es la L: llega a 570 mm de profundidad
-//       centro:    anafe angosto, dos cajones de cocina y la garrafa de gas fija al piso, detrás de una puerta
+//       centro:    dos cajones de cocina y, al piso, un guardado con puerta para el anafe portátil a cartucho y dos cartuchos
 //       derecha:   grifo y fregadero, con dos bidones al piso (uno de agua limpia y uno de aguas grises)
 //   - Cama extensible (71 a 120 cm) de plywood: dos módulos (120 y 60) con ventanas y dos placas en peine cuyas varillas salen al pasillo
 //   - Mueble derecho con cajones, puerta bajo la mesa plegable y alacena alta
@@ -130,11 +130,12 @@ export const CONFIG_INICIAL = {
     bidon: { x: 416, y: 408, z: 203, canilla: 40 }, // largo, alto, grosor
     nevera: { x: 585, y: 350, z: 335 }, // Alpicool G22 de 25 L, de tapa arriba: 585 sin manijas (unos 598 con ellas), alto 350, fondo 335
     fregadero: { x: 340, y: 130, z: 400 }, // los 400 mm son el fondo; el ancho es ESTIMADO
-    anafe: { x: 300, y: 70, z: 440 }, // ESTIMADO, a elegir: 2 hornallas empotradas de hasta 300 de ancho y 440 de fondo (la cocina mide 330 de ancho)
-    garrafa: { x: 230, y: 330, z: 230 }, // garrafa chica recargable (ESTIMADA)
-    regulador: { x: 70, y: 60, z: 70 },
-    valvulaGas: { x: 40, y: 40, z: 40 },
-    detectorGas: { x: 40, y: 50, z: 22 },
+    // Anafe portátil de 2 hornallas a cartucho (sin gas fijo). Se usa suelto sobre la tapa y se guarda de canto en el compartimento
+    // de la cocina, detrás de su puerta. ESTIMADO, a elegir: un Primus Kinjia mide unos 475 x 295 x 79 mm (dato de REI, sin confirmar).
+    // Medidas de canto: x grosor, y alto, z largo (el fondo del guardado mide 476 mm)
+    anafe: { x: 80, y: 295, z: 475 },
+    // Cartucho de gas CV 300 Plus: 90 mm de diámetro y 105 de alto (dato de Reimo). Van dos parados junto al anafe: uno conectado y uno de repuesto
+    cartucho: { x: 90, y: 105, z: 90 },
     bateriaAuto: { x: 278, y: 190, z: 175 },
     anl: { x: 60, y: 40, z: 40 },
     // Protección de la batería contra el frío (ESTIMADOS: confirmar con cada producto). Van debajo y al lado de la batería.

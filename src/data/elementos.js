@@ -22,7 +22,7 @@ export const ELEMENTOS = {
   },
   bateria: {
     descripcion: 'Batería de litio (LiFePO4) de 150 Ah. Alimenta la heladera, las luces, la bomba y el inversor.',
-    ubicacion: 'Sección eléctrica (izquierda) del mueble trasero, al piso, contra el fondo y bajo el plano de la cama. Queda lejos del fregadero y del gas.',
+    ubicacion: 'Sección eléctrica (izquierda) del mueble trasero, al piso, contra el fondo y bajo el plano de la cama. Queda lejos del fregadero y de la cocina.',
     consejos: [
       'Fijarla con un marco o correas: no puede moverse al frenar. Los bornes quedan arriba, con unos 6 cm libres hasta el estante.',
       'Apoya sobre la almohadilla calefactora y la plancha aislante: con frío (menos de 0 grados) no se debe cargar.',
@@ -192,7 +192,7 @@ export const ELEMENTOS = {
       'Mide 585 sin manijas y unos 598 con ellas: la sección tiene 620, así que sobran unos 22 mm. Confirmar con la heladera real.',
       'Dejar aire alrededor: necesita ventilar el compresor (rejilla abajo y arriba del frente fijo, y el hueco de atrás). Confirmar con el manual cuánto pide de cada lado.',
       'Línea propia en la caja de fusibles, sin interruptor.',
-      'Queda lejos del gas: el gas está al piso de la cocina, en otra sección.',
+      'Queda lejos del anafe: la cocina está en otra sección.',
     ],
     busqueda: 'instalar nevera compresor 12v furgoneta camper',
   },
@@ -221,7 +221,7 @@ export const ELEMENTOS = {
       'Fijarla sobre goma para que no vibre.',
       'Filtro de agua antes de la bomba.',
       'Se alcanza sacando el cajón de abajo del fregadero.',
-      'El cable de 12 V llega desde el panel (lado izquierdo) por el fondo del mueble: dentro de una funda y lejos del caño de gas.',
+      'El cable de 12 V llega desde el panel (lado izquierdo) por el fondo del mueble: dentro de una funda.',
     ],
     busqueda: 'instalar bomba de agua 12v camper',
   },
@@ -249,60 +249,31 @@ export const ELEMENTOS = {
     busqueda: 'instalar depósito de aguas grises camper',
   },
   anafe: {
-    descripcion: 'Anafe de 2 hornallas empotrado en la tapa 2, en la sección del medio. Con válvula de seguridad (termocupla) que corta el gas si se apaga la llama.',
-    ubicacion: 'Sección de la cocina, arriba. Abajo tiene dos cajones de cocina y, al piso, el compartimento de la garrafa con su puerta.',
+    descripcion: 'Anafe portátil de 2 hornallas que funciona con cartuchos de gas. No va fijo: se usa suelto sobre la tapa de la cocina y se guarda de canto, detrás de la puerta del mueble.',
+    ubicacion: 'Se guarda en la sección de la cocina, al piso, detrás de la puerta con la bisagra a la derecha, junto a los dos cartuchos. Arriba tiene dos cajones de cocina.',
     consejos: [
-      'La cocina mide 330 mm de ancho y 500 de fondo: buscar uno de hasta 300 de ancho y 440 de fondo (el corte tiene que dejar unos 25 mm de tapa por lado). Las de 30 cm tipo domino suelen medir 510 de fondo: no entran sin profundizar la cocina.',
-      'El 3D usa 300 x 440 x 70 mm como medida a elegir: confirmar con el anafe real y con la plantilla de corte.',
+      'El 3D usa 475 x 295 x 79 mm (como un Primus Kinjia): es una medida a confirmar con el anafe real. De canto entra con apenas 1 mm de luz en el fondo del guardado, así que medilo antes de cortar.',
+      'Antes de guardarlo tiene que estar apagado, frío y con el cartucho desconectado.',
+      'Para cocinar se saca por la puerta y se apoya plano sobre la tapa, con una base debajo que aguante el calor.',
       'Cocinar siempre con la claraboya abierta.',
       'Dejar libre alrededor del anafe: nada de cortinas ni telas cerca.',
-      'Fijar el anafe a la tapa con los soportes que trae.',
     ],
-    busqueda: 'instalar anafe 2 hornallas camper gas',
+    busqueda: 'anafe portátil 2 hornallas cartucho camper',
   },
-  garrafa: {
-    descripcion:
-      'Garrafa chica recargable, parada y fija en su compartimento, al piso del mueble y debajo de los dos cajones de cocina. Se saca una vez por semana por la puerta, se carga afuera y se vuelve a colocar.',
-    ubicacion: 'Compartimento de la garrafa, al piso de la sección del medio (debajo de los cajones de cocina y del anafe), detrás de una puerta con la bisagra a la derecha.',
+  cartucho: {
+    descripcion: 'Cartucho de gas para el anafe portátil. Van dos en el guardado de la cocina: uno conectado al anafe cuando se cocina y uno de repuesto.',
+    ubicacion: 'Guardado de la cocina, al piso y detrás de la puerta, parados al lado del anafe.',
     consejos: [
-      'Para sacarla: cerrar la llave de corte y la válvula de la garrafa, abrir la puerta, desenroscar el regulador y levantarla recta. La garrafa queda parada en un círculo calado en la base, que la traba, y el regulador y la manguera quedan en el compartimento.',
-      'La puerta empieza después del borde de la cama, así que al abrirse no pasa por debajo de ella ni toca la cama. La garrafa entra con muy poca luz: medila antes de cortar la puerta.',
-      'La manguera tiene que tener un bucle holgado para que la puerta se abra sin tirar de ella.',
-      'Siempre parada y con correa. Nunca acostada.',
-      'El compartimento de la garrafa tiene que ser aparte del resto del mueble, con una rejilla de ventilación de unos 100 cm2 hacia el exterior por el piso, justo bajo el círculo del asiento: el gas pesa más que el aire y tiene que poder salir sin entrar a la van.',
-      'Cerrar la válvula de la garrafa al manejar, al dormir y al irse.',
-      'Cargar solo en lugares habilitados y respetar el vencimiento de la garrafa.',
-      'Que un instalador de gas matriculado revise la instalación completa: es la parte más riesgosa de la obra.',
-    ],
-    busqueda: 'instalación de gas furgoneta camper garrafa ventilación',
-  },
-  regulador: {
-    descripcion: 'Regulador de presión de gas (GLP). Va enroscado en la válvula de la garrafa y baja la presión al valor que pide el anafe.',
-    ubicacion: 'Arriba de la garrafa, dentro de su compartimento, bajo el estante.',
-    consejos: [
-      'La rosca y la presión tienen que coincidir con la garrafa y con el anafe (cambia según el país).',
-      'Manguera certificada, con abrazaderas y dentro de su fecha de vencimiento.',
-      'Probar todas las uniones con agua jabonosa antes de usar.',
-    ],
-    busqueda: 'instalar regulador de gas garrafa camper',
-  },
-  valvulaGas: {
-    descripcion: 'Llave de corte de gas. Permite cortar el gas al anafe sin abrir la garrafa.',
-    ubicacion: 'Contra el fondo, bajo el anafe y detrás de los cajones de cocina. Se alcanza sacando el cajón de cocina de arriba.',
-    consejos: ['Usar llave de bola apta para gas.', 'Rotularla y que se pueda alcanzar rápido.', 'Cerrarla siempre que no se cocina.'],
-    busqueda: 'instalación de gas furgoneta camper llave de corte',
-  },
-  detectorGas: {
-    descripcion: 'Detector de gas GLP con alarma. El gas es más pesado que el aire y se junta cerca del piso.',
-    ubicacion: 'En el montante entre el eléctrico y la cocina, cerca del piso, al lado de la puerta de la garrafa.',
-    consejos: [
-      'Instalarlo a unos 30 cm del piso y lejos del anafe y de las rejillas de ventilación.',
+      'El 3D usa uno tipo CV 300: unos 90 mm de diámetro y 105 de alto. Hay que comprar el tipo que pida el anafe elegido.',
+      'Guardarlos siempre parados y desconectados, lejos del calor y del sol.',
+      'Cambiar el cartucho afuera de la van o con la claraboya abierta, lejos de cualquier llama, y revisar la junta antes de conectar el nuevo.',
       'Sumar un detector de monóxido de carbono a la altura de la cama.',
-      'Probarlo cada tanto con el botón de prueba.',
     ],
-    busqueda: 'detector de gas autocaravana camper instalación',
+    busqueda: 'cartucho de gas anafe portátil camper seguridad',
   },
 };
+// El segundo cartucho (el de repuesto) comparte la ficha
+ELEMENTOS.cartucho2 = ELEMENTOS.cartucho;
 
 // Datos para cables y mangueras: usan el texto del propio cable
 export const BUSQUEDA_CABLES = {
@@ -310,5 +281,4 @@ export const BUSQUEDA_CABLES = {
   ac: 'instalar enchufe 220v camper desde inversor',
   senal: 'inversor con mando a distancia instalación camper',
   agua: 'instalación de agua camper bomba depósito grifo',
-  gas: 'instalación de gas furgoneta camper garrafa regulador',
 };

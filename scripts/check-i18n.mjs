@@ -42,7 +42,7 @@ for (const [nombre, dic] of [['en', en], ['sv', sv]]) {
     if (k in h && !String(h[k]).trim()) mal(`${nombre}: vacío ${k}`);
   }
 
-  // Lo eléctrico, el agua y el gas
+  // Lo eléctrico y el agua
   const data = construir(CONFIG_INICIAL);
   const e3 = electrico3d(CONFIG_INICIAL);
   const res = calcularElectrica(CARGAS_INICIALES, ELECTRICA_INICIAL, e3.cables);
