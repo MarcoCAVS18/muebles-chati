@@ -15,7 +15,8 @@
 export function disposicionTrasero(cfg) {
   const { van, trasero: tr, equipos: eq, cama: ca } = cfg;
   const t = cfg.materiales.estructura.t;
-  const tb = cfg.materiales.fondo.t;
+  const tb = cfg.materiales.medio.t; // el fondo del mueble trasero es de la placa intermedia (12 mm)
+  const td = tb; // paredes de los cajones: la misma placa
 
   const profL = tr.profundidadL ?? tr.profundidad;
   const zF = van.largo - tr.profundidad; // frente de la cocina y del agua
@@ -71,7 +72,7 @@ export function disposicionTrasero(cfg) {
     yTableroFin: 570, // arriba del tablero empieza el frente fijo de la heladera
   };
   // Heladera de tapa arriba, sobre el compartimento eléctrico: su tapa queda a ras de la mesada y se abre por un corte de la
-  // tapa 1. Va 80 mm detrás del frente: ahí bajan los cables del tablero. Atrás queda un hueco de unos 130 mm para el aire y los cables.
+  // tapa (sobre el eléctrico). Va 80 mm detrás del frente: ahí bajan los cables del tablero. Atrás queda un hueco de unos 130 mm para el aire y los cables.
   E.yNevera = tr.alto - fri.y;
   E.yEstanteNevera = E.yNevera - t; // estante que la sostiene
   E.zNevera = zInE + 80;
@@ -175,17 +176,17 @@ export function disposicionTrasero(cfg) {
   // La canilla y la boca miran hacia la pared derecha.
   const sepBid = 10;
   const canBid = bid.canilla ?? 0;
-  const zBid0 = zIn + 15 + 5; // 5 mm de luz contra el frente del cajón
-  const xBid = W.xCajon + t + 2;
+  const zBid0 = zIn + td + 5; // 5 mm de luz contra la delantera del cajón
+  const xBid = W.xCajon + td + 2;
   W.bidones = [
     { nombre: 'limpia', x: xBid, y: W.yPisoBidones, z: zBid0 + bid.z + sepBid, sx: bid.x, sy: bid.y, sz: bid.z },
     { nombre: 'grises', x: xBid, y: W.yPisoBidones, z: zBid0, sx: bid.x, sy: bid.y, sz: bid.z },
   ];
   // Fondo del cajón: luz, los dos bidones, separación, luz y la trasera; las correderas vienen de a 50 mm
-  const fondoNecesario = 5 + 2 * bid.z + sepBid + 5 + t;
-  W.fondoCajonBidones = Math.min(Math.ceil(fondoNecesario / 50) * 50, zFondo - (zIn + 15));
+  const fondoNecesario = 5 + 2 * bid.z + sepBid + 5 + td;
+  W.fondoCajonBidones = Math.min(Math.ceil(fondoNecesario / 50) * 50, zFondo - (zIn + td));
   // Sobra a lo ancho: lado interior del cajón menos el largo del bidón con la canilla y las luces
-  W.sobraBidones = W.anchoCajon - 2 * t - (2 + bid.x + canBid + 2);
+  W.sobraBidones = W.anchoCajon - 2 * td - (2 + bid.x + canBid + 2);
   W.yEstante = W.yPisoBidones + bid.y + 12; // estante sobre los bidones
   W.yCajonFregadero = 510;
   W.altoCajonFregadero = 120;
@@ -196,5 +197,5 @@ export function disposicionTrasero(cfg) {
   W.xBomba = sec.W.x0 + 250;
   W.bomba = { x: W.xBomba, y: W.yEstante + t + 2, z: zF + 345, sx: 164, sy: 80, sz: 90 }; // sobre el estante, atrás del cajón bajo el fregadero
 
-  return { t, tb, zF, zFL, zB, zIn, zFondo, x1, yBase, yPiso, yTapa, d1, d2, yCamaSup, yCamaInf, yTopeBajo, yInicioAlto, sec, hueco, E, K, W };
+  return { t, tb, td, zF, zFL, zB, zIn, zFondo, x1, yBase, yPiso, yTapa, d1, d2, yCamaSup, yCamaInf, yTopeBajo, yInicioAlto, sec, hueco, E, K, W };
 }

@@ -30,6 +30,7 @@ const fmt = (n) => (Math.round(n * 10) / 10).toString().replace('.', ',');
 const esBisagra = (p) => !!p.bisagraAbajo || /^(Puerta|Alacena - puerta|Tapa de la mesa plegable)/i.test(p.nombre);
 const esVista = (p) => /^(Frente|Puerta|Tapa|Costado)/i.test(p.nombre);
 const esDesmontable = (p) => /^Placa (de la|del)/i.test(p.nombre);
+const esApoyoArco = (p) => /^Madera sobre el pasarruedas/i.test(p.nombre);
 // Un cajón es su caja y su frente: la clave sirve para saber si dos piezas son del mismo cajón
 const claveCajon = (p) => {
   if (/^Cajón .* - (lateral|trasera|delantera|piso)/i.test(p.nombre)) return p.nombre.replace(/ - .*$/, '').toLowerCase();
@@ -43,6 +44,7 @@ function motivoSinUnion(a, b) {
   if (!!a.ext !== !!b.ext) return 'Una de las dos se mueve con la cama: no se atornillan entre sí';
   if (a.ext && b.ext) return 'Las piezas que salen con la cama se atornillan según Herrajes';
   if (esBisagra(a) || esBisagra(b)) return 'Va colgada con bisagras (ver Herrajes)';
+  if (esApoyoArco(a) || esApoyoArco(b)) return 'Va pegada a la tapa del pasarruedas; la placa de la cama solo apoya encima';
   const ca = claveCajon(a);
   const cb = claveCajon(b);
   if ((ca || cb) && ca !== cb) return 'El cajón corre sobre sus correderas: no se une al mueble';

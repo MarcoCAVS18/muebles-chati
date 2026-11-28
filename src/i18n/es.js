@@ -391,6 +391,8 @@ export default {
     materiales: {
       estructura: { t: 'Placa estructura (mm)', hojaL: 'Hoja: largo', hojaA: 'Hoja: ancho' },
       fondo: { t: 'Placa fondos (mm)' },
+      medio: { t: 'Placa del mueble trasero: fondos y cajones (mm)' },
+      fina: { t: 'Madera sobre el pasarruedas izquierdo (mm)' },
     },
     corte: {
       kerf: 'Corte de sierra (mm)',
@@ -413,8 +415,7 @@ export default {
       extension: 'Cuánto se agranda',
       radio: 'Radio de esquinas',
       largo: 'Largo (180 cm, de pared a pared del mueble trasero)',
-      plataforma: 'Altura de la plataforma (pasarruedas + fieltro + placa)',
-      fieltro: 'Fieltro sobre el pasarruedas',
+      plataforma: 'Altura de la plataforma (pasarruedas + madera + placa)',
       largoCabecera: 'Largo del módulo de la cabecera',
       baseReforzada: 'Base reforzada (marcos de piso y postes verticales)',
       varillasPie: 'Varillas del módulo del pie',

@@ -186,9 +186,9 @@ export const ELEMENTOS = {
   },
   nevera: {
     descripcion: 'Heladera de compresor 12 V de 25 L, de tapa arriba (Alpicool G22: 585 x 335 x 350 mm). Va en la sección eléctrica (izquierda) del mueble trasero, sobre el compartimento de la batería, con la tapa a ras de la mesada.',
-    ubicacion: 'Sección eléctrica, arriba, detrás del frente fijo con rejillas (gris). Se abre hacia arriba por un corte de la tapa 1.',
+    ubicacion: 'Sección eléctrica, arriba, detrás del frente fijo con rejillas (gris). Se abre hacia arriba por un corte de la tapa, del lado izquierdo (sobre el eléctrico).',
     consejos: [
-      'Calar la tapa 1 con la plantilla de la heladera (585 x 335) y dejar libre el alto de la tapa abierta.',
+      'Calar la tapa, sobre el eléctrico, con la plantilla de la heladera (585 x 335) y dejar libre el alto de la tapa abierta.',
       'Mide 585 sin manijas y unos 598 con ellas: la sección tiene 620, así que sobran unos 22 mm. Confirmar con la heladera real.',
       'Dejar aire alrededor: necesita ventilar el compresor (rejilla abajo y arriba del frente fijo, y el hueco de atrás). Confirmar con el manual cuánto pide de cada lado.',
       'Línea propia en la caja de fusibles, sin interruptor.',
@@ -197,7 +197,7 @@ export const ELEMENTOS = {
     busqueda: 'instalar nevera compresor 12v furgoneta camper',
   },
   fregadero: {
-    descripcion: 'Fregadero encastrado en la tapa 3, del lado derecho del mueble, lejos de lo eléctrico. Mide 400 mm de fondo.',
+    descripcion: 'Fregadero encastrado en la tapa, del lado derecho del mueble, lejos de lo eléctrico. Mide 400 mm de fondo.',
     ubicacion: 'Sección del agua (derecha) del mueble trasero, arriba. Abajo tiene el cajón y, más abajo, el cajón de los bidones.',
     consejos: [
       'Calar la tapa con la plantilla del fregadero.',
@@ -209,7 +209,7 @@ export const ELEMENTOS = {
   },
   canilla: {
     descripcion: 'Canilla del fregadero, alimentada por la bomba de agua.',
-    ubicacion: 'Sobre la tapa 3, al lado del fregadero.',
+    ubicacion: 'Sobre la tapa, al lado del fregadero.',
     consejos: ['Manguera de grado alimenticio con abrazaderas.'],
     busqueda: 'instalar grifo fregadero camper',
   },
@@ -252,7 +252,7 @@ export const ELEMENTOS = {
     descripcion: 'Anafe portátil de 2 hornallas que funciona con cartuchos de gas. No va fijo: se usa suelto sobre la tapa de la cocina y se guarda de canto, detrás de la puerta del mueble.',
     ubicacion: 'Se guarda en la sección de la cocina, al piso, detrás de la puerta con la bisagra a la derecha, junto a los dos cartuchos. Arriba tiene dos cajones de cocina.',
     consejos: [
-      'El 3D usa 475 x 295 x 79 mm (como un Primus Kinjia): es una medida a confirmar con el anafe real. De canto entra con apenas 1 mm de luz en el fondo del guardado, así que medilo antes de cortar.',
+      'El guardado mide 473 mm de fondo: el anafe tiene que medir hasta 470 de largo. El 3D usa 470 x 295 x 79 mm como medida a elegir; un anafe de 475 mm (como el Primus Kinjia, según un dato sin confirmar) no entra. Medí el real antes de cortar el estante y la puerta.',
       'Antes de guardarlo tiene que estar apagado, frío y con el cartucho desconectado.',
       'Para cocinar se saca por la puerta y se apoya plano sobre la tapa, con una base debajo que aguante el calor.',
       'Cocinar siempre con la claraboya abierta.',

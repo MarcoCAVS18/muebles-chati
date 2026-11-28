@@ -25,7 +25,7 @@ import { crearReproductor, useReproductor } from './util/reproductor.js';
 import BarraArmado from './components/BarraArmado.jsx';
 import { useEsMovil, TACTIL } from './util/pantalla.js';
 import { Icono } from './components/Icono.jsx';
-import { TENEMOS_INICIAL, STOCK_VERSION } from './data/stock.js';
+import { TENEMOS_INICIAL, STOCK_VERSION, IDS_VERSION, idMigrado } from './data/stock.js';
 import { estadoDe, esColorValido } from './engine/colores.js';
 import { cuentaTornillos } from './engine/uniones.js';
 
@@ -135,6 +135,8 @@ export default function App() {
                 if (cm.ventana && cm.ventana.cabezal === 50) cm.ventana.cabezal = CONFIG_INICIAL.cama.ventana.cabezal;
                 if (cm.ranura && cm.ranura.dedo === undefined && (cm.ranura.ancho !== undefined || cm.ranura.margen !== undefined)) cm.ranura = { ...CONFIG_INICIAL.cama.ranura };
                 delete cm.bandejaAncho;
+                // Con 2 mm de luz las varillas se chocaban al extender: pasan a 4 mm por lado (varilla de 92 mm en ranura de 100)
+                if (cm.luzVarilla === 2) cm.luzVarilla = CONFIG_INICIAL.cama.luzVarilla;
                 delete cm.huecoMueble;
                 delete cm.cajonCabecera;
                 delete cm.cajonPie;
@@ -170,12 +172,20 @@ export default function App() {
             // Un guardado viejo no trae los consumos nuevos: se suman los que falten
             if (Array.isArray(d.cargas)) setCargas([...d.cargas, ...CARGAS_INICIALES.filter((c) => !d.cargas.some((g) => g.id === c.id))]);
             if (d.elec) setElec(mezclar(ELECTRICA_INICIAL, d.elec));
+            // Un guardado con la numeración vieja de las piezas (antes de unir las tapas) pasa los ids a la numeración nueva
+            const idsViejos = d.idsV !== IDS_VERSION;
             if (d.colorPiezas && typeof d.colorPiezas === 'object') {
-              setColorPiezas(Object.fromEntries(Object.entries(d.colorPiezas).filter(([, v]) => esColorValido(v))));
+              setColorPiezas(
+                Object.fromEntries(
+                  Object.entries(d.colorPiezas)
+                    .map(([id, v]) => [idsViejos ? idMigrado(id) : id, v])
+                    .filter(([id, v]) => id && esColorValido(v))
+                )
+              );
             }
             // Si la lista inicial creció desde que se guardó, las maderas nuevas se suman una vez
             if (Array.isArray(d.tenemos)) {
-              const ids = d.tenemos.filter((x) => typeof x === 'string');
+              const ids = d.tenemos.filter((x) => typeof x === 'string').map((x) => (idsViejos ? idMigrado(x) : x)).filter(Boolean);
               setTenemos(d.stockV === STOCK_VERSION ? ids : [...new Set([...ids, ...TENEMOS_INICIAL])]);
             }
           }

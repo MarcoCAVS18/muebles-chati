@@ -340,12 +340,18 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
   const G = 'Mueble trasero';
   const L = data.layout.trasero;
   const t = cfg.materiales.estructura.t;
+  const tm = cfg.materiales.medio.t; // placa intermedia: fondos y cajones
   const por = (re) => data.partes.filter((p) => p.grupo === G && re.test(p.nombre));
   const f = (re) => filas(por(re), cortes);
   const ag = agujerosDe(data, e3).filter((a) => a.grupo === G);
   const cal = caladosDe(data, e3).filter((a) => a.grupo === G);
   const cajones = cajonesDe(data, G);
   const entraPiso = 50 - (t + L.yBase);
+  // Peso de cada módulo con toda su madera (sin la tapa): el eléctrico llega hasta la cara derecha del divisor 1
+  const kgDe = (ps) => ps.reduce((a, q) => a + (q.salidaDe ? 0 : (q.sx * q.sy * q.sz) / 1e9) * (q.tipo === 'liston' ? cfg.listones[q.mat].densidad : cfg.materiales[q.mat].densidad), 0);
+  const maderaMod = data.partes.filter((q) => q.grupo === G && !/^Tapa/.test(q.nombre));
+  const kgE = kgDe(maderaMod.filter((q) => q.x + q.sx / 2 <= L.d1 + t));
+  const kgK = kgDe(maderaMod.filter((q) => q.x + q.sx / 2 > L.d1 + t));
   const estantes = por(/^Estante/);
   const pasos = [];
   // Variante del fondo inclinado (apagada por defecto): cambia el corte de algunas piezas y cómo se pega el fondo
@@ -355,12 +361,12 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
   pasos.push({
     id: 'tra-1',
     titulo: 'Cortar y rotular',
-    intro: `Todo el mueble sale del contrachapado de ${t} mm y del de ${cfg.materiales.fondo.t} mm. Seguí el plano de la pestaña «Placas y cortes».`,
+    intro: `Todo el mueble sale del contrachapado de ${t} mm y del de ${tm} mm (fondos y cajones). Seguí el plano de la pestaña «Placas y cortes».`,
     hacer: [
       'Con sierra circular apoyá la cara linda hacia abajo; con caladora, hacia arriba. Así no astilla donde se ve.',
       'Cortá primero las tiras de la hoja a lo ancho y después cada tira a lo largo, como dice el plano.',
       'Rotulá cada pieza con su id (TRA-xx) en la cara que va por dentro, apenas la cortás. Con tantas piezas parecidas es la única forma de no confundirse.',
-      'Lijá los cantos que quedan a la vista (frentes, tapas, zócalos) y sellá los de bidones, fregadero y cajón de agua.',
+      'Lijá los cantos que quedan a la vista (frentes, tapa, zócalos) y sellá los de bidones, fregadero y cajón de agua.',
       ...(inc
         ? [
             `Fondo inclinado (${fmt(inc.grados)}°): los costados y los divisores no son rectángulos. Cortalos como rectángulo del largo mayor y después recortá el borde de atrás en diagonal: ${ladosInc.map((q) => `${q.id} mide ${fmt(q.silueta.uAb)} mm abajo y ${fmt(q.silueta.uAr)} mm arriba`).join('; ')} (medidas desde el borde del frente). Marcá los dos puntos, uní con una regla larga y cortá con sierra circular guiada.`,
@@ -393,14 +399,14 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     ],
     ojo: [
       'Las posiciones salen del recorrido de cables del 3D. Si cambiás el recorrido en la pestaña Eléctrica, volvé a mirar esta tabla antes de taladrar.',
-      'Esta tabla no incluye los aparatos que atraviesan una pieza (heladera, fregadero): esos se cortan con el aparato en la mano, en el paso de las tapas.',
+      'Esta tabla no incluye los aparatos que atraviesan una pieza (heladera, fregadero): esos se cortan con el aparato en la mano, en el paso de la tapa.',
     ],
   });
 
   pasos.push({
     id: 'tra-3',
     titulo: 'Módulo eléctrico (el de la izquierda, en L)',
-    intro: `Es una caja de ${r0(L.d1 + t)} mm de ancho con el costado izquierdo, el divisor 1 como pared derecha, la base y el fondo. Se arma afuera. La cara derecha del divisor 1 es donde después se apoya el otro módulo.`,
+    intro: `Es una caja de ${r0(L.d1 + t)} mm de ancho con el costado izquierdo, el divisor 1 como pared derecha, la base y el fondo. Se arma afuera, igual que el otro módulo, y se le ponen ahí mismo los estantes, el marco, el frente y la puerta (pasos siguientes). La cara derecha del divisor 1 es donde después se apoya el otro módulo.`,
     hacer: [
       `Con la base boca abajo, pegá y atornillá los apoyos: adelante, al medio y atrás, a ras de los bordes (tornillos 3,5x30 desde arriba, uno cada 150 mm). La base queda ${L.yBase} mm sobre el piso y sin esto se pandea con la batería.`,
       'Apoyá el costado izquierdo acostado. Marcá en su cara de adentro la línea de abajo de la base y la del zócalo.',
@@ -415,8 +421,8 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       'Parate el divisor 1 sobre la base, a ras del borde derecho, y atornillalo desde abajo, entre los apoyos. Escuadralo con la escuadra grande.',
       'Pegá el zócalo al frente de la base, entre el costado y el divisor.',
       inc
-        ? `Pegá el fondo inclinado de 9 mm contra los cantos de atrás (base, divisor) con cola y tornillos 3,5x20 cada 100 mm por la cara del fondo. Antes biselá esos cantos a ${fmt(inc.grados)}° (sierra circular inclinada, se sacan unos 3 mm) para que el fondo apoye en toda la cara; sin bisel apoya solo en la arista de arriba. Es lo que te deja la caja a escuadra: medí las dos diagonales.`
-        : 'Pegá el fondo de 9 mm contra los cantos de atrás (base, divisor) con puntas o tornillos 3x20 cada 100 mm. Es lo que te deja la caja a escuadra: medí las dos diagonales.',
+        ? `Pegá el fondo inclinado de ${tm} mm contra los cantos de atrás (base, divisor) con cola y los tornillos de la tabla de fijaciones, por la cara del fondo. Antes biselá esos cantos a ${fmt(inc.grados)}° (sierra circular inclinada, se sacan unos 3 mm) para que el fondo apoye en toda la cara; sin bisel apoya solo en la arista de arriba. Es lo que te deja la caja a escuadra: medí las dos diagonales.`
+        : `Pegá el fondo de ${tm} mm contra los cantos de atrás (base, divisor) con cola y tornillos 4x40 cada 150 mm. Es lo que te deja la caja a escuadra: medí las dos diagonales.`,
     ],
     piezas: [...f(/^(Base|Zócalo frontal) \(eléctrico\)|^Apoyo bajo la base.*\(eléctrico\)/), ...f(/^Costado izquierdo$/), ...f(/^Divisor eléctrico y cocina/), ...f(/^Fondo eléctrico/)],
     ojo: [
@@ -425,8 +431,8 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
             `El fondo va inclinado ${fmt(inc.grados)}°: sigue la separación metálica y los asientos. Abajo el mueble gana ${r0(inc.gananciaPiso)} mm de fondo y arriba pierde ${r0(inc.perdidaTecho)} mm, con ${r0(inc.aire)} mm de aire contra el metal y el asiento. Las medidas salen del perfil que mediste con la tanza.`,
           ]
         : []),
-      'El fondo de 9 mm no toca el canto del costado izquierdo (el costado mide 15 mm y el fondo empieza a 15): la escuadra la da la base. Que no se mueva hasta fijarla a la van.',
-      'No pongas todavía los estantes ni los marcos: la batería y los equipos pesados entran por arriba y por adelante.',
+      `El fondo de ${tm} mm no toca el canto del costado izquierdo (el costado mide 15 mm y el fondo empieza a 15): la escuadra la da la base. Que no se mueva hasta fijarla a la van.`,
+      'No instales todavía equipos ni batería: entran después, ya con el módulo en la van, por la puerta lateral y por arriba (antes de la tapa).',
     ],
   });
 
@@ -438,9 +444,9 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       'Pegá y atornillá los tres apoyos debajo de la base, igual que en el módulo eléctrico.',
       'Apoyá el costado derecho acostado y fijale la base (4x40 desde afuera). Parate el divisor 2 sobre la base y atornillalo desde abajo, entre los apoyos.',
       inc
-        ? `Pegá el zócalo al frente y el fondo inclinado de 9 mm atrás, con cola y tornillos 3,5x20 cada 100 mm por la cara del fondo. Biselá a ${fmt(inc.grados)}° los cantos de atrás de la base y del divisor 2.`
-        : 'Pegá el zócalo al frente y el fondo de 9 mm atrás, con puntas o tornillos 3x20.',
-      'Como falta la pared izquierda, la caja tiende a abrirse en V: atravesale un listón provisorio arriba (atornillado en los dos extremos) hasta que esté apoyada contra el divisor 1.',
+        ? `Pegá el zócalo al frente y el fondo inclinado de ${tm} mm atrás, con cola y los tornillos de la tabla de fijaciones, por la cara del fondo. Biselá a ${fmt(inc.grados)}° los cantos de atrás de la base y del divisor 2.`
+        : `Pegá el zócalo al frente y el fondo de ${tm} mm atrás, con cola y tornillos 4x40.`,
+      'Como falta la pared izquierda, la caja tiende a abrirse en V: atravesale un listón provisorio arriba (atornillado en los dos extremos) hasta que esté apoyada contra el divisor 1 en la van. Probá en el taller los dos módulos juntos, cara derecha del divisor 1 contra la caja de la cocina: tienen que calzar sin luz.',
     ],
     piezas: [...f(/^(Base|Zócalo frontal) \(cocina y agua\)|^Apoyo bajo la base.*\(cocina y agua\)/), ...f(/^Costado derecho$/), ...f(/^Divisor cocina y agua/), ...f(/^Fondo cocina y agua/)],
     ojo: ['El costado derecho queda a la vista desde el pasillo: avellaná los tornillos y tapalos con masilla o tapones.'],
@@ -448,32 +454,8 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
 
   pasos.push({
     id: 'tra-5',
-    titulo: 'Llevarlos a la van, fijarlos y unirlos',
-    intro: 'El mueble mide 1560 mm de ancho y no pasa entero por las puertas: por eso son dos módulos. Se meten por separado y se unen adentro.',
-    hacer: [
-      'Antes de subir nada: marcá en el piso de la van dónde están los 4 listones del piso (medí desde la pared izquierda) y pasalos a la base de cada módulo. Los tornillos al piso tienen que caer sobre un listón.',
-      `Tornillo al piso: 5x50 entra ${entraPiso} mm en el listón (${50} mm menos ${t} mm de base y ${L.yBase} mm de apoyo). Antes de usarlo medí la altura del listón: el tornillo no puede pasar de su altura menos 5 mm. Si el listón es más bajo, usá 5x40.`,
-      'Primero el módulo eléctrico: contra el mamparo y la pared izquierda. Nivelalo con cuñas de contrachapado, sellá con butilo cada agujero del piso y atornillá.',
-      inc
-        ? 'Fijá el costado izquierdo a la pared y el fondo al mamparo con escuadras L, solo en la parte alta, donde el fondo roza con el mamparo. Abajo el fondo queda con aire frente al metal: no lo fuerces contra él. Dejá sin tapar el pasacables del eléctrico en el fondo.'
-        : 'Fijá el costado izquierdo a la pared y el fondo al mamparo con escuadras L (arriba y abajo). Dejá sin tapar el pasacables del eléctrico en el fondo.',
-      'Después el módulo de cocina y agua: deslizalo hasta que toque la cara derecha del divisor 1. Pasá cola en los cantos que se tocan (base, zócalo, fondo) y atornillalo al piso igual que el otro.',
-      'Unión: tres tornillos 4x25 desde el compartimento eléctrico, a través del divisor 1, al montante izquierdo de la cocina (arriba, al medio y abajo). Son 4x25 porque un 4x40 atraviesa el montante de 15 mm.',
-      'Dos escuadras L 40x40 debajo de la tapa 2 (cuando la pongas, paso 10), contra la cara del divisor 1, con tornillos cortos de 12 mm para que no atraviesen los 15 mm.',
-    ],
-    piezas: [],
-    tablas: [],
-    ojo: [
-      'La unión entre módulos es lo más flojo del diseño. Lo que lo sostiene es que ambos están atornillados al piso, a las paredes y al mamparo.',
-      'Las escuadras al mamparo del modelo traen tornillo autoperforante de 19 mm: con un fondo de 9 mm no llega a la chapa. Usá 4,8x32.',
-      'No sé todavía qué altura tiene el listón del piso, ni si el ancho de 1560 vale para toda la van. Hasta medirlo, no atornilles al piso.',
-    ],
-  });
-
-  pasos.push({
-    id: 'tra-6',
     titulo: 'Estantes sobre soportes regulables',
-    intro: 'Los cuatro estantes no se pegan: apoyan en soportes de 5 mm, así se pueden sacar para llegar al fondo. Se colocan con el mueble ya fijo.',
+    intro: 'Los cuatro estantes no se pegan: apoyan en soportes de 5 mm, así se pueden sacar para llegar al fondo. Se colocan con cada módulo ya armado, todavía afuera; para llevarlos a la van se sacan.',
     hacer: [
       'Marcá cada soporte con la plantilla: dos por costado, a 50 mm del frente del estante y a 50 mm del fondo.',
       'Taladrá con broca de 5 mm y tope a 8 mm de profundidad. El divisor mide 15 mm y le entran agujeros de los dos lados: nunca más de 8 mm por lado.',
@@ -488,21 +470,21 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
         filas: estantes.map((p) => [`${p.id} ${p.nombre}`, `${r0(p.y)} mm`, `${fmt(dimsDe(p)[0])} x ${fmt(dimsDe(p)[1])} mm`]),
       },
     ],
-    ojo: ['La altura es desde el piso de la van, no desde la base del mueble (la base queda a 35 mm del piso con su apoyo).'],
+    ojo: ['La altura es desde el piso de la van, no desde la base del mueble (la base queda a 35 mm del piso con su apoyo): afuera, medila desde abajo del apoyo de la base.'],
   });
 
   const marcoE = por(/^Frente eléctrico - montante|^Tablero del panel|^Frente de la heladera - travesaño|^Frente fijo del eléctrico/);
   const marcoK = por(/^Frente cocina( \(guardado\))? - /);
   const marcoW = por(/^Frente agua - /);
   pasos.push({
-    id: 'tra-7',
+    id: 'tra-6',
     titulo: 'Marcos de los frentes',
     intro: `Los frentes son planos y las puertas van a ras, metidas en el hueco con 2 mm de luz. El marco (montantes y travesaños de ${t} mm) cierra la cara de adelante del mueble.`,
     hacer: [
       'Armá cada marco sobre el banco: travesaño entre montantes, cola y dos tornillos 4x25 por unión, pretaladrando el canto del travesaño.',
-      'Llevalo al mueble: cola en los cantos de la base y de los divisores, y 4x25 desde adentro del costado o del divisor hacia el montante.',
+      'Llevalo al módulo, que está sobre el banco: cola en los cantos de la base y de los divisores, y 4x25 desde adentro del costado o del divisor hacia el montante.',
       'Medí cada hueco con una regla antes de cortar o colocar una puerta: tiene que dar el ancho de la puerta más 4 mm.',
-      'El frente fijo de la heladera (TRA-21) se saca para llegar al compresor: sujetalo con 4 tornillos a tacos de 15x15 pegados detrás del marco.',
+      `El frente fijo de la heladera (${por(/^Frente fijo de la heladera/)[0]?.id || 'TRA'}) se saca para llegar al compresor: sujetalo con 4 tornillos a tacos de 15x15 pegados detrás del marco.`,
       `El frente fijo del eléctrico (${por(/^Frente fijo del eléctrico/)[0]?.id || 'TRA'}) tapa los equipos desde adelante y queda atornillado: al compartimento se entra por la puerta lateral del costado izquierdo, no por debajo de la cama.`,
     ],
     piezas: [...filas(marcoE, cortes), ...filas(marcoK, cortes), ...filas(marcoW, cortes)],
@@ -510,16 +492,16 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
   });
 
   pasos.push({
-    id: 'tra-8',
+    id: 'tra-7',
     titulo: 'Cajones y correderas',
-    intro: 'Cuatro cajones se tiran hacia el pasillo. Cada caja lleva dos laterales, una trasera, un piso y una delantera de 15 mm; el frente se atornilla a la delantera desde adentro.',
+    intro: `Cuatro cajones se tiran hacia el pasillo. Cada caja lleva dos laterales, una trasera, un piso y una delantera de ${tm} mm (el piso del cajón de bidones, de 15); el frente se atornilla a la delantera desde adentro.`,
     hacer: [
       'Armá cada caja: laterales contra los cantos de la trasera y de la delantera (4x40 desde afuera, pretaladrando el canto) y escuadrala con la diagonal.',
-      'El piso va entre los laterales, al ras de abajo: cola y puntas, o tornillos 3,5x20 desde afuera por los laterales al canto del piso. El de bidones es de 15 mm.',
+      `El piso va entre los laterales, al ras de abajo: cola y tornillos 4x40 desde afuera por los laterales al canto del piso. Pretaladrá bien centrado: el canto mide ${tm} mm. El de bidones es de 15 mm.`,
       'Corredera en el cajón: a ras del canto de adelante del lateral y centrada en el alto del lateral (tabla). Cada lado deja 13 mm de luz: la caja mide el hueco menos 26 mm.',
       'Corredera en el mueble: a la misma altura del piso de la van que la del cajón, a ras del borde de adelante del mueble. Nivelá con un listón de apoyo antes de atornillar.',
-      'Colgá la caja y probala sin frente: tiene que correr y frenar sin rozar.',
-      'Frente: ponelo en el hueco con 2 mm de luz, calzá con recortes de 2 mm y atornillalo a la delantera desde adentro de la caja con cuatro tornillos 4x25.',
+      'Colgá la caja y probala sin frente: tiene que correr y frenar sin rozar. Para llevar el módulo a la van sacá los cajones (las correderas se separan con su palanca): se vuelven a colgar adentro.',
+      `Frente: ponelo en el hueco con 2 mm de luz, calzá con recortes de 2 mm y atornillalo a la delantera desde adentro de la caja con cola y tornillos 4x20 (la delantera mide ${tm} mm: uno más largo asomaría por la cara del frente).`,
     ],
     piezas: cajones.flatMap((c) => filas(c.piezas, cortes)),
     tablas: [tablaCajones(cajones)],
@@ -530,10 +512,11 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
   });
 
   const puertaG = por(/^Puerta del guardado del anafe/)[0];
+  const tapa = por(/^Tapa \(un solo tablero\)/)[0];
   const luzAnafe = inc ? null : Math.round(L.K.guardado.fondo - cfg.equipos.anafe.z);
   const puertaL = por(/^Puerta lateral/)[0];
   pasos.push({
-    id: 'tra-9',
+    id: 'tra-8',
     titulo: 'Puertas, frentes y botones push',
     intro: 'Hay dos puertas con bisagras de cazoleta: la del guardado del anafe (bisagra a la derecha) y la lateral del compartimento eléctrico, en el costado izquierdo. Los cajones abren con botones push redondos: no hay tiradores.',
     hacer: [
@@ -546,6 +529,7 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
         : 'Puerta lateral del compartimento eléctrico: dos bisagras.',
       'Botones push: taladrá del diámetro que diga la ficha del botón que compres (el modelo supone 28 mm) y fijalos con su pestillo. Medidas en la tabla.',
       'Dos rejillas de 100 mm en la puerta lateral para el inversor y el DC-DC, y dos en el frente fijo de la heladera (una arriba y una abajo).',
+      'Para llevar el módulo a la van desenganchá las puertas de las bisagras (las de cazoleta se sacan con un clic) y se vuelven a colgar adentro.',
     ],
     piezas: [...filas(por(/^Puerta del guardado del anafe/), cortes), ...filas(por(/^Puerta lateral/), cortes), ...filas(por(/^Frente fijo de la heladera/), cortes)],
     tablas: [tablaBotones(data, G)],
@@ -556,17 +540,47 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
   });
 
   pasos.push({
-    id: 'tra-10',
-    titulo: 'Tapas y calados de los aparatos',
-    intro: 'Las tres tapas se atornillan desde arriba a los costados, divisores y marcos. Los calados del fregadero y la heladera se hacen con el aparato real en la mano.',
+    id: 'tra-9',
+    titulo: 'Llevarlos a la van, fijarlos y unirlos',
+    intro: `El mueble mide ${r0(L.x1)} mm de ancho y no pasa entero por las puertas: por eso son dos módulos. Se arman completos afuera (caja, estantes, marco, cajones y puertas), se meten por separado y se unen adentro. Con toda su madera pesan unos ${r0(kgE)} kg el eléctrico y ${r0(kgK)} kg el de cocina y agua; sin cajones, puertas ni estantes bastante menos.`,
     hacer: [
-      'Antes de poner una tapa, pasá lo que va por abajo: mangueras, cables y la batería.',
-      'Apoyá la tapa, marcá con cinta de enmascarar el contorno del aparato y dejá 3 a 5 mm de luz. Las medidas de la tabla son del modelo, no del catálogo.',
-      'Calá con la caladora (primero un agujero de 10 mm en una esquina), lijá y sellá el canto. En las tapas 2 y 3 sellá bien: acá cae agua.',
-      'Tapa 1: encima del compartimento eléctrico y la heladera. Tapa 2: la cocina, sin calado: el anafe se apoya suelto encima. Tapa 3: el fregadero.',
-      'Atornillá desde arriba cada 150 mm, a 15 mm del borde, con avellanado y masilla. La tapa 2 se une a la tapa 1 con cola en el canto.',
+      'Antes de subir cada módulo sacá los cajones, las puertas y los estantes (van sueltos): así pesa menos y no se golpea nada. Todo se vuelve a colgar adentro.',
+      'Antes de subir nada: marcá en el piso de la van dónde están los 4 listones del piso (medí desde la pared izquierda) y pasalos a la base de cada módulo. Los tornillos al piso tienen que caer sobre un listón.',
+      `Tornillo al piso: 5x50 entra ${entraPiso} mm en el listón (${50} mm menos ${t} mm de base y ${L.yBase} mm de apoyo). Antes de usarlo medí la altura del listón: el tornillo no puede pasar de su altura menos 5 mm. Si el listón es más bajo, usá 5x40.`,
+      'Primero el módulo eléctrico: contra el mamparo y la pared izquierda. Nivelalo con cuñas de contrachapado, sellá con butilo cada agujero del piso y atornillá.',
+      inc
+        ? 'Fijá el costado izquierdo a la pared y el fondo al mamparo con escuadras L, solo en la parte alta, donde el fondo roza con el mamparo. Abajo el fondo queda con aire frente al metal: no lo fuerces contra él. Dejá sin tapar el pasacables del eléctrico en el fondo.'
+        : 'Fijá el costado izquierdo a la pared y el fondo al mamparo con escuadras L (arriba y abajo). Dejá sin tapar el pasacables del eléctrico en el fondo.',
+      'Después el módulo de cocina y agua: deslizalo hasta que toque la cara derecha del divisor 1. Pasá cola en los cantos que se tocan (base, zócalo, fondo) y atornillalo al piso igual que el otro.',
+      'Unión: tres tornillos 4x25 desde el compartimento eléctrico, a través del divisor 1, al montante izquierdo de la cocina (arriba, al medio y abajo). Son 4x25 porque un 4x40 atraviesa el montante de 15 mm. Trabajás por la puerta lateral y por arriba, con los estantes del eléctrico sacados.',
+      'Volvé a colgar cajones, puertas y estantes y probá todo de nuevo: tienen que correr y cerrar igual que en el taller.',
     ],
-    piezas: filas(por(/^Tapa \d/), cortes),
+    piezas: [],
+    tablas: [],
+    ojo: [
+      'La unión entre módulos es lo más flojo del diseño. Lo que lo sostiene es que ambos están atornillados al piso, a las paredes y al mamparo, y que después los une por arriba la tapa, que es un solo tablero.',
+      `Las escuadras al mamparo del modelo traen tornillo autoperforante de 19 mm: con un fondo de ${tm} mm apenas llega a la chapa. Usá 4,8x32.`,
+      'No sé todavía qué altura tiene el listón del piso, ni si el ancho de 1560 vale para toda la van. Hasta medirlo, no atornilles al piso.',
+    ],
+  });
+
+  pasos.push({
+    id: 'tra-10',
+    titulo: 'Tapa y calados de los aparatos',
+    intro: tapa
+      ? `La tapa es un solo tablero de ${r0(tapa.sx)} x ${r0(tapa.sz)} mm que va de pared a pared y se atornilla desde arriba a los costados, divisores y marcos de los dos módulos, ya unidos adentro de la van. Por eso se pone al final y los une por arriba. Los calados del fregadero y la heladera se hacen con el aparato real en la mano.`
+      : 'La tapa se atornilla desde arriba a los costados, divisores y marcos. Los calados del fregadero y la heladera se hacen con el aparato real en la mano.',
+    hacer: [
+      tapa && tapa.silueta
+        ? `Forma: un rectángulo de ${r0(tapa.sx)} x ${r0(tapa.sz)} mm al que se le saca un escalón en el lado del frente: ${r0(tapa.silueta.escalon)} mm de fondo por ${r0(tapa.sx - tapa.silueta.uEscalon)} mm de largo, de la derecha hasta ${r0(tapa.silueta.uEscalon)} mm de la pared izquierda. La parte de ${r0(tapa.sz)} mm cubre el compartimento eléctrico (la L) y el resto llega a ${r0(tapa.sz - tapa.silueta.escalon)} mm. Cortala con sierra circular guiada y redondeá la esquina interior del escalón con la caladora.`
+        : 'La tapa es un rectángulo del ancho del mueble.',
+      'Antes de poner la tapa, pasá lo que va por abajo: mangueras, cables y la batería. Probá antes que el tablero entra: se mete de canto por la puerta trasera, a lo largo de la van, y se gira adentro.',
+      'Apoyá la tapa, marcá con cinta de enmascarar el contorno del aparato y dejá 3 a 5 mm de luz. Las medidas de la tabla son del modelo, no del catálogo.',
+      'Calá con la caladora (primero un agujero de 10 mm en una esquina), lijá y sellá el canto. Sellá bien el del fregadero: ahí cae agua.',
+      'Sobre el compartimento eléctrico (a la izquierda, la parte de la L) va la heladera con su calado; en el centro, sobre la cocina, no hay calado: el anafe se apoya suelto encima; a la derecha va el fregadero.',
+      'Atornillá desde arriba cada 150 mm, a 15 mm del borde, con avellanado y masilla, y también al divisor 1 y al divisor 2.',
+    ],
+    piezas: filas(por(/^Tapa \(un solo tablero\)/), cortes),
     tablas: [
       {
         titulo: 'Calados (esperá al aparato real)',
@@ -585,7 +599,7 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
       'Eléctrica: la hace o la revisa el técnico. Los cables ya van en la pestaña Eléctrica, con calibres, fusibles y largos. La batería se conecta al final.',
       'Agua: bidón de agua limpia atrás, bomba a la derecha del mueble, manguera de grado alimenticio con abrazaderas hasta la canilla. El bidón de aguas grises va adelante.',
       'Fregadero: sifón con la salida hacia el bidón de aguas grises. Probalo con agua antes de tapar.',
-      'Cocina: no hay gas fijo. El anafe a cartucho se guarda de canto detrás de su puerta, con los dos cartuchos parados a su lado, y se usa suelto sobre la tapa 2. Probá que entra y sale por la puerta antes de cerrar el mueble.',
+      'Cocina: no hay gas fijo. El anafe a cartucho se guarda de canto detrás de su puerta, con los dos cartuchos parados a su lado, y se usa suelto sobre la tapa, en la sección de la cocina. Probá que entra y sale por la puerta antes de cerrar el mueble.',
       'Detector de monóxido y extintor: el detector junto a la cocina, el extintor cerca de la puerta, lejos de la hornalla.',
     ],
     piezas: [],
@@ -612,7 +626,7 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     titulo: 'Mueble trasero',
     resumen: [
       `Detrás de los asientos, de pared a pared: ${r0(L.x1)} mm de ancho y ${r0(cfg.trasero.alto)} mm de alto, con tres secciones (eléctrica, cocina y agua).`,
-      'Se arma en dos módulos afuera y se une adentro: el eléctrico (izquierda, en L, más profundo) y el de cocina y agua (derecha).',
+      'Se arma entero afuera, en dos módulos completos (cajas, estantes, marcos, cajones y puertas): el eléctrico (izquierda, en L, más profundo) y el de cocina y agua (derecha). Se llevan a la van, se unen adentro y recién ahí va la tapa, de un solo tablero.',
       'La cama se une después al frente del módulo eléctrico.',
     ],
     lista: listaDe(data, G),
@@ -620,9 +634,9 @@ function trasero(data, plan, cfg, e3, cortes, indice) {
     esperar: [
       'Altura real del listón del piso y posición de los 4 listones (decide el largo de los tornillos al piso).',
       'Si el ancho de 1560 mm vale para toda la van o solo para este mueble.',
-      'Fregadero elegido (para cortar la tapa 3).',
+      'Fregadero elegido (para calar la tapa).',
       'Anafe a cartucho elegido y medido de canto (largo, ancho y grueso reales) antes de cortar el estante y la puerta de su guardado.',
-      'Heladera comprada (para cortar la tapa 1 y hacer las rejillas).',
+      'Heladera comprada (para calar la tapa y hacer las rejillas).',
       'Bisagras y botones push comprados y probados contra el contrachapado.',
     ],
   };
@@ -697,6 +711,7 @@ function cama(data, plan, cfg, e3, cortes) {
   const largueroCab = base ? largueros.filter((q) => /\(cabecera\)/.test(q.nombre)) : [];
   const largueroPlaca = largueros.filter((q) => !largueroCab.includes(q));
   const listaIds = (ps) => ps.map((q) => q.id).join(', ');
+  const madArco = por(/^Madera sobre el pasarruedas/);
   const archIzq = (cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10;
   const anchoModulo = r0(cm.ancho + (portales[0] ? portales[0].sx : 15));
 
@@ -914,14 +929,16 @@ function cama(data, plan, cfg, e3, cortes) {
     titulo: 'Placas de la plataforma',
     intro: `Las dos placas se apoyan en el panel central, en la guía, en el frente y en los listones de pared (y en el pasarruedas), y se pueden levantar para llegar al piso. Los largueros (${listaIds(largueroPlaca)}) no apoyan en el piso: cuelgan de la placa, por debajo, y le dan rigidez y apoyo a las varillas.`,
     hacer: [
-      `Pegá fieltro o goma de ${cm.fieltro} mm sobre los pasarruedas (0,8 m cada uno).`,
-      `El pasarruedas izquierdo, con su tapa, llega a ${(cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10} cm; con ${cm.fieltro} mm de fieltro y la placa de ${t} mm, la cama queda a ${cm.plataforma / 10} cm. La placa lleva un corte en esa zona para que pase el arco real; todavía no está dibujado en la app.`,
+      madArco.length
+        ? `Pegá con cola y peso encima la madera de ${madArco[0].sy} mm (${madArco[0].id}, ${madArco[0].sx} x ${madArco[0].sz} mm) sobre la tapa de la caja del pasarruedas izquierdo, a ras de sus bordes. Alcanza con un retazo.`
+        : 'Pegá la madera sobre la tapa de la caja del pasarruedas izquierdo.',
+      `El pasarruedas izquierdo, con su tapa, llega a ${(cfg.van.archAltoIzq ?? cfg.van.archAlto) / 10} cm; con la madera de ${cfg.materiales.fina.t} mm encima y la placa de ${t} mm, la cama queda a ${cm.plataforma / 10} cm. La placa lleva un corte en esa zona para que pase el arco real; todavía no está dibujado en la app.`,
       'Apoyá la placa del pie y la de la cabecera: dejan 3 mm de luz entre ellas.',
       `Largueros (${listaIds(largueroPlaca)}): quedan a ras de la cara de abajo de la placa, los de apoyo a ${r0(por(/^Larguero de apoyo \(pie\)/)[0].x)} mm de la pared izquierda de la van y los de las puntas a ${r0(por(/^Larguero de las puntas \(pie\)/)[0].x)} mm. Lo más cómodo es dar vuelta cada placa sobre la mesa, pegarles los largueros por debajo y atornillarlos desde arriba, y apoyar el conjunto en la caja. Dejá 3 mm de luz contra los listones de las correderas.${largueroCab.length ? ` Los largueros de la cabecera (${listaIds(largueroCab)}) ya están sobre los postes del medio: bajá la placa sobre ellos.` : ''}`,
       'Atornillá desde arriba solo los dedos y el borde fijo, con tornillos avellanados 4x40 a los largueros y listones. Avellaná la cabeza para que no moleste el colchón.',
       'Las varillas se deslizan por encima de los largueros y del borde del pasarruedas: pegales cinta de teflón (PTFE) en la cara de arriba antes de armar las varillas, en el paso siguiente.',
     ],
-    piezas: [...filas(placas, cortes), ...filas(largueroPlaca, cortes)],
+    piezas: [...filas(madArco, cortes), ...filas(placas, cortes), ...filas(largueroPlaca, cortes)],
     ojo: [
       base
         ? 'El peso baja así: colchón y varillas, a la placa y los largueros, a los postes, a los marcos de piso y al piso. Por el lado de la pared apoya además en el pasarruedas.'

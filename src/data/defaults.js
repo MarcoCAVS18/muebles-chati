@@ -38,6 +38,10 @@ export const CONFIG_INICIAL = {
   materiales: {
     estructura: { nombre: 'Contrachapado 15 mm', t: 15, hojaL: 2440, hojaA: 1220, densidad: 680 },
     fondo: { nombre: 'Contrachapado 9 mm', t: 9, hojaL: 2440, hojaA: 1220, densidad: 640 },
+    // Placa intermedia del mueble trasero: fondos, pisos, laterales, traseras y delanteras de los cajones (sale de los retazos de 12 mm)
+    medio: { nombre: 'Contrachapado 12 mm', t: 12, hojaL: 2440, hojaA: 1220, densidad: 650 },
+    // Madera que se pega sobre la tapa del pasarruedas izquierdo para llegar a la altura de la cama: alcanza con un retazo
+    fina: { nombre: 'Madera de 5 mm', t: 5, hojaL: 2440, hojaA: 1220, densidad: 650, retazo: true },
   },
 
   listones: {
@@ -74,8 +78,7 @@ export const CONFIG_INICIAL = {
     extension: 490, // se agranda hasta 1200
     radio: 50, // radio de las esquinas
     largo: 1800, // largo de la cama, de pared a pared del mueble trasero: las dos tapas de los extremos están adentro
-    plataforma: 400, // altura de la cara superior: pasarruedas izquierdo (380) + fieltro (5) + placa (15)
-    fieltro: 5, // entre las placas y el pasarruedas izquierdo
+    plataforma: 400, // altura de la cara superior: pasarruedas izquierdo (380) + madera sobre él (5) + placa (15)
     largoCabecera: 1200, // largo del módulo de la cabecera (el otro, de 600 mm, va al pie)
     // Variante: base de piso reforzada, como la armó Marco en el taller. Cada módulo lleva un marco de piso de listones de 45 x 45
     // (sus dos refuerzos y dos rieles, uno al borde del pasillo y otro sobre la cara del pasarruedas) y de ahí salen postes
@@ -89,7 +92,7 @@ export const CONFIG_INICIAL = {
     ranura: { ancho: 100, dedo: 1, radio: 20 },
     lomo: 60, // lomo fijo contra la pared, de donde salen los dedos de la placa
     lomoMovil: 80, // lomo de las varillas, del lado del pasillo
-    luzVarilla: 2, // luz de cada varilla dentro de su ranura, a cada lado
+    luzVarilla: 4, // luz de cada varilla dentro de su ranura, a cada lado (con 2 mm se chocaban al extender): varilla de 92 mm en ranura de 100
     alturaCorredera: 30, // alto máximo de las correderas: van al listón de 30 x 30 de las varillas
     // Ventanas de los costados fijos (llegan 5 mm bajo los listones de las correderas), cerradas por una puerta que baja hasta
     // el piso (bisagras abajo). zocalo y cabezal = madera que queda abajo y arriba de la ventana; margen = lo que deja la
@@ -131,9 +134,10 @@ export const CONFIG_INICIAL = {
     nevera: { x: 585, y: 350, z: 335 }, // Alpicool G22 de 25 L, de tapa arriba: 585 sin manijas (unos 598 con ellas), alto 350, fondo 335
     fregadero: { x: 340, y: 130, z: 400 }, // los 400 mm son el fondo; el ancho es ESTIMADO
     // Anafe portátil de 2 hornallas a cartucho (sin gas fijo). Se usa suelto sobre la tapa y se guarda de canto en el compartimento
-    // de la cocina, detrás de su puerta. ESTIMADO, a elegir: un Primus Kinjia mide unos 475 x 295 x 79 mm (dato de REI, sin confirmar).
-    // Medidas de canto: x grosor, y alto, z largo (el fondo del guardado mide 476 mm)
-    anafe: { x: 80, y: 295, z: 475 },
+    // de la cocina, detrás de su puerta. ESTIMADO, a elegir: con el fondo de 12 mm el guardado mide 473 mm de fondo, así que el anafe
+    // tiene que medir hasta 470 de largo (un Primus Kinjia mide unos 475 x 295 x 79 mm, dato sin confirmar: así no entra).
+    // Medidas de canto: x grosor, y alto, z largo
+    anafe: { x: 80, y: 295, z: 470 },
     // Cartucho de gas CV 300 Plus: 90 mm de diámetro y 105 de alto (dato de Reimo). Van dos parados junto al anafe: uno conectado y uno de repuesto
     cartucho: { x: 90, y: 105, z: 90 },
     bateriaAuto: { x: 278, y: 190, z: 175 },

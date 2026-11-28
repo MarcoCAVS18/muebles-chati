@@ -25,7 +25,7 @@ function interpolar(perfil, y) {
 export function planoFondo(cfg) {
   const { van, trasero: tr } = cfg;
   const t = cfg.materiales.estructura.t;
-  const tb = cfg.materiales.fondo.t;
+  const tb = cfg.materiales.medio.t;
   const aire = tr.aireFondo ?? 10;
   const yIni = tr.zocalo; // abajo del fondo (cara de abajo de la base)
   const yFin = tr.alto - t; // arriba del fondo (cara de abajo de las tapas)

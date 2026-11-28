@@ -44,7 +44,7 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
 - Dónde se fija cada mueble (piso, pared, entre muebles) y cuántos tornillos y escuadras.
 - Uniones entre maderas (`src/engine/uniones.js`): la app detecta dónde se tocan las piezas (unas 190 uniones y unos 660 tornillos) y para
   cada una define cola, diámetro y largo del tornillo, separación, desde qué cara se atornilla y el pretaladro. Cara contra canto: se
-  atraviesa la pieza fina y el tornillo entra 25 mm en el canto (4x40 en madera de 15 mm; 3,5x30 en el piso de 9 mm de los cajones);
+  atraviesa la pieza fina y el tornillo entra 25 mm en el canto (4x40 en madera de 15 mm y en la de 12 mm del mueble trasero; 3,5x30 en el piso de 9 mm de los cajones del mueble derecho);
   cara contra cara: 4x25 o 4x30. Primer tornillo a 30 mm del extremo y uno cada 150 mm (120 mm en cajones y tapas finas, 200 mm en las
   placas de la cama, que van sin cola y solo desde arriba para poder levantarlas). Un contacto de menos de 30 mm o un canto de menos de
   12 mm va solo con cola. No se atornillan entre sí las piezas que se mueven (varillas, portales, cajones), las que cuelgan de bisagras ni
@@ -66,10 +66,10 @@ Abrir la dirección que muestra Vite (normalmente http://localhost:5173).
   22 cm), bomba y mangueras de agua. El extractor del techo (310 x 310 mm con el marco) se abre a mano: está en el 3D
   pero sin conexión eléctrica.
 - Botones push: cada puerta y cada cajón de los tres muebles lleva un botón negro redondo en el 3D, para ver dónde va.
-- Lo que tenemos y lo que falta: el botón de la tilde en la barra del 3D pinta la madera de dos colores (verde, ya la tenemos; ámbar, falta) y cuenta las piezas de cada una. La lista inicial está en `src/data/stock.js` (CAM-01 a 07, 20 a 23, 31 y 32) y se cambia con la casilla «Ya la tenemos» de la tarjeta de cada pieza (doble clic en la madera); se guarda en la nube. Las varillas móviles cuentan como que están si la placa de la que salen está.
+- Lo que tenemos y lo que falta: el botón de la tilde en la barra del 3D pinta la madera de dos colores (verde, ya la tenemos; ámbar, falta) y cuenta las piezas de cada una. La lista inicial está en `src/data/stock.js` (toda la cama, CAM-01 a 32; falta solo la madera de 5 mm sobre el pasarruedas, CAM-33) y se cambia con la casilla «Ya la tenemos» de la tarjeta de cada pieza (doble clic en la madera); se guarda en la nube. Las varillas móviles cuentan como que están si la placa de la que salen está.
   Las varillas de la cama conservan un tirador embutido porque el canto de 15 mm es muy fino para el botón.
 - Cocina sin gas fijo: anafe portátil de 2 hornallas a cartucho, guardado de canto al piso de la cocina detrás de una puerta, con dos
-  cartuchos parados al lado (uno conectado y uno de repuesto). Se usa suelto sobre la tapa 2, sin calado.
+  cartuchos parados al lado (uno conectado y uno de repuesto). Se usa suelto sobre la tapa, en la sección de la cocina, sin calado.
 - Al hacer clic en cualquier equipo, cable o manguera (en el 3D o en la pestaña Eléctrica) se abre un panel con qué
   es, dónde va, cómo se conecta y un video de YouTube recomendado.
 - Modo pieza: doble clic en una madera (en el 3D, en la lista de despiece o en el plano de cortes) y las demás se desvanecen:
@@ -148,26 +148,31 @@ En «Medidas», sección «Cama», el casillero **Base reforzada** (apagado por 
 - Mueble trasero de pared a pared (1720 mm) y de 500 mm de profundidad, con una L de 570 mm solo en la sección eléctrica
   (a la izquierda), que llega hasta el pie de la cama de 180 cm. Si tapa la puerta corrediza, achicar el ancho en la barra
   lateral. Secciones (x): eléctrico 15-617, cocina 632-1087 y agua 1102-1705.
-- La cama queda a 40 cm: el pasarruedas izquierdo, con su tapa, mide 38 cm; con 5 mm de fieltro y la placa de 15 mm la superficie llega a
+- La cama queda a 40 cm: el pasarruedas izquierdo, con su tapa, mide 38 cm; con una madera de 5 mm pegada encima (CAM-33, 185 x 800 mm, sale de un
+  retazo) y la placa de 15 mm la superficie llega a
   400 mm (el frente del pie y la guía de la cabecera miden 400 mm, el panel central 385 mm). El arco real mide 42,5 cm: la placa lleva un
   corte ahí, que todavía no se dibuja. Las dos placas y los dos módulos llenan los 180 cm, hasta el frente de la L. Al compartimento
   eléctrico se entra por una puerta en el costado izquierdo (la que se ve al abrir la puerta corrediza de la van), no por debajo de la cama.
   Todo lo eléctrico queda al piso, debajo del plano de la cama; el panel y los enchufes van sobre la cama, en el tablero de arriba, y los
   cajones de cocina de la L van sobre el tablero. El estante de los equipos queda a 395 mm para dejar 55 mm o más sobre los bornes.
-- Mueble trasero: se arma en dos módulos que pasan por las puertas y se unen adentro de la van: el eléctrico (izquierda, con el
-  divisor 1 como pared derecha) y el de cocina y agua (sin pared izquierda: apoya contra ese divisor). Por eso el fondo es de
-  dos piezas. La base queda 20 mm sobre el piso y apoya en 6 tiras de canto (adelante, al medio y atrás de cada base). Cada
-  cajón lleva un panel delantero de 15 mm al que se atornilla el frente, que cierra a ras del marco. Los marcos y las
-  delanteras se unen cara contra cara de 15 mm, por eso llevan tornillos 4x25 y no 4x40.
+- Mueble trasero: se arma entero afuera (cajas, estantes, marcos, cajones y puertas) en dos módulos que pasan por las puertas y se
+  unen adentro de la van: el eléctrico (izquierda, con el divisor 1 como pared derecha) y el de cocina y agua (sin pared izquierda:
+  apoya contra ese divisor). Por eso el fondo es de dos piezas. Después va la tapa, de un solo tablero de pared a pared (TRA-14,
+  1560 x 570 mm con un escalón de 70 mm donde termina la L), que une los dos módulos por arriba. La base queda 20 mm sobre el
+  piso y apoya en 6 tiras de canto (adelante, al medio y atrás de cada base). Los fondos, los pisos, los laterales, las traseras
+  y las delanteras de los cajones son de la placa de 12 mm (`materiales.medio`, sale de los retazos); solo el piso del cajón de
+  bidones queda de 15 mm. Cada cajón lleva una delantera de 12 mm a la que se atornilla el frente, que cierra a ras del marco.
+  Los marcos se unen cara contra cara de 15 mm, por eso llevan tornillos 4x25 y no 4x40.
 - Mueble derecho: se apoya sobre el pasarruedas derecho. Bajo 43 cm solo queda libre la franja del frente (cerrada con un
   frente ciego) y los dos cajones se acomodan arriba, a partir de los 45 cm.
 - El frente de la cocina y del agua está en z = 1910, 70 mm detrás del frente de la L (z = 1840), donde termina la cama. El anafe
   se guarda de canto en un compartimento al piso, detrás de una puerta con la bisagra a la derecha que arranca después del borde de
   la cama (x 724 a 965), así que al abrirse nunca pasa por debajo de ella. `npm run check` verifica que el anafe y los dos cartuchos
-  entren en el guardado y que la puerta quede fuera de la cama. El anafe (475 x 295 x 79 mm, estimado como un Primus Kinjia) entra
-  con apenas 1 mm de luz en el fondo del guardado: medir el real antes de cortar el estante y la puerta.
+  entren en el guardado y que la puerta quede fuera de la cama. Con el fondo de 12 mm el guardado queda de 473 mm de fondo: el anafe
+  (470 x 295 x 80 mm como máximo) entra con 3 mm de luz, y un Primus Kinjia de unos 475 mm no entra. Medir el real antes de cortar el
+  estante y la puerta.
   La sección de agua tapa parte de la puerta lateral derecha (z 1340 a 2320).
-- Medidas estimadas de la cocina: anafe portátil de 475 x 295 x 79 mm, cartucho CV 300 de 90 mm de diámetro y 105 de alto, heladera 420 x 300 x 340 mm,
+- Medidas estimadas de la cocina: anafe portátil de hasta 470 x 295 x 80 mm, cartucho CV 300 de 90 mm de diámetro y 105 de alto, heladera 420 x 300 x 340 mm,
   fregadero 340 de ancho x 400 de fondo, bidones de 20 L de 215 x 400 x 290 mm.
 - Cocinar con un anafe a cartucho dentro de la van produce monóxido: usarlo con la claraboya abierta y con detector de monóxido de carbono.
 - La cama no lleva cajones: cada ventana de los costados la cierra una puerta con bisagras de cazoleta en el borde de abajo que baja hasta el piso, como en las fotos de referencia (Standard Sliding Bed B120). Detrás queda el hueco de guardado del módulo.
@@ -183,7 +188,7 @@ En «Medidas», sección «Cama», el casillero **Base reforzada** (apagado por 
   hacia el pasillo y quedan intercaladas con los dedos fijos. Cerrada se ve como una placa lisa de 71 cm; abierta mide 120 cm. La cabecera
   lleva 6 varillas y el pie 3 (`cama.varillasCabecera` y `cama.varillasPie`). Todas las ranuras y todos los dedos fijos miden 100 mm
   (`cama.ranura.ancho`; con 0 se reparten en la bahía) y el peine queda centrado en cada placa: quedan 41,75 mm de madera en los dos
-  extremos de las dos placas. Cada varilla (96 mm) entra con 2 mm de luz por lado. Las esquinas del pasillo son R50 (un solo círculo para la placa y el lomo) y el fondo de las ranuras R20.
+  extremos de las dos placas. Cada varilla (92 mm) entra con 4 mm de luz por lado (con 2 mm se chocaban al extender). Las esquinas del pasillo son R50 (un solo círculo para la placa y el lomo) y el fondo de las ranuras R20.
   Las varillas no figuran en la tabla de cortes: salen de la placa. Se cambian en `cama.ranura`, `cama.lomo`, `cama.lomoMovil` y `cama.ventana` (defaults.js).
 - Placas de la cama: la de la cabecera mide 1183,5 mm y la del pie 583,5 mm de largo (710 mm de ancho, 3 mm de luz entre las dos y 15 mm
   de pared en cada extremo dentro de los 180 cm). Las dos tienen el mismo ancho y no llevan recortes. Se cambia en "Largo placa cabecera".

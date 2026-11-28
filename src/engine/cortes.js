@@ -68,6 +68,17 @@ export function listaDeCompras(data, plan, cfg, resElec, elec3d) {
   const filas = [];
   for (const [mat, res] of Object.entries(plan.planPlacas)) {
     const m = cfg.materiales[mat];
+    if (m.retazo) {
+      // Una pieza suelta que sale de un retazo: no hace falta comprar la hoja entera
+      const piezas = data.partes.filter((p) => p.mat === mat && !p.salidaDe);
+      filas.push({
+        categoria: 'Madera',
+        item: `${m.nombre}: retazo de ${piezas.map((p) => [p.sx, p.sy, p.sz].sort((a, b) => b - a).slice(0, 2).join(' x ')).join(' y ')} mm`,
+        cantidad: piezas.length,
+        nota: 'Alcanza con un retazo: no hace falta comprar la hoja entera.',
+      });
+      continue;
+    }
     filas.push({
       categoria: 'Madera',
       item: `${m.nombre} - hoja ${m.hojaL} x ${m.hojaA} mm`,

@@ -103,7 +103,13 @@ exigir(vn.archLargo === 800 && vn.archAlto === 425 && vn.archIntrusion === 185, 
 exigir(vn.archInicio + vn.archLargo + vn.puertaLateral.vigas + vn.puertaLateral.largo + vn.puertaLateral.desdeMamparo === vn.largo, 'el pasarruedas, las vigas y la puerta no suman el largo útil de la van');
 exigir(cfgI.cama.largo === 1800, 'la cama debería medir 180 cm de largo');
 exigir(vn.archAltoIzq === 380, 'el pasarruedas izquierdo, con su tapa, debería medir 380 mm de alto');
-exigir(cfgI.cama.plataforma === vn.archAltoIzq + cfgI.cama.fieltro + 15, 'la placa de la cama (15 mm) debería apoyar sobre el pasarruedas izquierdo con su fieltro de 5 mm: cama a 40 cm');
+exigir(cfgI.cama.plataforma === vn.archAltoIzq + cfgI.materiales.fina.t + 15, 'la placa de la cama (15 mm) debería apoyar sobre la madera de 5 mm pegada al pasarruedas izquierdo: cama a 40 cm');
+{
+  const mad = data.partes.filter((q) => /^Madera sobre el pasarruedas izquierdo/.test(q.nombre));
+  exigir(mad.length === 1 && mad[0].id === 'CAM-33' && mad[0].mat === 'fina', 'debería haber una sola madera de 5 mm sobre el pasarruedas izquierdo (CAM-33)');
+  exigir(Math.abs(mad[0].y - vn.archAltoIzq) < 1e-6 && Math.abs(mad[0].sy - 5) < 1e-6 && mad[0].sx === vn.archIntrusion && mad[0].sz === vn.archLargo && mad[0].z === vn.archInicio && mad[0].x === 0, 'la madera de 5 mm debería cubrir la tapa de la caja: 185 x 800 mm a 380 mm de alto');
+  exigir(Math.abs(mad[0].y + mad[0].sy - data.layout.cama.yB) < 1e-6, 'la cara de arriba de la madera debería quedar a ras de la cara de abajo de las placas (385 mm)');
+}
 exigir(cfgI.cama.plataforma === 400 && data.layout.cama.yB === 385 && data.layout.cama.yT === 400, 'la superficie de la cama debería estar a 400 mm y el panel central a 385 mm');
 exigir(cfgI.cama.ancho === 710 && cfgI.cama.ancho + cfgI.cama.extension === 1200, 'la cama debería medir 71 cm cerrada y 120 cm abierta');
 exigir(cfgI.cama.varillasPie === 3 && cfgI.cama.varillasCabecera === 6 && cfgI.cama.ranura.ancho === 100, 'la cama debería llevar 3 varillas en el módulo del pie y 6 en el de la cabecera, con ranuras de 100 mm');
@@ -121,7 +127,7 @@ exigir(cfgI.cama.varillasPie === 3 && cfgI.cama.varillasCabecera === 6 && cfgI.c
   exigir(guia && frP && guia.sy === 400 && frP.sy === 400 && pan && pan.sy === 385, 'el frente del pie y la guía deberían medir 400 mm y el panel central 385 mm');
   const luzPlacas = pl.map((q) => q.z).sort((a, b) => a - b);
   exigir(Math.abs(luzPlacas[1] - (luzPlacas[0] + pl.find((q) => q.z === luzPlacas[0]).sz) - 3) < 0.01, 'las dos placas deberían dejar 3 mm de luz entre sí');
-  // Las varillas salen de las ranuras de su placa (3 y 6) con 2 mm de luz y no se cuentan como hoja aparte
+  // Las varillas salen de las ranuras de su placa (3 y 6) con 4 mm de luz y no se cuentan como hoja aparte
   for (const v of varillasM) {
     const placa = data.partes.find((q) => q.id === v.salidaDe);
     exigir(placa && placa.perfil.n === v.perfil.n && v.perfil.n === (/cabecera/.test(placa.nombre) ? 6 : 3), `las varillas ${v.id} deberían tener tantas varillas como ranuras tiene su placa`);
@@ -150,7 +156,7 @@ for (let i = 0; i < interiores.length; i++) {
     exigir(!solapan(interiores[i], interiores[j]), `los equipos ${interiores[i].id} y ${interiores[j].id} se pisan`);
   }
 }
-// La heladera asoma por la tapa 1 (la tapa lleva el recorte), por eso también está encastrada
+// La heladera asoma por la tapa (la tapa lleva el recorte), por eso también está encastrada
 const ENCASTRADOS = ['fregadero', 'canilla', 'nevera'];
 for (const e of interiores) {
   if (ENCASTRADOS.includes(e.id)) continue;
@@ -332,8 +338,8 @@ exigir(e3.cables.some((c) => c.hasta === 'bomba') && CARGAS_INICIALES.some((c) =
 // ---- Modo pieza: contorno, descripción de cortes, cámara y cotas ----
 const conContorno = data.partes.filter((p) => contorno(p));
 // Con el fondo inclinado se suman 3: el costado derecho y los dos divisores, que llevan el borde de atrás inclinado
-const contornosEsperados = cfgI.trasero.fondoInclinado ? 16 : 13;
-exigir(conContorno.length === contornosEsperados, `deberían tener contorno propio ${contornosEsperados} piezas (2 placas, 2 juegos de varillas, el frente del pie con su puerta, 2 costados fijos, 2 portales, 2 puertas de los módulos y el costado izquierdo con su puerta${cfgI.trasero.fondoInclinado ? ', más el costado derecho y los 2 divisores inclinados' : ''}), hay ${conContorno.length}`);
+const contornosEsperados = cfgI.trasero.fondoInclinado ? 17 : 14;
+exigir(conContorno.length === contornosEsperados, `deberían tener contorno propio ${contornosEsperados} piezas (2 placas, 2 juegos de varillas, el frente del pie con su puerta, 2 costados fijos, 2 portales, 2 puertas de los módulos, el costado izquierdo con su puerta y la tapa con su escalón${cfgI.trasero.fondoInclinado ? ', más el costado derecho y los 2 divisores inclinados' : ''}), hay ${conContorno.length}`);
 const cab = data.partes.find((p) => /^Placa de la cabecera/.test(p.nombre));
 const pie = data.partes.find((p) => /^Placa del pie/.test(p.nombre));
 exigir(contorno(cab).esquinas === 4 && contorno(cab).peine && !contorno(cab).recorte, 'la placa de la cabecera debería ser un peine de 4 esquinas redondeadas, sin recorte');
@@ -356,7 +362,7 @@ exigir(describirPieza(cab, CONFIG_INICIAL).lineas.some((l) => /ranuras/.test(l.t
   exigir(contorno(cab).radio === cm.radio, 'las esquinas del pasillo de la placa deberían ser R50');
   // Ancho de dedo igual al de la ranura (proporción 1) y varilla = ranura menos las dos luces
   exigir(Math.abs(cab.perfil.costilla - cab.perfil.ancho * cm.ranura.dedo) < 1e-6, 'el dedo fijo debería medir lo que la ranura por la proporción pedida');
-  // Ranuras de 100 mm en las dos placas (varillas de 96) y la misma madera en los dos extremos de las dos placas
+  // Ranuras de 100 mm en las dos placas (varillas de 92) y la misma madera en los dos extremos de las dos placas
   for (const pl of [cab, pie]) {
     const pf = pl.perfil;
     exigir(Math.abs(pf.ancho - cm.ranura.ancho) < 1e-6 && Math.abs(pf.costilla - cm.ranura.ancho) < 1e-6, `las ranuras y los dedos de ${pl.id} deberían medir ${cm.ranura.ancho} mm`);
@@ -545,8 +551,8 @@ function L_E() {
 {
   const rol = (id) => rolDe(data.partes.find((p) => p.id === id));
   const esperado = {
-    'TRA-01': 'lateral', 'TRA-19': 'frente', 'TRA-25': 'frente', 'TRA-66': 'frente', 'TRA-39': 'interior', 'TRA-40': 'interior', 'TRA-57': 'liston', 'TRA-14': 'horizontal',
-    'TRA-61': 'liston', 'CAM-01': 'horizontal', 'CAM-08': 'horizontal', 'CAM-10': 'frente', 'CAM-11': 'liston', 'CAM-25': 'liston', 'CAM-29': 'liston', 'DER-25': 'frente',
+    'TRA-01': 'lateral', 'TRA-17': 'frente', 'TRA-23': 'frente', 'TRA-64': 'frente', 'TRA-37': 'interior', 'TRA-38': 'interior', 'TRA-55': 'liston', 'TRA-14': 'horizontal',
+    'TRA-59': 'liston', 'CAM-01': 'horizontal', 'CAM-08': 'horizontal', 'CAM-10': 'frente', 'CAM-11': 'liston', 'CAM-25': 'liston', 'CAM-29': 'liston', 'DER-25': 'frente',
     'DER-02': 'lateral', 'DER-01': 'interior', 'DER-34': 'interior', 'DER-38': 'horizontal', 'DER-40': 'frente',
   };
   for (const [id, r] of Object.entries(esperado)) exigir(rol(id) === r, `${id} debería ser ${r} y es ${rol(id)}`);
@@ -560,9 +566,9 @@ function L_E() {
   exigir(!Object.values(ROLES).some((r) => r.color === ESTADOS.tenemos.color || r.color === ESTADOS.falta.color), 'los colores de tenemos y falta no deberían repetir los de los roles');
   const set = new Set(TENEMOS_INICIAL);
   exigir(data.partes.filter((p) => p.tipo === 'liston' && !/^(Riel del pie|Riel de la cabecera|Listón de piso|Viga del medio|Poste)/.test(p.nombre)).every((p) => set.has(p.id)), 'todos los listones están cortados: deberían figurar como que ya los tenemos');
-  exigir(data.partes.filter((p) => p.grupo === 'Cama' && /^CAM-(0[1-7]|1[135-9]|2\d|30|3[12])$/.test(p.id)).every((p) => estadoDe(p, set) === 'tenemos'), 'las maderas de la lista deberían figurar como que ya las tenemos');
+  exigir(data.partes.filter((p) => p.grupo === 'Cama' && /^CAM-(0\d|[12]\d|3[0-2])$/.test(p.id)).every((p) => estadoDe(p, set) === 'tenemos'), 'las maderas de la lista deberían figurar como que ya las tenemos');
   exigir(data.partes.filter((p) => p.grupo !== 'Cama').every((p) => estadoDe(p, set) === 'falta'), 'las maderas de los otros muebles deberían figurar como que faltan');
-  for (const id of ['CAM-10', 'CAM-12', 'CAM-14']) exigir(estadoDe(data.partes.find((p) => p.id === id), set) === 'falta', `${id} debería figurar como que falta`);
+  exigir(estadoDe(data.partes.find((p) => p.id === 'CAM-33'), set) === 'falta', 'CAM-33 (la madera de 5 mm sobre el pasarruedas) debería figurar como que falta');
   // Las varillas móviles salen de las placas CAM-01 y CAM-02: cuentan como que ya están
   const varillasE = data.partes.filter((p) => p.salidaDe);
   exigir(varillasE.length === 2 && varillasE.every((p) => estadoDe(p, set) === 'tenemos'), 'las varillas que salen de las placas que ya tenemos deberían figurar como que ya están');
@@ -587,11 +593,11 @@ function L_E() {
   exigir(llaveCajon('Frente cajón de cocina 1') === llaveCajon('Cajón de cocina 1 - lateral'), 'el frente de un cajón y su caja deberían ser el mismo cajón');
   for (const m of cajones) exigir(Math.abs(m.v[0]) + Math.abs(m.v[2]) > 0 && m.v[1] === 0, 'un cajón debería deslizar en horizontal');
   // Las bisagras están del lado contrario al botón. La puerta del guardado del anafe gira sobre su borde derecho (hueco 724 a 965)
-  const guardadoP = ab.porParte['TRA-25'];
+  const guardadoP = ab.porParte['TRA-23'];
   exigir(guardadoP && Math.abs(guardadoP.pivote[0] - 963) < 1.5, 'la puerta del guardado del anafe debería girar sobre su borde derecho');
   // La puerta lateral gira sobre el borde del lado del mamparo y se abre hacia el pasillo de la van
-  const lateralP = ab.porParte['TRA-66'];
-  const lat = data.partes.find((q) => q.id === 'TRA-66');
+  const lateralP = ab.porParte['TRA-64'];
+  const lat = data.partes.find((q) => q.id === 'TRA-64');
   exigir(lateralP && Math.abs(lateralP.pivote[1] - (lat.z + lat.sz)) < 3, 'la puerta lateral debería girar sobre su borde del lado del mamparo');
 }
 
@@ -631,8 +637,11 @@ function L_E() {
   const juntasPlaca = data.juntas.filter((j) => /^Placa (de la|del)/.test(porId.get(j.cara).nombre) || /^Placa (de la|del)/.test(porId.get(j.canto).nombre));
   exigir(juntasPlaca.length === (cfgI.cama.baseReforzada ? 8 : 6) && juntasPlaca.reduce((t, j) => t + j.cantidad, 0) >= 20 && juntasPlaca.every((j) => j.eje === 'y' && j.sentido === -1 && !j.cola && /^Placa (de la|del)/.test(porId.get(j.cara).nombre)), 'las placas de la cama deberían atornillarse solo desde arriba y sin cola');
   // El piso de 9 mm de un cajón lleva tornillos de 3,5x30, el resto de las maderas de 15 mm lleva 4x40 en canto y 4x25 cara contra cara
-  const pisosCajon = data.juntas.filter((j) => /piso del cajón$/.test(porId.get(j.canto).nombre));
-  exigir(pisosCajon.length > 0 && pisosCajon.every((j) => j.tornillo.d === 3.5 && j.tornillo.largo === 30), 'el piso de 9 mm de los cajones debería llevar tornillos de 3,5x30');
+  const pisosCajon = data.juntas.filter((j) => /piso del cajón$/.test(porId.get(j.canto).nombre) && porId.get(j.canto).grupo === 'Mueble derecho');
+  exigir(pisosCajon.length > 0 && pisosCajon.every((j) => j.tornillo.d === 3.5 && j.tornillo.largo === 30), 'el piso de 9 mm de los cajones del mueble derecho debería llevar tornillos de 3,5x30');
+  // En el mueble trasero los cajones son de 12 mm: el piso entra por el canto con 4x40 (el canto de 12 mm aguanta un tornillo de 4)
+  const pisosTra = data.juntas.filter((j) => /piso del cajón$/.test(porId.get(j.canto).nombre) && porId.get(j.canto).grupo === 'Mueble trasero');
+  exigir(pisosTra.length > 0 && pisosTra.every((j) => j.tornillo.d === 4 && j.tornillo.largo === 40), 'el piso de 12 mm de los cajones del mueble trasero debería llevar tornillos de 4x40');
   exigir(data.juntas.filter((j) => j.clase === 'cara-cara').every((j) => j.tornillo.largo <= 30), 'cara contra cara de 15 mm lleva tornillos cortos (hasta 30 mm)');
   exigir(data.juntas.filter((j) => j.clase === 'cara-canto' && j.tornillo.d === 4 && j.cantidad > 0).every((j) => j.entran >= 18), 'cara contra canto debería entrar al menos 18 mm en el canto');
   // Compras: los tornillos calculados figuran con el 10 % de margen y las uniones por pieza no se duplican con las viejas
@@ -694,7 +703,7 @@ function L_E() {
     const zTop = f.inclinada.z - f.sy * Math.sin(ang);
     exigir(Math.abs(yTop - plano.yFin) < 0.2 && Math.abs(zTop - plano.zAtras(plano.yFin)) < 0.2, `el fondo ${f.id} girado debería terminar arriba en y=${plano.yFin}, z=${plano.zAtras(plano.yFin).toFixed(1)}; termina en y=${yTop.toFixed(1)}, z=${zTop.toFixed(1)}`);
     exigir(f.inclinada.z - f.sz >= f.z - 0.01 && Math.abs(f.z + f.sz - f.inclinada.z) < 0.01, `el pivote de ${f.id} debería ser su borde de abajo-atrás`);
-    exigir(pv.lista.placas.fondo.some((q) => q.id === f.id && [q.L, q.A].some((v) => Math.abs(v - f.sy) < 0.1) && Math.abs(q.t - Lv.tb) < 0.1), `el despiece de ${f.id} debería traer su largo real sobre la pendiente`);
+    exigir(pv.lista.placas.medio.some((q) => q.id === f.id && [q.L, q.A].some((v) => Math.abs(v - f.sy) < 0.1) && Math.abs(q.t - Lv.tb) < 0.1), `el despiece de ${f.id} debería traer su largo real sobre la pendiente`);
   }
   // Las piezas horizontales llegan hasta la cara de adelante del fondo (a ras, sin entrar ni dejar luz grande)
   for (const p of tv.filter((q) => /^(Base \(|Estante)/.test(q.nombre))) {

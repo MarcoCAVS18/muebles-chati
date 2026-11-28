@@ -391,6 +391,8 @@ export default {
     materiales: {
       estructura: { t: 'Stomskiva (mm)', hojaL: 'Skiva: längd', hojaA: 'Skiva: bredd' },
       fondo: { t: 'Ryggskiva (mm)' },
+      medio: { t: 'Bakre möbelns skiva: ryggar och lådor (mm)' },
+      fina: { t: 'Trä över vänster hjulhus (mm)' },
     },
     corte: {
       kerf: 'Sågspår (mm)',
@@ -413,8 +415,7 @@ export default {
       extension: 'Hur mycket den dras ut',
       radio: 'Hörnradie',
       largo: 'Längd (180 cm, från vägg till vägg på bakre möbeln)',
-      plataforma: 'Plattformens höjd (hjulhus + filt + skiva)',
-      fieltro: 'Filt över hjulhuset',
+      plataforma: 'Plattformens höjd (hjulhus + trä + skiva)',
       largoCabecera: 'Längd på huvudmodulen',
       baseReforzada: 'Förstärkt bas (golvramar och lodräta stolpar)',
       varillasPie: 'Stavar i fotmodulen',

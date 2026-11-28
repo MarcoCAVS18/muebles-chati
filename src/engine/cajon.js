@@ -1,9 +1,12 @@
 // Caja de un cajón (sin el frente). dir indica hacia dónde se tira: 'x+', 'x-', 'z+', 'z-'.
 // x, y, z: esquina mínima de la caja. ancho: medida transversal. fondo: profundidad en el eje de tirada.
 // pisoGrueso: piso de 15 mm (cajones que cargan peso). carga: texto con la carga de las correderas.
+// fino: laterales, trasera y piso de la placa intermedia (12 mm) en lugar de la de estructura y la de fondos.
 
-export function cajon(ctx, { grupo, nombre, x, y, z, ancho, alto, fondo, dir, pisoGrueso = false, carga = '' }) {
-  const { t, tb } = ctx;
+export function cajon(ctx, { grupo, nombre, x, y, z, ancho, alto, fondo, dir, pisoGrueso = false, fino = false, carga = '' }) {
+  const { t, tb, tm } = ctx;
+  const tl = fino ? tm : t; // grosor de los laterales y de la trasera
+  const mat = fino ? 'medio' : 'estructura';
   const eje = dir[0];
   const signo = dir[1];
 
@@ -28,11 +31,12 @@ export function cajon(ctx, { grupo, nombre, x, y, z, ancho, alto, fondo, dir, pi
     });
   };
 
-  caja('lateral', 0, fondo, 0, t, 0, alto);
-  caja('lateral', 0, fondo, ancho - t, t, 0, alto);
-  caja('trasera', 0, t, t, ancho - 2 * t, 0, alto);
-  if (pisoGrueso) caja('piso del cajón (15 mm)', t, fondo - t, t, ancho - 2 * t, 0, t);
-  else caja('piso del cajón', t, fondo - t, t, ancho - 2 * t, 0, tb, 'fondo');
+  caja('lateral', 0, fondo, 0, tl, 0, alto, mat);
+  caja('lateral', 0, fondo, ancho - tl, tl, 0, alto, mat);
+  caja('trasera', 0, tl, tl, ancho - 2 * tl, 0, alto, mat);
+  if (pisoGrueso) caja('piso del cajón (15 mm)', tl, fondo - tl, tl, ancho - 2 * tl, 0, t);
+  else if (fino) caja('piso del cajón', tl, fondo - tl, tl, ancho - 2 * tl, 0, tm, 'medio');
+  else caja('piso del cajón', tl, fondo - tl, tl, ancho - 2 * tl, 0, tb, 'fondo');
 
   const largoCorredera = Math.floor(fondo / 50) * 50;
   ctx.herraje(grupo, carga ? `Par de correderas de carga ${largoCorredera} mm (${carga})` : `Par de correderas telescópicas ${largoCorredera} mm`, 1, nombre);

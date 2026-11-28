@@ -22,6 +22,7 @@ export function crearContexto(cfg) {
   const contadores = {};
   const t = cfg.materiales.estructura.t;
   const tb = cfg.materiales.fondo.t;
+  const tm = cfg.materiales.medio.t; // placa intermedia del mueble trasero
 
   function parte(p) {
     const pref = PREFIJOS[p.grupo] || 'GEN';
@@ -81,6 +82,7 @@ export function crearContexto(cfg) {
     cfg,
     t,
     tb,
+    tm,
     partes,
     decos,
     layout,

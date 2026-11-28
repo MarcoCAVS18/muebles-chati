@@ -45,7 +45,7 @@ export function cama(ctx, G) {
   // Peine: lomo fijo contra la pared, lomo móvil del lado del pasillo y las varillas entre los dos
   const lomo = ca.lomo ?? 60;
   const lomoM = ca.lomoMovil ?? 80;
-  const luz = ca.luzVarilla ?? 2; // luz de cada varilla dentro de su ranura, a cada lado
+  const luz = ca.luzVarilla ?? 4; // luz de cada varilla dentro de su ranura, a cada lado
   const xl = x0 + lomo; // fondo de las ranuras
   const xs = x1 - lomoM; // punta de los dedos fijos y cara interior del lomo móvil
   const xr = xl + luz; // punta de atrás de las varillas
@@ -233,7 +233,7 @@ export function cama(ctx, G) {
   larguero('Larguero de apoyo (pie)', xL1, zonaPie);
   larguero('Larguero de apoyo (cabecera)', xL1, zonaCab);
   larguero('Larguero de las puntas (pie)', xL2, zonaPie);
-  // Sobre el pasarruedas la placa apoya directamente en él (con fieltro): ahí no hay listón de pared
+  // Sobre el pasarruedas la placa apoya directamente en la madera pegada encima de él: ahí no hay listón de pared
   const lw = (nombre, z0, z1) => {
     if (z1 - z0 > 100) LST(nombre, x0, yB - 30, z0, 30, 30, z1 - z0);
   };
@@ -277,6 +277,10 @@ export function cama(ctx, G) {
   };
   portal('del pie, 60', bahiaPie, zPie, zCentro);
   portal('de la cabecera, 120', bahiaCab, zCentro, zCab);
+
+  // Madera pegada sobre la tapa de la caja del pasarruedas izquierdo: sube el apoyo de las placas de 380 a 385 mm. Es la pieza
+  // CAM-33 y va antes de la variante de base reforzada, así que sus piezas pasan a numerarse desde CAM-34.
+  P('Madera sobre el pasarruedas izquierdo', 0, van.archAltoIzq ?? van.archAlto, arcoIni, van.archIntrusion, cfg.materiales.fina.t, van.archLargo, { mat: 'fina' });
 
   // ---- Base reforzada (variante, al final para no mover los ids) ----
   // Cada módulo se arma sobre un marco de piso de listones de 45 x 45: sus dos refuerzos de piso y dos rieles. Uno de los rieles
@@ -401,12 +405,8 @@ export function cama(ctx, G) {
     1,
     `Ranuras de ${Math.round(repPie.ancho)} a ${Math.round(repCab.ancho)} mm de ancho con el fondo R${ra.radio}; las varillas salen de ellas con ${luz} mm de luz a cada lado; ventanas con esquinas R${ve.radio}`
   );
-  ctx.herraje(
-    G,
-    'Fieltro o goma antivibración 5 mm',
-    2,
-    `Entre las placas y los pasarruedas (${(van.archLargo / 1000).toFixed(1)} m cada uno): sube la placa de ${van.archAltoIzq ?? van.archAlto} a ${yB} mm`
-  );
+  // La madera sobre el pasarruedas izquierdo va pegada a la tapa de la caja; la placa solo apoya encima
+  ctx.unir(G, 'cola', 2 * (van.archIntrusion + van.archLargo), `Madera de ${cfg.materiales.fina.t} mm pegada sobre la tapa del pasarruedas izquierdo (con peso encima hasta que seque): sube el apoyo de las placas de ${van.archAltoIzq ?? van.archAlto} a ${yB} mm`);
 
   // ---- Controles ----
   if (x1 + t + ca.extension > van.ancho) ctx.aviso('La cama extendida no entra: la extensión, con el portal, supera el ancho de la van.');

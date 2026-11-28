@@ -71,6 +71,8 @@ export const SECCIONES_CFG = [
     campos: [
       { ruta: 'materiales.estructura.t', etiqueta: 'Placa estructura (mm)' },
       { ruta: 'materiales.fondo.t', etiqueta: 'Placa fondos (mm)' },
+      { ruta: 'materiales.medio.t', etiqueta: 'Placa del mueble trasero: fondos y cajones (mm)' },
+      { ruta: 'materiales.fina.t', etiqueta: 'Madera sobre el pasarruedas izquierdo (mm)' },
       { ruta: 'materiales.estructura.hojaL', etiqueta: 'Hoja: largo' },
       { ruta: 'materiales.estructura.hojaA', etiqueta: 'Hoja: ancho' },
       { ruta: 'corte.kerf', etiqueta: 'Corte de sierra (mm)' },
@@ -101,8 +103,7 @@ export const SECCIONES_CFG = [
       { ruta: 'cama.extension', etiqueta: 'Cuánto se agranda' },
       { ruta: 'cama.radio', etiqueta: 'Radio de esquinas' },
       { ruta: 'cama.largo', etiqueta: 'Largo (180 cm, de pared a pared del mueble trasero)' },
-      { ruta: 'cama.plataforma', etiqueta: 'Altura de la plataforma (pasarruedas + fieltro + placa)' },
-      { ruta: 'cama.fieltro', etiqueta: 'Fieltro sobre el pasarruedas' },
+      { ruta: 'cama.plataforma', etiqueta: 'Altura de la plataforma (pasarruedas + madera + placa)' },
       { ruta: 'cama.largoCabecera', etiqueta: 'Largo del módulo de la cabecera' },
       { ruta: 'cama.baseReforzada', etiqueta: 'Base reforzada (marcos de piso y postes verticales)', tipo: 'check' },
       { ruta: 'cama.varillasPie', etiqueta: 'Varillas del módulo del pie' },

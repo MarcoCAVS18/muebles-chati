@@ -391,6 +391,8 @@ export default {
     materiales: {
       estructura: { t: 'Structure board (mm)', hojaL: 'Sheet: length', hojaA: 'Sheet: width' },
       fondo: { t: 'Back panel board (mm)' },
+      medio: { t: 'Rear unit board: back panels and drawers (mm)' },
+      fina: { t: 'Wood over the left wheel arch (mm)' },
     },
     corte: {
       kerf: 'Saw kerf (mm)',
@@ -413,8 +415,7 @@ export default {
       extension: 'How much it extends',
       radio: 'Corner radius',
       largo: 'Length (180 cm, wall to wall of the rear unit)',
-      plataforma: 'Platform height (wheel arch + felt + board)',
-      fieltro: 'Felt over the wheel arch',
+      plataforma: 'Platform height (wheel arch + wood + board)',
       largoCabecera: 'Length of the head module',
       baseReforzada: 'Reinforced base (floor frames and vertical posts)',
       varillasPie: 'Rods of the foot module',

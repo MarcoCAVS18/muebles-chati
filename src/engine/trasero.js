@@ -10,7 +10,8 @@ import { disposicionTrasero } from './disposicion.js';
 import { planoFondo } from './fondoInclinado.js';
 
 export function trasero(ctx, G) {
-  const { cfg, t, tb } = ctx;
+  const { cfg, t, tm } = ctx;
+  const tb = tm; // fondo y paredes de los cajones: la placa intermedia (12 mm)
   const { trasero: tr, equipos: eq } = cfg;
   const L = disposicionTrasero(cfg);
   const { zF, zFL, zB, zIn, zFondo, x1, yBase, yPiso, yTapa, d1, d2, sec, hueco, E, K, W } = L;
@@ -60,7 +61,7 @@ export function trasero(ctx, G) {
     return ctx.parte({
       grupo: G,
       nombre,
-      mat: 'fondo',
+      mat: 'medio',
       x,
       y: yBase,
       z: zp - tb,
@@ -110,7 +111,7 @@ export function trasero(ctx, G) {
   else P('Costado derecho', x1 - t, 0, zF, t, tr.alto - t, prof - tb);
   // El fondo va en dos mitades, una por módulo (el mueble se arma en dos módulos que se unen adentro de la van)
   if (inc) fondoInc('Fondo eléctrico (inclinado)', t, d1);
-  else P('Fondo eléctrico (contra el mamparo)', t, yBase, zB - tb, d1, tr.alto - t - yBase, tb, 'fondo');
+  else P('Fondo eléctrico (contra el mamparo)', t, yBase, zB - tb, d1, tr.alto - t - yBase, tb, 'medio');
   P('Base (eléctrico)', t, yBase, L.E.zIn, d1 + t - t, t, largoHasta(L.E.zIn, yBase + t, largoIntE));
   P('Base (cocina y agua)', d1 + t, yBase, zIn, x1 - t - (d1 + t), t, largoHasta(zIn, yBase + t, largoInt));
   P('Zócalo frontal (eléctrico)', t, 0, zFL, d1 + t - t, yBase, t);
@@ -133,10 +134,42 @@ export function trasero(ctx, G) {
   P('Estante sobre el guardado del anafe (bajo los cajones de cocina)', sec.K.x0, K.yEstante, zIn, sec.K.x1 - sec.K.x0, t, largoHasta(zIn, K.yEstante + t, largoInt));
   P('Estante sobre los bidones', sec.W.x0, W.yEstante, zIn, sec.W.x1 - sec.W.x0, t, largoHasta(zIn, W.yEstante + t, largoInt));
 
-  // Tapas: una por sección, atornilladas desde arriba
-  P('Tapa 1 (eléctrico)', 0, yTapa, zFL, d1 + t, t, profL);
-  P('Tapa 2 (cocina)', d1 + t, yTapa, zF, d2 - d1, t, prof);
-  P('Tapa 3 (fregadero)', d2 + t, yTapa, zF, x1 - d2 - t, t, prof);
+  // Tapa: un solo tablero de pared a pared, atornillado desde arriba a los costados, divisores y marcos. Sobre la sección eléctrica
+  // llega hasta la L (570 mm de fondo) y sobre la cocina y el agua hasta los 500 mm: queda un escalón en el lado del frente.
+  // Va después de unir los dos módulos adentro de la van, así que no se arma con ninguno de los dos.
+  const escalon = zF - zFL; // lo que la L sobresale del resto del mueble
+  const uEscalon = d1 + t; // desde ahí hacia la derecha el tablero es más corto
+  ctx.parte({
+    grupo: G,
+    nombre: 'Tapa (un solo tablero)',
+    mat: 'estructura',
+    x: 0,
+    y: yTapa,
+    z: zFL,
+    sx: x1,
+    sy: t,
+    sz: profL,
+    ...(escalon > 0.5 ? { silueta: {
+      plano: 'xz',
+      tipo: 'escalonL',
+      w: x1,
+      h: profL,
+      uEscalon,
+      escalon,
+      esquinas: 0,
+      radio: 0,
+      // En el plano xz la forma se dibuja con v hacia atrás (v negativo): el frente de la L queda en v = 0
+      cmds: [
+        { t: 'M', u: 0, v: 0 },
+        { t: 'L', u: uEscalon, v: 0 },
+        { t: 'L', u: uEscalon, v: -escalon },
+        { t: 'L', u: x1, v: -escalon },
+        { t: 'L', u: x1, v: -profL },
+        { t: 'L', u: 0, v: -profL },
+        { t: 'L', u: 0, v: 0 },
+      ],
+    } } : {}),
+  });
 
   // Frentes planos con puertas a ras. En la sección eléctrica los frentes bajos terminan antes del plano
   // de la cama y el tablero cubre desde ahí: el travesaño del medio es donde se atornilla la cama.
@@ -202,11 +235,12 @@ export function trasero(ctx, G) {
       nombre: c.nombre,
       x: K.xCajon,
       y: c.y0 + 5,
-      z: zIn + 15,
+      z: zIn + tb,
       ancho: K.anchoCajon,
       alto: c.y1 - c.y0 - 25,
       fondo: K.fondoCajonCocina, // cortos: no llegan al fondo
       dir: 'z-',
+      fino: true,
     });
   }
   cajon(ctx, {
@@ -214,12 +248,13 @@ export function trasero(ctx, G) {
     nombre: 'Cajón de bidones',
     x: W.xCajon,
     y: W.yCajonBidones,
-    z: zIn + 15,
+    z: zIn + tb,
     ancho: W.anchoCajon,
     alto: W.altoCajonBidones,
     fondo: W.fondoCajonBidones,
     dir: 'z-',
     pisoGrueso: true,
+    fino: true,
     carga: '45 kg o más, dos bidones de 20 L pesan unos 40 kg',
   });
   cajon(ctx, {
@@ -227,17 +262,18 @@ export function trasero(ctx, G) {
     nombre: 'Cajón bajo el fregadero',
     x: W.xCajon,
     y: W.yCajonFregadero,
-    z: zIn + 15,
+    z: zIn + tb,
     ancho: W.anchoCajon,
     alto: W.altoCajonFregadero,
     fondo: W.fondoCajonFregadero,
     dir: 'z-',
+    fino: true,
   });
 
   // Lo que sigue se agrega al final para no mover los ids de las demás piezas.
   // Segunda mitad del fondo (cocina y agua), contra el mamparo
   if (inc) fondoInc('Fondo cocina y agua (inclinado)', d1 + t, x1 - t - (d1 + t));
-  else P('Fondo cocina y agua (contra el mamparo)', d1 + t, yBase, zB - tb, x1 - t - (d1 + t), tr.alto - t - yBase, tb, 'fondo');
+  else P('Fondo cocina y agua (contra el mamparo)', d1 + t, yBase, zB - tb, x1 - t - (d1 + t), tr.alto - t - yBase, tb, 'medio');
   // Apoyos bajo las bases: la base queda a yBase del piso, y sin apoyo se pandea con la carga de los bidones y la batería.
   // Son tiras de canto (de recorte de la hoja de 15 mm) en el sentido del ancho: adelante, al medio y atrás. Cruzan los
   // listones del piso, que van a lo largo de la van, y ahí se atornillan.
@@ -253,9 +289,9 @@ export function trasero(ctx, G) {
   };
   apoyos('eléctrico', t, d1, E.zIn);
   apoyos('cocina y agua', d1 + t, x1 - t - (d1 + t), zIn);
-  // Panel delantero de cada cajón: la caja arranca 15 mm detrás del frente (zIn + 15) justamente para que entre este panel.
+  // Panel delantero de cada cajón (12 mm): la caja arranca detrás de él (zIn + 12) justamente para que entre este panel.
   // Va delante de los laterales, ancho completo; el frente (que cierra a ras del marco) se atornilla a él desde adentro.
-  const delantera = (nombre, x, y, ancho, alto) => P(`${nombre} - delantera`, x, y, zIn, ancho, alto, t);
+  const delantera = (nombre, x, y, ancho, alto) => P(`${nombre} - delantera`, x, y, zIn, ancho, alto, tb, 'medio');
   for (const c of K.cajones) delantera(c.nombre, K.xCajon, c.y0 + 5, K.anchoCajon, c.y1 - c.y0 - 25);
   delantera('Cajón de bidones', W.xCajon, W.yCajonBidones, W.anchoCajon, W.altoCajonBidones);
   delantera('Cajón bajo el fregadero', W.xCajon, W.yCajonFregadero, W.anchoCajon, W.altoCajonFregadero);
@@ -282,14 +318,6 @@ export function trasero(ctx, G) {
 
   // Los dos módulos se arman afuera y se unen adentro de la van, contra la cara derecha del divisor 1.
   // El módulo de la cocina y el agua no tiene pared izquierda: la pared es el divisor del módulo eléctrico.
-  ctx.unir(G, 'directo', 0, 'Dos escuadras L bajo la tapa 2, contra la cara del divisor 1, para que el borde izquierdo de la tapa no quede colgado', {
-    herraje: 'Escuadra L 40x40 mm (pared)',
-    cantidad: 2,
-  });
-  ctx.unir(G, 'directo', 0, 'Tornillos cortos de esas escuadras: no pueden pasar los 15 mm de la tapa ni del divisor', {
-    herraje: 'Tornillo 3,5x12 mm (escuadras de unión)',
-    cantidad: 8,
-  });
 
   // Botones push en cada frente. Las puertas llevan el botón cerca del borde libre (la bisagra queda del lado contrario),
   // los cajones lo llevan al centro.
@@ -368,7 +396,7 @@ export function trasero(ctx, G) {
     sy: freg.y + t + 3,
     sz: freg.z,
     color: '#b0bec5',
-    nota: 'Encastrado en la tapa 3, sección del agua (derecha), arriba de los dos cajones',
+    nota: 'Encastrado en la tapa, sección del agua (derecha), arriba de los dos cajones',
   });
   ctx.deco({
     grupo: G,
@@ -418,7 +446,7 @@ export function trasero(ctx, G) {
     sy: 100,
     sz: 30,
     color: '#cfd8dc',
-    nota: 'Sobre la tapa 3, al lado del fregadero',
+    nota: 'Sobre la tapa, al lado del fregadero',
   });
 
   // Heladera (izquierda, arriba del eléctrico): de tapa arriba, con la tapa a ras de la mesada (sobresale 3 mm como el fregadero)
@@ -433,7 +461,7 @@ export function trasero(ctx, G) {
     sz: fri.z,
     color: '#cfd8dc',
     estado: 'A comprar: Alpicool G22 de 25 L (unas 2 000 kr)',
-    nota: 'Sección eléctrica, arriba, apoyada en su estante; se abre por un corte de la tapa 1',
+    nota: 'Sección eléctrica, arriba, apoyada en su estante; se abre por un corte de la tapa sobre el eléctrico (izquierda)',
   });
 
   // Cocina (centro): dos cajones de cocina y, al piso, el guardado con puerta. El anafe se usa suelto sobre la tapa

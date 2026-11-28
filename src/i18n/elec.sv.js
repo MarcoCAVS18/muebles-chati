@@ -1,8 +1,8 @@
 // El och vatten på svenska, för installatören. Varje text hämtas med id för apparaten eller kabeln.
-// Skivor som heter på spanska i delförteckningen (Tapa 1, Tapa 2, Tapa 3) står kvar inom parentes.
+// Skivor som heter på spanska i delförteckningen (Tapa) står kvar inom parentes.
 export default {
   equipos: {
-    fregadero: { nombre: 'Diskho', nota: 'Infälld i toppskiva 3 (Tapa 3), vattenavsnittet (höger), ovanför de två lådorna' },
+    fregadero: { nombre: 'Diskho', nota: 'Infälld i toppskivan (Tapa), vattenavsnittet (höger), ovanför de två lådorna' },
     bidon1: {
       nombre: 'Dunk för rent vatten (20 L, platt)',
       nota: 'Längst bak i dunklådan, vriden åt sidan: öppningen och kranen pekar mot högra väggen',
@@ -14,10 +14,10 @@ export default {
       estado: 'Ska köpas: platt dunk med kran, 416 x 203 x 408 mm (Camping4u eller Scandihills). Mät den när den kommer',
     },
     bomba: { nombre: 'Vattenpump 12 V', nota: 'På dunkhyllan, bakom lådan under diskhon' },
-    canilla: { nombre: 'Kran', nota: 'På toppskiva 3 (Tapa 3), bredvid diskhon' },
+    canilla: { nombre: 'Kran', nota: 'På toppskivan (Tapa), bredvid diskhon' },
     nevera: {
       nombre: 'Kompressorkylbox (Alpicool G22, 25 L)',
-      nota: 'Elavsnittet, högst upp, vilar på sin hylla; öppnas genom ett urtag i toppskiva 1 (Tapa 1)',
+      nota: 'Elavsnittet, högst upp, vilar på sin hylla; öppnas genom ett urtag i toppskivan (Tapa), till vänster',
       estado: 'Ska köpas: Alpicool G22 på 25 L (ungefär 2 000 kr)',
     },
     anafe: { nombre: 'Bärbar gasolhäll med 2 brännare (patron)', nota: 'Förvaras på högkant bakom köksdörren. Tas ut och används löst på toppskivan, med patronen ansluten', estado: 'Ska köpas: bekräfta måtten' },
@@ -441,9 +441,9 @@ export default {
     },
     nevera: {
       descripcion: 'Kompressorkylbox 12 V på 25 L, med lock upptill (Alpicool G22: 585 x 335 x 350 mm). Den placeras i elavsnittet (vänster) i bakre möbeln, ovanför batterifacket, med locket i jämnhöjd med bänkskivan.',
-      ubicacion: 'Elavsnittet, högst upp, bakom den fasta fronten med galler (grå). Öppnas uppåt genom ett urtag i toppskiva 1 (Tapa 1).',
+      ubicacion: 'Elavsnittet, högst upp, bakom den fasta fronten med galler (grå). Öppnas uppåt genom ett urtag i toppskivan (Tapa), till vänster.',
       consejos: [
-        'Såga ut toppskiva 1 (Tapa 1) med kylboxens mall (585 x 335) och lämna fri höjd för det öppna locket.',
+        'Såga ut toppskivan (Tapa), över elavsnittet, med kylboxens mall (585 x 335) och lämna fri höjd för det öppna locket.',
         'Den mäter 585 utan handtag och cirka 598 med dem: avsnittet är 620, så cirka 22 mm blir över. Bekräfta med den riktiga kylboxen.',
         'Lämna luft runt den: kompressorn behöver ventileras (galler nedtill och upptill på den fasta fronten, samt utrymmet bakom). Kontrollera i manualen hur mycket den kräver på varje sida.',
         'Egen ledning i säkringsboxen, utan strömbrytare.',
@@ -452,7 +452,7 @@ export default {
       busqueda: 'installera kompressorkylbox 12v husbil',
     },
     fregadero: {
-      descripcion: 'Diskho infälld i toppskiva 3 (Tapa 3), på möbelns högra sida, långt från elen. Den är 400 mm djup.',
+      descripcion: 'Diskho infälld i toppskivan (Tapa), på möbelns högra sida, långt från elen. Den är 400 mm djup.',
       ubicacion: 'Vattenavsnittet (höger) i bakre möbeln, högst upp. Under den finns lådan och, längre ner, dunklådan.',
       consejos: [
         'Såga ut toppskivan med diskhons mall.',
@@ -464,7 +464,7 @@ export default {
     },
     canilla: {
       descripcion: 'Diskhons kran, matad av vattenpumpen.',
-      ubicacion: 'På toppskiva 3 (Tapa 3), bredvid diskhon.',
+      ubicacion: 'På toppskivan (Tapa), bredvid diskhon.',
       consejos: ['Livsmedelsgodkänd slang med slangklämmor.'],
       busqueda: 'installera kran diskho husbil',
     },
@@ -507,7 +507,7 @@ export default {
       descripcion: 'Bärbar gasolhäll med 2 brännare som går på gasolpatroner. Den är inte fast: den används löst på kökets toppskiva och förvaras på högkant bakom möbelns dörr.',
       ubicacion: 'Förvaras i köksavsnittet, på golvet, bakom dörren med gångjärn till höger, bredvid de två patronerna. Ovanför finns två kökslådor.',
       consejos: [
-        '3D använder 475 x 295 x 79 mm (som en Primus Kinjia): måttet ska bekräftas med den riktiga hällen. På högkant går den i med bara 1 mm spel i botten av förvaringsutrymmet, så mät den innan du sågar.',
+        'Förvaringsutrymmet är 473 mm djupt: hällen får vara högst 470 mm lång. 3D använder 470 x 295 x 79 mm som mått att välja; en häll på 475 mm (som Primus Kinjia, enligt ett obekräftat mått) får inte plats. Mät den riktiga innan du sågar hyllan och dörren.',
         'Innan den förvaras ska den vara avstängd, kall och med patronen frånkopplad.',
         'För att laga mat tar du ut den genom dörren och ställer den platt på toppskivan, med ett värmetåligt underlag under.',
         'Laga alltid mat med takluckan öppen.',

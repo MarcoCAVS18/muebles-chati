@@ -102,8 +102,8 @@ export function contorno(p) {
     const s = p.silueta;
     return {
       plano: s.plano,
-      w: p.sz,
-      h: p.sy,
+      w: s.plano === 'xz' ? p.sx : p.sz,
+      h: s.plano === 'xz' ? p.sz : p.sy,
       cmds: s.cmds,
       escuadras: [],
       esquinas: s.esquinas,
@@ -224,7 +224,13 @@ export function describirPieza(p, cfg) {
           : `${c.esquinas} esquinas redondeadas de radio R${fmt(c.radio)} mm (fresadora con fresa de radio o plantilla)`,
       });
     }
-    if (c.silueta && c.silueta.tipo === 'atrasInclinado') {
+    if (c.silueta && c.silueta.tipo === 'escalonL') {
+      const s = c.silueta;
+      lineas.push({
+        tipo: 'recto',
+        texto: `Tablero con un escalón: cortá el rectángulo de ${fmt(s.w)} x ${fmt(s.h)} mm y sacale del lado del frente un rectángulo de ${fmt(s.w - s.uEscalon)} mm de largo por ${fmt(s.escalon)} mm de fondo, desde el borde derecho hasta ${fmt(s.uEscalon)} mm del borde izquierdo. La parte de ${fmt(s.h)} mm cubre el compartimento eléctrico (la L). Redondeá con la caladora la esquina interior del escalón.`,
+      });
+    } else if (c.silueta && c.silueta.tipo === 'atrasInclinado') {
       const s = c.silueta;
       lineas.push({
         tipo: 'recto',
@@ -502,7 +508,17 @@ export function anotarPieza(p, cam) {
         arcos.push({ pts, tipo: 'redondo', etiqueta, pos });
       }
     }
-    if (c.silueta && c.silueta.tipo === 'atrasInclinado') {
+    if (c.silueta && c.silueta.tipo === 'escalonL') {
+      // Ancho de la parte de la L y fondo del escalón (el frente de la L queda en v = 0 y el fondo hacia v negativo)
+      const s = c.silueta;
+      const U = (u, v) => {
+        const [a, b] = aMarco(s.plano, u, v);
+        return V(a, b);
+      };
+      const cotaS = (ini, fin, valor, nom) => cotas.push({ ini, fin, ext: [], valor, nombre: nom, tipo: 'arco' });
+      cotaS(U(0, -s.h + 40), U(s.uEscalon, -s.h + 40), s.uEscalon, 'Ancho de la parte de la L');
+      cotaS(U(s.uEscalon + 40, 0), U(s.uEscalon + 40, -s.escalon), s.escalon, 'Fondo del escalón');
+    } else if (c.silueta && c.silueta.tipo === 'atrasInclinado') {
       // Largo abajo y arriba del borde de atrás inclinado, medidos desde el borde del frente
       const s = c.silueta;
       const U = (u, v) => {

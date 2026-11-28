@@ -1,8 +1,8 @@
 // Electrical and water in English, for the installer. Each text is looked up by the id of the device or cable.
-// Names of boards that stay in Spanish in the parts list (Tapa 1, Tapa 2, Tapa 3) are kept in brackets.
+// Names of boards that stay in Spanish in the parts list (Tapa) are kept in brackets.
 export default {
   equipos: {
-    fregadero: { nombre: 'Sink', nota: 'Built into top panel 3 (Tapa 3), water section (right), above the two drawers' },
+    fregadero: { nombre: 'Sink', nota: 'Built into the top panel (Tapa), water section (right), above the two drawers' },
     bidon1: {
       nombre: 'Clean water jerrycan (20 L, flat)',
       nota: 'At the back of the jerrycan drawer, turned sideways: the cap and tap face the right-hand wall',
@@ -14,10 +14,10 @@ export default {
       estado: 'To buy: flat jerrycan with tap, 416 x 203 x 408 mm (Camping4u or Scandihills). Measure it when it arrives',
     },
     bomba: { nombre: '12 V water pump', nota: 'On the jerrycan shelf, behind the drawer under the sink' },
-    canilla: { nombre: 'Tap', nota: 'On top panel 3 (Tapa 3), next to the sink' },
+    canilla: { nombre: 'Tap', nota: 'On the top panel (Tapa), next to the sink' },
     nevera: {
       nombre: 'Compressor fridge (Alpicool G22, 25 L)',
-      nota: 'Electrical section, on top, resting on its shelf; opens through a cut-out in top panel 1 (Tapa 1)',
+      nota: 'Electrical section, on top, resting on its shelf; opens through a cut-out in the top panel (Tapa), on the left',
       estado: 'To buy: Alpicool G22, 25 L (about 2,000 kr)',
     },
     anafe: { nombre: 'Portable 2-burner cartridge hob', nota: 'Stored on its edge behind the kitchen door. Taken out and used loose on the top panel, with the cartridge connected', estado: 'To buy: confirm dimensions' },
@@ -441,9 +441,9 @@ export default {
     },
     nevera: {
       descripcion: '12 V compressor fridge of 25 L, top-opening (Alpicool G22: 585 x 335 x 350 mm). It goes in the electrical section (left) of the rear unit, above the battery compartment, with the lid flush with the worktop.',
-      ubicacion: 'Electrical section, on top, behind the fixed front with vents (grey). Opens upwards through a cut-out in top panel 1 (Tapa 1).',
+      ubicacion: 'Electrical section, on top, behind the fixed front with vents (grey). Opens upwards through a cut-out in the top panel (Tapa), on the left.',
       consejos: [
-        'Cut top panel 1 (Tapa 1) with the fridge template (585 x 335) and leave the height of the open lid free.',
+        'Cut the top panel (Tapa), over the electrical section, with the fridge template (585 x 335) and leave the height of the open lid free.',
         'It measures 585 without handles and about 598 with them: the section is 620, so about 22 mm are left. Confirm with the real fridge.',
         'Leave air around it: the compressor needs to breathe (vent below and above the fixed front, and the gap behind). Check the manual for how much it needs on each side.',
         'Dedicated line in the fuse box, without a switch.',
@@ -452,7 +452,7 @@ export default {
       busqueda: 'install 12v compressor fridge campervan',
     },
     fregadero: {
-      descripcion: 'Sink built into top panel 3 (Tapa 3), on the right side of the unit, away from the electrics. It is 400 mm deep.',
+      descripcion: 'Sink built into the top panel (Tapa), on the right side of the unit, away from the electrics. It is 400 mm deep.',
       ubicacion: 'Water section (right) of the rear unit, on top. Below it is the drawer and, further down, the jerrycan drawer.',
       consejos: [
         'Cut the top panel with the sink template.',
@@ -464,7 +464,7 @@ export default {
     },
     canilla: {
       descripcion: 'Sink tap, fed by the water pump.',
-      ubicacion: 'On top panel 3 (Tapa 3), next to the sink.',
+      ubicacion: 'On the top panel (Tapa), next to the sink.',
       consejos: ['Food-grade hose with clamps.'],
       busqueda: 'install sink tap campervan',
     },
@@ -507,7 +507,7 @@ export default {
       descripcion: 'Portable 2-burner hob that runs on gas cartridges. It is not fixed: it is used loose on the kitchen top panel and stored on its edge behind the unit door.',
       ubicacion: 'Stored in the kitchen section, on the floor, behind the door hinged on the right, next to the two cartridges. Above it are two kitchen drawers.',
       consejos: [
-        'The 3D uses 475 x 295 x 79 mm (like a Primus Kinjia): this size is to be confirmed with the real hob. On its edge it fits with only 1 mm of clearance at the back of the storage space, so measure it before cutting.',
+        'The storage space is 473 mm deep: the hob has to be up to 470 mm long. The 3D uses 470 x 295 x 79 mm as the size to choose; a 475 mm hob (like the Primus Kinjia, according to an unconfirmed figure) does not fit. Measure the real one before cutting the shelf and the door.',
         'Before storing it, it has to be off, cold and with the cartridge disconnected.',
         'To cook, take it out through the door and put it flat on the top panel, with a heat-resistant base underneath.',
         'Always cook with the skylight open.',
